@@ -18,6 +18,21 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClientGame.h" />
+    <ClInclude Include="ClientNetwork.h" />
+    <ClInclude Include="NetworkServices.h" />
+    <ClInclude Include="ServerGame.h" />
+    <ClInclude Include="ServerNetwork.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ClientGame.cpp" />
+    <ClCompile Include="ClientNetwork.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="NetworkServices.cpp" />
+    <ClCompile Include="ServerGame.cpp" />
+    <ClCompile Include="ServerNetwork.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{1C4F3B07-F2FF-41C3-A6A3-3BD9D640E279}</ProjectGuid>
@@ -114,8 +129,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

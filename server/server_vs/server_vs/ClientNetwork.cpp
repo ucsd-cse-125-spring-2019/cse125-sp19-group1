@@ -1,7 +1,7 @@
 #include "ClientNetwork.h"
 
-ClientNetwork::ClientNetwork(void) {
-
+ClientNetwork::ClientNetwork(void) 
+{
 	// create WSADATA object
 	WSADATA wsaData;
 
@@ -16,12 +16,11 @@ ClientNetwork::ClientNetwork(void) {
 	// Initialize Winsock
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-	if (iResult != 0) {
+	if (iResult != 0) 
+    {
 		printf("WSAStartup failed with error: %d\n", iResult);
 		exit(1);
 	}
-
-
 
 	// set address info
 	ZeroMemory(&hints, sizeof(hints));
@@ -39,13 +38,15 @@ ClientNetwork::ClientNetwork(void) {
 	}
 
 	// Attempt to connect to an address until one succeeds
-	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+	for (ptr = result; ptr != NULL; ptr = ptr->ai_next) 
+    {
 
 		// Create a SOCKET for connecting to server
 		ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype,
 			ptr->ai_protocol);
 
-		if (ConnectSocket == INVALID_SOCKET) {
+		if (ConnectSocket == INVALID_SOCKET) 
+        {
 			printf("socket failed with error: %ld\n", WSAGetLastError());
 			WSACleanup();
 			exit(1);

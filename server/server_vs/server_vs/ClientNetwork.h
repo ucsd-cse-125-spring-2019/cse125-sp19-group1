@@ -18,7 +18,6 @@ class ClientNetwork
 {
  
 public:
- 
     // for error checking function calls in Winsock library
     int iResult;
  
