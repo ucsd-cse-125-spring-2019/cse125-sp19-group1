@@ -1,15 +1,15 @@
-Info,  T14164: Load ../DAE/gunbot.dae
-Info,  T14164: Found a matching importer for this file format: Collada Importer.
-Info,  T14164: Import root directory is '../DAE\'
-Info,  T14164: Entering post processing pipeline
-Info,  T14164: RemoveRedundantMatsProcess finished. Removed 7 redundant and 0 unused materials.
-Info,  T14164: Points: 0, Lines: 0, Triangles: 28, Polygons: 0 (Meshes, X = removed)
-Error, T14164: FindInvalidDataProcess fails on mesh uvcoords: All vectors are identical
-Warn,  T14164: Simplified dummy tracks with just one key
+Info,  T21352: Load ../DAE/gunbot.dae
+Info,  T21352: Found a matching importer for this file format: Collada Importer.
+Info,  T21352: Import root directory is '../DAE\'
+Info,  T21352: Entering post processing pipeline
+Info,  T21352: RemoveRedundantMatsProcess finished. Removed 7 redundant and 0 unused materials.
+Info,  T21352: Points: 0, Lines: 0, Triangles: 28, Polygons: 0 (Meshes, X = removed)
+Error, T21352: FindInvalidDataProcess fails on mesh uvcoords: All vectors are identical
+Warn,  T21352: Simplified dummy tracks with just one key
 Skipping one or more lines with the same contents
-Info,  T14164: FindInvalidDataProcess finished. Found issues ...
-Error, T14164: Failed to compute tangents; need UV data in channel0
-Info,  T14164: CalcTangentsProcess finished. Tangents have been calculated
-Info,  T14164: JoinVerticesProcess finished | Verts in: 76524 out: 27301 | ~64.3%
-Info,  T14164: Cache relevant are 28 meshes (25508 faces). Average output ACMR is 1.155402
-Info,  T14164: Leaving post processing pipeline
+Info,  T21352: FindInvalidDataProcess finished. Found issues ...
+Error, T21352: Failed to compute tangents; need UV data in channel0
+Info,  T21352: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T21352: JoinVerticesProcess finished | Verts in: 76524 out: 27301 | ~64.3%
+Info,  T21352: Cache relevant are 28 meshes (25508 faces). Average output ACMR is 1.155402
+Info,  T21352: Leaving post processing pipeline

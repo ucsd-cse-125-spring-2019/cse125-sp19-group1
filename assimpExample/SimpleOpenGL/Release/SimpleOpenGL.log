@@ -1,8 +1,8 @@
 ﻿  Sample_SimpleOpenGL.c
-c:\users\hung\documents\github\cse125-sp19-group1\assimpexample\simpleopengl\sample_simpleopengl.c(371): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+c:\users\hung\documents\github\cse125-sp19-group1\assimpexample\simpleopengl\sample_simpleopengl.c(418): warning C4996: 'getenv': This function or variable may be unsafe. Consider using _dupenv_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.16299.0\ucrt\stdlib.h(1199): note: see declaration of 'getenv'
   Generating code
-  1 of 16 functions ( 6.3%) were compiled, the rest were copied from previous compilation.
+  3 of 17 functions (17.6%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code

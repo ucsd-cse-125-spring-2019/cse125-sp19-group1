@@ -30,9 +30,13 @@
 const struct aiScene* scene = NULL;
 GLuint scene_list = 0;
 struct aiVector3D scene_min, scene_max, scene_center;
+int oldTimeSinceStart = 0;
 
 /* current rotation angle */
 static float angle = 0.f;
+static float xr = 0.f;
+static float yr = 0.f;
+static float zr = 0.f;
 
 #define aisgl_min(x,y) (x<y?x:y)
 #define aisgl_max(x,y) (y>x?y:x)
@@ -262,6 +266,47 @@ void do_motion (void)
 	glutPostRedisplay ();
 }
 
+/*
+ Handle keyboard inputs: Allow for movement along the y plane
+*/
+void handleKeyInput(int key, int x, int y) 
+{
+	int timeSinceStart = glutGet(GLUT_ELAPSED_TIME);
+	int deltaTime = timeSinceStart - oldTimeSinceStart;
+	oldTimeSinceStart = timeSinceStart;
+
+	switch (key)
+	{
+	case 27:      break;
+	case GLUT_KEY_LEFT: {
+		printf("GLUT_KEY_LEFT %d\n", key);
+		xr -= 1;
+		glutPostRedisplay();
+		break;
+	}
+	case GLUT_KEY_RIGHT: {
+		printf("GLUT_KEY_RIGHT %d\n", key);
+		xr += 1;
+		glutPostRedisplay();
+		break;
+	}
+	case GLUT_KEY_UP: {
+		printf("GLUT_KEY_UP %d\n", key);
+		zr -= 1;
+		glutPostRedisplay();
+		break;
+	}
+	case GLUT_KEY_DOWN: {
+		printf("GLUT_KEY_DOWN %d\n", key);
+		zr += 1;
+		glutPostRedisplay();
+		break;
+	}
+	default: printf("Read input, not recognized"); break;
+	}
+
+}
+
 /* ---------------------------------------------------------------------------- */
 void display(void)
 {
@@ -274,7 +319,9 @@ void display(void)
 	gluLookAt(0.f,0.f,3.f,0.f,0.f,-5.f,0.f,1.f,0.f);
 
 	/* rotate it around the y axis */
-	glRotatef(angle,0.f,1.f,0.f);
+	//glRotatef(angle, 0, 1.f, 0);
+
+	//glRotatef(angle,0.f,1.f,0.f);
 
 	/* scale the whole asset to fit into our view frustum */
 	tmp = scene_max.x-scene_min.x;
@@ -284,7 +331,7 @@ void display(void)
 	glScalef(tmp, tmp, tmp);
 
         /* center the model */
-	glTranslatef( -scene_center.x, -scene_center.y, -scene_center.z );
+	glTranslatef( -scene_center.x + xr, -scene_center.y + yr, -scene_center.z + zr );
 
         /* if the display list has not been made yet, create a new one and
            fill it with scene contents */
@@ -373,6 +420,8 @@ int main(int argc, char **argv)
 
 	glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
 
+	glutSpecialFunc(handleKeyInput);
+
 	glutGet(GLUT_ELAPSED_TIME);
 	glutMainLoop();
 
@@ -385,5 +434,6 @@ int main(int argc, char **argv)
 	   again. This will definitely release the last resources allocated
 	   by Assimp.*/
 	aiDetachAllLogStreams();
+
 	return 0;
 }
