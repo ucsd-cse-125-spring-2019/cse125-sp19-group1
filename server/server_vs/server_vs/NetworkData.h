@@ -15,15 +15,16 @@ enum PacketTypes {
 struct Packet {
 
 	unsigned int packet_type;
-	char * data;
+	char databuf;
 
 	void serialize(char * data) {
-		std::cout << data << std::endl;
 		memcpy(data, this, sizeof(Packet));
+		//std::cout << data << std::endl;
 	}
 
 	void deserialize(char * data) {
-		std::cout << data << std::endl;
 		memcpy(this, data, sizeof(Packet));
+		//std::cout << data << std::endl;
+
 	}
 };

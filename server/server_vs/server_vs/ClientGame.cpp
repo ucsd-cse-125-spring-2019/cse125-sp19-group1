@@ -40,8 +40,8 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
-
-	int i = 0;
+	std::cout << "data recved: " << network_data << std::endl;
+	/*int i = 0;
 	while (i < (unsigned int)data_length)
 	{
 		packet.deserialize(&(network_data[i]));
@@ -52,7 +52,7 @@ void ClientGame::update()
 		case ACTION_EVENT:
 
 			printf("client received action event packet from server\n");
-			//printf(packet.)
+			std::cout << packet.databuf << std::endl;
 			sendActionPackets();
 
 			break;
@@ -63,5 +63,5 @@ void ClientGame::update()
 
 			break;
 		}
-	}
+	}*/
 }

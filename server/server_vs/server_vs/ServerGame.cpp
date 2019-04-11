@@ -79,13 +79,18 @@ void ServerGame::receiveFromClients()
 void ServerGame::sendActionPackets()
 {
 	// send action packet
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
+	//const unsigned int packet_size = sizeof(Packet);
+	const unsigned int packet_size = 100;
+	char packet_data[packet_size] = "{ \"a\": \"b\"}";
 
 	Packet packet;
 	packet.packet_type = ACTION_EVENT;
+	char text[100] = "hello world";
 
-	packet.serialize(packet_data);
+
+	packet.databuf = 'h';
+
+	//packet.serialize(packet_data);
 
 	network->sendToAll(packet_data, packet_size);
 }
