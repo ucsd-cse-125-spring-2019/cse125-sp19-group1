@@ -52,7 +52,7 @@ void ClientGame::update()
 		case ACTION_EVENT:
 
 			printf("client received action event packet from server\n");
-
+			//printf(packet.)
 			sendActionPackets();
 
 			break;
