@@ -1,8 +1,0 @@
-﻿  ClientGame.cpp
-  ClientNetwork.cpp
-  main.cpp
-  NetworkServices.cpp
-  ServerGame.cpp
-  ServerNetwork.cpp
-  Generating Code...
-  server_vs.vcxproj -> D:\CSE 125\cse125-sp19-group1\server\server_vs\Debug\server_vs.exe
