@@ -1,0 +1,10 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(1216,5): warning MSB8012: TargetPath(C:\Users\Hung\Downloads\assimp-4.1.0\samples\SimpleOpenGL\Debug\SimpleOpenGL.exe) does not match the Linker's OutputFile property value (C:\Users\Hung\Downloads\assimp-4.1.0\samples\SimpleOpenGL\Debug\SimpleOpenGL_Debug.exe). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(1218,5): warning MSB8012: TargetName(SimpleOpenGL) does not match the Linker's OutputFile property value (SimpleOpenGL_Debug). This may cause your project to build incorrectly. To correct this, please make sure that $(OutDir), $(TargetName) and $(TargetExt) property values match the value specified in %(Link.OutputFile).
+Sample_SimpleOpenGL.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+  SimpleOpenGL.vcxproj -> C:\Users\Hung\Downloads\assimp-4.1.0\samples\SimpleOpenGL\Debug\SimpleOpenGL.exe
+  The system cannot find the file specified.
+  The system cannot find the path specified.
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(138,5): error MSB3073: The command "copy "Debug\SimpleOpenGL.exe" ..\bin
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(138,5): error MSB3073: copy ..\..\bin\assimp_debug-dll_Win32\Assimp32d.dll ..\bin
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(138,5): error MSB3073: 
+C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppCommon.targets(138,5): error MSB3073: :VCEnd" exited with code 1.
