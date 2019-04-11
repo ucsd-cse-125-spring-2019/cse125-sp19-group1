@@ -36,9 +36,9 @@ void serverLoop(void * arg)
  
 void clientLoop()
 {
-    while(true)
-    {
-        //do game stuff
-        //will later run client->update();
-    }
+	while (true)
+	{
+		//do game stuff
+		client->update();
+	}
 }

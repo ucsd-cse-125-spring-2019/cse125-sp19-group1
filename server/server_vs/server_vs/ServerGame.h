@@ -1,4 +1,5 @@
 #include "ServerNetwork.h"
+#include "NetworkData.h"
 
 class ServerGame
 {
@@ -9,7 +10,8 @@ public:
 	~ServerGame(void);
 
     void update();
-
+	void receiveFromClients();
+	void sendActionPackets();
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 
@@ -17,4 +19,6 @@ private:
 
     // The ServerNetwork object 
     ServerNetwork* network;
+	// data buffer
+	char network_data[MAX_PACKET_SIZE];
 };

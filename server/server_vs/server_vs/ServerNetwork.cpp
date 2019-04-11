@@ -103,3 +103,42 @@ bool ServerNetwork::acceptNewClient(unsigned int & id)
  
     return false;
 }
+
+// receive incoming data
+int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
+{
+	if (sessions.find(client_id) != sessions.end())
+	{
+		SOCKET currentSocket = sessions[client_id];
+		iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
+
+		if (iResult == 0)
+		{
+			printf("Connection closed\n");
+			closesocket(currentSocket);
+		}
+
+		return iResult;
+	}
+	return 0;
+}
+
+// send data to all clients
+void ServerNetwork::sendToAll(char * packets, int totalSize)
+{
+	SOCKET currentSocket;
+	std::map<unsigned int, SOCKET>::iterator iter;
+	int iSendResult;
+
+	for (iter = sessions.begin(); iter != sessions.end(); iter++)
+	{
+		currentSocket = iter->second;
+		iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
+
+		if (iSendResult == SOCKET_ERROR)
+		{
+			printf("send failed with error: %d\n", WSAGetLastError());
+			closesocket(currentSocket);
+		}
+	}
+}

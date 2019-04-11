@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="ClientGame.h" />
     <ClInclude Include="ClientNetwork.h" />
+    <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkServices.h" />
     <ClInclude Include="ServerGame.h" />
     <ClInclude Include="ServerNetwork.h" />
