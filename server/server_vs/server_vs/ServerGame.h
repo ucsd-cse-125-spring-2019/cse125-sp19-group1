@@ -1,5 +1,6 @@
 #include "ServerNetwork.h"
 #include "NetworkData.h"
+#include <string>
 
 class ServerGame
 {
@@ -11,7 +12,14 @@ public:
 
     void update();
 	void receiveFromClients();
-	void sendActionPackets();
+	//void sendActionPackets();
+	void sendActionPackets(std::string, std::string);
+	void initNewClient();
+	void updateForwardEvent(std::string id);
+	void updateBackwardEvent(std::string id);
+	void updateLeftEvent(std::string id);
+	void updateRightEvent(std::string id);
+
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 

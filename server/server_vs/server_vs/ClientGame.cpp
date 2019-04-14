@@ -3,6 +3,7 @@
 
 int location[3] = { 0, 0, 0 };
 
+//initialization 
 ClientGame::ClientGame(void)
 {
 	network = new ClientNetwork();
@@ -19,6 +20,7 @@ ClientGame::ClientGame(void)
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
+//Sending packet information
 void ClientGame::sendActionPackets()
 {
 	// send action packet
@@ -33,6 +35,8 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
+
+//Getting data back and updating game state 
 void ClientGame::update()
 {
 	Packet packet;
