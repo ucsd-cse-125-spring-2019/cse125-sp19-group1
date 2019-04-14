@@ -14,6 +14,7 @@ enum PacketTypes {
 struct Packet {
 
 	unsigned int packet_type;
+	char databuf;
 
 	void serialize(char * data) {
 		memcpy(data, this, sizeof(Packet));

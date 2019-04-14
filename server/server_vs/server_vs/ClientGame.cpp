@@ -1,4 +1,7 @@
 #include "ClientGame.h"
+#include <iostream>
+
+int location[3] = { 0, 0, 0 };
 
 ClientGame::ClientGame(void)
 {
@@ -40,9 +43,10 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
-
-	int i = 0;
-	while (i < (unsigned int)data_length)
+	std::cout << "data recved: " << network_data << std::endl;
+	//std::cout << packet.databuf << std::endl;
+	
+	/*while (i < (unsigned int)data_length)
 	{
 		packet.deserialize(&(network_data[i]));
 		i += sizeof(Packet);
@@ -63,5 +67,5 @@ void ClientGame::update()
 
 			break;
 		}
-	}
+	}*/
 }
