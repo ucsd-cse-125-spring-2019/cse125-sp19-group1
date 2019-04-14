@@ -1,7 +1,6 @@
 #include "ClientGame.h"
 #include <iostream>
-
-int location[3] = { 0, 0, 0 };
+#include <map>
 
 //initialization 
 ClientGame::ClientGame(void)
@@ -35,11 +34,27 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
+void ClientGame::sendForwardPackets()
+{
+	// send action packet
+	const unsigned int packet_size = sizeof(Packet);
+	char packet_data[packet_size];
+
+	Packet packet;
+	packet.packet_type = FORWARD_EVENT;
+
+	packet.serialize(packet_data);
+
+	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
+}
+
+
+
 
 //Getting data back and updating game state 
 void ClientGame::update()
 {
-	Packet packet;
+	//Packet packet;
 	int data_length = network->receivePackets(network_data);
 
 	if (data_length <= 0)
@@ -47,7 +62,8 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
-	std::cout << "data recved: " << network_data << std::endl;
+	std::cout << "data recved on client: " << network_data << std::endl;
+
 	//std::cout << packet.databuf << std::endl;
 	
 	/*while (i < (unsigned int)data_length)
@@ -72,4 +88,9 @@ void ClientGame::update()
 			break;
 		}
 	}*/
+}
+
+void ClientGame::parseNetworkData()
+{
+	
 }

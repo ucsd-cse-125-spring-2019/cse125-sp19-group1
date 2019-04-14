@@ -129,8 +129,7 @@ void ServerGame::sendActionPackets(std::string id, std::string data)
 	//std::cout << "id: " << id << std::endl;
 	//std::cout << "data: " << data << std::endl;
 
-	std::string msg_string = "{id:" + id + ";" + data + "}";
-	std::cout << "msg: " << msg_string << std::endl;
+	std::string msg_string = "id:" + id + ";" + data + "\r\n";
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 
@@ -164,10 +163,7 @@ void ServerGame::initNewClient()
 	clients[id] = loc;
 	client_id++;
 
-	std::string data =
-		"x:" + std::to_string(loc[0]) + ";" +
-		"y:" + std::to_string(loc[1]) + ";" +
-		"z:" + std::to_string(loc[2]);
+	std::string data = "New Client";
 
 	//send to client that connected their current id
 	//update all other clients that a new client has joined
@@ -176,8 +172,8 @@ void ServerGame::initNewClient()
 
 void ServerGame::updateForwardEvent(std::string id)
 {
+	clients[id][2] +=  SPEED;
 	vector<int> loc = clients[id];
-	loc[2] += SPEED;
 		
 	std::string data =
 		"x:" + std::to_string(loc[0]) + ";" +
@@ -189,8 +185,8 @@ void ServerGame::updateForwardEvent(std::string id)
 
 void ServerGame::updateBackwardEvent(std::string id)
 {
+	clients[id][2] -= SPEED;
 	vector<int> loc = clients[id];
-	loc[2] -= SPEED;
 
 	std::string data =
 		"x:" + std::to_string(loc[0]) + ";" +
@@ -203,7 +199,7 @@ void ServerGame::updateBackwardEvent(std::string id)
 void ServerGame::updateLeftEvent(std::string id)
 {
 	vector<int> loc = clients[id];
-	loc[0] -= SPEED;
+	clients[id][0] -= SPEED;
 
 	std::string data =
 		"x:" + std::to_string(loc[0]) + ";" +
@@ -216,7 +212,8 @@ void ServerGame::updateLeftEvent(std::string id)
 void ServerGame::updateRightEvent(std::string id)
 {
 	vector<int> loc = clients[id];
-	loc[0] += SPEED;
+	clients[id][0] += SPEED;
+
 
 	std::string data =
 		"x:" + std::to_string(loc[0]) + ";" +

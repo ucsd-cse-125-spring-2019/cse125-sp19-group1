@@ -15,8 +15,10 @@ public:
 	ClientNetwork* network;
 
 	void sendActionPackets();
+	void sendForwardPackets();
 
 	char network_data[MAX_PACKET_SIZE];
 
 	void update();
+	void parseNetworkData();
 };
