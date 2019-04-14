@@ -80,33 +80,33 @@ void ServerGame::receiveFromClients()
 
 			case FORWARD_EVENT:
 
-				printf("server received action event packet from client\n");
+				printf("Forward event called\n");
 
-				updateForwardEvent("client_0");
+				updateForwardEvent("client_1");
 
 				break;
 
 			case BACKWARD_EVENT:
 
-				printf("server received action event packet from client\n");
+				printf("Backwards event called\n");
 
-				updateBackwardEvent("client_0");
+				updateBackwardEvent("client_1");
 
 				break;
 
 			case LEFT_EVENT:
 
-				printf("server received action event packet from client\n");
+				printf("Left event called\n");
 
-				updateLeftEvent("client_0");
+				updateLeftEvent("client_1");
 
 				break;
 
 			case RIGHT_EVENT:
 
-				printf("server received action event packet from client\n");
+				printf("Right event called\n");
 				
-				updateRightEvent("client_0");
+				updateRightEvent("client_1");
 
 				break;
 
@@ -163,7 +163,10 @@ void ServerGame::initNewClient()
 	clients[id] = loc;
 	client_id++;
 
-	std::string data = "New Client";
+	std::string data = 
+		"x:" + std::to_string(loc[0]) + ";" +
+		"y:" + std::to_string(loc[1]) + ";" +
+		"z:" + std::to_string(loc[2]);;
 
 	//send to client that connected their current id
 	//update all other clients that a new client has joined
