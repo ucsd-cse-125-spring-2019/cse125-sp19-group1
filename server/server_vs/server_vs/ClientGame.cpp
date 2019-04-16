@@ -1,8 +1,9 @@
 #include "ClientGame.h"
 #include <iostream>
 #include <map>
+#include <vector>
 
-std::map < std::string, vector<int>> clients;
+//std::map < std::string, std::vector<int>> clients;
 
 //initialization 
 ClientGame::ClientGame(void)
@@ -61,41 +62,8 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
-	std::cout << "data recved: " << network_data << std::endl;
-	/*int i = 0;
-
-	std::cout << "data recved on client: " << network_data << std::endl;
-}
-
-
-void ClientGame::parseMovementData()
-{
-	
-
-	int i = 0;
-
-	while (i < (unsigned int)data_length)
-	{
-		packet.deserialize(&(network_data[i]));
-		i += sizeof(Packet);
-
-		switch (packet.packet_type) {
-
-		case ACTION_EVENT:
-
-			printf("client received action event packet from server\n");
-			std::cout << packet.databuf << std::endl;
-			sendActionPackets();
-
-			break;
-
-		default:
-
-			printf("error in packet types\n");
-
-			break;
-		}
-	}*/
+	std::cout << "data received: " << network_data << std::endl;
+	decodeData(network_data);
 }
 
 void ClientGame::decodeData(const char * data)
@@ -104,8 +72,8 @@ void ClientGame::decodeData(const char * data)
 	std::stringstream strStream(dataIn);
 	std::istream &dataStream(strStream);
 
-	std::string field = "";
-	std::string type_str = "";
+	std::string clientID = "";
+	std::string key_str = "";
 	std::string value_str = "";
 
 	while (dataStream.peek() != EOF)
@@ -113,9 +81,14 @@ void ClientGame::decodeData(const char * data)
 		std::string token_str = "";
 		char c = dataStream.peek();
 
-		if (c == '\n')
+		if (c == '-')
 		{
-			field.clear();
+			while (c == '-')
+			{
+				token_str += dataStream.get();
+				c = dataStream.peek();
+			}
+			clientID.clear();
 		}
 
 		if (isalpha(c)) // read word
@@ -126,21 +99,21 @@ void ClientGame::decodeData(const char * data)
 				c = dataStream.peek();
 			}
 
-			if (field.empty())
+			if (clientID.empty())
 			{
-				field = token_str;
+				clientID = token_str;
 			}
 
 			if (token_str == "type")
 			{
-				type_str.clear();
+				key_str.clear();
 				while (c != ',')
 				{
-					type_str += dataStream.get();
+					key_str += dataStream.get();
 					c = dataStream.peek();
 				}
 
-				type_str.erase(0, 2);
+				key_str.erase(0, 2);
 				//std::cout << field << ":" << type_str << std::endl;
 
 			}
@@ -158,7 +131,7 @@ void ClientGame::decodeData(const char * data)
 
 				value_str.erase(0, 2);
 				value_str.erase(value_str.length() - 2, 2);
-				std::cout << field << "--" << type_str << "--" << value_str << std::endl;
+				std::cout << clientID << "--" << key_str << "--" << value_str << std::endl;
 
 			}
 
@@ -170,6 +143,6 @@ void ClientGame::decodeData(const char * data)
 			c = dataStream.get();
 		}
 	}
-	std::cout << "decode" << std::endl;
+	std::cout << "decode:" << std::endl;
 	std::cout << data << std::endl;
 }
