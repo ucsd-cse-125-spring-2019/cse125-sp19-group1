@@ -100,7 +100,7 @@ void ClientGame::decodeData(const char * data)
 				c = dataStream.peek();
 			}
 
-			// reset client ID
+			// reset client ID at end of block
 			if(token_str == "-----")
 				clientID.clear();
 		}
