@@ -19,7 +19,7 @@ bool loadAssimp(const char * path, std::vector<MeshEntry *> * meshes) {
 	}
   
   (*meshes).reserve(scene->mNumMeshes);
-  std::cout << "Num meshes in loadAssimp: " << scene->mNumMeshes << std::endl;
+  std::cout << "Num materials in loadAssimp: " << scene->mNumMaterials << std::endl;
   
   const aiMesh* mesh;
   

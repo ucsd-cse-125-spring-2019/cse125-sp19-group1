@@ -69,6 +69,9 @@ void SetupOpenGLSettings()
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	// Disable backface culling to render both sides of polygons
 	glDisable(GL_CULL_FACE);
+	/* Enable culling of faces to speed up rendering
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK); */
 	// Set clear color
 	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
 	// Set shading to smooth
@@ -96,7 +99,7 @@ void Init()
 	_beginthread(serverLoop, 0, (void*)12);
 
 	light = new DirLight();
-	fbx = new FBXObject(TABLE_PATH); //LUMA_PATH
+	fbx = new FBXObject(DOOR_PATH); //LUMA_PATH
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 }
@@ -200,10 +203,6 @@ void DisplayCallback(GLFWwindow* window)
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, windowWidth, windowHeight);
-
-	// Enable culling of faces to speed up rendering:
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
 	glDepthMask(GL_TRUE);
 
 	glUseProgram(objShaderProgram);
