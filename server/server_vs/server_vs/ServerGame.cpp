@@ -123,6 +123,19 @@ void ServerGame::sendActionPackets(std::string id, std::string data)
 {
 	// send action packet
 	//const unsigned int packet_size = sizeof(Packet);
+
+	//const unsigned int packet_size = 100;
+	//char packet_data[packet_size] = "{ \"a\": \"b\"}";
+
+	Packet packet;
+	packet.packet_type = ACTION_EVENT;
+	char text[100] = "hello world";
+
+
+	packet.databuf = 'h';
+
+	//packet.serialize(packet_data);
+
 	//char packet_data[packet_size];
 	//const unsigned int packet_size = 100;
 
@@ -224,6 +237,7 @@ void ServerGame::updateRightEvent(std::string id)
 		"x:" + std::to_string(loc[0]) + ";" +
 		"y:" + std::to_string(loc[1]) + ";" +
 		"z:" + std::to_string(loc[2]);
+
 
 	sendActionPackets(id, data);
 }
