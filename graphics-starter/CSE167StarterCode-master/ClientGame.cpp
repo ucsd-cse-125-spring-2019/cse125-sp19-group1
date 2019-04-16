@@ -140,15 +140,15 @@ void ClientGame::decodeData(const char * data)
 						std::string val_str = "";
 						char d = valStream.peek();
 
-						if (isdigit(d) || d == '.')
+						if (isdigit(d) || d == '.' || d == '-')
 						{
-							while (isdigit(d))
+							while (isdigit(d) || d == '.' || d == '-')
 							{
 								val_str += valStream.get();
 								d = valStream.peek();
 							}
 
-							vec3.push_back(std::stoi(val_str));
+							vec3.push_back(val_str.size() == 0 ? 0 : std::stoi(val_str));
 							std::cout << "num: " << val_str << std::endl;
 						}
 						else

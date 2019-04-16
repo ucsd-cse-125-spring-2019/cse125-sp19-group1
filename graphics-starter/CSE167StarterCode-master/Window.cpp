@@ -131,6 +131,7 @@ void Window::display_callback(GLFWwindow* window)
 			client->clients2["client_0"][1] * 0.1f,
 			client->clients2["client_0"][2] * 0.1f);
 		playerPos = location;
+		printf("Client got new player pos from server: %f %f %f\n", playerPos.x, playerPos.y, playerPos.z);
 	}
 
 	// Render objects
