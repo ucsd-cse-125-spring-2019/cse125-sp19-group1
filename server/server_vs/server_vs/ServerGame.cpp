@@ -30,7 +30,7 @@ void ServerGame::update()
     if(network->acceptNewClient(client_id))
     {
         printf("client %d has been connected to the server\n",client_id); 
-		initNewClient();
+		//initNewClient();
     }
 
 	receiveFromClients();
@@ -43,7 +43,7 @@ void ServerGame::receiveFromClients()
 
 	// go through all clients
 	std::map<unsigned int, SOCKET>::iterator iter;
-
+	
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		int data_length = network->receiveData(iter->first, network_data);
@@ -59,7 +59,8 @@ void ServerGame::receiveFromClients()
 		{
 			packet.deserialize(&(network_data[i]));
 			i += sizeof(Packet);
-
+			
+			std::string clientid;
 			switch (packet.packet_type) {
 
 			case INIT_CONNECTION:
@@ -81,8 +82,7 @@ void ServerGame::receiveFromClients()
 			case FORWARD_EVENT:
 
 				//printf("Forward event called\n");
-
-				updateForwardEvent("client_1");
+				updateForwardEvent("client_" + std::to_string(iter->first));
 
 				sendActionPackets();
 
@@ -129,9 +129,9 @@ void ServerGame::sendActionPackets()
 	for (auto const& x : clients)
 	{
 		msg_string += x.first + "\n";
-		msg_string += "location:"+x.second[0]+" "+ x.second[1]+" "+ x.second[2]+"\n"
+		msg_string += "location:" + std::to_string(x.second[0]) + std::string(" ") + std::to_string(x.second[1]) + std::string(" ") + std::to_string(x.second[2]) + std::string("\n");
 	}
-	msg_string += "-----"
+	msg_string += "-----";
 
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
@@ -140,6 +140,8 @@ void ServerGame::sendActionPackets()
 	for (i = 0; i < packet_size; i++) {
 		msg[i] = msg_string[i];
 	}
+
+	//printf("sendtoall\n");
 
 	network->sendToAll(msg, packet_size);
 	delete[] msg;
