@@ -27,7 +27,6 @@
     <ClInclude Include="..\Mesh.h" />
     <ClInclude Include="..\NetworkData.h" />
     <ClInclude Include="..\NetworkServices.h" />
-    <ClInclude Include="..\OBJObject.h" />
     <ClInclude Include="..\ServerGame.h" />
     <ClInclude Include="..\ServerNetwork.h" />
     <ClInclude Include="..\util.h" />
@@ -42,7 +41,6 @@
     <ClCompile Include="..\math_3d.cpp" />
     <ClCompile Include="..\Mesh.cpp" />
     <ClCompile Include="..\NetworkServices.cpp" />
-    <ClCompile Include="..\OBJObject.cpp" />
     <ClCompile Include="..\ServerGame.cpp" />
     <ClCompile Include="..\ServerNetwork.cpp" />
     <ClCompile Include="..\Texture.cpp" />
