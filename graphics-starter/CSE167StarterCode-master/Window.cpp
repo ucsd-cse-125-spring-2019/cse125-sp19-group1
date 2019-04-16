@@ -1,10 +1,10 @@
 #include "Window.h"
 #include "ClientGame.h"
+#include "NetworkData.h"
 
 const char* window_title = "GLFW Starter Project";
 
 
-//Cube cube(5.0f);
 Mesh mesh;
 ClientGame * client;
 
@@ -99,8 +99,7 @@ void Window::resize_callback(GLFWwindow* window, int width, int height)
 
 void Window::idle_callback()
 {
-	// Perform any updates as necessary. Here, we will spin the cube slightly.
-	//cube.update();
+	// Perform any updates as necessary. Here, we will spin the mesh slightly.
 	//mesh.spin();
 	client->update();
 
@@ -108,34 +107,41 @@ void Window::idle_callback()
 
 void Window::display_callback(GLFWwindow* window)
 {
-	// Clear the color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// Set the matrix mode to GL_MODELVIEW
-	glMatrixMode(GL_MODELVIEW);
-	// Load the identity matrix
-	glLoadIdentity();
-	
-	// Render objects
-	//cube.draw();
+	// Send updates to the server
 	if (playerDir == 1) {
-		client->sendForwardPackets();
+		client->sendPacket(FORWARD_EVENT);
 		//playerPos += Vector3f(0, playerSpeed, 0);
 	}
 	else if (playerDir == 2) {
+		client->sendPacket(BACKWARD_EVENT);
 		//playerPos -= Vector3f(0, playerSpeed, 0);
 	}
 	else if (playerDir == 3) {
+		client->sendPacket(LEFT_EVENT);
 		//playerPos -= Vector3f(playerSpeed, 0, 0);
 	}
 	else if (playerDir == 4) {
+		client->sendPacket(RIGHT_EVENT);
 		//playerPos += Vector3f(playerSpeed, 0, 0);
 	}
+
+	// Read player position sent from the server
 	if (!client->clients2.empty()) {
 		Vector3f location = Vector3f(client->clients2["client_0"][0] * 0.1f,
 			client->clients2["client_0"][1] * 0.1f,
 			client->clients2["client_0"][2] * 0.1f);
 		playerPos = location;
 	}
+
+	// Render objects
+
+	// Clear the color and depth buffers
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Set the matrix mode to GL_MODELVIEW
+	glMatrixMode(GL_MODELVIEW);
+	// Load the identity matrix
+	glLoadIdentity();
+
 	Vector3f translation = playerPos - lastPlayerPos;
 	glTranslatef(translation.x, translation.y, translation.z);
 	//lastPlayerPos = playerPos;

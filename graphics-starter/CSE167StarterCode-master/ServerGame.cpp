@@ -90,7 +90,8 @@ void ServerGame::receiveFromClients()
 
 			case BACKWARD_EVENT:
 
-				printf("Backwards event called\n");
+				//printf("Backwards event called\n");
+				updateBackwardEvent("client_" + std::to_string(iter->first));
 
 				sendActionPackets();
 
@@ -98,7 +99,8 @@ void ServerGame::receiveFromClients()
 
 			case LEFT_EVENT:
 
-				printf("Left event called\n");
+				//printf("Left event called\n");
+				updateLeftEvent("client_" + std::to_string(iter->first));
 
 				sendActionPackets();
 
@@ -106,7 +108,8 @@ void ServerGame::receiveFromClients()
 
 			case RIGHT_EVENT:
 
-				printf("Right event called\n");
+				//printf("Right event called\n");
+				updateRightEvent("client_" + std::to_string(iter->first));
 				
 				sendActionPackets();
 

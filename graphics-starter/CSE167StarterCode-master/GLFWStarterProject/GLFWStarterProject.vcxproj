@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="..\ClientGame.h" />
     <ClInclude Include="..\ClientNetwork.h" />
-    <ClInclude Include="..\Cube.h" />
     <ClInclude Include="..\main.h" />
     <ClInclude Include="..\math_3d.h" />
     <ClInclude Include="..\Mesh.h" />
@@ -36,7 +35,6 @@
   <ItemGroup>
     <ClCompile Include="..\ClientGame.cpp" />
     <ClCompile Include="..\ClientNetwork.cpp" />
-    <ClCompile Include="..\Cube.cpp" />
     <ClCompile Include="..\main.cpp" />
     <ClCompile Include="..\math_3d.cpp" />
     <ClCompile Include="..\Mesh.cpp" />

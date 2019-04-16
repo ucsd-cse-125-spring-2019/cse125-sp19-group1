@@ -13,7 +13,6 @@
 #endif
 
 #include <GLFW/glfw3.h>
-#include "Cube.h"
 #include "Mesh.h"
 
 class Window
