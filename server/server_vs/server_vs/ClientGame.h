@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include <string>
 
 class ClientGame
 {
@@ -23,5 +24,5 @@ public:
 	void parseMovementData();
 
 private:
-	static unsigned int my_client_id;
+	static std::string my_client_id;
 };

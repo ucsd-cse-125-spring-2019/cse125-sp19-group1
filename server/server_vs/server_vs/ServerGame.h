@@ -12,8 +12,7 @@ public:
 
     void update();
 	void receiveFromClients();
-	//void sendActionPackets();
-	void sendActionPackets(std::string, std::string);
+	void sendActionPackets();
 	void initNewClient();
 	void updateForwardEvent(std::string id);
 	void updateBackwardEvent(std::string id);
