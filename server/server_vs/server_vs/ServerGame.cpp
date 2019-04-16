@@ -80,7 +80,7 @@ void ServerGame::receiveFromClients()
 
 			case FORWARD_EVENT:
 
-				printf("Forward event called\n");
+				//printf("Forward event called\n");
 
 				updateForwardEvent("client_1");
 
@@ -137,6 +137,9 @@ void ServerGame::sendActionPackets(std::string id, std::string data)
 	for (i = 0; i < packet_size; i++) {
 		msg[i] = msg_string[i];
 	}
+
+	//packet.serialize(msg);
+
 	//packet.databuf = 'h';
 	//printf(msg);
 	
@@ -216,7 +219,6 @@ void ServerGame::updateRightEvent(std::string id)
 {
 	vector<int> loc = clients[id];
 	clients[id][0] += SPEED;
-
 
 	std::string data =
 		"x:" + std::to_string(loc[0]) + ";" +

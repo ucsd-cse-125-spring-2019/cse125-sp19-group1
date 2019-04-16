@@ -54,7 +54,7 @@ void ClientGame::sendForwardPackets()
 //Getting data back and updating game state 
 void ClientGame::update()
 {
-	//Packet packet;
+	Packet packet;
 	int data_length = network->receivePackets(network_data);
 
 	if (data_length <= 0)
@@ -63,34 +63,9 @@ void ClientGame::update()
 		return;
 	}
 	std::cout << "data recved on client: " << network_data << std::endl;
-
-	//std::cout << packet.databuf << std::endl;
-	
-	/*while (i < (unsigned int)data_length)
-	{
-		packet.deserialize(&(network_data[i]));
-		i += sizeof(Packet);
-
-		switch (packet.packet_type) {
-
-		case ACTION_EVENT:
-
-			printf("client received action event packet from server\n");
-
-			sendActionPackets();
-
-			break;
-
-		default:
-
-			printf("error in packet types\n");
-
-			break;
-		}
-	}*/
 }
 
-void ClientGame::parseNetworkData()
+void ClientGame::parseMovementData()
 {
 	
 }

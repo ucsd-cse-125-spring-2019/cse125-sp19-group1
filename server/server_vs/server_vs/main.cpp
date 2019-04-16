@@ -45,6 +45,10 @@ void clientLoop()
 		if (xd) 
 		{
 			client->sendForwardPackets();
+			client->sendForwardPackets();
+			client->sendForwardPackets();
+			client->sendForwardPackets();
+			client->sendForwardPackets();
 			xd = false;
 		}
 
