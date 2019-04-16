@@ -74,7 +74,7 @@ void ServerGame::receiveFromClients()
 
 				printf("server received action event packet from client\n");
 
-				//sendActionPackets();
+				sendActionPackets();
 
 				break;
 
@@ -84,13 +84,15 @@ void ServerGame::receiveFromClients()
 
 				updateForwardEvent("client_1");
 
+				sendActionPackets();
+
 				break;
 
 			case BACKWARD_EVENT:
 
 				printf("Backwards event called\n");
 
-				updateBackwardEvent("client_1");
+				sendActionPackets();
 
 				break;
 
@@ -98,7 +100,7 @@ void ServerGame::receiveFromClients()
 
 				printf("Left event called\n");
 
-				updateLeftEvent("client_1");
+				sendActionPackets();
 
 				break;
 
@@ -106,7 +108,7 @@ void ServerGame::receiveFromClients()
 
 				printf("Right event called\n");
 				
-				updateRightEvent("client_1");
+				sendActionPackets();
 
 				break;
 
@@ -119,30 +121,18 @@ void ServerGame::receiveFromClients()
 		}
 	}
 }
-void ServerGame::sendActionPackets(std::string id, std::string data)
+void ServerGame::sendActionPackets()
 {
-	// send action packet
-	//const unsigned int packet_size = sizeof(Packet);
 
-	//const unsigned int packet_size = 100;
-	//char packet_data[packet_size] = "{ \"a\": \"b\"}";
+	//READ IN DATA STRUCTURES AND SEND DATA ACCORDINGLY
+	std::string msg_string = "";
+	for (auto const& x : clients)
+	{
+		msg_string += x.first + "\n";
+		msg_string += "location:"+x.second[0]+" "+ x.second[1]+" "+ x.second[2]+"\n"
+	}
+	msg_string += "-----"
 
-	Packet packet;
-	packet.packet_type = ACTION_EVENT;
-	char text[100] = "hello world";
-
-
-	packet.databuf = 'h';
-
-	//packet.serialize(packet_data);
-
-	//char packet_data[packet_size];
-	//const unsigned int packet_size = 100;
-
-	//std::cout << "id: " << id << std::endl;
-	//std::cout << "data: " << data << std::endl;
-
-	std::string msg_string = "" + id + "\n" + data + "\r\n";
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 
@@ -151,22 +141,8 @@ void ServerGame::sendActionPackets(std::string id, std::string data)
 		msg[i] = msg_string[i];
 	}
 
-	//packet.serialize(msg);
-
-	//packet.databuf = 'h';
-	//printf(msg);
-	
-	//char packet_data[packet_size] = 
-
-	//Packet packet;
-	//packet.packet_type = ACTION_EVENT;
-	//char text[100] = "hello world";
-
-	//packet.serialize(packet_data);
-	//packet.databuf = 'h';
-
-	//network->sendToAll(packet_data, packet_size);
 	printf("sendtoall\n");
+
 	network->sendToAll(msg, packet_size);
 	delete[] msg;
 }
@@ -175,70 +151,28 @@ void ServerGame::sendActionPackets(std::string id, std::string data)
 void ServerGame::initNewClient()
 {
 	//updating current data structure to hold onto client
-	std::vector<int> loc{ 10, 20, 30 };
+	std::vector<int> loc{ 0, 0, 0 };
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
 	client_id++;
-
-	std::string data =
-		"location: " + std::to_string(loc[0]) + " " +
-		"" + std::to_string(loc[1]) + " " +
-		"" + std::to_string(loc[2]) + "\n";
-
-	//send to client that connected their current id
-	//update all other clients that a new client has joined
-	sendActionPackets(id, data);
 }
 
 void ServerGame::updateForwardEvent(std::string id)
 {
 	clients[id][2] +=  SPEED;
-	vector<int> loc = clients[id];
-		
-	std::string data =
-		"location: " + std::to_string(loc[0]) + " " +
-		"" + std::to_string(loc[1]) + " " +
-		"" + std::to_string(loc[2]) + "\n";
-
-	sendActionPackets(id, data);
 }
 
 void ServerGame::updateBackwardEvent(std::string id)
 {
 	clients[id][2] -= SPEED;
-	vector<int> loc = clients[id];
-
-	std::string data =
-		"x:" + std::to_string(loc[0]) + ";" +
-		"y:" + std::to_string(loc[1]) + ";" +
-		"z:" + std::to_string(loc[2]);
-
-	sendActionPackets(id, data);
 }
 
 void ServerGame::updateLeftEvent(std::string id)
 {
-	vector<int> loc = clients[id];
 	clients[id][0] -= SPEED;
-
-	std::string data =
-		"x:" + std::to_string(loc[0]) + ";" +
-		"y:" + std::to_string(loc[1]) + ";" +
-		"z:" + std::to_string(loc[2]);
-
-	sendActionPackets(id, data);
 }
 
 void ServerGame::updateRightEvent(std::string id)
 {
-	vector<int> loc = clients[id];
 	clients[id][0] += SPEED;
-
-	std::string data =
-		"x:" + std::to_string(loc[0]) + ";" +
-		"y:" + std::to_string(loc[1]) + ";" +
-		"z:" + std::to_string(loc[2]);
-
-
-	sendActionPackets(id, data);
 }

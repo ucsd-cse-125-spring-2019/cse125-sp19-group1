@@ -62,6 +62,7 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
+
 	std::cout << "data received:\n" << network_data << std::endl;
 	decodeData(network_data);
 }
@@ -133,4 +134,5 @@ void ClientGame::decodeData(const char * data)
 	}
 	std::cout << "decode:" << std::endl;
 	std::cout << data << std::endl;
+
 }
