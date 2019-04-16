@@ -1,13 +1,25 @@
 ﻿  ClientGame.cpp
-c:\users\hung\documents\github\cse125-sp19-group1\graphics-starter\cse167startercode-master\clientgame.cpp(56): warning C4101: 'packet': unreferenced local variable
+c:\users\ahosek\cse125\cse125-sp19-group1\graphics-starter\cse167startercode-master\clientgame.cpp(56): warning C4101: 'packet': unreferenced local variable
+  ClientNetwork.cpp
+  Cube.cpp
+  main.cpp
+c:\program files (x86)\windows kits\10\include\10.0.16299.0\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
+  c:\users\ahosek\cse125\cse125-sp19-group1\graphics-starter\cse167startercode-master\packages\nupengl.core.0.1.0.1\build\native\include\glfw\glfw3.h(92): note: see previous definition of 'APIENTRY'
+  math_3d.cpp
+  Mesh.cpp
+  NetworkServices.cpp
+  OBJObject.cpp
+  ServerGame.cpp
+  ServerNetwork.cpp
+  Texture.cpp
   Window.cpp
 c:\program files (x86)\windows kits\10\include\10.0.16299.0\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
-  c:\users\hung\documents\github\cse125-sp19-group1\graphics-starter\cse167startercode-master\packages\nupengl.core.0.1.0.1\build\native\include\glfw\glfw3.h(92): note: see previous definition of 'APIENTRY'
-c:\users\hung\documents\github\cse125-sp19-group1\graphics-starter\cse167startercode-master\window.cpp(183): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\hung\documents\github\cse125-sp19-group1\graphics-starter\cse167startercode-master\window.cpp(184): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  c:\users\ahosek\cse125\cse125-sp19-group1\graphics-starter\cse167startercode-master\packages\nupengl.core.0.1.0.1\build\native\include\glfw\glfw3.h(92): note: see previous definition of 'APIENTRY'
+c:\users\ahosek\cse125\cse125-sp19-group1\graphics-starter\cse167startercode-master\window.cpp(183): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\ahosek\cse125\cse125-sp19-group1\graphics-starter\cse167startercode-master\window.cpp(184): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Generating code
-  3 of 1032 functions ( 0.3%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
+  1003 of 1003 functions (100.0%) were compiled, the rest were copied from previous compilation.
+    78 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  GLFWStarterProject.vcxproj -> C:\Users\Hung\Documents\GitHub\cse125-sp19-group1\graphics-starter\CSE167StarterCode-master\Release\GLFWStarterProject.exe
+  GLFWStarterProject.vcxproj -> C:\Users\ahosek\CSE125\cse125-sp19-group1\graphics-starter\CSE167StarterCode-master\Release\GLFWStarterProject.exe
