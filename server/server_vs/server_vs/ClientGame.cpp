@@ -65,7 +65,33 @@ void ClientGame::update()
 	std::cout << "data recved on client: " << network_data << std::endl;
 }
 
+<<<<<<< HEAD
 void ClientGame::parseMovementData()
 {
 	
+=======
+	int i = 0;
+	while (i < (unsigned int)data_length)
+	{
+		packet.deserialize(&(network_data[i]));
+		i += sizeof(Packet);
+
+		switch (packet.packet_type) {
+
+		case ACTION_EVENT:
+
+			printf("client received action event packet from server\n");
+			//printf(packet.)
+			sendActionPackets();
+
+			break;
+
+		default:
+
+			printf("error in packet types\n");
+
+			break;
+		}
+	}
+>>>>>>> b957bcb1eb9c579f8b2ea435f62544a21d8ea080
 }
