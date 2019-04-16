@@ -1,6 +1,7 @@
 #include "ClientGame.h"
 #include <iostream>
 #include <map>
+#include <vector>
 
 std::map < std::string, vector<int>> clients;
 
@@ -65,11 +66,6 @@ void ClientGame::update()
 	/*int i = 0;
 
 	std::cout << "data recved on client: " << network_data << std::endl;
-}
-
-
-void ClientGame::parseMovementData()
-{
 	
 
 	int i = 0;
@@ -172,4 +168,5 @@ void ClientGame::decodeData(const char * data)
 	}
 	std::cout << "decode" << std::endl;
 	std::cout << data << std::endl;
+
 }

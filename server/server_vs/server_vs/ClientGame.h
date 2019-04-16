@@ -6,6 +6,7 @@
 #include "NetworkData.h"
 #include <iostream>
 #include <sstream>
+#include <string>
 
 class ClientGame
 {
@@ -26,5 +27,5 @@ public:
 	void parseMovementData();
 
 private:
-	static unsigned int my_client_id;
+	static std::string my_client_id;
 };
