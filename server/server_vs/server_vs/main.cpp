@@ -36,9 +36,21 @@ void serverLoop(void * arg)
  
 void clientLoop()
 {
+	bool xd = true;
 	while (true)
 	{
 		//do game stuff
+		//client->sendForwardPackets();
 		client->update();
+		if (xd) 
+		{
+			client->sendForwardPackets();
+			client->sendForwardPackets();
+			client->sendForwardPackets();
+			client->sendForwardPackets();
+			client->sendForwardPackets();
+			xd = false;
+		}
+
 	}
 }

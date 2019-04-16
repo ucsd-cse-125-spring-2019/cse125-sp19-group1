@@ -18,8 +18,10 @@ public:
 
 	void sendActionPackets();
 	void decodeData(const char * data);
+	void sendForwardPackets();
 
 	char network_data[MAX_PACKET_SIZE];
 
 	void update();
+	void parseMovementData();
 };
