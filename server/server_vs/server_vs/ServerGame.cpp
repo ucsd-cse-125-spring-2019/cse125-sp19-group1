@@ -80,7 +80,7 @@ void ServerGame::receiveFromClients()
 
 			case FORWARD_EVENT:
 
-				//printf("Forward event called\n");
+				printf("Forward event called\n");
 
 				updateForwardEvent("client_1");
 
@@ -142,7 +142,7 @@ void ServerGame::sendActionPackets(std::string id, std::string data)
 	//std::cout << "id: " << id << std::endl;
 	//std::cout << "data: " << data << std::endl;
 
-	std::string msg_string = "id:" + id + ";" + data + "\r\n";
+	std::string msg_string = "" + id + "\n" + data + "\r\n";
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 
@@ -166,6 +166,7 @@ void ServerGame::sendActionPackets(std::string id, std::string data)
 	//packet.databuf = 'h';
 
 	//network->sendToAll(packet_data, packet_size);
+	printf("sendtoall\n");
 	network->sendToAll(msg, packet_size);
 	delete[] msg;
 }
@@ -179,10 +180,10 @@ void ServerGame::initNewClient()
 	clients[id] = loc;
 	client_id++;
 
-	std::string data = 
-		"x:" + std::to_string(loc[0]) + ";" +
-		"y:" + std::to_string(loc[1]) + ";" +
-		"z:" + std::to_string(loc[2]);;
+	std::string data =
+		"location: " + std::to_string(loc[0]) + " " +
+		"" + std::to_string(loc[1]) + " " +
+		"" + std::to_string(loc[2]) + "\n";
 
 	//send to client that connected their current id
 	//update all other clients that a new client has joined
@@ -195,9 +196,9 @@ void ServerGame::updateForwardEvent(std::string id)
 	vector<int> loc = clients[id];
 		
 	std::string data =
-		"x:" + std::to_string(loc[0]) + ";" +
-		"y:" + std::to_string(loc[1]) + ";" +
-		"z:" + std::to_string(loc[2]);
+		"location: " + std::to_string(loc[0]) + " " +
+		"" + std::to_string(loc[1]) + " " +
+		"" + std::to_string(loc[2]) + "\n";
 
 	sendActionPackets(id, data);
 }

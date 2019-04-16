@@ -62,7 +62,7 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
-	std::cout << "data received: " << network_data << std::endl;
+	std::cout << "data received:\n" << network_data << std::endl;
 	decodeData(network_data);
 }
 
@@ -88,10 +88,20 @@ void ClientGame::decodeData(const char * data)
 				token_str += dataStream.get();
 				c = dataStream.peek();
 			}
-			clientID.clear();
+
+			// reset client ID
+			if(token_str == "-----")
+				clientID.clear();
 		}
 
-		if (isalpha(c)) // read word
+		// Clear key and values at end of line
+		if (c == '\n')
+		{
+			key_str.clear();
+			value_str.clear();
+		}
+
+		if (isalpha(c) || isdigit(c)) // read word
 		{
 			while (isalpha(c) || isdigit(c) || c == '_')
 			{
@@ -103,45 +113,23 @@ void ClientGame::decodeData(const char * data)
 			{
 				clientID = token_str;
 			}
-
-			if (token_str == "type")
+			else if (key_str.empty())
 			{
-				key_str.clear();
-				while (c != ',')
-				{
-					key_str += dataStream.get();
-					c = dataStream.peek();
-				}
-
-				key_str.erase(0, 2);
-				//std::cout << field << ":" << type_str << std::endl;
+				key_str = token_str;
 
 			}
-
-
-			if (token_str == "value")
+			else if (value_str.empty())
 			{
-				value_str.clear();
-				while (c != '\n')
-				{
-					value_str += dataStream.get();
-					c = dataStream.peek();
-
-				}
-
-				value_str.erase(0, 2);
-				value_str.erase(value_str.length() - 2, 2);
-				std::cout << clientID << "--" << key_str << "--" << value_str << std::endl;
-
+				value_str = token_str;
 			}
-
-			//std::cout << field << ":" << token_str << std::endl;
 
 		}
 		else // Remove whitespace/miscellanous chars
 		{
 			c = dataStream.get();
 		}
+
+		std::cout << "clientID:" << clientID << "  key: " << key_str << "  value: " << value_str << std::endl;
 	}
 	std::cout << "decode:" << std::endl;
 	std::cout << data << std::endl;
