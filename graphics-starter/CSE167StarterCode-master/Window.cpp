@@ -1,10 +1,13 @@
 #include "Window.h"
+#include "ClientGame.h"
 
 const char* window_title = "GLFW Starter Project";
 
 
 //Cube cube(5.0f);
 Mesh mesh;
+ClientGame * client;
+
 
 int Window::width;
 int Window::height;
@@ -49,6 +52,8 @@ GLFWwindow* Window::create_window(int width, int height)
 
 	// 4x antialiasing
 	glfwWindowHint(GLFW_SAMPLES, 4);
+
+	client = new ClientGame();
 
 	// Create the GLFW window
 	GLFWwindow * window = glfwCreateWindow(width, height, window_title, NULL, NULL);
@@ -96,7 +101,8 @@ void Window::idle_callback()
 {
 	// Perform any updates as necessary. Here, we will spin the cube slightly.
 	//cube.update();
-	mesh.spin();
+	//mesh.spin();
+	client->update();
 
 }
 
@@ -112,16 +118,23 @@ void Window::display_callback(GLFWwindow* window)
 	// Render objects
 	//cube.draw();
 	if (playerDir == 1) {
-		playerPos += Vector3f(0, playerSpeed, 0);
+		client->sendForwardPackets();
+		//playerPos += Vector3f(0, playerSpeed, 0);
 	}
 	else if (playerDir == 2) {
-		playerPos -= Vector3f(0, playerSpeed, 0);
+		//playerPos -= Vector3f(0, playerSpeed, 0);
 	}
 	else if (playerDir == 3) {
-		playerPos -= Vector3f(playerSpeed, 0, 0);
+		//playerPos -= Vector3f(playerSpeed, 0, 0);
 	}
 	else if (playerDir == 4) {
-		playerPos += Vector3f(playerSpeed, 0, 0);
+		//playerPos += Vector3f(playerSpeed, 0, 0);
+	}
+	if (!client->clients2.empty()) {
+		Vector3f location = Vector3f(client->clients2["client_0"][0] * 0.1f,
+			client->clients2["client_0"][1] * 0.1f,
+			client->clients2["client_0"][2] * 0.1f);
+		playerPos = location;
 	}
 	Vector3f translation = playerPos - lastPlayerPos;
 	glTranslatef(translation.x, translation.y, translation.z);

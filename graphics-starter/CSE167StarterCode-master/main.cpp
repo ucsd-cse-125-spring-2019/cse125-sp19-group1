@@ -1,6 +1,16 @@
 #include "main.h"
 
 GLFWwindow* window;
+// may need #include "stdafx.h" in visual studio
+//#include "stdafx.h"
+#include "ServerGame.h"
+#include "ClientGame.h"
+// used for multi-threading
+#include <process.h>
+
+void serverLoop(void *);
+
+ServerGame * server;
 
 void error_callback(int error, const char* description)
 {
@@ -89,6 +99,13 @@ void print_versions()
 
 int main(void)
 {
+	// initialize the server
+	server = new ServerGame();
+
+	// create thread with arbitrary argument for the run function
+	_beginthread(serverLoop, 0, (void*)12);
+
+	// initialize the client 
 	// Create the GLFW window
 	if (!glfwInit())
 		exit(EXIT_FAILURE);
@@ -125,4 +142,12 @@ int main(void)
 	glfwTerminate();
 
 	exit(EXIT_SUCCESS);
+}
+
+void serverLoop(void * arg)
+{
+	while (true)
+	{
+		server->update();
+	}
 }
