@@ -21,33 +21,29 @@ ClientGame::ClientGame(void)
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-//Sending packet information
-void ClientGame::sendActionPackets()
+void ClientGame::sendPacket(const PacketTypes type)
 {
 	// send action packet
 	const unsigned int packet_size = sizeof(Packet);
 	char packet_data[packet_size];
 
 	Packet packet;
-	packet.packet_type = ACTION_EVENT;
+	packet.packet_type = type;
 
 	packet.serialize(packet_data);
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
+//Sending packet information
+void ClientGame::sendActionPackets()
+{
+	sendPacket(ACTION_EVENT);
+}
+
 void ClientGame::sendForwardPackets()
 {
-	// send action packet
-	const unsigned int packet_size = sizeof(Packet);
-	char packet_data[packet_size];
-
-	Packet packet;
-	packet.packet_type = FORWARD_EVENT;
-
-	packet.serialize(packet_data);
-
-	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
+	sendPacket(FORWARD_EVENT);
 }
 
 //Getting data back and updating game state 

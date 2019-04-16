@@ -23,6 +23,8 @@ public:
 
 	ClientNetwork* network;
 
+	void sendPacket(const PacketTypes type);
+	
 	void sendActionPackets();
 	void decodeData(const char * data);
 	void sendForwardPackets();
