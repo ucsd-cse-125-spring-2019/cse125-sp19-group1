@@ -14,6 +14,7 @@
 #include "texture.h"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 struct Vertex
@@ -30,6 +31,10 @@ struct Vertex
 		m_tex = tex;
 		m_normal = normal;
 	}
+
+	void resetPos(Vector3f& pos) {
+		m_pos = pos;
+	}
 };
 
 class Mesh
@@ -38,13 +43,18 @@ public:
 	Mesh();
 	~Mesh();
 	bool LoadMesh(const std::string& Filename);
-	void Render(glm::mat4 * V, glm::mat4 * P, glm::vec3 playerPos);
+	void Render(glm::mat4 * V, glm::mat4 * P, Vector3f playerPos);
+
+	void spin();
+	glm::mat4 toWorld;
 
 private:
 	bool InitFromScene(const aiScene* pScene, const std::string& Filename);
 	void InitMesh(unsigned int Index, const aiMesh* paiMesh);
 	bool InitMaterials(const aiScene* pScene, const std::string& Filename);
 	void Clear();
+
+	float angle;
 
 #define INVALID_MATERIAL 0xFFFFFFFF
 
@@ -58,6 +68,8 @@ private:
 		GLuint VB;
 		GLuint IB;
 
+		std::vector<Vertex> vertices;
+		std::vector<Vertex> origVertices;
 		unsigned int NumIndices;
 		unsigned int MaterialIndex;
 	};

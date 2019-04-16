@@ -33,6 +33,8 @@ bool Mesh::MeshEntry::Init(const std::vector<Vertex>& Vertices,
 	const std::vector<unsigned int>& Indices)
 {
 	NumIndices = Indices.size();
+	vertices = Vertices;
+	origVertices = Vertices;
 
 	glGenBuffers(1, &VB);
 	glBindBuffer(GL_ARRAY_BUFFER, VB);
@@ -57,7 +59,8 @@ void Mesh::Clear()
 bool Mesh::LoadMesh(const std::string& Filename)
 {
 	Clear();
-
+	toWorld = glm::mat4(1.0f);
+	angle = 0.0f;
 	bool Ret = false;
 
 	Assimp::Importer Importer;
@@ -167,15 +170,27 @@ bool Mesh::InitMaterials(const aiScene* pScene, const std::string& Filename)
 	return Ret;
 }
 
-void Mesh::Render(glm::mat4 * V, glm::mat4 * P, glm::vec3 playerPos)
+void Mesh::Render(glm::mat4 * V, glm::mat4 * P, Vector3f playerPos)
 {
-	glm::mat4 modelview = (*V)  * glm::mat4(1.0f);
+	glm::mat4 modelview = (*V)  * toWorld;
+
+	glPushMatrix();
+	glMultMatrixf(&toWorld[0][0]);
+
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
 
 	for (unsigned int i = 0; i < m_Entries.size(); i++) {
+		std::vector<Vertex> vertices = m_Entries[i].vertices;
+
+		/*for (int j = 0; j < m_Entries[i].vertices.size(); j++) {
+			m_Entries[i].vertices[i].resetPos(m_Entries[i].origVertices[i].m_pos + playerPos);
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, m_Entries[i].VB);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex)*vertices.size(),
+				&vertices[0], GL_STATIC_DRAW);*/
 		glBindBuffer(GL_ARRAY_BUFFER, m_Entries[i].VB);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const GLvoid*)12);
@@ -196,4 +211,12 @@ void Mesh::Render(glm::mat4 * V, glm::mat4 * P, glm::vec3 playerPos)
 	glDisableVertexAttribArray(2);
 	glDisableVertexAttribArray(1);
 	glDisableVertexAttribArray(0);
+	glPopMatrix();
+}
+
+void Mesh::spin() {
+	this->angle += 0.1f;
+	if (this->angle > 360.0f || this->angle < -360.0f) this->angle = 0.0f;
+	// This creates the matrix to rotate the cube
+	this->toWorld = glm::rotate(glm::mat4(1.0f), this->angle / 180.0f * glm::pi<float>(), glm::vec3(0.0f, 1.0f, 0.0f));
 }

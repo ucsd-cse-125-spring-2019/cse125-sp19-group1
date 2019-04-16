@@ -16,7 +16,11 @@ glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);    // e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);      // up | What orientation "up" is
 
-glm::vec3 playerPos(0.0f, 0.0f, 0.0f);
+Vector3f playerPos(0.0f, 0.0f, 0.0f);
+Vector3f lastPlayerPos(0.0f, 0.0f, 0.0f);
+float playerSpeed = 0.001f;
+int playerDir = 0;
+
 
 bool mouseRotation = false;
 glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
@@ -27,7 +31,7 @@ float scaleMouseWheel = 1.05f;
 void Window::initialize_objects()
 {
 	mesh = Mesh();
-	mesh.LoadMesh("table.obj");
+	mesh.LoadMesh("Door.obj");
 }
 
 void Window::clean_up()
@@ -92,6 +96,8 @@ void Window::idle_callback()
 {
 	// Perform any updates as necessary. Here, we will spin the cube slightly.
 	//cube.update();
+	mesh.spin();
+
 }
 
 void Window::display_callback(GLFWwindow* window)
@@ -105,7 +111,22 @@ void Window::display_callback(GLFWwindow* window)
 	
 	// Render objects
 	//cube.draw();
-	mesh.Render(&V, &P);
+	if (playerDir == 1) {
+		playerPos += Vector3f(0, playerSpeed, 0);
+	}
+	else if (playerDir == 2) {
+		playerPos -= Vector3f(0, playerSpeed, 0);
+	}
+	else if (playerDir == 3) {
+		playerPos -= Vector3f(playerSpeed, 0, 0);
+	}
+	else if (playerDir == 4) {
+		playerPos += Vector3f(playerSpeed, 0, 0);
+	}
+	Vector3f translation = playerPos - lastPlayerPos;
+	glTranslatef(translation.x, translation.y, translation.z);
+	//lastPlayerPos = playerPos;
+	mesh.Render(&V, &P, playerPos);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
@@ -124,6 +145,22 @@ void Window::key_callback(GLFWwindow* window, int key, int scancode, int action,
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+
+		if (key == GLFW_KEY_UP) {
+			playerDir = 1;
+		}
+		if (key == GLFW_KEY_DOWN) {
+			playerDir = 2;
+		}
+		if (key == GLFW_KEY_LEFT) {
+			playerDir = 3;
+		}
+		if (key == GLFW_KEY_RIGHT) {
+			playerDir = 4;
+		}
+	}
+	else if (action == GLFW_RELEASE) {
+		playerDir = 0;
 	}
 }
 

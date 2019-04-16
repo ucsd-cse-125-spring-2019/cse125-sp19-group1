@@ -1,9 +1,9 @@
 ﻿  Window.cpp
-c:\users\hung\downloads\cse167startercode-master\window.cpp(131): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\hung\downloads\cse167startercode-master\window.cpp(132): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\hung\downloads\cse167startercode-master\window.cpp(170): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\hung\downloads\cse167startercode-master\window.cpp(171): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   Generating code
-  2 of 531 functions ( 0.4%) were compiled, the rest were copied from previous compilation.
+  1 of 563 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   GLFWStarterProject.vcxproj -> C:\Users\Hung\Downloads\CSE167StarterCode-master\Release\GLFWStarterProject.exe
