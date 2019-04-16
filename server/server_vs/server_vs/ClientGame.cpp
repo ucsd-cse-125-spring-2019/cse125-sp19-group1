@@ -2,6 +2,8 @@
 #include <iostream>
 #include <map>
 
+std::map < std::string, vector<int>> clients;
+
 //initialization 
 ClientGame::ClientGame(void)
 {
@@ -47,9 +49,6 @@ void ClientGame::sendForwardPackets()
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
-
-
-
 
 //Getting data back and updating game state 
 void ClientGame::update()

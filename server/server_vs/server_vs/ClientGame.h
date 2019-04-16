@@ -21,4 +21,7 @@ public:
 
 	void update();
 	void parseMovementData();
+
+private:
+	static unsigned int my_client_id;
 };

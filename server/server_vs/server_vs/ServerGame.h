@@ -29,4 +29,5 @@ private:
     ServerNetwork* network;
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
+	
 };
