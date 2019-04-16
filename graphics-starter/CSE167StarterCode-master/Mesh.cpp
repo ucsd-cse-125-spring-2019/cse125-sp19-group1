@@ -170,9 +170,9 @@ bool Mesh::InitMaterials(const aiScene* pScene, const std::string& Filename)
 	return Ret;
 }
 
-void Mesh::Render(glm::mat4 * V, glm::mat4 * P, Vector3f playerPos)
+void Mesh::Render(const glm::mat4 & V, const glm::mat4 & P, Vector3f playerPos)
 {
-	glm::mat4 modelview = (*V)  * toWorld;
+	glm::mat4 modelview = V * toWorld;
 
 	glPushMatrix();
 	glMultMatrixf(&toWorld[0][0]);

@@ -43,7 +43,7 @@ public:
 	Mesh();
 	~Mesh();
 	bool LoadMesh(const std::string& Filename);
-	void Render(glm::mat4 * V, glm::mat4 * P, Vector3f playerPos);
+	void Render(const glm::mat4 & V, const glm::mat4 & P, Vector3f playerPos);
 
 	void spin();
 	glm::mat4 toWorld;

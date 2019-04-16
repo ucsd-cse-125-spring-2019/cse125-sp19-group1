@@ -139,7 +139,7 @@ void Window::display_callback(GLFWwindow* window)
 	Vector3f translation = playerPos - lastPlayerPos;
 	glTranslatef(translation.x, translation.y, translation.z);
 	//lastPlayerPos = playerPos;
-	mesh.Render(&V, &P, playerPos);
+	mesh.Render(V, P, playerPos);
 
 	// Gets events, including input such as keyboard and mouse or window resizing
 	glfwPollEvents();
