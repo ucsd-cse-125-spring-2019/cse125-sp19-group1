@@ -58,7 +58,7 @@ void ClientGame::update()
 		return;
 	}
 
-	std::cout << "data received:\n" << network_data << std::endl;
+	//std::cout << "data received on client:\n" << network_data << std::endl;
 	decodeData(network_data);
 
 	// printing out client data for debug checking
@@ -69,7 +69,7 @@ void ClientGame::update()
 		msg_string += "location:" + std::to_string(x.second[0]) + std::string(" ") + std::to_string(x.second[1]) + std::string(" ") + std::to_string(x.second[2]) + std::string("\n");
 	}
 
-	std::cout << "msgstr:\n" << msg_string << std::endl;
+	//std::cout << "after parse:\n" << msg_string << std::endl;
 }
 
 void ClientGame::decodeData(const char * data)
@@ -149,7 +149,7 @@ void ClientGame::decodeData(const char * data)
 							}
 
 							vec3.push_back(std::stoi(val_str));
-							std::cout << "num: " << val_str << std::endl;
+							//std::cout << "num: " << val_str << std::endl;
 						}
 						else
 						{
@@ -160,7 +160,7 @@ void ClientGame::decodeData(const char * data)
 					clients2[clientID] = vec3;
 				}
 			}
-			std::cout << "clientID: " << clientID << "  key: " << key_str << "  value: " << value_str << std::endl;
+			//std::cout << "clientID: " << clientID << "  key: " << key_str << "  value: " << value_str << std::endl;
 		}
 		else // Remove whitespace/miscellanous chars
 		{
@@ -169,7 +169,7 @@ void ClientGame::decodeData(const char * data)
 
 		
 	}
-	std::cout << "\ndecode:" << std::endl;
-	std::cout << data << std::endl;
+	//std::cout << "\ndecode:" << std::endl;
+	//std::cout << data << std::endl;
 
 }
