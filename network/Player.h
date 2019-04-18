@@ -1,21 +1,21 @@
 #pragma once
-#include "Location.h"
 
 struct Location
 {
-public:
+	Location(float argX = 0.0f, float argY = 0.0f, float argZ = 0.0f) : x(argX), y(argY), z(argZ) {}
 
-	Location(float x = 0.0f, float y = 0.0f, float z = 0.0f);
+	float x;
+	float y;
+	float z;
 
-	std::vector<float> getLocation();
-	void setLocation(float x, float y, float z);
-	float getX();
-	float getY();
-	float getZ();
-protected:
-	std::vector<float> loc;
-
+	void update(float argX, float argY, float argZ)
+	{
+		x = argX;
+		y = argY;
+		z = argZ;
+	}
 };
+
 class Player
 {
 public:
@@ -23,7 +23,8 @@ public:
 	Player();
 	Player(Location aLoc);
 	Location getLocation();
+	void setLocation(float argX, float argY, float argZ);
 
 protected:
-	Location loc;
+	Location myLocation;
 };

@@ -2,12 +2,17 @@
 
 Player::Player()
 {
-	loc = Location();
+	myLocation = Location();
 }
 
 Player::Player(Location aLoc)
 {
-	loc = aLoc;
+	myLocation = aLoc;
 }
 
-Location Player::getLocation() { return loc; }
+Location Player::getLocation() { return myLocation; }
+
+void Player::setLocation(float argX, float argY, float argZ)
+{
+	myLocation.update(argX, argY, argZ);
+}

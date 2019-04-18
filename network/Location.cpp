@@ -1,10 +1,7 @@
 #include "Location.h"
 
-// Default constructor initializes location at (0, 0, 0)
-Location::Location() : loc(std::vector<float>{0.0f, 0.0f, 0.0f}) {}
-
 // Initializes location based on input
-Location::Location(float x, float y, float z) : loc(std::vector<float>{x, y, z}) {}
+Location::Location(float x = 0.0f, float y = 0.0f, float z = 0.0f) : loc(std::vector<float>{x, y, z}) {}
 
 // Returns location float vector
 std::vector<float> Location::getLocation() { return loc; }
