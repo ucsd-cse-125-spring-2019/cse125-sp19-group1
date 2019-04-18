@@ -10,7 +10,7 @@ bool loadAssimp(const char * path, std::vector<MeshEntry *> * meshes) {
 	Assimp::Importer importer;
 
 	//const aiScene* scene = importer.ReadFile(path, 0/*aiProcess_JoinIdenticalVertices | aiProcess_SortByPType*/);
-  const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate); // | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);// | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
   
 	if(!scene) {
 		fprintf( stderr, importer.GetErrorString());
@@ -19,7 +19,6 @@ bool loadAssimp(const char * path, std::vector<MeshEntry *> * meshes) {
 	}
   
   (*meshes).reserve(scene->mNumMeshes);
-  std::cout << "Num materials in loadAssimp: " << scene->mNumMaterials << std::endl;
   
   const aiMesh* mesh;
   
@@ -32,6 +31,21 @@ bool loadAssimp(const char * path, std::vector<MeshEntry *> * meshes) {
     vertices = (*meshes)[mesh_index]->getVertices();
     uvs = (*meshes)[mesh_index]->getUVs();
     normals = (*meshes)[mesh_index]->getNormals();
+	if (mesh_index < scene->mNumMaterials) {
+		aiMaterial * mat = (scene->mMaterials)[mesh_index];
+		glm::vec3 color;
+		std::cerr<<"Num Textures = " << mat->GetTextureCount(aiTextureType_AMBIENT);
+		mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
+		(*meshes)[mesh_index]->SetAmbient(color);
+		std::cerr << "Ambient Color : " << color.x;
+		mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+		(*meshes)[mesh_index]->SetDiffuse(color);
+		mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
+		(*meshes)[mesh_index]->SetSpecular(color);
+		float shininess;
+		mat->Get(AI_MATKEY_SHININESS, shininess);
+		(*meshes)[mesh_index]->SetShine(shininess);
+	}
 
     // Fill vertices positions
     (*vertices).reserve(mesh->mNumVertices);

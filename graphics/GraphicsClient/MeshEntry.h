@@ -35,6 +35,10 @@ public:
   MeshEntry();
   ~MeshEntry();
   void Init();
+  void SetAmbient(glm::vec3 newAmb);
+  void SetDiffuse(glm::vec3 newDiff);
+  void SetSpecular(glm::vec3 newSpec);
+  void SetShine(float newShine);
   void draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P);
   void printMatrix(glm::mat4 * matrix);
   void update();
