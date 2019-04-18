@@ -36,7 +36,7 @@
     <ClCompile Include="..\..\..\network\Player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\network\Location.cpp">
+    <ClCompile Include="..\..\..\network\GameData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,7 +62,10 @@
     <ClInclude Include="..\..\..\network\Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\network\Location.h">
+    <ClInclude Include="..\..\..\network\GameData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\network\StringParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -49,7 +49,6 @@ void ClientGame::sendForwardPackets()
 //Getting data back and updating game state 
 void ClientGame::update()
 {
-	Packet packet;
 	int data_length = network->receivePackets(network_data);
 
 	if (data_length <= 0)
@@ -131,7 +130,7 @@ void ClientGame::decodeData(const char * data)
 				if (key_str == "location")
 				{
 
-					std::vector<int> vec3;
+					std::vector<float> vec3;
 					std::stringstream valStrStream(value_str);
 					std::istream &valStream(valStrStream);
 					
@@ -148,7 +147,7 @@ void ClientGame::decodeData(const char * data)
 								d = valStream.peek();
 							}
 
-							vec3.push_back(std::stoi(val_str));
+							vec3.push_back(std::stof(val_str));
 							//std::cout << "num: " << val_str << std::endl;
 						}
 						else

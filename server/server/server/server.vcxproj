@@ -117,7 +117,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\network\ClientGame.cpp" />
     <ClCompile Include="..\..\..\network\ClientNetwork.cpp" />
-    <ClCompile Include="..\..\..\network\Location.cpp" />
+    <ClCompile Include="..\..\..\network\GameData.cpp" />
     <ClCompile Include="..\..\..\network\NetworkServices.cpp" />
     <ClCompile Include="..\..\..\network\Player.cpp" />
     <ClCompile Include="..\..\..\network\ServerGame.cpp" />
@@ -127,12 +127,13 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\..\network\ClientNetwork.h" />
-    <ClInclude Include="..\..\..\network\Location.h" />
+    <ClInclude Include="..\..\..\network\GameData.h" />
     <ClInclude Include="..\..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\..\network\NetworkServices.h" />
     <ClInclude Include="..\..\..\network\Player.h" />
     <ClInclude Include="..\..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\..\network\ServerNetwork.h" />
+    <ClInclude Include="..\..\..\network\StringParser.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,6 +5,7 @@
 #include "ClientNetwork.h"
 #include "NetworkData.h"
 #include "Player.h"
+#include "StringParser.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -19,7 +20,7 @@ public:
 	ClientGame();
 	~ClientGame(void);
 
-	std::map < std::string, std::vector<int> > clients2;
+	std::map < std::string, std::vector<float> > clients2;
 
 
 	ClientNetwork* network;
