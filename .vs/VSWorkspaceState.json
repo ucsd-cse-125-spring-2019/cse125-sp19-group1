@@ -1,9 +1,12 @@
 {
   "ExpandedNodes": [
     "",
-    "\\graphics-starter",
-    "\\graphics-starter\\CSE167StarterCode-master"
+    "\\graphics-starter\\CSE167StarterCode-master",
+    "\\graphics\\GraphicsClient",
+    "\\server",
+    "\\server\\server",
+    "\\server\\server_vs"
   ],
-  "SelectedNode": "\\graphics-starter\\CSE167StarterCode-master\\GLFWStarterProject.sln",
+  "SelectedNode": "\\graphics",
   "PreviewInSolutionExplorer": false
 }
