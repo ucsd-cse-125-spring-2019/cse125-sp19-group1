@@ -4,12 +4,14 @@
 #include "../../network/ClientGame.h"
 // used for multi-threading
 #include <process.h>
+#include <ctime>
 
 void serverLoop(void *);
 void clientLoop(void);
  
 ServerGame * server;
 ClientGame * client;
+int elapsedTime = 0;
 
 int main()
 {
@@ -21,16 +23,21 @@ int main()
     _beginthread( serverLoop, 0, (void*)12);
  
     // initialize the client 
-    client = new ClientGame();
+    //client = new ClientGame();
     
-    clientLoop();
+    //clientLoop();
+	serverLoop((void*)12);
 }
 
 void serverLoop(void * arg) 
 { 
     while(true) 
     {
-        server->update();
+		if (clock() - elapsedTime > 1000.0 / 60)
+		{
+			elapsedTime = clock();
+			server->update();
+		}
     }
 }
  
