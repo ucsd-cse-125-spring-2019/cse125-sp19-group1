@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include "Player.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -34,4 +35,6 @@ public:
 
 private:
 	static std::string my_client_id;
+
+	std::map < std::string, std::vector<int> > allClients;
 };
