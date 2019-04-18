@@ -69,6 +69,22 @@ void MeshEntry::Init() {
   glBindVertexArray(0);
 }
 
+void MeshEntry::SetAmbient(glm::vec3 newAmb) {
+	ambient = glm::vec3(newAmb);
+}
+
+void MeshEntry::SetDiffuse(glm::vec3 newDiff) {
+	diffuse = glm::vec3(newDiff);
+}
+
+void MeshEntry::SetSpecular(glm::vec3 newSpec) {
+	specular = glm::vec3(newSpec);
+}
+
+void MeshEntry::SetShine(float newShine) {
+	shininess = newShine;
+}
+
 std::vector<unsigned int> * MeshEntry::getFaces() {
   return &faces;
 }
