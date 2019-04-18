@@ -36,22 +36,22 @@
     <ClInclude Include="Tester.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="server\ClientGame.h">
+    <ClInclude Include="..\..\network\ClientGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="server\ClientNetwork.h">
+    <ClInclude Include="..\..\network\ClientNetwork.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="server\NetworkData.h">
+    <ClInclude Include="..\..\network\NetworkData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="server\NetworkServices.h">
+    <ClInclude Include="..\..\network\NetworkServices.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="server\ServerGame.h">
+    <ClInclude Include="..\..\network\ServerGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="server\ServerNetwork.h">
+    <ClInclude Include="..\..\network\ServerNetwork.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -74,19 +74,19 @@
     <ClCompile Include="MeshEntry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server\ClientGame.cpp">
+    <ClCompile Include="..\..\network\ClientGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server\ClientNetwork.cpp">
+    <ClCompile Include="..\..\network\ClientNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server\NetworkServices.cpp">
+    <ClCompile Include="..\..\network\NetworkServices.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server\ServerGame.cpp">
+    <ClCompile Include="..\..\network\ServerGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="server\ServerNetwork.cpp">
+    <ClCompile Include="..\..\network\ServerNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

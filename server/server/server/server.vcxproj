@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{A9924152-8D03-4207-BE62-CE1F5A6ACBE9}</ProjectGuid>
-    <RootNamespace>GraphicsClient</RootNamespace>
+    <ProjectGuid>{41AA6445-9EE4-40BF-BF43-C8CBC997D552}</ProjectGuid>
+    <RootNamespace>server</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -77,10 +77,6 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -89,10 +85,6 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -120,59 +112,25 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\network\ClientGame.h" />
-    <ClInclude Include="..\..\network\ClientNetwork.h" />
-    <ClInclude Include="..\..\network\NetworkData.h" />
-    <ClInclude Include="..\..\network\NetworkServices.h" />
-    <ClInclude Include="..\..\network\ServerGame.h" />
-    <ClInclude Include="..\..\network\ServerNetwork.h" />
-    <ClInclude Include="Core.h" />
-    <ClInclude Include="DirLight.h" />
-    <ClInclude Include="FBXObject.h" />
-    <ClInclude Include="MeshEntry.h" />
-    <ClInclude Include="objloader.h" />
-    <ClInclude Include="shader.h" />
-    <ClInclude Include="Tester.h" />
+    <ClCompile Include="..\..\..\network\ClientGame.cpp" />
+    <ClCompile Include="..\..\..\network\ClientNetwork.cpp" />
+    <ClCompile Include="..\..\..\network\NetworkServices.cpp" />
+    <ClCompile Include="..\..\..\network\ServerGame.cpp" />
+    <ClCompile Include="..\..\..\network\ServerNetwork.cpp" />
+    <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\network\ClientGame.cpp" />
-    <ClCompile Include="..\..\network\ClientNetwork.cpp" />
-    <ClCompile Include="..\..\network\NetworkServices.cpp" />
-    <ClCompile Include="..\..\network\ServerGame.cpp" />
-    <ClCompile Include="..\..\network\ServerNetwork.cpp" />
-    <ClCompile Include="DirLight.cpp" />
-    <ClCompile Include="FBXObject.cpp" />
-    <ClCompile Include="MeshEntry.cpp" />
-    <ClCompile Include="objloader.cpp" />
-    <ClCompile Include="shader.cpp" />
-    <ClCompile Include="Tester.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="obj_shader.frag" />
-    <None Include="obj_shader.vert" />
-    <None Include="packages.config" />
+    <ClInclude Include="..\..\..\network\ClientGame.h" />
+    <ClInclude Include="..\..\..\network\ClientNetwork.h" />
+    <ClInclude Include="..\..\..\network\NetworkData.h" />
+    <ClInclude Include="..\..\..\network\NetworkServices.h" />
+    <ClInclude Include="..\..\..\network\ServerGame.h" />
+    <ClInclude Include="..\..\..\network\ServerNetwork.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="packages\glm.0.9.9.500\build\native\glm.targets" Condition="Exists('packages\glm.0.9.9.500\build\native\glm.targets')" />
-    <Import Project="packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets" Condition="Exists('packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" />
-    <Import Project="packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets" Condition="Exists('packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" />
-    <Import Project="packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
-    <Import Project="packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('packages\Assimp.3.0.0\build\native\Assimp.targets')" />
   </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glm.0.9.9.500\build\native\glm.targets'))" />
-    <Error Condition="!Exists('packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets'))" />
-    <Error Condition="!Exists('packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets'))" />
-    <Error Condition="!Exists('packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
-    <Error Condition="!Exists('packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
-  </Target>
 </Project>

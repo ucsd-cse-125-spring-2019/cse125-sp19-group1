@@ -5,8 +5,10 @@
 #include "DirLight.h"
 #include "FBXObject.h"
 #include <process.h>
-#include "./server/ServerGame.h"
-#include "./server/ClientGame.h"
+//#include "./server/ServerGame.h"
+//#include "./server/ClientGame.h"
+#include "../../network/ServerGame.h"
+#include "../../network/ClientGame.h"
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
