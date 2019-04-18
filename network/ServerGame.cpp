@@ -154,6 +154,22 @@ void ServerGame::initNewClient()
 	std::vector<int> loc{ 0, 0, 0 };
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
+
+
+	std::string msg_string = "SERVER INITIALIZATION\n";
+
+	msg_string += "id:                " + id;
+	msg_string += "\n-----";
+
+	int packet_size = msg_string.length();
+	char * msg = new char[packet_size];
+
+	int i;
+	for (i = 0; i < packet_size; i++) {
+		msg[i] = msg_string[i];
+
+	}
+	network->sendToClient(msg, packet_size, client_id);
 	client_id++;
 }
 

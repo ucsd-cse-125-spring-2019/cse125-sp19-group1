@@ -69,6 +69,7 @@ void ClientGame::update()
 	}
 
 	//std::cout << "after parse:\n" << msg_string << std::endl;
+	memset(network_data, 0, sizeof(network_data)); // empties the buffer after parsing
 }
 
 void ClientGame::decodeData(const char * data)
