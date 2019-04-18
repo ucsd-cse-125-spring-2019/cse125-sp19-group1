@@ -33,8 +33,10 @@ public:
 	void update();
 	void parseMovementData();
 
+
+	std::map < std::string, Player > allClients;
 private:
 	static std::string my_client_id;
 
-	std::map < std::string, std::vector<int> > allClients;
+	
 };

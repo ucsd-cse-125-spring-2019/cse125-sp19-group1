@@ -12,7 +12,7 @@
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
-#define DOOR_PATH "../Models/chair.fbx"
+#define DOOR_PATH "../Models/gunbot.dae"
 #define TABLE_PATH "../Models/Table.obj"
 
 // function declarations
