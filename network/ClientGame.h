@@ -25,13 +25,11 @@ public:
 
 	void sendActionPackets();
 	void decodeData(const char * data);
-	void sendForwardPackets();
+	void sendMovementPackets(const int type);
 
 	char network_data[MAX_PACKET_SIZE];
 
 	void update();
-	void parseMovementData();
 
-private:
-	static std::string my_client_id;
+	std::string my_client_id;
 };

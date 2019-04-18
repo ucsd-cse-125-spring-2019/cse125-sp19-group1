@@ -69,6 +69,8 @@ void ServerGame::receiveFromClients()
 
 				initNewClient();
 
+				sendInitPackets();
+
 				break;
 
 			case ACTION_EVENT:
@@ -82,7 +84,8 @@ void ServerGame::receiveFromClients()
 			case FORWARD_EVENT:
 
 				//printf("Forward event called\n");
-				updateForwardEvent("client_" + std::to_string(iter->first));
+				cout << "this is network data" << packet.id << endl;
+				updateForwardEvent(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -90,7 +93,7 @@ void ServerGame::receiveFromClients()
 
 			case BACKWARD_EVENT:
 
-				printf("Backwards event called\n");
+				updateBackwardEvent(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -98,7 +101,7 @@ void ServerGame::receiveFromClients()
 
 			case LEFT_EVENT:
 
-				printf("Left event called\n");
+				updateLeftEvent(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -106,7 +109,7 @@ void ServerGame::receiveFromClients()
 
 			case RIGHT_EVENT:
 
-				printf("Right event called\n");
+				updateRightEvent(std::string(packet.id));
 				
 				sendActionPackets();
 
@@ -121,6 +124,28 @@ void ServerGame::receiveFromClients()
 		}
 	}
 }
+
+void ServerGame::sendInitPackets()
+{
+	std::string msg_string = "client_" + std::to_string(client_id) + "\n";
+	msg_string += "init:client_" + std::to_string(client_id) + "\n";
+	client_id++;
+
+	msg_string += "-----\n";
+	int packet_size = msg_string.length();
+	char * msg = new char[packet_size];
+
+	int i;
+	for (i = 0; i < packet_size; i++) {
+		msg[i] = msg_string[i];
+	}
+
+	//printf("sendtoall\n");
+
+	network->sendToAll(msg, packet_size);
+	delete[] msg;
+}
+
 void ServerGame::sendActionPackets()
 {
 
@@ -131,7 +156,7 @@ void ServerGame::sendActionPackets()
 		msg_string += x.first + "\n";
 		msg_string += "location:" + std::to_string(x.second[0]) + std::string(" ") + std::to_string(x.second[1]) + std::string(" ") + std::to_string(x.second[2]) + std::string("\n");
 	}
-	msg_string += "-----";
+	msg_string += "-----\n";
 
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
@@ -154,12 +179,17 @@ void ServerGame::initNewClient()
 	std::vector<int> loc{ 0, 0, 0 };
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
-	client_id++;
 }
 
 void ServerGame::updateForwardEvent(std::string id)
 {
-	clients[id][2] +=  SPEED;
+	if (clients.find(id) != clients.end()) {
+		cout << "id is in clients" << endl;
+		clients[id][2] += SPEED;
+	}
+	else {
+		cout << "id" << id << endl;
+	}
 }
 
 void ServerGame::updateBackwardEvent(std::string id)

@@ -32,14 +32,27 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-void ClientGame::sendForwardPackets()
+void ClientGame::sendMovementPackets(const int type)
 {
 	// send action packet
 	const unsigned int packet_size = sizeof(Packet);
 	char packet_data[packet_size];
 
 	Packet packet;
-	packet.packet_type = FORWARD_EVENT;
+	packet.packet_type = type;
+
+	if (my_client_id == "") {
+		return;
+	}
+
+	std::cout << "About to send movement packet with ID: " << my_client_id << std::endl;
+	memset(packet.id, 0, sizeof(packet.id));
+	int i;
+	for (i = 0; i < my_client_id.size() && i < 8; i++) {
+		packet.id[i] = my_client_id[i];
+	}
+	//packet.id[8] = '\0';
+
 
 	packet.serialize(packet_data);
 
@@ -128,7 +141,14 @@ void ClientGame::decodeData(const char * data)
 			{
 				value_str = token_str;
 
-				if (key_str == "location")
+				if (key_str == "init" && my_client_id == "") {
+					my_client_id = token_str;
+					std::cout << "My client ID: " << my_client_id << std::endl;
+					std::vector<int> vector(3, 0);
+					clients2[my_client_id] = vector;
+				}
+
+				else if (key_str == "location")
 				{
 
 					std::vector<int> vec3;
@@ -140,15 +160,15 @@ void ClientGame::decodeData(const char * data)
 						std::string val_str = "";
 						char d = valStream.peek();
 
-						if (isdigit(d) || d == '.')
+						if (isdigit(d) || d == '.' || d == '-')
 						{
-							while (isdigit(d))
+							while (isdigit(d) || d == '.' || d == '-')
 							{
 								val_str += valStream.get();
 								d = valStream.peek();
 							}
 
-							vec3.push_back(std::stoi(val_str));
+							vec3.push_back(val_str.size() == 0 ? 0 : std::stoi(val_str));
 							std::cout << "num: " << val_str << std::endl;
 						}
 						else
