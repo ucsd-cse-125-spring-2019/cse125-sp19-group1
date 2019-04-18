@@ -115,6 +115,7 @@ int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
 		if (iResult == 0)
 		{
 			printf("Connection closed\n");
+			sessions.erase(client_id);
 			closesocket(currentSocket);
 		}
 
