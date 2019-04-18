@@ -57,7 +57,7 @@ void ClientGame::update()
 		return;
 	}
 
-	//std::cout << "data received on client:\n" << network_data << std::endl;
+	std::cout << "data received on client:\n" << network_data << std::endl;
 	decodeData(network_data);
 
 	// printing out client data for debug checking
