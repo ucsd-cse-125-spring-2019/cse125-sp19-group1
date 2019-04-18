@@ -89,6 +89,9 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -118,8 +121,13 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+<<<<<<< HEAD
       <AdditionalLibraryDirectories>C:\Users\Hung\Documents\GitHub\cse125-sp19-group1\graphics\GraphicsClient\packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glu32.lib;opengl32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+=======
+      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+>>>>>>> ddf5b7631389e6910c7a8717a04e1c10ee367628
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
