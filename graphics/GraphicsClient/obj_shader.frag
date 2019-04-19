@@ -24,14 +24,18 @@ in vec3 ambient;
 in vec3 specular;
 in float shininess;
 in vec4 ShadowCoord;
+in vec2 UV;
 
 // You can output many things. The first vec4 type output determines the color of the fragment
 out vec4 color;
 
 vec3 CalcDirLight(vec3 normal, vec3 viewDir)
 {
+  //load in texture from sampler2D
   vec3 surfaceToLight = normalize(light.light_pos.xyz);
-  vec3 amb = ambient;
+  vec4 texColor = texture(renderedTexture, UV);
+  vec3 amb = vec3(texColor.x, texColor.y, texColor.z);
+  //vec3 amb = ambient;
   // Diffuse shading
   float diffuseCoeff = max(0.0f, dot(normal, surfaceToLight));
   vec3 diff = diffuse * diffuseCoeff;
@@ -77,6 +81,7 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
 
 void main()
 {
+  vec4 texColor = texture(renderedTexture, UV);
   vec3 normal, res, viewDir;
   float visibility = 1.0;
   float bias = 0.005;
@@ -95,4 +100,5 @@ void main()
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);
+  color = texColor;
 }

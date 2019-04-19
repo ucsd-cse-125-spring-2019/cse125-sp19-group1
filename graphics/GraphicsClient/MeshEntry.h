@@ -21,7 +21,7 @@ private:
   float shininess;
   
   // These variables are needed for the shader program
-  GLuint VAO, VBO_V, VBO_N, EBO;
+  GLuint VAO, VBO_V, VBO_N, VBO_UV, EBO;
   GLuint uProjection, uModelview, uView;
   GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
   

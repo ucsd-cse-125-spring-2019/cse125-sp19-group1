@@ -4,6 +4,7 @@
 #include "MeshEntry.h"
 #include "shader.h"
 #include "objloader.h"
+#include "textureloader.h"
 
 class FBXObject
 {

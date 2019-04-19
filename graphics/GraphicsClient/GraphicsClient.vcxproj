@@ -140,6 +140,7 @@
     <ClInclude Include="objloader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Tester.h" />
+    <ClInclude Include="textureloader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\network\ClientGame.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="objloader.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Tester.cpp" />
+    <ClCompile Include="textureloader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag" />

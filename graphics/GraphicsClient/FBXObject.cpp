@@ -24,8 +24,11 @@ void FBXObject::parse(const char *filepath)
 {
   // Populate the face indices, vertices, and normals vectors with the object data:
   loadAssimp(filepath, &meshes);
+  loadTexture("caustics.ppm");
 }
 
 void FBXObject::update() {
   // This function will handle anything that must continuously occur.
 }
+
+
