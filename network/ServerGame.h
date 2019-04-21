@@ -20,6 +20,7 @@ public:
 	void updateBackwardEvent(std::string id);
 	void updateLeftEvent(std::string id);
 	void updateRightEvent(std::string id);
+	void updateCollision(std::string id);
 
 private:
 

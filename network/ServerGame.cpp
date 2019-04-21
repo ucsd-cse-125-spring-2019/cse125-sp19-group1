@@ -23,8 +23,6 @@ ServerGame::ServerGame(void)
     // set up the server network to listen 
     network = new ServerNetwork(); 
 	walls = new Walls();
-	int loc[3] = { 0,0,0 };
-	walls->detectCollision( loc );
 }
  
 void ServerGame::update() 
@@ -93,6 +91,7 @@ void ServerGame::receiveFromClients()
 				//printf("Forward event called\n");
 				cout << "this is network data" << packet.id << endl;
 				updateForwardEvent(std::string(packet.id));
+				updateCollision(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -101,6 +100,7 @@ void ServerGame::receiveFromClients()
 			case BACKWARD_EVENT:
 
 				updateBackwardEvent(std::string(packet.id));
+				updateCollision(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -109,6 +109,7 @@ void ServerGame::receiveFromClients()
 			case LEFT_EVENT:
 
 				updateLeftEvent(std::string(packet.id));
+				updateCollision(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -117,7 +118,8 @@ void ServerGame::receiveFromClients()
 			case RIGHT_EVENT:
 
 				updateRightEvent(std::string(packet.id));
-				
+				updateCollision(std::string(packet.id));
+
 				sendActionPackets();
 
 				break;
@@ -183,20 +185,14 @@ void ServerGame::sendActionPackets()
 void ServerGame::initNewClient()
 {
 	//updating current data structure to hold onto client
-	std::vector<int> loc{ 0, 0, 0 };
+	std::vector<int> loc{ 10, 0, 10 };
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
 }
 
 void ServerGame::updateForwardEvent(std::string id)
 {
-	if (clients.find(id) != clients.end()) {
-		cout << "id is in clients" << endl;
-		clients[id][2] += SPEED;
-	}
-	else {
-		cout << "id" << id << endl;
-	}
+	clients[id][2] += SPEED;
 }
 
 void ServerGame::updateBackwardEvent(std::string id)
@@ -212,4 +208,10 @@ void ServerGame::updateLeftEvent(std::string id)
 void ServerGame::updateRightEvent(std::string id)
 {
 	clients[id][0] += SPEED;
+}
+
+void ServerGame::updateCollision(std::string id)
+{
+	std::vector<int> loc = clients[id];
+	walls->detectCollision(loc);
 }
