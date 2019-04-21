@@ -44,7 +44,7 @@ void clientLoop()
 		client->update();
 		if (true) 
 		{
-			client->sendMovementPackets(FORWARD_EVENT);
+			//client->sendMovementPackets(FORWARD_EVENT);
 			//client->sendMovementPackets(BACKWARD_EVENT);
 			//client->sendMovementPackets(LEFT_EVENT);
 			//client->sendMovementPackets(RIGHT_EVENT);

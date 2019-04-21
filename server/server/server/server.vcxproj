@@ -120,6 +120,7 @@
     <ClCompile Include="..\..\..\network\NetworkServices.cpp" />
     <ClCompile Include="..\..\..\network\ServerGame.cpp" />
     <ClCompile Include="..\..\..\network\ServerNetwork.cpp" />
+    <ClCompile Include="..\..\..\network\Walls.cpp" />
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -129,6 +130,10 @@
     <ClInclude Include="..\..\..\network\NetworkServices.h" />
     <ClInclude Include="..\..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\..\network\ServerNetwork.h" />
+    <ClInclude Include="..\..\..\network\Walls.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\network\layout.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

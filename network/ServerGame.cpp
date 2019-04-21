@@ -1,4 +1,5 @@
 #include "ServerGame.h"
+#include "Walls.h"
 #include <map>
 #include <iostream>
 #include <vector>
@@ -21,6 +22,9 @@ ServerGame::ServerGame(void)
  
     // set up the server network to listen 
     network = new ServerNetwork(); 
+	walls = new Walls();
+	int loc[3] = { 0,0,0 };
+	walls->detectCollision( loc );
 }
  
 void ServerGame::update() 
@@ -59,8 +63,11 @@ void ServerGame::receiveFromClients()
 		{
 			packet.deserialize(&(network_data[i]));
 			i += sizeof(Packet);
-			
-			std::string clientid;
+
+			if (packet.packet_type != INIT_CONNECTION && packet.id == "") {
+				continue;
+			}
+
 			switch (packet.packet_type) {
 
 			case INIT_CONNECTION:

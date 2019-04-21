@@ -33,6 +33,9 @@
     <ClCompile Include="..\..\..\network\ServerNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\network\Walls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\network\ClientGame.h">
@@ -53,5 +56,11 @@
     <ClInclude Include="..\..\..\network\ServerNetwork.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\network\Walls.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\network\layout.txt" />
   </ItemGroup>
 </Project>

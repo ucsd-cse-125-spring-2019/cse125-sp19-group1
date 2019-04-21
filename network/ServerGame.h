@@ -1,5 +1,6 @@
 #include "ServerNetwork.h"
 #include "NetworkData.h"
+#include "Walls.h"
 #include <string>
 
 class ServerGame
@@ -27,6 +28,10 @@ private:
 
     // The ServerNetwork object 
     ServerNetwork* network;
+
+	// The Walls object
+	Walls* walls;
+
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
 	
