@@ -11,7 +11,7 @@ public:
 
 	//Hardcode map for now 
 	int TILE_SIZE = 20;
-	int PLAYER_RADIUS = 5; 
+	int PLAYER_RADIUS = 2; 
 	int WALL_SIZE = 2;
 
 	int layout[3][3] =
