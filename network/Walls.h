@@ -7,12 +7,12 @@ public:
 	Walls();
 	~Walls();
 
-	void detectCollision(int loc[3]);
+	void detectCollision(std::vector<int> loc);
 
 	//Hardcode map for now 
-	int TILE_SIZE = 20;
-	int PLAYER_RADIUS = 2; 
-	int WALL_SIZE = 2;
+	const static int TILE_SIZE = 20;
+	const static int PLAYER_RADIUS = 2; 
+	const static int WALL_SIZE = 2;
 
 	int layout[3][3] =
 				{ {12,2,5},

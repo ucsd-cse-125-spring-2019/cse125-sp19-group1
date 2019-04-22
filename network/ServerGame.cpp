@@ -12,7 +12,7 @@ std::map < std::string, vector<int>> clients;
  
 unsigned int ServerGame::client_id; 
 
-unsigned int SPEED = 10;
+unsigned int SPEED = 2;
 
 
 ServerGame::ServerGame(void)
@@ -190,24 +190,76 @@ void ServerGame::initNewClient()
 	clients[id] = loc;
 }
 
-void ServerGame::updateForwardEvent(std::string id)
+void ServerGame::updateRightEvent(std::string id)
 {
-	clients[id][2] += SPEED;
+	clients[id][0] += SPEED;
+	updatePlayerCollision(id, 0);
 }
 
 void ServerGame::updateBackwardEvent(std::string id)
 {
 	clients[id][2] -= SPEED;
+	updatePlayerCollision(id, 1);
+}
+
+void ServerGame::updateForwardEvent(std::string id)
+{
+	clients[id][2] += SPEED;
+	updatePlayerCollision(id, 2);
 }
 
 void ServerGame::updateLeftEvent(std::string id)
 {
 	clients[id][0] -= SPEED;
+	updatePlayerCollision(id, 3);
 }
 
-void ServerGame::updateRightEvent(std::string id)
+
+
+void ServerGame::updatePlayerCollision(std::string id, int dir) 
 {
-	clients[id][0] += SPEED;
+	std::vector<int> loc = clients[id];
+
+	//0 == right
+	//1 == down
+	//2 == forward
+	//3 == left
+	map<string, vector<int>>::iterator it;
+	for (it = clients.begin(); it != clients.end(); it++)
+	{
+		if (it->first == id) {
+			continue;
+		}
+
+		//calculate distance between two points 
+		int my_x = clients[id][0];
+		int my_z = clients[id][2];
+
+		int ot_x = it->second[0];
+		int ot_z = it->second[2];
+
+		float dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
+		
+		if (dist < 2 * Walls::PLAYER_RADIUS) 
+		{
+			if (dir == 0) 
+			{
+				clients[id][0] = ot_x - 2 * Walls::PLAYER_RADIUS;
+			} 
+			else if (dir == 1)
+			{
+				clients[id][2] = ot_z - 2 * Walls::PLAYER_RADIUS;
+			}
+			else if (dir == 2)
+			{
+				clients[id][2] = ot_z + 2 * Walls::PLAYER_RADIUS;
+			}
+			else
+			{
+				clients[id][0] = ot_x + 2 * Walls::PLAYER_RADIUS;
+			}
+		}
+	}
 }
 
 void ServerGame::updateCollision(std::string id)

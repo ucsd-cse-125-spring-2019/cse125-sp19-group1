@@ -21,6 +21,7 @@ public:
 	void updateLeftEvent(std::string id);
 	void updateRightEvent(std::string id);
 	void updateCollision(std::string id);
+	void updatePlayerCollision(std::string id, int dir);
 
 private:
 
