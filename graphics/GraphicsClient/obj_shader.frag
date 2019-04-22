@@ -34,18 +34,22 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
   //load in texture from sampler2D
   vec3 surfaceToLight = normalize(light.light_pos.xyz);
   vec4 texColor = texture(renderedTexture, UV);
-  vec3 amb = vec3(texColor.x, texColor.y, texColor.z);
+  vec3 texColorNoAlpha =  vec3(texColor.x, texColor.y, texColor.z);
+  vec3 amb = texColorNoAlpha;
   //vec3 amb = ambient;
   // Diffuse shading
   float diffuseCoeff = max(0.0f, dot(normal, surfaceToLight));
-  vec3 diff = diffuse * diffuseCoeff;
+  //vec3 diff = diffuse * diffuseCoeff;
+  vec3 diff = texColorNoAlpha * diffuseCoeff;
   // Specular shading
   float specularCoeff = 0.0f;
   if (diffuseCoeff > 0.0f) {
     specularCoeff = pow(max(0.0f, dot(viewDir, reflect(-surfaceToLight, normal))), shininess);
   }
-  vec3 spec = specular * specularCoeff;
+  //vec3 spec = specular * specularCoeff;
+  vec3 spec = texColorNoAlpha * specularCoeff;
   //TOON SHADING SHIT
+  /**
   vec4 tempColor;
   float edge = max(0.0,dot(normal, viewDir));
   float intensity = max(dot(normal, normalize(light.light_pos.xyz)), 0);
@@ -74,9 +78,10 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
   //If it's on the edge we want it to add a black outline
   if (edge < 0.4) {
     return amb;
-  }
+  }**/
   
-  return tempColor.xyz + amb;
+  //return tempColor.xyz + amb;
+  return amb + diff + spec;
 }
 
 void main()
@@ -100,5 +105,5 @@ void main()
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);
-  color = texColor;
+  //color = texColor;
 }
