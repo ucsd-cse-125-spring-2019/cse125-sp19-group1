@@ -15,7 +15,7 @@
 Walls::Walls()
 {
 	//Reading from a file to generate map
-	/*std::ifstream infile("layout.txt");
+	std::ifstream infile("layout.txt");
 	std::string line;
 	printf("INITIALIZING WALLS!\n");	
 	std::cout << infile.good() << std::endl;
@@ -24,7 +24,7 @@ Walls::Walls()
 	{
 		std::cout << "reading the file line by line" << std::endl;
 		std::cout << line << std::endl;
-	}*/
+	}
 
 	//Hardcode layout for now
 	int c;

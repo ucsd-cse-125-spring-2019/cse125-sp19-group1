@@ -62,7 +62,6 @@ void ClientGame::sendMovementPackets(const int type)
 //Getting data back and updating game state 
 void ClientGame::update()
 {
-	Packet packet;
 	int data_length = network->receivePackets(network_data);
 
 	if (data_length <= 0)

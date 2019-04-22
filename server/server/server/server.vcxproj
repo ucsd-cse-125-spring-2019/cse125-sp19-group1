@@ -132,9 +132,6 @@
     <ClInclude Include="..\..\..\network\ServerNetwork.h" />
     <ClInclude Include="..\..\..\network\Walls.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\network\layout.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -60,7 +60,4 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\network\layout.txt" />
-  </ItemGroup>
 </Project>
