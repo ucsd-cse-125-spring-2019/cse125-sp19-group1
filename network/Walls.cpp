@@ -88,20 +88,20 @@ void Walls::detectCollision(std::vector<int> loc) {
 	}
 }
 
-std::string Walls::encodeWalls()
+std::string Walls::encodeWallData()
 {
-	std::stringstream encoding;
+	std::stringstream encodedData;
 
 	for (int c = 0; c < 3; c++) {
 		for (int r = 0; r < 3; r++) {
-			encoding << layout[c][r];
+			encodedData << layout[c][r];
 
 			if(r < 3-1)
-				encoding << " ";
+				encodedData << " ";
 		}
 		if(c < 3-1)
-			encoding << ", ";
+			encodedData << ", ";
 	}
-	encoding << std::endl;
-	return encoding.str();
+	encodedData << std::endl;
+	return encodedData.str();
 }

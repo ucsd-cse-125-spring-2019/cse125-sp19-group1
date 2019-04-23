@@ -14,7 +14,6 @@ enum class Keys { KEY1 = 100, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9 };
 struct Gate
 {
 public:
-	//Gate(int num = 0) : location(Location()), progress(0.0f), gateNum(num), validKeys(aKeys) {})
 	Gate(std::vector<Keys> aKeys = std::vector<Keys>({ Keys::KEY1, Keys::KEY2, Keys::KEY3 }), int num = 0) : location(Location()), progress(0.0f), gateNum(num), validKeys(aKeys) {}
 	Gate(Location aLocation, int num = 0) : location(aLocation), progress(0.0f), gateNum(num) {}
 	
@@ -29,6 +28,15 @@ public:
 	void updateProgress(Keys aKey) {
 		progress++;
 		validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey)); 
+	}
+
+	std::string encodeGateData() {
+		std::stringstream encodedData;
+		encodedData << "num: " << gateNum << "|"
+			<< "progress: " << progress << "|"
+			<< "location: " << location.getX() << " " << location.getY() << " " << location.getZ()
+			<< std::endl;
+		return encodedData.str();
 	}
 	std::vector<Keys> validKeys;
 protected:

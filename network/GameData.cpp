@@ -20,7 +20,8 @@ std::string GameData::encodeGameData()
 		encodedData << iter->second->encodePlayerData();
 	}
 	encodedData << "client: " << GENERALDATA_ID << std::endl;
-	encodedData << "walls: " << walls->encodeWalls();
+	encodedData << "walls: " << walls->encodeWallData();
+	encodedData << "gate: " << gate1.encodeGateData();
 
 	return encodedData.str();
 }

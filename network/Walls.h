@@ -19,6 +19,6 @@ public:
 				  {8,0,1},
 				  {10,2,3} };
 
-	std::string encodeWalls();
+	std::string encodeWallData();
 };
 
