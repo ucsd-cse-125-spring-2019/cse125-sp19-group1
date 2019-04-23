@@ -2,6 +2,7 @@
 #include "NetworkData.h"
 #include "Walls.h"
 #include <string>
+#include "GameData.h"
 
 class ServerGame
 {
@@ -23,6 +24,7 @@ public:
 	void updateCollision(std::string id);
 	void updatePlayerCollision(std::string id, int dir);
 
+	GameData gameData;
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 

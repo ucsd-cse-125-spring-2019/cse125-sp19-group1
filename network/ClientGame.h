@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "GameData.h"
 
 
 class ClientGame
@@ -40,5 +41,7 @@ private:
 
 
 	std::string my_client_id;
+
+	GameData gameData;
 
 };
