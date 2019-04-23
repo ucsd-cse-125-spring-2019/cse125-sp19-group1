@@ -183,9 +183,7 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 
 void IdleCallback()
 {
-	if (directions[0]) {
-		client->sendForwardPackets();
-	}
+	SendPackets();
 	client->update();
 }
 

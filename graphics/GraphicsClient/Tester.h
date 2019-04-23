@@ -15,6 +15,13 @@
 #define DOOR_PATH "../Models/chair.fbx"
 #define TABLE_PATH "../Models/Table.obj"
 
+
+//Event types
+int FORWARD_EVENT = 2;
+int BACKWARD_EVENT = 3;
+int LEFT_EVENT = 4;
+int RIGHT_EVENT = 5;
+
 // function declarations
 void ErrorCallback(int error, const char* description);
 void SetupGlew();
