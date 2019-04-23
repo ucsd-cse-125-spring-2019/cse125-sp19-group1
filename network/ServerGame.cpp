@@ -193,8 +193,9 @@ void ServerGame::sendActionPackets()
 	}
 	msg_string += "-----\n";
 	
-	msg_string = gameData->encodeGameData(); // gets an encoded game data string for all players and general game data
-
+	// gets an encoded game data string for all players and general game data
+	msg_string = gameData->encodeGameData(); 
+	
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 

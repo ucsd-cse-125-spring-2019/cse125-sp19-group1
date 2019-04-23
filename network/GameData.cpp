@@ -8,7 +8,7 @@ GameData::GameData()
 GameData::GameData(Walls * aPtr)
 {
 	walls = aPtr;
-	layout = walls->layout;
+	//layout = walls->layout;
 }
 
 std::string GameData::encodeGameData()
@@ -28,4 +28,9 @@ std::string GameData::encodeGameData()
 void GameData::addNewClient(int anID)
 {
 	clients[anID] = new Player(anID);
+}
+
+void GameData::decodeGameData()
+{
+
 }
