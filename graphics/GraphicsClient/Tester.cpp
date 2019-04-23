@@ -204,61 +204,21 @@ void MovePlayer()
 		glm::vec3 prevPos = fbx->GetPosition();
 		Location location = client->allClients["client_0"].getLocation();
 		glm::vec3 newPos = glm::vec3(location.x * 0.1f, location.y * 0.1f, location.z * 0.1f);
-		glm::vec3 diff = glm::vec3(prevPos[0] - newPos[0], prevPos[1] - newPos[1], prevPos[2] - newPos[2]);
 		fbx->MoveTo(newPos[0], newPos[1], newPos[2]);
 		MoveCamera(&newPos);
 		UpdateView();
 	}
 }
 
-void MoveCamera(glm::vec3 * translation) {
+void MoveCamera(glm::vec3 * newPlayerPos) {
 	if (fbx->WithinBounds(-20.0f, 20.0f, -20.0f, 20.0f)) {
-		cam_look_at[0] = (*translation)[0];
-		cam_pos[0] = (*translation)[0] + 45.0f;
-		cam_look_at[2] = (*translation)[2];
-		cam_pos[2] = (*translation)[2] + 45.0f;
+		cam_look_at[0] = (*newPlayerPos)[0];
+		cam_pos[0] = (*newPlayerPos)[0] + 45.0f;
+		cam_look_at[2] = (*newPlayerPos)[2];
+		cam_pos[2] = (*newPlayerPos)[2] + 45.0f;
 		UpdateView();
 	}
 }
-
-/* void DummyMovePlayer()
-{
-	if (directions[0]) {
-		fbx->translate(0.0f, 0.0f, -1.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[2] += -1.0f;
-			cam_pos[2] += -1.0f;
-			UpdateView();
-		}
-	}
-
-	if (directions[1]) {
-		fbx->translate(0.0f, 0.0f, 1.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[2] += 1.0f;
-			cam_pos[2] += 1.0f;
-			UpdateView();
-		}
-	}
-
-	if (directions[2]) {
-		fbx->translate(-1.0f, 0.0f, 0.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[0] += -1.0f;
-			cam_pos[0] += -1.0f;
-			UpdateView();
-		}
-	}
-
-	if (directions[3]) {
-		fbx->translate(1.0f, 0.0f, 0.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[2] += 1.0f;
-			cam_pos[2] += 1.0f;
-			UpdateView();
-		}
-	}
-} */
 
 void IdleCallback()
 {
