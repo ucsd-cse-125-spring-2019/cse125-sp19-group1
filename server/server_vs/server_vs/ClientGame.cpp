@@ -5,6 +5,8 @@
 
 std::map < std::string, std::vector<int> > clients2;
 
+std::string my_client_id;
+
 //initialization 
 ClientGame::ClientGame(void)
 {
@@ -37,14 +39,30 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-void ClientGame::sendForwardPackets()
+void ClientGame::sendMovementPackets(int type)
 {
 	// send action packet
 	const unsigned int packet_size = sizeof(Packet);
 	char packet_data[packet_size];
 
 	Packet packet;
-	packet.packet_type = FORWARD_EVENT;
+	packet.packet_type = -1;
+	if (type == FORWARD_EVENT) 
+	{
+		packet.packet_type = FORWARD_EVENT;
+	}
+	if (type == BACKWARD_EVENT) 
+	{
+		packet.packet_type = BACKWARD_EVENT;
+	}
+	else if (type == LEFT_EVENT) 
+	{
+		packet.packet_type = LEFT_EVENT;
+	} 
+	else if (type == RIGHT_EVENT) 
+	{
+		packet.packet_type = RIGHT_EVENT;
+	}
 
 	packet.serialize(packet_data);
 
@@ -54,7 +72,6 @@ void ClientGame::sendForwardPackets()
 //Getting data back and updating game state 
 void ClientGame::update()
 {
-	Packet packet;
 	int data_length = network->receivePackets(network_data);
 
 	if (data_length <= 0)
@@ -70,11 +87,16 @@ void ClientGame::update()
 	std::string msg_string;
 	for (auto const& x : clients2)
 	{
+		std::cout << "\nTHIS IS A CLIENT\n";
 		msg_string += x.first + "\n";
 		msg_string += "location:" + std::to_string(x.second[0]) + std::string(" ") + std::to_string(x.second[1]) + std::string(" ") + std::to_string(x.second[2]) + std::string("\n");
 	}
 
-	std::cout << "msgstr:\n" << msg_string << std::endl;
+	std::cout << "msgstr:\n" << 
+		"my client id: " << my_client_id << "\n" <<
+		msg_string << std::endl;
+
+	
 }
 
 void ClientGame::decodeData(const char * data)
@@ -133,7 +155,13 @@ void ClientGame::decodeData(const char * data)
 			{
 				value_str = token_str;
 
-				if (key_str == "location")
+				if (key_str == "init" && my_client_id == "") {
+					my_client_id = token_str;
+					//std::cout << "My client ID: " << my_client_id << std::endl;
+
+				}
+
+				else if (key_str == "location")
 				{
 
 					std::vector<int> vec3;

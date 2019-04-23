@@ -1,4 +1,5 @@
 #include "ServerGame.h"
+#include "Walls.h"
 #include <map>
 #include <iostream>
 #include <vector>
@@ -11,7 +12,7 @@ std::map < std::string, vector<int>> clients;
  
 unsigned int ServerGame::client_id; 
 
-unsigned int SPEED = 10;
+unsigned int SPEED = 2;
 
 
 ServerGame::ServerGame(void)
@@ -21,6 +22,7 @@ ServerGame::ServerGame(void)
  
     // set up the server network to listen 
     network = new ServerNetwork(); 
+	walls = new Walls();
 }
  
 void ServerGame::update() 
@@ -76,7 +78,14 @@ void ServerGame::receiveFromClients()
 			packet.deserialize(&(network_data[i]));
 			i += sizeof(Packet);
 
-			std::string clientid;
+
+			//std::string clientid;
+
+			if (packet.packet_type != INIT_CONNECTION && packet.id == "") {
+				continue;
+			}
+
+
 			switch (packet.packet_type) {
 
 			case INIT_CONNECTION:
@@ -84,6 +93,8 @@ void ServerGame::receiveFromClients()
 				printf("server received init packet from client\n");
 
 				initNewClient();
+
+				sendInitPackets();
 
 				break;
 
@@ -98,7 +109,9 @@ void ServerGame::receiveFromClients()
 			case FORWARD_EVENT:
 
 				//printf("Forward event called\n");
-				updateForwardEvent("client_" + std::to_string(iter->first));
+				cout << "this is network data" << packet.id << endl;
+				updateForwardEvent(std::string(packet.id));
+				updateCollision(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -106,7 +119,8 @@ void ServerGame::receiveFromClients()
 
 			case BACKWARD_EVENT:
 
-				printf("Backwards event called\n");
+				updateBackwardEvent(std::string(packet.id));
+				updateCollision(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -114,7 +128,8 @@ void ServerGame::receiveFromClients()
 
 			case LEFT_EVENT:
 
-				printf("Left event called\n");
+				updateLeftEvent(std::string(packet.id));
+				updateCollision(std::string(packet.id));
 
 				sendActionPackets();
 
@@ -122,7 +137,12 @@ void ServerGame::receiveFromClients()
 
 			case RIGHT_EVENT:
 
-				printf("Right event called\n");
+
+				//printf("Right event called\n");
+
+				updateRightEvent(std::string(packet.id));
+				updateCollision(std::string(packet.id));
+
 
 				sendActionPackets();
 
@@ -138,6 +158,28 @@ void ServerGame::receiveFromClients()
 		iter++;
 	}
 }
+
+void ServerGame::sendInitPackets()
+{
+	std::string msg_string = "client_" + std::to_string(client_id) + "\n";
+	msg_string += "init:client_" + std::to_string(client_id) + "\n";
+	client_id++;
+
+	msg_string += "-----\n";
+	int packet_size = msg_string.length();
+	char * msg = new char[packet_size];
+
+	int i;
+	for (i = 0; i < packet_size; i++) {
+		msg[i] = msg_string[i];
+	}
+
+	//printf("sendtoall\n");
+
+	network->sendToAll(msg, packet_size);
+	delete[] msg;
+}
+
 void ServerGame::sendActionPackets()
 {
 
@@ -148,7 +190,7 @@ void ServerGame::sendActionPackets()
 		msg_string += x.first + "\n";
 		msg_string += "location:" + std::to_string(x.second[0]) + std::string(" ") + std::to_string(x.second[1]) + std::string(" ") + std::to_string(x.second[2]) + std::string("\n");
 	}
-	msg_string += "-----";
+	msg_string += "-----\n";
 
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
@@ -168,11 +210,12 @@ void ServerGame::sendActionPackets()
 void ServerGame::initNewClient()
 {
 	//updating current data structure to hold onto client
-	std::vector<int> loc{ 0, 0, 0 };
+	std::vector<int> loc{ 10, 0, 10 };
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
 
 
+	/*
 	std::string msg_string = "SERVER INITIALIZATION\n";
 
 	msg_string += "id:                " + id;
@@ -188,24 +231,83 @@ void ServerGame::initNewClient()
 	}
 	network->sendToClient(msg, packet_size, client_id);
 	client_id++;
-}
-
-void ServerGame::updateForwardEvent(std::string id)
-{
-	clients[id][2] +=  SPEED;
-}
-
-void ServerGame::updateBackwardEvent(std::string id)
-{
-	clients[id][2] -= SPEED;
-}
-
-void ServerGame::updateLeftEvent(std::string id)
-{
-	clients[id][0] -= SPEED;
+	*/
 }
 
 void ServerGame::updateRightEvent(std::string id)
 {
 	clients[id][0] += SPEED;
+	updatePlayerCollision(id, 0);
+}
+
+void ServerGame::updateBackwardEvent(std::string id)
+{
+	clients[id][2] -= SPEED;
+	updatePlayerCollision(id, 1);
+}
+
+void ServerGame::updateForwardEvent(std::string id)
+{
+	clients[id][2] += SPEED;
+	updatePlayerCollision(id, 2);
+}
+
+void ServerGame::updateLeftEvent(std::string id)
+{
+	clients[id][0] -= SPEED;
+	updatePlayerCollision(id, 3);
+}
+
+
+
+void ServerGame::updatePlayerCollision(std::string id, int dir) 
+{
+	std::vector<int> loc = clients[id];
+
+	//0 == right
+	//1 == down
+	//2 == forward
+	//3 == left
+	map<string, vector<int>>::iterator it;
+	for (it = clients.begin(); it != clients.end(); it++)
+	{
+		if (it->first == id) {
+			continue;
+		}
+
+		//calculate distance between two points 
+		int my_x = clients[id][0];
+		int my_z = clients[id][2];
+
+		int ot_x = it->second[0];
+		int ot_z = it->second[2];
+
+		float dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
+		
+		if (dist < 2 * Walls::PLAYER_RADIUS) 
+		{
+			if (dir == 0) 
+			{
+				clients[id][0] = ot_x - 2 * Walls::PLAYER_RADIUS;
+			} 
+			else if (dir == 1)
+			{
+				clients[id][2] = ot_z - 2 * Walls::PLAYER_RADIUS;
+			}
+			else if (dir == 2)
+			{
+				clients[id][2] = ot_z + 2 * Walls::PLAYER_RADIUS;
+			}
+			else
+			{
+				clients[id][0] = ot_x + 2 * Walls::PLAYER_RADIUS;
+			}
+		}
+	}
+}
+
+void ServerGame::updateCollision(std::string id)
+{
+	std::vector<int> loc = clients[id];
+	walls->detectCollision(loc);
 }

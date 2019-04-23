@@ -39,16 +39,13 @@ void clientLoop()
 	bool xd = true;
 	while (true)
 	{
-		//do game stuff
-		//client->sendForwardPackets();
 		client->update();
 		if (xd) 
 		{
-			client->sendForwardPackets();
-			//client->sendForwardPackets();
-			//client->sendForwardPackets();
-			//client->sendForwardPackets();
-			//client->sendForwardPackets();
+			client->sendMovementPackets(FORWARD_EVENT);
+			client->sendMovementPackets(BACKWARD_EVENT);
+			client->sendMovementPackets(LEFT_EVENT);
+			client->sendMovementPackets(RIGHT_EVENT);
 			xd = false;
 		}
 

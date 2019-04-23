@@ -40,6 +40,7 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\network\StringParser.cpp">
+    <ClCompile Include="..\..\..\network\Walls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -69,6 +70,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\network\StringParser.h">
+    <ClInclude Include="..\..\..\network\Walls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -25,7 +25,7 @@ struct Packet {
 
 	//std::string packet_id;
 
-	char * data;
+	char id [9];
 
 
 	void serialize(char * data) {

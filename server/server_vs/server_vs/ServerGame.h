@@ -13,6 +13,7 @@ public:
     void update();
 	void receiveFromClients();
 	void sendActionPackets();
+	void sendInitPackets();
 	void initNewClient();
 	void updateForwardEvent(std::string id);
 	void updateBackwardEvent(std::string id);
@@ -28,5 +29,4 @@ private:
     ServerNetwork* network;
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
-	
 };
