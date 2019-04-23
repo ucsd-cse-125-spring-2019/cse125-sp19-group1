@@ -2,7 +2,7 @@
 
 GameData::GameData()
 {
-
+	walls = new Walls();
 }
 
 std::string GameData::encodeGameData()
@@ -11,12 +11,15 @@ std::string GameData::encodeGameData()
 
 	for (auto iter = clients.begin(); iter != clients.end(); iter++)
 	{
-		encodedData << iter->second.encodePlayerData();
+		encodedData << iter->second->encodePlayerData();
 	}
+	encodedData << "client: " << -10 << std::endl;
+	encodedData << "walls: " << walls->encodeWalls;
+
 	return encodedData.str();
 }
 
 void GameData::addNewClient(int anID)
 {
-	clients[anID] = Player(anID);
+	clients[anID] = new Player(anID);
 }

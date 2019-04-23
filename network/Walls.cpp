@@ -88,5 +88,16 @@ void Walls::detectCollision(std::vector<int> loc) {
 	}
 }
 
+std::string Walls::encodeWalls()
+{
+	std::stringstream encoding;
 
-
+	for (int c = 0; c < 3; c++) {
+		for (int r = 0; r < 3; r++) {
+			encoding << layout[c][r] << " ";
+		}
+		encoding << ',';
+	}
+	encoding << std::endl;
+	return encoding.str();
+}

@@ -20,9 +20,8 @@ void Player::setLocation(float argX, float argY, float argZ)
 
 std::string Player::encodePlayerData()
 {
-	//std::string encoding = "id: " + playerID;
 	std::stringstream encoding;
-	encoding << "client_id: " << playerID << std::endl;
+	encoding << "client: " << playerID << std::endl;
 	encoding << "location: " << location.x << " " << location.y << " " << location.z << std::endl;
 
 	return encoding.str();
