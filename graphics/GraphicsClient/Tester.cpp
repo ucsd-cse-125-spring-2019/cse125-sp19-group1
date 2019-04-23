@@ -15,7 +15,6 @@ DirLight * light;
 FBXObject * fbx;
 GLuint objShaderProgram;
 
-// 47, 62, 47
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
@@ -201,24 +200,23 @@ void SendPackets()
 
 void MovePlayer()
 {
-	if (!client->clients2.empty()) {
+	if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
 		glm::vec3 prevPos = fbx->GetPosition();
 		Location location = client->allClients["client_0"].getLocation();
 		glm::vec3 newPos = glm::vec3(location.x * 0.1f, location.y * 0.1f, location.z * 0.1f);
 		glm::vec3 diff = glm::vec3(prevPos[0] - newPos[0], prevPos[1] - newPos[1], prevPos[2] - newPos[2]);
-		fbx->Translate(diff[0], diff[1], diff[2]);
 		fbx->MoveTo(newPos[0], newPos[1], newPos[2]);
-		MoveCamera(&diff);
+		MoveCamera(&newPos);
 		UpdateView();
 	}
 }
 
 void MoveCamera(glm::vec3 * translation) {
-	if (fbx->WithinBounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-		for (int i = 0; i < 3; i++) {
-			cam_look_at[i] += (*translation)[i];
-			cam_pos[i] += (*translation)[i];
-		}
+	if (fbx->WithinBounds(-20.0f, 20.0f, -20.0f, 20.0f)) {
+		cam_look_at[0] = (*translation)[0];
+		cam_pos[0] = (*translation)[0] + 45.0f;
+		cam_look_at[2] = (*translation)[2];
+		cam_pos[2] = (*translation)[2] + 45.0f;
 		UpdateView();
 	}
 }
