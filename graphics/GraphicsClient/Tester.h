@@ -15,6 +15,8 @@
 #define DOOR_PATH "../Models/raccoon.fbx"
 #define TABLE_PATH "../Models/Table.obj"
 
+#define RACCOON_TEX_PATH "../Textures/raccoon.ppm"
+
 // function declarations
 void ErrorCallback(int error, const char* description);
 void SetupGlew();

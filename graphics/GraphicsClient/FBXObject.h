@@ -31,8 +31,8 @@ private:
 
 public:
 	// creating. destroying, and debugging
-	FBXObject(const char * obj_path);
-	void Parse(const char* filepath);
+	FBXObject(const char * obj_path, const char * tex_path);
+	void Parse(const char* filepath, const char* texFilepath);
 	~FBXObject();
 	void PrintMatrix(glm::mat4 * matrix);
 	// manipulation

@@ -99,7 +99,7 @@ void Init()
 	_beginthread(serverLoop, 0, (void*)12);
 
 	light = new DirLight();
-	fbx = new FBXObject(DOOR_PATH); //LUMA_PATH
+	fbx = new FBXObject(DOOR_PATH, RACCOON_TEX_PATH); //LUMA_PATH
 	fbx->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);

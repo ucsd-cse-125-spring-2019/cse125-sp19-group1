@@ -1,16 +1,16 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * path) {
+FBXObject::FBXObject(const char * path, const char * texPath) {
   // initilize stuff
-  Parse(path);
+  Parse(path, texPath);
   Init();
 }
 
-void FBXObject::Parse(const char *filepath)
+void FBXObject::Parse(const char *filepath, const char *texFilepath)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data:
 	load(filepath, &vertices, &normals, &indices, &uvs);
-	loadTexture("caustics.ppm");
+	loadTexture(texFilepath);
 }
 
 FBXObject::~FBXObject()
