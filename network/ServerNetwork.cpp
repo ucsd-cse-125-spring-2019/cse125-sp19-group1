@@ -111,17 +111,28 @@ int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
 	{
 		SOCKET currentSocket = sessions[client_id];
 		iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
+		//if(iResult == -1)
+		//	printf(" error: %d\n", WSAGetLastError());
 
 		if (iResult == 0)
 		{
+			printf(" error: %d\n", WSAGetLastError());
+
 			printf("Connection closed\n");
-			sessions.erase(client_id);
-			closesocket(currentSocket);
+			//sessions.erase(client_id);
+			//closesocket(currentSocket);
+		}
+
+		if (iResult == -1 && WSAGetLastError() == 10054)
+		{
+			printf("Client disconnected\n");
+			//closesocket(currentSocket);
+			//sessions.erase(client_id);
 		}
 
 		return iResult;
 	}
-	return 0;
+	return -2;
 }
 
 // send data to all clients
@@ -131,7 +142,7 @@ void ServerNetwork::sendToAll(char * packets, int totalSize)
 	std::map<unsigned int, SOCKET>::iterator iter;
 	int iSendResult;
 
-	for (iter = sessions.begin(); iter != sessions.end(); iter++)
+	for (iter = sessions.begin(); iter != sessions.end(); ) //iter++)
 	{
 		currentSocket = iter->second;
 		iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
@@ -139,9 +150,17 @@ void ServerNetwork::sendToAll(char * packets, int totalSize)
 		if (iSendResult == SOCKET_ERROR)
 		{
 			printf("send failed with error: %d\n", WSAGetLastError());
-			sessions.erase(iter->first);
 			closesocket(currentSocket);
+			//auto temp = iter--;
+			sessions.erase(iter++);
+			//iter = temp;
+			//if (iter != sessions.begin() && iter != sessions.end())
+			//	iter--;
+			if (sessions.size() == 0)
+				break;
 		}
+		else
+			iter++;
 	}
 }
 
@@ -152,7 +171,7 @@ void ServerNetwork::sendToClient(char * packets, int totalSize, unsigned int cli
 	if (iSendResult == SOCKET_ERROR)
 	{
 		printf("send failed with error: %d\n", WSAGetLastError());
-		sessions.erase(client_id);
 		closesocket(sessions[client_id]);
+		sessions.erase(client_id);
 	}
 }
