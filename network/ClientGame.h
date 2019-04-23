@@ -4,6 +4,8 @@
 #include <Windows.h>
 #include "ClientNetwork.h"
 #include "NetworkData.h"
+#include "Player.h"
+#include "StringParser.h"
 #include <iostream>
 #include <sstream>
 #include <vector>
@@ -18,7 +20,7 @@ public:
 	ClientGame();
 	~ClientGame(void);
 
-	std::map < std::string, std::vector<int> > clients2;
+	std::map < std::string, std::vector<float> > clients2;
 
 
 	ClientNetwork* network;
@@ -31,5 +33,12 @@ public:
 
 	void update();
 
+
+	std::map < std::string, Player > allClients;
+private:
+	static std::string my_client_id;
+
+
 	std::string my_client_id;
+
 };

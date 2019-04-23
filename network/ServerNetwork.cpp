@@ -112,15 +112,9 @@ int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
 		SOCKET currentSocket = sessions[client_id];
 		iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
 
-		if (iResult == 0)
-		{
-			printf("Connection closed\n");
-			closesocket(currentSocket);
-		}
-
-		return iResult;
+		return iResult; // returns 0 if client clean disconnect, return -1 if force disconnect or other error
 	}
-	return 0;
+	return -2;
 }
 
 // send data to all clients
@@ -134,11 +128,17 @@ void ServerNetwork::sendToAll(char * packets, int totalSize)
 	{
 		currentSocket = iter->second;
 		iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
+	}
+}
 
-		if (iSendResult == SOCKET_ERROR)
-		{
-			printf("send failed with error: %d\n", WSAGetLastError());
-			closesocket(currentSocket);
-		}
+void ServerNetwork::sendToClient(char * packets, int totalSize, unsigned int client_id)
+{
+	int iSendResult = NetworkServices::sendMessage(sessions[client_id], packets, totalSize);
+
+	if (iSendResult == SOCKET_ERROR)
+	{
+		printf("send failed with error: %d\n", WSAGetLastError());
+		closesocket(sessions[client_id]);
+		sessions.erase(client_id);
 	}
 }

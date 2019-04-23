@@ -36,6 +36,7 @@ void ServerGame::update()
     }
 
 	receiveFromClients();
+
 }
 
 void ServerGame::receiveFromClients()
@@ -45,14 +46,29 @@ void ServerGame::receiveFromClients()
 
 	// go through all clients
 	std::map<unsigned int, SOCKET>::iterator iter;
-	
-	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
+
+	for (iter = network->sessions.begin(); iter != network->sessions.end(); )//iter++)
 	{
 		int data_length = network->receiveData(iter->first, network_data);
-
+		cout << "size:" << network->sessions.size() << std::endl;
 		if (data_length <= 0)
 		{
 			//no data recieved
+			if (network->sessions.size() == 0)
+				break;
+
+			if (data_length == 0 || (data_length == -1 && WSAGetLastError() == CONNECTION_RESET_ERROR))
+			{
+				printf("Client disconnected\n");
+				closesocket(iter->second);
+				network->sessions.erase(iter++);
+
+			}
+			else
+			{
+				iter++;
+			}
+
 			continue;
 		}
 
@@ -62,9 +78,13 @@ void ServerGame::receiveFromClients()
 			packet.deserialize(&(network_data[i]));
 			i += sizeof(Packet);
 
+
+			//std::string clientid;
+
 			if (packet.packet_type != INIT_CONNECTION && packet.id == "") {
 				continue;
 			}
+
 
 			switch (packet.packet_type) {
 
@@ -117,8 +137,12 @@ void ServerGame::receiveFromClients()
 
 			case RIGHT_EVENT:
 
+
+				//printf("Right event called\n");
+
 				updateRightEvent(std::string(packet.id));
 				updateCollision(std::string(packet.id));
+
 
 				sendActionPackets();
 
@@ -131,6 +155,7 @@ void ServerGame::receiveFromClients()
 				break;
 			}
 		}
+		iter++;
 	}
 }
 
@@ -188,6 +213,25 @@ void ServerGame::initNewClient()
 	std::vector<int> loc{ 10, 0, 10 };
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
+
+
+	/*
+	std::string msg_string = "SERVER INITIALIZATION\n";
+
+	msg_string += "id:                " + id;
+	msg_string += "\n-----";
+
+	int packet_size = msg_string.length();
+	char * msg = new char[packet_size];
+
+	int i;
+	for (i = 0; i < packet_size; i++) {
+		msg[i] = msg_string[i];
+
+	}
+	network->sendToClient(msg, packet_size, client_id);
+	client_id++;
+	*/
 }
 
 void ServerGame::updateRightEvent(std::string id)

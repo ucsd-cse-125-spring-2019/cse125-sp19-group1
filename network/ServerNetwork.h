@@ -9,6 +9,7 @@ using namespace std;
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "6881" 
+#define CONNECTION_RESET_ERROR 10054
 
 class ServerNetwork
 {
@@ -38,4 +39,6 @@ public:
 
 	// send data to all clients
 	void sendToAll(char * packets, int totalSize);
+
+	void sendToClient(char * packets, int totalSize, unsigned int client_id);
 };

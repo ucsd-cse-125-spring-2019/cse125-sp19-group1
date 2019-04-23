@@ -131,6 +131,7 @@
     <ClInclude Include="..\..\network\ClientNetwork.h" />
     <ClInclude Include="..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\network\NetworkServices.h" />
+    <ClInclude Include="..\..\network\Player.h" />
     <ClInclude Include="..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\network\ServerNetwork.h" />
     <ClInclude Include="Core.h" />
@@ -145,6 +146,7 @@
     <ClCompile Include="..\..\network\ClientGame.cpp" />
     <ClCompile Include="..\..\network\ClientNetwork.cpp" />
     <ClCompile Include="..\..\network\NetworkServices.cpp" />
+    <ClCompile Include="..\..\network\Player.cpp" />
     <ClCompile Include="..\..\network\ServerGame.cpp" />
     <ClCompile Include="..\..\network\ServerNetwork.cpp" />
     <ClCompile Include="DirLight.cpp" />
