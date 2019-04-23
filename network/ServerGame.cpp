@@ -43,119 +43,107 @@ void ServerGame::receiveFromClients()
 
 	// go through all clients
 	std::map<unsigned int, SOCKET>::iterator iter;
-	try
+
+	for (iter = network->sessions.begin(); iter != network->sessions.end(); )//iter++)
 	{
-		for (iter = network->sessions.begin(); iter != network->sessions.end(); )//iter++)
+		int data_length = network->receiveData(iter->first, network_data);
+		cout << "size:" << network->sessions.size() << std::endl;
+		if (data_length <= 0)
 		{
-			int data_length = network->receiveData(iter->first, network_data);
-			cout << "size:" << network->sessions.size() << std::endl;
-			if (data_length <= 0)
+			//no data recieved
+			if (network->sessions.size() == 0)
+				break;
+
+			if (data_length == 0 || (data_length == -1 && WSAGetLastError() == CONNECTION_RESET_ERROR))
 			{
-				//no data recieved
-				if (network->sessions.size() == 0)
-					break;
-
-				if (data_length == 0 ||( data_length == -1 && WSAGetLastError() == 10054))
+				printf("Client disconnected\n");
+				closesocket(iter->second);
+				//if (network->sessions.size() == 1)
 				{
-					printf("Client disconnected\n");
-					closesocket(iter->second);
-					if (network->sessions.size() == 1)
-					{
-
-
-						network->sessions.erase(iter);
-						break;
-					}
-					else
-					{
-						if (network->sessions.size() == 0)
-							break;
-
-						network->sessions.erase(iter++);
-
-					}
-
+					//network->sessions.erase(iter);
+					//break;
 				}
-				else
+				//else
 				{
-					iter++;
-				}
-
-				continue;
-			}
-
-			unsigned int i = 0;
-			while (i < (unsigned int)data_length)
-			{
-				packet.deserialize(&(network_data[i]));
-				i += sizeof(Packet);
-
-				std::string clientid;
-				switch (packet.packet_type) {
-
-				case INIT_CONNECTION:
-
-					printf("server received init packet from client\n");
-
-					initNewClient();
-
-					break;
-
-				case ACTION_EVENT:
-
-					printf("server received action event packet from client\n");
-
-					sendActionPackets();
-
-					break;
-
-				case FORWARD_EVENT:
-
-					//printf("Forward event called\n");
-					updateForwardEvent("client_" + std::to_string(iter->first));
-
-					sendActionPackets();
-
-					break;
-
-				case BACKWARD_EVENT:
-
-					printf("Backwards event called\n");
-
-					sendActionPackets();
-
-					break;
-
-				case LEFT_EVENT:
-
-					printf("Left event called\n");
-
-					sendActionPackets();
-
-					break;
-
-				case RIGHT_EVENT:
-
-					printf("Right event called\n");
-
-					sendActionPackets();
-
-					break;
-
-				default:
-
-					printf("error in packet types\n");
-
-					break;
+					//if (network->sessions.size() == 0)
+						//break;
+					network->sessions.erase(iter++);
 				}
 			}
-			iter++;
+			else
+			{
+				iter++;
+			}
+
+			continue;
 		}
-		
-	}
-	catch (...)
-	{
-		printf("ERRORS HERE");
+
+		unsigned int i = 0;
+		while (i < (unsigned int)data_length)
+		{
+			packet.deserialize(&(network_data[i]));
+			i += sizeof(Packet);
+
+			std::string clientid;
+			switch (packet.packet_type) {
+
+			case INIT_CONNECTION:
+
+				printf("server received init packet from client\n");
+
+				initNewClient();
+
+				break;
+
+			case ACTION_EVENT:
+
+				printf("server received action event packet from client\n");
+
+				sendActionPackets();
+
+				break;
+
+			case FORWARD_EVENT:
+
+				//printf("Forward event called\n");
+				updateForwardEvent("client_" + std::to_string(iter->first));
+
+				sendActionPackets();
+
+				break;
+
+			case BACKWARD_EVENT:
+
+				printf("Backwards event called\n");
+
+				sendActionPackets();
+
+				break;
+
+			case LEFT_EVENT:
+
+				printf("Left event called\n");
+
+				sendActionPackets();
+
+				break;
+
+			case RIGHT_EVENT:
+
+				printf("Right event called\n");
+
+				sendActionPackets();
+
+				break;
+
+			default:
+
+				printf("error in packet types\n");
+
+				break;
+			}
+		}
+		iter++;
 	}
 }
 void ServerGame::sendActionPackets()

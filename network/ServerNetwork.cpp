@@ -111,23 +111,15 @@ int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
 	{
 		SOCKET currentSocket = sessions[client_id];
 		iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
-		//if(iResult == -1)
-		//	printf(" error: %d\n", WSAGetLastError());
 
 		if (iResult == 0)
 		{
-			printf(" error: %d\n", WSAGetLastError());
-
 			printf("Connection closed\n");
-			//sessions.erase(client_id);
-			//closesocket(currentSocket);
 		}
 
-		if (iResult == -1 && WSAGetLastError() == 10054)
+		if (iResult == -1 && WSAGetLastError() == CONNECTION_RESET_ERROR)
 		{
 			printf("Client disconnected\n");
-			//closesocket(currentSocket);
-			//sessions.erase(client_id);
 		}
 
 		return iResult;
@@ -156,8 +148,8 @@ void ServerNetwork::sendToAll(char * packets, int totalSize)
 			//iter = temp;
 			//if (iter != sessions.begin() && iter != sessions.end())
 			//	iter--;
-			if (sessions.size() == 0)
-				break;
+			//if (sessions.size() == 0)
+			//	break;
 		}
 		else
 			iter++;
