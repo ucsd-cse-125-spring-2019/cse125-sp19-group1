@@ -31,6 +31,7 @@ void MeshEntry::Init() {
   glGenBuffers(1, &(this->VBO_V));
   glGenBuffers(1, &(this->VBO_N));
   glGenBuffers(1, &(this->EBO));
+  glGenBuffers(1, &(this->VBO_UV));
   
   // Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
   // Consider the VAO as a container for all your buffers.
@@ -55,12 +56,28 @@ void MeshEntry::Init() {
   glBufferData(GL_ARRAY_BUFFER, ((this->normals).size() * (3 * sizeof(GLfloat))), (this->normals).data(), GL_STATIC_DRAW);
   glEnableVertexAttribArray(1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	
+  glBindBuffer(GL_ARRAY_BUFFER, this->VBO_UV);
+  glBufferData(GL_ARRAY_BUFFER, ((this->uvs).size() * (2 * sizeof(GLfloat))), (this->uvs).data(), GL_STATIC_DRAW);
+  glEnableVertexAttribArray(2);
+  glVertexAttribPointer(2,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
+	  2, // This second line tells us how any components there are per vertex. In this case, it's 2 (we have an x, y component)
+	  GL_FLOAT, // What type these components are
+	  GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
+	  2 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 2 floats, they should have the size of 3 floats in between
+	  (GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
+  // We've sent the vertex data over to OpenGL, but there's still something missing.
+  // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
+
+
   
   // We've sent the vertex data over to OpenGL, but there's still something missing.
   // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (this->EBO));
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((this->faces).size() * sizeof(GLuint)), &((this->faces)[0]), GL_STATIC_DRAW);
   
+
+
   // Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   
@@ -155,4 +172,25 @@ void MeshEntry::printMatrix(glm::mat4 * matrix) {
 
 void MeshEntry::update() {
   // This function will handle anything that must continuously occur.
+}
+
+void MeshEntry::translate(float x, float y, float z) {
+	glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+	this->toWorld = translationMatrix * (this->toWorld);
+}
+
+void MeshEntry::rotate(float angle, float x, float y, float z) {
+	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(x, y, z));
+	this->toWorld = rotationMatrix * (this->toWorld);
+}
+
+bool MeshEntry::within_bounds(float x_min, float x_max, float z_min, float z_max) {
+	float x = (this->toWorld)[3][0];
+	float z = (this->toWorld)[3][2];
+
+	if (x > x_min && x < x_max && z > z_min && z < z_max) {
+		return true;
+	}
+
+	return false;
 }

@@ -78,8 +78,8 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)packages\assimp_native.4.0.1\build\native\lib\Win32\v141\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp-vc140-mt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -90,8 +90,8 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)packages\Assimp.3.0.0\build\native\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)packages\assimp_native.4.0.1\build\native\lib\x64\v141\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp-vc140-mt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -106,7 +106,7 @@
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\ahosek\CSE125\cse125-sp19-group1\graphics\GraphicsClient\packages\assimp_native.4.0.1\build\native\lib\Win32\v140\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)packages\assimp_native.4.0.1\build\native\lib\win32\v141\Release</AdditionalLibraryDirectories>
       <AdditionalDependencies>opengl32.lib;glu32.lib;assimp-vc140-mt.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -123,7 +123,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>opengl32.lib;glu32.lib;assimp-vc140-mt.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Users\ahosek\CSE125\cse125-sp19-group1\graphics\GraphicsClient\packages\assimp_native.4.0.1\build\native\lib\Win32\v140\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)packages\assimp_native.4.0.1\build\native\lib\x64\v141\Release</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -134,6 +134,7 @@
     <ClInclude Include="..\..\network\Player.h" />
     <ClInclude Include="..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\network\ServerNetwork.h" />
+    <ClInclude Include="..\..\network\Walls.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="FBXObject.h" />
@@ -141,6 +142,7 @@
     <ClInclude Include="objloader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Tester.h" />
+    <ClInclude Include="textureloader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\network\ClientGame.cpp" />
@@ -149,12 +151,14 @@
     <ClCompile Include="..\..\network\Player.cpp" />
     <ClCompile Include="..\..\network\ServerGame.cpp" />
     <ClCompile Include="..\..\network\ServerNetwork.cpp" />
+    <ClCompile Include="..\..\network\Walls.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="FBXObject.cpp" />
     <ClCompile Include="MeshEntry.cpp" />
     <ClCompile Include="objloader.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Tester.cpp" />
+    <ClCompile Include="textureloader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag" />
@@ -163,24 +167,20 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets" Condition="Exists('packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets')" />
+    <Import Project="packages\assimp_native.4.0.1\build\native\assimp_native.targets" Condition="Exists('packages\assimp_native.4.0.1\build\native\assimp_native.targets')" />
     <Import Project="packages\glm.0.9.9.500\build\native\glm.targets" Condition="Exists('packages\glm.0.9.9.500\build\native\glm.targets')" />
     <Import Project="packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets" Condition="Exists('packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" />
     <Import Project="packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets" Condition="Exists('packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" />
-    <Import Project="packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets" Condition="Exists('packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" />
-    <Import Project="packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets" Condition="Exists('packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets')" />
-    <Import Project="packages\assimp_native.4.0.1\build\native\assimp_native.targets" Condition="Exists('packages\assimp_native.4.0.1\build\native\assimp_native.targets')" />
-    <Import Project="packages\Assimp.3.0.0\build\native\Assimp.targets" Condition="Exists('packages\Assimp.3.0.0\build\native\Assimp.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
+    <Error Condition="!Exists('packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets'))" />
+    <Error Condition="!Exists('packages\assimp_native.4.0.1\build\native\assimp_native.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\assimp_native.4.0.1\build\native\assimp_native.targets'))" />
     <Error Condition="!Exists('packages\glm.0.9.9.500\build\native\glm.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\glm.0.9.9.500\build\native\glm.targets'))" />
     <Error Condition="!Exists('packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nupengl.core.redist.0.1.0.1\build\native\nupengl.core.redist.targets'))" />
     <Error Condition="!Exists('packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\nupengl.core.0.1.0.1\build\native\nupengl.core.targets'))" />
-    <Error Condition="!Exists('packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Assimp.redist.3.0.0\build\native\Assimp.redist.targets'))" />
-    <Error Condition="!Exists('packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\assimp_native.redist.4.0.1\build\native\assimp_native.redist.targets'))" />
-    <Error Condition="!Exists('packages\assimp_native.4.0.1\build\native\assimp_native.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\assimp_native.4.0.1\build\native\assimp_native.targets'))" />
-    <Error Condition="!Exists('packages\Assimp.3.0.0\build\native\Assimp.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Assimp.3.0.0\build\native\Assimp.targets'))" />
   </Target>
 </Project>

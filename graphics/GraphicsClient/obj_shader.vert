@@ -8,6 +8,7 @@
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 vertexUV;
 
 // Uniform variables can be updated by fetching their location and passing values to that location
 uniform mat4 projection;
@@ -31,6 +32,7 @@ out vec3 ambient;
 out vec3 specular;
 out float shininess;
 out vec4 ShadowCoord;
+out vec2 UV;
 
 void main()
 {
@@ -45,4 +47,7 @@ void main()
   specular = specColor;
   shininess = shineAmt;
   ShadowCoord = depthBiasMVP * model * vec4(position, 1.0f);
+
+  //uvs for texturing
+  UV = vertexUV;
 }

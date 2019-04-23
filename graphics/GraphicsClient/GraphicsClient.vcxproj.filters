@@ -55,6 +55,11 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\Player.h">
+    </ClInclude>
+    <ClInclude Include="textureloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\Walls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -93,6 +98,11 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\network\Player.cpp">
+    </ClCompile>
+    <ClCompile Include="textureloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\Walls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
