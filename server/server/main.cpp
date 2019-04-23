@@ -20,7 +20,7 @@ int main()
     server = new ServerGame();
 
     // create thread with arbitrary argument for the run function
-    _beginthread( serverLoop, 0, (void*)12);
+    //_beginthread( serverLoop, 0, (void*)12);
  
     // initialize the client 
     //client = new ClientGame();
@@ -33,7 +33,7 @@ void serverLoop(void * arg)
 { 
     while(true) 
     {
-		if (clock() - elapsedTime > 1000.0 / 60)
+		if (clock() - elapsedTime > 1000.0 / 30)
 		{
 			elapsedTime = clock();
 			server->update();
