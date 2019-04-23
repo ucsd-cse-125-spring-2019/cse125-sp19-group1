@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\network\ClientNetwork.h" />
+    <ClInclude Include="..\..\network\GameData.h" />
     <ClInclude Include="..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\network\NetworkServices.h" />
     <ClInclude Include="..\..\network\Player.h" />
@@ -147,6 +148,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\network\ClientGame.cpp" />
     <ClCompile Include="..\..\network\ClientNetwork.cpp" />
+    <ClCompile Include="..\..\network\GameData.cpp" />
     <ClCompile Include="..\..\network\NetworkServices.cpp" />
     <ClCompile Include="..\..\network\Player.cpp" />
     <ClCompile Include="..\..\network\ServerGame.cpp" />

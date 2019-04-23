@@ -1,4 +1,7 @@
 #pragma once
+#include <string>
+#include <sstream>
+#include <iostream>
 
 struct Location
 {
@@ -21,10 +24,14 @@ class Player
 public:
 	
 	Player();
-	Player(Location aLoc);
+	Player(int anID);
+	Player(int anID, Location aLoc);
 	Location getLocation();
 	void setLocation(float argX, float argY, float argZ);
 
+	std::string encodePlayerData();
+
 protected:
-	Location myLocation;
+	Location	location;
+	int			playerID;
 };

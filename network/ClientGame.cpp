@@ -182,7 +182,7 @@ void ClientGame::decodeData(const char * data)
 					}
 
 					clients2[clientID] = vec3;
-					allClients[clientID] = Player(Location(vec3[0], vec3[1], vec3[2]));
+					allClients[clientID] = Player(0, Location(vec3[0], vec3[1], vec3[2]));
 				}
 			}
 			//std::cout << "clientID: " << clientID << "  key: " << key_str << "  value: " << value_str << std::endl;

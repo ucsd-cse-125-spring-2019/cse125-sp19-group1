@@ -191,6 +191,8 @@ void ServerGame::sendActionPackets()
 		msg_string += "location:" + std::to_string(x.second[0]) + std::string(" ") + std::to_string(x.second[1]) + std::string(" ") + std::to_string(x.second[2]) + std::string("\n");
 	}
 	msg_string += "-----\n";
+	
+	msg_string = gameData.encodeGameData();
 
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
@@ -214,7 +216,7 @@ void ServerGame::initNewClient()
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
 
-
+	gameData.addNewClient(client_id);
 	/*
 	std::string msg_string = "SERVER INITIALIZATION\n";
 

@@ -1,18 +1,29 @@
 #include "Player.h"
 
-Player::Player()
+Player::Player() : playerID(-1) { std::cout << "default constructor called\n"; }
+Player::Player(int anID) : playerID(anID)
 {
-	myLocation = Location();
+	location = Location();
 }
 
-Player::Player(Location aLoc)
+Player::Player(int anID, Location aLoc) : playerID(anID)
 {
-	myLocation = aLoc;
+	location = aLoc;
 }
 
-Location Player::getLocation() { return myLocation; }
+Location Player::getLocation() { return location; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
-	myLocation.update(argX, argY, argZ);
+	location.update(argX, argY, argZ);
+}
+
+std::string Player::encodePlayerData()
+{
+	//std::string encoding = "id: " + playerID;
+	std::stringstream encoding;
+	encoding << "client_id: " << playerID << std::endl;
+	encoding << "location: " << location.x << " " << location.y << " " << location.z << std::endl;
+
+	return encoding.str();
 }
