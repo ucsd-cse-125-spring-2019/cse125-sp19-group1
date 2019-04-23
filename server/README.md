@@ -37,3 +37,23 @@
 - captured animals:
 	- animal 1
 	- ...
+
+## Data Format
+For game data sent from server to client:
+
+init: 5
+id: Player1 \n
+Type: animal \n
+Class: cat \n
+Location: x y z \n
+etc...
+------
+Player2 \n
+Type: animal \n
+Class: cat \n
+etc...
+-----
+General \n
+Exit1 status: true false true \n                  (true means that corresponding key # is found)
+key locations: key1: x y z || key2: x y z || ...  \n
+-----
