@@ -94,9 +94,13 @@ std::string Walls::encodeWalls()
 
 	for (int c = 0; c < 3; c++) {
 		for (int r = 0; r < 3; r++) {
-			encoding << layout[c][r] << " ";
+			encoding << layout[c][r];
+
+			if(r < 3-1)
+				encoding << " ";
 		}
-		encoding << ',';
+		if(c < 3-1)
+			encoding << ", ";
 	}
 	encoding << std::endl;
 	return encoding.str();

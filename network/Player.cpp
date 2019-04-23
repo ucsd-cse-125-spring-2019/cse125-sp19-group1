@@ -22,7 +22,7 @@ std::string Player::encodePlayerData()
 {
 	std::stringstream encoding;
 	encoding << "client: " << playerID << std::endl;
-	encoding << "location: " << location.x << " " << location.y << " " << location.z << std::endl;
+	encoding << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
 
 	return encoding.str();
 }

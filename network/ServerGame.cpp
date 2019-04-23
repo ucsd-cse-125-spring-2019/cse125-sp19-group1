@@ -23,6 +23,7 @@ ServerGame::ServerGame(void)
     // set up the server network to listen 
     network = new ServerNetwork(); 
 	walls = new Walls();
+	gameData = new GameData(walls);
 }
  
 void ServerGame::update() 
@@ -192,7 +193,7 @@ void ServerGame::sendActionPackets()
 	}
 	msg_string += "-----\n";
 	
-	msg_string = gameData.encodeGameData();
+	msg_string = gameData->encodeGameData(); // gets an encoded game data string for all players and general game data
 
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
@@ -216,7 +217,7 @@ void ServerGame::initNewClient()
 	std::string id = "client_" + std::to_string(client_id);
 	clients[id] = loc;
 
-	gameData.addNewClient(client_id);
+	gameData->addNewClient(client_id);
 	/*
 	std::string msg_string = "SERVER INITIALIZATION\n";
 

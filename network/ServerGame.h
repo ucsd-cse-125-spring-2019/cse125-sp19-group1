@@ -24,7 +24,7 @@ public:
 	void updateCollision(std::string id);
 	void updatePlayerCollision(std::string id, int dir);
 
-	GameData gameData;
+	GameData * gameData;
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 

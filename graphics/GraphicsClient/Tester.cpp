@@ -206,9 +206,9 @@ void MovePlayer()
 			client->clients2["client_0"][1] * 0.1f,
 			client->clients2["client_0"][2] * 0.1f);
 		*/
-		glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().x * 0.1f,
-			client->allClients["client_0"].getLocation().y * 0.1f,
-			client->allClients["client_0"].getLocation().z * 0.1f);
+		glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
+			client->allClients["client_0"].getLocation().getY() * 0.1f,
+			client->allClients["client_0"].getLocation().getZ() * 0.1f);
 
 		cam_pos = location;
 		UpdateView();

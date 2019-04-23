@@ -6,20 +6,34 @@
 #include <string>
 #include "Walls.h"
 
+#define GENERALDATA_ID -10
+
+struct Gate
+{
+public:
+	Location getLocation() { return location; }
+	float getProgress() { return progress; }
+protected:
+	Location location;
+	float progress;
+};
+
 class GameData
 {
 public:
 	GameData();
+	GameData(Walls * aPtr);
 
 	std::map < int, Player * > clients;
 	Walls * walls;
-
-	typedef std::string(*encodeFunctionType)(std::string key);
+	int ** layout;
 
 	void addNewClient(int anID);
+
+	typedef std::string(*encodeFunctionType)(std::string key);
 	std::map<std::string, encodeFunctionType> encodingFunctions;
-	std::string encodeLocation(std::string key);
 	std::string encodeGameData();
+	void decodeGameData();
 
 
 protected:

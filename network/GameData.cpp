@@ -2,7 +2,13 @@
 
 GameData::GameData()
 {
-	walls = new Walls();
+	walls = nullptr;
+}
+
+GameData::GameData(Walls * aPtr)
+{
+	walls = aPtr;
+	layout = walls->layout;
 }
 
 std::string GameData::encodeGameData()
@@ -13,8 +19,8 @@ std::string GameData::encodeGameData()
 	{
 		encodedData << iter->second->encodePlayerData();
 	}
-	encodedData << "client: " << -10 << std::endl;
-	encodedData << "walls: " << walls->encodeWalls;
+	encodedData << "client: " << GENERALDATA_ID << std::endl;
+	encodedData << "walls: " << walls->encodeWalls();
 
 	return encodedData.str();
 }
