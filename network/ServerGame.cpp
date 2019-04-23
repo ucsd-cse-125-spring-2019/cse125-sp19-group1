@@ -34,6 +34,7 @@ void ServerGame::update()
     }
 
 	receiveFromClients();
+
 }
 
 void ServerGame::receiveFromClients()
@@ -58,17 +59,8 @@ void ServerGame::receiveFromClients()
 			{
 				printf("Client disconnected\n");
 				closesocket(iter->second);
-				//if (network->sessions.size() == 1)
-				{
-					//network->sessions.erase(iter);
-					//break;
-				}
-				//else
-				{
-					//if (network->sessions.size() == 0)
-						//break;
-					network->sessions.erase(iter++);
-				}
+				network->sessions.erase(iter++);
+
 			}
 			else
 			{

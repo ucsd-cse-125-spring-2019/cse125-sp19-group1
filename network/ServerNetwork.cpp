@@ -112,17 +112,7 @@ int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
 		SOCKET currentSocket = sessions[client_id];
 		iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
 
-		if (iResult == 0)
-		{
-			printf("Connection closed\n");
-		}
-
-		if (iResult == -1 && WSAGetLastError() == CONNECTION_RESET_ERROR)
-		{
-			printf("Client disconnected\n");
-		}
-
-		return iResult;
+		return iResult; // returns 0 if client clean disconnect, return -1 if force disconnect or other error
 	}
 	return -2;
 }
@@ -134,25 +124,10 @@ void ServerNetwork::sendToAll(char * packets, int totalSize)
 	std::map<unsigned int, SOCKET>::iterator iter;
 	int iSendResult;
 
-	for (iter = sessions.begin(); iter != sessions.end(); ) //iter++)
+	for (iter = sessions.begin(); iter != sessions.end(); iter++)
 	{
 		currentSocket = iter->second;
 		iSendResult = NetworkServices::sendMessage(currentSocket, packets, totalSize);
-
-		if (iSendResult == SOCKET_ERROR)
-		{
-			printf("send failed with error: %d\n", WSAGetLastError());
-			closesocket(currentSocket);
-			//auto temp = iter--;
-			sessions.erase(iter++);
-			//iter = temp;
-			//if (iter != sessions.begin() && iter != sessions.end())
-			//	iter--;
-			//if (sessions.size() == 0)
-			//	break;
-		}
-		else
-			iter++;
 	}
 }
 
