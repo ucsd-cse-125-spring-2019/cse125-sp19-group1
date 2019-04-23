@@ -5,8 +5,7 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 {
 	Assimp::Importer importer;
 
-	//const aiScene* scene = importer.ReadFile(path, 0/*aiProcess_JoinIdenticalVertices | aiProcess_SortByPType*/);
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);// | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 
 	if (!scene) {
 		fprintf(stderr, importer.GetErrorString());
@@ -16,60 +15,7 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 
 	aiMesh * mesh = scene->mMeshes[0];
 	populateMesh(mesh, vertices, normals, indices, uvs);
-}
 
-bool loadMeshEntries(const char * path, std::vector<MeshEntry *> * meshes) {
-
-	std::vector<unsigned int> * indices;
-	std::vector<glm::vec3> * vertices;
-	std::vector<glm::vec2> * uvs;
-	std::vector<glm::vec3> * normals;
-
-	Assimp::Importer importer;
-
-	//const aiScene* scene = importer.ReadFile(path, 0/*aiProcess_JoinIdenticalVertices | aiProcess_SortByPType*/);
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);// | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
-
-	if (!scene) {
-		fprintf(stderr, importer.GetErrorString());
-		getchar();
-		return false;
-	}
-
-	(*meshes).reserve(scene->mNumMeshes);
-
-	aiMesh * mesh;
-
-	for (unsigned int mesh_index = 0; mesh_index < scene->mNumMeshes; mesh_index++) {
-
-		mesh = scene->mMeshes[mesh_index];
-
-		(*meshes).push_back(new MeshEntry());
-		indices = (*meshes)[mesh_index]->getIndices();
-		vertices = (*meshes)[mesh_index]->getVertices();
-		uvs = (*meshes)[mesh_index]->getUVs();
-		normals = (*meshes)[mesh_index]->getNormals();
-		if (mesh_index < scene->mNumMaterials) {
-			aiMaterial * mat = (scene->mMaterials)[mesh_index];
-			glm::vec3 color;
-			std::cerr << "Num Textures = " << mat->GetTextureCount(aiTextureType_AMBIENT);
-			mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
-			(*meshes)[mesh_index]->SetAmbient(color);
-			std::cerr << "Ambient Color : " << color.x;
-			mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-			(*meshes)[mesh_index]->SetDiffuse(color);
-			mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
-			(*meshes)[mesh_index]->SetSpecular(color);
-			float shininess;
-			mat->Get(AI_MATKEY_SHININESS, shininess);
-			(*meshes)[mesh_index]->SetShine(shininess);
-		}
-
-		populateMesh(mesh, vertices, normals, indices, uvs);
-		(*meshes)[mesh_index]->Init();
-	}
-
-	// The "scene" pointer will be deleted automatically by "importer"
 	return true;
 }
 

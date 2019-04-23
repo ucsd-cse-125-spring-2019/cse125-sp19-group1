@@ -14,7 +14,6 @@ glm::mat4 V; // V for view
 DirLight * light;
 FBXObject * fbx;
 GLuint objShaderProgram;
-Transform * root;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
@@ -98,22 +97,12 @@ void Init()
 	server = new ServerGame();
 	client = new ClientGame();
 	_beginthread(serverLoop, 0, (void*)12);
-	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+
 	light = new DirLight();
 	fbx = new FBXObject(DOOR_PATH, RACCOON_TEX_PATH); //LUMA_PATH
-	root = new Transform(glm::mat4(1.0));
-	Transform * player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel = new Geometry(fbx, objShaderProgram);
-	root->addChild(player);
-	player->addChild(playerModel);
-	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
-	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel2 = new Geometry(fbx, objShaderProgram);
-	root->addChild(player2Translate);
-	player2Translate->addChild(player2Rotate);
-	player2Rotate->addChild(playerModel2);
-	//fbx->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+	fbx->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 	// load the shader program
+	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 }
 
 void serverLoop(void * args) {
@@ -249,8 +238,7 @@ void DisplayCallback(GLFWwindow* window)
 
 	glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos);
-	root->draw(V, P);
-	//fbx->Draw(objShaderProgram, &V, &P);
+	fbx->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
 	glfwSwapBuffers(window);
