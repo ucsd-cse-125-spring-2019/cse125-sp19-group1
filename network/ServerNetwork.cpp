@@ -111,12 +111,21 @@ int ServerNetwork::receiveData(unsigned int client_id, char * recvbuf)
 	{
 		SOCKET currentSocket = sessions[client_id];
 		iResult = NetworkServices::receiveMessage(currentSocket, recvbuf, MAX_PACKET_SIZE);
+		if(iResult == -1)
+			printf(" error: %d\n", WSAGetLastError());
 
 		if (iResult == 0)
 		{
 			printf("Connection closed\n");
 			sessions.erase(client_id);
 			closesocket(currentSocket);
+		}
+
+		if (iResult == -1 && WSAGetLastError() == 10054)
+		{
+			printf("Client disconnected\n");
+			closesocket(currentSocket);
+			sessions.erase(client_id);
 		}
 
 		return iResult;

@@ -51,6 +51,8 @@ void ServerGame::receiveFromClients()
 		if (data_length <= 0)
 		{
 			//no data recieved
+			if (network->sessions.size() == 0)
+				break;
 			continue;
 		}
 
