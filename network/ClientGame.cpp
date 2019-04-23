@@ -144,7 +144,7 @@ void ClientGame::decodeData(const char * data)
 				if (key_str == "init" && my_client_id == "") {
 					my_client_id = token_str;
 					std::cout << "My client ID: " << my_client_id << std::endl;
-					std::vector<int> vector(3, 0);
+					std::vector<float> vector(3, 0.0);
 					clients2[my_client_id] = vector;
 				}
 

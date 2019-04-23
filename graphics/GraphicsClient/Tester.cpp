@@ -15,8 +15,9 @@ DirLight * light;
 FBXObject * fbx;
 GLuint objShaderProgram;
 
+// 47, 62, 47
 // Default camera parameters
-glm::vec3 cam_pos(0.0f, 0.0f, 20.0f);    // e  | Position of camera
+glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);      // up | What orientation "up" is
 
@@ -100,6 +101,7 @@ void Init()
 
 	light = new DirLight();
 	fbx = new FBXObject(DOOR_PATH); //LUMA_PATH
+	fbx->rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 }
@@ -181,15 +183,24 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 	return window;
 }
 
-void IdleCallback()
+void SendPackets() 
 {
-	SendPackets();
-	client->update();
+	if (directions[0]) {
+		client->sendMovementPackets(FORWARD_EVENT);
+	}
+	if (directions[1]) {
+		client->sendMovementPackets(BACKWARD_EVENT);
+	}
+	if (directions[2]) {
+		client->sendMovementPackets(LEFT_EVENT);
+	}
+	if (directions[3]) {
+		client->sendMovementPackets(RIGHT_EVENT);
+	}
 }
 
-void DisplayCallback(GLFWwindow* window)
+void MovePlayer()
 {
-	// glm::mat4 drawingMatrix = glm::mat4(1.0f);
 	if (!client->clients2.empty()) {
 		/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
 			client->clients2["client_0"][1] * 0.1f,
@@ -202,7 +213,58 @@ void DisplayCallback(GLFWwindow* window)
 		cam_pos = location;
 		UpdateView();
 	}
+}
 
+/* void DummyMovePlayer()
+{
+	if (directions[0]) {
+		fbx->translate(0.0f, 0.0f, -1.0f);
+		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
+			cam_look_at[2] += -1.0f;
+			cam_pos[2] += -1.0f;
+			UpdateView();
+		}
+	}
+
+	if (directions[1]) {
+		fbx->translate(0.0f, 0.0f, 1.0f);
+		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
+			cam_look_at[2] += 1.0f;
+			cam_pos[2] += 1.0f;
+			UpdateView();
+		}
+	}
+
+	if (directions[2]) {
+		fbx->translate(-1.0f, 0.0f, 0.0f);
+		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
+			cam_look_at[0] += -1.0f;
+			cam_pos[0] += -1.0f;
+			UpdateView();
+		}
+	}
+
+	if (directions[3]) {
+		fbx->translate(1.0f, 0.0f, 0.0f);
+		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
+			cam_look_at[2] += 1.0f;
+			cam_pos[2] += 1.0f;
+			UpdateView();
+		}
+	}
+} */
+
+void IdleCallback()
+{
+	/* TODO: waiting for server implementation */
+	SendPackets();
+	client->update();
+	MovePlayer();
+	//DummyMovePlayer();
+}
+
+void DisplayCallback(GLFWwindow* window)
+{
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, windowWidth, windowHeight);
@@ -235,15 +297,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-
+			directions[1] = true;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-
+			directions[2] = true;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-
+			directions[3] = true;
 		}
 	}
 	else if (action == GLFW_RELEASE) {
@@ -252,15 +314,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-
+			directions[1] = false;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-
+			directions[2] = false;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-
+			directions[3] = false;
 		}
 	}
 }

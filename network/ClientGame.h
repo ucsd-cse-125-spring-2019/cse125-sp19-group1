@@ -22,7 +22,6 @@ public:
 
 	std::map < std::string, std::vector<float> > clients2;
 
-
 	ClientNetwork* network;
 
 	void sendActionPackets();
@@ -35,10 +34,6 @@ public:
 
 
 	std::map < std::string, Player > allClients;
-private:
-	static std::string my_client_id;
-
-
 	std::string my_client_id;
 
 };

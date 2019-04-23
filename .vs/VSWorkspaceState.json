@@ -4,8 +4,9 @@
     "\\network",
     "\\server",
     "\\server\\server",
+    "\\server\\server\\server",
     "\\server\\server_vs"
   ],
-  "SelectedNode": "\\network\\layout.txt",
+  "SelectedNode": "\\network\\ServerNetwork.h",
   "PreviewInSolutionExplorer": false
 }

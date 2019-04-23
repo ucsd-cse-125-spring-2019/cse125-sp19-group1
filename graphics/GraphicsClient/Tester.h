@@ -12,15 +12,8 @@
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
-#define DOOR_PATH "../Models/gunbot.dae"
+#define DOOR_PATH "../Models/raccoon.fbx"
 #define TABLE_PATH "../Models/Table.obj"
-
-
-//Event types
-int FORWARD_EVENT = 2;
-int BACKWARD_EVENT = 3;
-int LEFT_EVENT = 4;
-int RIGHT_EVENT = 5;
 
 // function declarations
 void ErrorCallback(int error, const char* description);
@@ -32,6 +25,9 @@ void serverLoop(void * args);
 void CleanUp();
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight);
 GLFWwindow* CreateWindowFrame(int width, int height);
+void SendPackets();
+void MovePlayer();
+void DummyMovePlayer();
 void IdleCallback();
 void DisplayCallback(GLFWwindow* window);
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
