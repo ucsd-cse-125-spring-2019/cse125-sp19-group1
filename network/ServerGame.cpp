@@ -242,13 +242,13 @@ void ServerGame::updateRightEvent(std::string id)
 
 void ServerGame::updateBackwardEvent(std::string id)
 {
-	clients[id][2] -= SPEED;
+	clients[id][2] += SPEED;
 	updatePlayerCollision(id, 1);
 }
 
 void ServerGame::updateForwardEvent(std::string id)
 {
-	clients[id][2] += SPEED;
+	clients[id][2] -= SPEED;
 	updatePlayerCollision(id, 2);
 }
 

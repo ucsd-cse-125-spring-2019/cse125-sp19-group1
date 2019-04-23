@@ -27,6 +27,7 @@ void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight);
 GLFWwindow* CreateWindowFrame(int width, int height);
 void SendPackets();
 void MovePlayer();
+void MoveCamera(glm::vec3 * translation);
 void DummyMovePlayer();
 void IdleCallback();
 void DisplayCallback(GLFWwindow* window);

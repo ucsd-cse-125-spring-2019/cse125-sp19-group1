@@ -101,7 +101,7 @@ void Init()
 
 	light = new DirLight();
 	fbx = new FBXObject(DOOR_PATH); //LUMA_PATH
-	fbx->rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+	fbx->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 }
@@ -202,15 +202,23 @@ void SendPackets()
 void MovePlayer()
 {
 	if (!client->clients2.empty()) {
-		/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
-			client->clients2["client_0"][1] * 0.1f,
-			client->clients2["client_0"][2] * 0.1f);
-		*/
-		glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().x * 0.1f,
-			client->allClients["client_0"].getLocation().y * 0.1f,
-			client->allClients["client_0"].getLocation().z * 0.1f);
+		glm::vec3 prevPos = fbx->GetPosition();
+		Location location = client->allClients["client_0"].getLocation();
+		glm::vec3 newPos = glm::vec3(location.x * 0.1f, location.y * 0.1f, location.z * 0.1f);
+		glm::vec3 diff = glm::vec3(prevPos[0] - newPos[0], prevPos[1] - newPos[1], prevPos[2] - newPos[2]);
+		fbx->Translate(diff[0], diff[1], diff[2]);
+		fbx->MoveTo(newPos[0], newPos[1], newPos[2]);
+		MoveCamera(&diff);
+		UpdateView();
+	}
+}
 
-		cam_pos = location;
+void MoveCamera(glm::vec3 * translation) {
+	if (fbx->WithinBounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
+		for (int i = 0; i < 3; i++) {
+			cam_look_at[i] += (*translation)[i];
+			cam_pos[i] += (*translation)[i];
+		}
 		UpdateView();
 	}
 }
@@ -272,7 +280,7 @@ void DisplayCallback(GLFWwindow* window)
 
 	glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos);
-	fbx->draw(objShaderProgram, &V, &P);
+	fbx->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
 	glfwSwapBuffers(window);

@@ -8,12 +8,6 @@
 
 #include "MeshEntry.h"
 
-// Luma values
-glm::vec3 luma_amb = glm::vec3(0.24725f, 0.1995f, 0.0745f);
-glm::vec3 luma_diff = glm::vec3(0.75164f, 0.60648f, 0.22648f);
-glm::vec3 luma_spec = glm::vec3(0.628281f, 0.555802f, 0.366065f);
-float luma_shininess = 52.0f;
-
 MeshEntry::MeshEntry() {
 }
 
@@ -21,10 +15,10 @@ void MeshEntry::Init() {
   // initialize stuff
   
   this->toWorld = glm::mat4(1.0f);
-  this->ambient = luma_amb;
-  this->diffuse = luma_diff;
-  this->specular = luma_spec;
-  this->shininess = luma_shininess;
+  this->ambient = default_amb;
+  this->diffuse = default_diff;
+  this->specular = default_spec;
+  this->shininess = default_shininess;
   
   // Create array object and buffers. Remember to delete your buffers when the object is destroyed!
   glGenVertexArrays(1, &(this->VAO));
@@ -74,7 +68,7 @@ void MeshEntry::Init() {
   // We've sent the vertex data over to OpenGL, but there's still something missing.
   // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (this->EBO));
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((this->faces).size() * sizeof(GLuint)), &((this->faces)[0]), GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((this->indices).size() * sizeof(GLuint)), &((this->indices)[0]), GL_STATIC_DRAW);
   
 
 
@@ -102,8 +96,8 @@ void MeshEntry::SetShine(float newShine) {
 	shininess = newShine;
 }
 
-std::vector<unsigned int> * MeshEntry::getFaces() {
-  return &faces;
+std::vector<unsigned int> * MeshEntry::getIndices() {
+  return &indices;
 }
 
 std::vector<glm::vec3> * MeshEntry::getVertices() {
@@ -154,7 +148,7 @@ void MeshEntry::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
   // Now draw the object. We simply need to bind the VAO associated with it.
   glBindVertexArray(this->VAO);
   // Tell OpenGL to draw with triangles, the number of triangles, the type of the indices, and the offset to start from
-  glDrawElements(GL_TRIANGLES, (GLsizei) (this->faces).size(), GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, (GLsizei) (this->indices).size(), GL_UNSIGNED_INT, 0);
   // Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
   glBindVertexArray(0);
 }
