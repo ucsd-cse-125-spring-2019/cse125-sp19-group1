@@ -4,6 +4,9 @@
 #include "Core.h"
 #include "DirLight.h"
 #include "FBXObject.h"
+#include "Node.h"
+#include "Transform.h"
+#include "Geometry.h"
 #include <process.h>
 //#include "./server/ServerGame.h"
 //#include "./server/ClientGame.h"
@@ -14,6 +17,7 @@
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
 #define DOOR_PATH "../Models/raccoon.fbx"
 #define TABLE_PATH "../Models/Table.obj"
+#define RACCOON_PATH "../Models/raccoon.fbx"
 
 #define RACCOON_TEX_PATH "../Textures/raccoon.ppm"
 

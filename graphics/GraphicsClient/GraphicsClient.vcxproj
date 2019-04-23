@@ -138,11 +138,14 @@
     <ClInclude Include="Core.h" />
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="FBXObject.h" />
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="MeshEntry.h" />
+    <ClInclude Include="Node.h" />
     <ClInclude Include="objloader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Tester.h" />
     <ClInclude Include="textureloader.h" />
+    <ClInclude Include="Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\network\ClientGame.cpp" />
@@ -154,11 +157,14 @@
     <ClCompile Include="..\..\network\Walls.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="FBXObject.cpp" />
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="MeshEntry.cpp" />
+    <ClCompile Include="Node.cpp" />
     <ClCompile Include="objloader.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Tester.cpp" />
     <ClCompile Include="textureloader.cpp" />
+    <ClCompile Include="Transform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag" />
