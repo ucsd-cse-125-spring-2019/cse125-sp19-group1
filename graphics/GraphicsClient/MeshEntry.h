@@ -46,6 +46,9 @@ public:
   std::vector<glm::vec3> * getVertices();
   std::vector<glm::vec2> * getUVs();
   std::vector<glm::vec3> * getNormals();
+  void translate(float x, float y, float z);
+  void rotate(float angle, float x, float y, float z);
+  bool within_bounds(float x_min, float x_max, float z_min, float z_max);
 };
 
 #endif /* MeshEntry_h */

@@ -173,3 +173,24 @@ void MeshEntry::printMatrix(glm::mat4 * matrix) {
 void MeshEntry::update() {
   // This function will handle anything that must continuously occur.
 }
+
+void MeshEntry::translate(float x, float y, float z) {
+	glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z));
+	this->toWorld = translationMatrix * (this->toWorld);
+}
+
+void MeshEntry::rotate(float angle, float x, float y, float z) {
+	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), angle, glm::vec3(x, y, z));
+	this->toWorld = rotationMatrix * (this->toWorld);
+}
+
+bool MeshEntry::within_bounds(float x_min, float x_max, float z_min, float z_max) {
+	float x = (this->toWorld)[3][0];
+	float z = (this->toWorld)[3][2];
+
+	if (x > x_min && x < x_max && z > z_min && z < z_max) {
+		return true;
+	}
+
+	return false;
+}
