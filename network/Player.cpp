@@ -1,14 +1,14 @@
 #include "Player.h"
 
-Player::Player() : playerID(-1) { std::cout << "default constructor called\n"; }
-Player::Player(int anID) : playerID(anID)
+Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; }
+Player::Player(int anID) : playerID(anID), inventory("empty"), hasCake(false)
 {
 	location = Location();
+	
 }
 
-Player::Player(int anID, Location aLoc) : playerID(anID)
+Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory("empty"), hasCake(false)
 {
-	location = aLoc;
 }
 
 Location Player::getLocation() { return location; }

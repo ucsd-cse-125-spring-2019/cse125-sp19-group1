@@ -3,6 +3,8 @@
 #include <sstream>
 #include <iostream>
 
+enum class Items { CAKE=200 };
+
 struct Location
 {
 public:
@@ -44,4 +46,6 @@ public:
 protected:
 	Location	location;
 	int			playerID;
+	std::string inventory;
+	bool		hasCake;
 };
