@@ -65,7 +65,7 @@ void GameData::decodeGameData(const char * data)
 		if (p.first == "client")
 		{
 			playerID = std::stoi(value);
-			if (players.count(playerID) == 0)
+			if (players.count(playerID) == 0 && playerID != GENERALDATA_ID)
 			{
 				addNewClient(playerID);
 			}

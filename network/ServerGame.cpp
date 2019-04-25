@@ -113,7 +113,7 @@ void ServerGame::receiveFromClients()
 				cout << "this is network data" << packet.id << endl;
 				//updateForwardEvent(std::string(packet.id));
 				updateForwardEvent2(iter->first);
-				updateCollision(std::string(packet.id));
+				//updateCollision(std::string(packet.id));
 
 				//sendActionPackets();
 
@@ -165,11 +165,12 @@ void ServerGame::sendInitPackets()
 {
 	std::string msg_string = "client_" + std::to_string(client_id) + "\n";
 	msg_string += "init:client_" + std::to_string(client_id) + "\n";
-	client_id++;
 
 	msg_string += "-----\n";
 	
 	msg_string = "init: " + std::to_string(client_id) + "\n";
+	client_id++;
+
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 
