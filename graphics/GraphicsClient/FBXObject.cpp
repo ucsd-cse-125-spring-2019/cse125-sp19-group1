@@ -12,7 +12,7 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 	// Populate the face indices, vertices, and normals vectors with the object data:
 	if (this->hasSkel) {
 		this->skel = new Skeleton();
-		load(filepath, &vertices, &normals, &indices, &uvs, skel);
+		loadWithSkeleton(filepath, &vertices, &normals, &indices, &uvs, skel);
 	}
 	else {
 		load(filepath, &vertices, &normals, &indices, &uvs);
@@ -38,6 +38,11 @@ void FBXObject::PrintMatrix(glm::mat4 * matrix) {
 		std::cerr << std::endl;
 	}
 	std::cerr << std::endl;
+}
+
+void FBXObject::PrintSkeleton() {
+	if (hasSkel)
+		skel->Print();
 }
 
 void FBXObject::Update() {

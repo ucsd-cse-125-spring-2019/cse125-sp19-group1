@@ -39,6 +39,7 @@ public:
 	void Parse(const char* filepath, const char* texFilepath);
 	~FBXObject();
 	void PrintMatrix(glm::mat4 * matrix);
+	void PrintSkeleton();
 	// manipulation
 	void Update();
 	void MoveTo(float x, float y, float z);

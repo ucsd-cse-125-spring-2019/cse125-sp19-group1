@@ -18,10 +18,10 @@
 
 bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
 	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs);
-bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
+bool loadWithSkeleton(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
 	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs, Skeleton * skel);
-void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * meshVertices, std::vector<Vertex *> * skelVertices);
-void populateSkelBones(aiMesh * mesh, std::vector<Vertex *> * skelVertices, std::vector<Bone *> * bones);
+void traverseSkeleton(aiNode * currRoot, Skeleton * skel);
+void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<Vertex *> * skelVertices);
 glm::mat4 * aiMatTOglm(aiMatrix4x4 mat);
 void populateMesh(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
 	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs);
