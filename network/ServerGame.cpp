@@ -58,7 +58,7 @@ void ServerGame::receiveFromClients()
 			if (network->sessions.size() == 0)
 				break;
 
-			if (data_length == 0 || (data_length == -1 && WSAGetLastError() == CONNECTION_RESET_ERROR))
+			if (data_length == 0 || (data_length == -1 && (WSAGetLastError() == CONNECTION_RESET_ERROR || WSAGetLastError() == CONNECTION_ABORT_ERROR)))
 			{
 				printf("Client disconnected\n");
 				closesocket(iter->second);
