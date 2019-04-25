@@ -42,7 +42,7 @@ void ClientGame::sendMovementPackets(const int type)
 	Packet packet;
 	packet.packet_type = type;
 
-	if (my_client_id == "") {
+	if (my_client_id == "" && myID == -1) {
 		return;
 	}
 

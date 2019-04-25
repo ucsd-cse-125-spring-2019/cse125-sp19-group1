@@ -111,7 +111,8 @@ void ServerGame::receiveFromClients()
 
 				//printf("Forward event called\n");
 				cout << "this is network data" << packet.id << endl;
-				updateForwardEvent(std::string(packet.id));
+				//updateForwardEvent(std::string(packet.id));
+				updateForwardEvent2(iter->first);
 				updateCollision(std::string(packet.id));
 
 				//sendActionPackets();
@@ -258,6 +259,13 @@ void ServerGame::updateForwardEvent(std::string id)
 	updatePlayerCollision(id, 2);
 }
 
+void ServerGame::updateForwardEvent2(int id)
+{
+	Location loc = gameData->getPlayer(id)->getLocation();
+	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+	//updatePlayerCollision2(id, 2);
+}
+
 void ServerGame::updateLeftEvent(std::string id)
 {
 	clients[id][0] -= SPEED;
@@ -311,6 +319,9 @@ void ServerGame::updatePlayerCollision(std::string id, int dir)
 		}
 	}
 }
+
+//void ServerGame::updatePlayerCollision2(int id, int dir)
+
 
 void ServerGame::updateCollision(std::string id)
 {
