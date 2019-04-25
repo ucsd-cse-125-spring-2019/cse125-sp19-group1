@@ -95,9 +95,9 @@ void PrintVersions()
 
 void Init()
 {
-	server = new ServerGame();
+	//server = new ServerGame();
 	client = new ClientGame();
-	_beginthread(serverLoop, 0, (void*)12);
+	//_beginthread(serverLoop, 0, (void*)12);
 
 	light = new DirLight();
 	fbx = new FBXObject(DOOR_PATH); //LUMA_PATH

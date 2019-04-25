@@ -57,14 +57,14 @@ void GameData::decodeGameData(const char * data)
 			{
 				addNewClient(playerID);
 			}
-			std::cout << key << " : " << value << std::endl;
+			//std::cout << key << " : " << value << std::endl;
 
 		}
 		else
 		{
 
 
-			std::cout << key << " : " << value << std::endl;
+			//std::cout << key << " : " << value << std::endl;
 
 			if (playerID == GENERALDATA_ID)
 			{

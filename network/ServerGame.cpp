@@ -37,7 +37,7 @@ void ServerGame::update()
     }
 
 	receiveFromClients();
-
+	sendActionPackets();
 }
 
 void ServerGame::receiveFromClients()
@@ -103,7 +103,7 @@ void ServerGame::receiveFromClients()
 
 				printf("server received action event packet from client\n");
 
-				sendActionPackets();
+				//sendActionPackets();
 
 				break;
 
@@ -114,7 +114,7 @@ void ServerGame::receiveFromClients()
 				updateForwardEvent(std::string(packet.id));
 				updateCollision(std::string(packet.id));
 
-				sendActionPackets();
+				//sendActionPackets();
 
 				break;
 
@@ -123,7 +123,7 @@ void ServerGame::receiveFromClients()
 				updateBackwardEvent(std::string(packet.id));
 				updateCollision(std::string(packet.id));
 
-				sendActionPackets();
+				//sendActionPackets();
 
 				break;
 
@@ -132,7 +132,7 @@ void ServerGame::receiveFromClients()
 				updateLeftEvent(std::string(packet.id));
 				updateCollision(std::string(packet.id));
 
-				sendActionPackets();
+				//sendActionPackets();
 
 				break;
 
@@ -145,7 +145,7 @@ void ServerGame::receiveFromClients()
 				updateCollision(std::string(packet.id));
 
 
-				sendActionPackets();
+				//sendActionPackets();
 
 				break;
 

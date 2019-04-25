@@ -175,7 +175,7 @@ void ClientGame::decodeData(const char * data)
 							//std::cout << "num: " << val_str << std::endl;
 
 							vec3.push_back(val_str.size() == 0 ? 0 : std::stoi(val_str));
-							std::cout << "num: " << val_str << std::endl;
+							//std::cout << "num: " << val_str << std::endl;
 						}
 						else
 						{
