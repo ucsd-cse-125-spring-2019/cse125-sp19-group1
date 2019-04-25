@@ -34,7 +34,7 @@ void GameData::addNewClient(int anID)
 	players[anID] = new Player(anID);
 }
 
-void GameData::addNewClient(int anID)
+void GameData::removeClient(int anID)
 {
 	players.erase(anID);
 }

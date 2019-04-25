@@ -37,7 +37,7 @@ void ServerGame::update()
     }
 
 	receiveFromClients();
-	sendActionPackets();
+	//sendActionPackets();
 }
 
 void ServerGame::receiveFromClients()
@@ -63,7 +63,7 @@ void ServerGame::receiveFromClients()
 				printf("Client disconnected\n");
 				closesocket(iter->second);
 				network->sessions.erase(iter++);
-
+				gameData->removeClient(iter->first);
 			}
 			else
 			{
