@@ -2,6 +2,7 @@
 #define FBXOBJECT_H
 
 #include "Core.h"
+#include "Skeleton.h"
 #include "shader.h"
 #include "objloader.h"
 #include "textureloader.h"
@@ -23,6 +24,9 @@ private:
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
+	Skeleton * skel;
+	bool hasSkel;
+
 	// Luma values
 	glm::vec3 default_amb = glm::vec3(0.24725f, 0.1995f, 0.0745f);
 	glm::vec3 default_diff = glm::vec3(0.75164f, 0.60648f, 0.22648f);
@@ -31,7 +35,7 @@ private:
 
 public:
 	// creating. destroying, and debugging
-	FBXObject(const char * obj_path, const char * tex_path);
+	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel);
 	void Parse(const char* filepath, const char* texFilepath);
 	~FBXObject();
 	void PrintMatrix(glm::mat4 * matrix);

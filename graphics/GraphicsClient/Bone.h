@@ -5,14 +5,12 @@
 
 class Bone {
 public:
-	Bone();
+	Bone(string newName, glm::mat4 * newOffsetMatrix);
 	~Bone();
 private:
 	std::vector<Bone *> children;
-	char * name;
+	string name;
 	glm::mat4 offsetMat;
-	// unsigned int == vertex ID and float == weight
-	std::vector<std::pair<unsigned int, float>> weights;
 };
 
 #endif

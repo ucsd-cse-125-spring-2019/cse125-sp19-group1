@@ -17,11 +17,14 @@ class Skeleton {
 public:
 	Skeleton();
 	~Skeleton();
+	void InitVertices(int numVerts);
+	std::vector<Bone *> * GetTree();
+	std::vector<Vertex *> * GetVertices();
 private:
 	Bone * root;
 	std::vector<Bone *> tree;
+	std::vector<Vertex *> vertices;
 	glm::mat4 worldMtx;
-	std::vector<Vertex> vertices;
 };
 
 #endif

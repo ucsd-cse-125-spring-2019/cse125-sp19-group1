@@ -1,15 +1,22 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * path, const char * texPath) {
-  // initilize stuff
-  Parse(path, texPath);
-  Init();
+FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel) {
+	// initialize stuff
+	this->hasSkel = attachSkel;
+	Parse(path, texPath);
+	Init();
 }
 
 void FBXObject::Parse(const char *filepath, const char *texFilepath)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data:
-	load(filepath, &vertices, &normals, &indices, &uvs);
+	if (this->hasSkel) {
+		this->skel = new Skeleton();
+		load(filepath, &vertices, &normals, &indices, &uvs, skel);
+	}
+	else {
+		load(filepath, &vertices, &normals, &indices, &uvs);
+	}
 	loadTexture(texFilepath);
 }
 

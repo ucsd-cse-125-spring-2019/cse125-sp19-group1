@@ -6,17 +6,13 @@
 
 class Vertex {
 
-	struct Weight {
-		string name;
-		unsigned int id;
-		float weight;
-	};
-
 public:
 	Vertex();
 	~Vertex();
+	void AddWeight(string boneName, float boneWeight);
 private:
-	std::vector<Weight> weights;
+	// string == name of bone, float == weight of bone
+	std::vector<std::pair<string, float>> weights;
 };
 
 #endif
