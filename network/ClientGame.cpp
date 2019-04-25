@@ -76,7 +76,7 @@ void ClientGame::update()
 	if (myID == -1)
 	{
 		std::vector<std::pair<std::string, std::string>> keyValuePairs;
-		keyValuePairs = StringParser::parseKeyValueString(network_data);
+ 		keyValuePairs = StringParser::parseKeyValueString(network_data);
 		std::string key = keyValuePairs[0].first;
 		std::string value = keyValuePairs[0].second;
 

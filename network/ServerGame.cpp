@@ -37,7 +37,7 @@ void ServerGame::update()
     }
 
 	receiveFromClients();
-	sendActionPackets();
+	//sendActionPackets();
 }
 
 void ServerGame::receiveFromClients()
@@ -112,8 +112,8 @@ void ServerGame::receiveFromClients()
 				//printf("Forward event called\n");
 				cout << "this is network data" << packet.id << endl;
 				//updateForwardEvent(std::string(packet.id));
-				updateForwardEvent2(iter->first);
-				//updateCollision(std::string(packet.id));
+				updateForwardEvent(iter->first);
+				updateCollision(iter->first);
 
 				//sendActionPackets();
 
@@ -121,8 +121,8 @@ void ServerGame::receiveFromClients()
 
 			case BACKWARD_EVENT:
 
-				updateBackwardEvent(std::string(packet.id));
-				updateCollision(std::string(packet.id));
+				updateBackwardEvent(iter->first);
+				updateCollision(iter->first);
 
 				//sendActionPackets();
 
@@ -130,8 +130,8 @@ void ServerGame::receiveFromClients()
 
 			case LEFT_EVENT:
 
-				updateLeftEvent(std::string(packet.id));
-				updateCollision(std::string(packet.id));
+				updateLeftEvent(iter->first);
+				updateCollision(iter->first);
 
 				//sendActionPackets();
 
@@ -142,8 +142,8 @@ void ServerGame::receiveFromClients()
 
 				//printf("Right event called\n");
 
-				updateRightEvent(std::string(packet.id));
-				updateCollision(std::string(packet.id));
+				updateRightEvent(iter->first);
+				updateCollision(iter->first);
 
 
 				//sendActionPackets();
@@ -158,6 +158,7 @@ void ServerGame::receiveFromClients()
 			}
 		}
 		iter++;
+		sendActionPackets();
 	}
 }
 
@@ -242,35 +243,32 @@ void ServerGame::initNewClient()
 	*/
 }
 
-void ServerGame::updateRightEvent(std::string id)
+void ServerGame::updateRightEvent(int id)
 {
-	clients[id][0] += SPEED;
-	updatePlayerCollision(id, 0);
+	Location loc = gameData->getPlayer(id)->getLocation();
+	gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+	//updatePlayerCollision(id, 0);
 }
 
-void ServerGame::updateBackwardEvent(std::string id)
+void ServerGame::updateBackwardEvent(int id)
 {
-	clients[id][2] -= SPEED;
-	updatePlayerCollision(id, 1);
+	Location loc = gameData->getPlayer(id)->getLocation();
+	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+	//updatePlayerCollision(id, 1);
 }
 
-void ServerGame::updateForwardEvent(std::string id)
-{
-	clients[id][2] += SPEED;
-	updatePlayerCollision(id, 2);
-}
-
-void ServerGame::updateForwardEvent2(int id)
+void ServerGame::updateForwardEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
 	//updatePlayerCollision2(id, 2);
 }
 
-void ServerGame::updateLeftEvent(std::string id)
+void ServerGame::updateLeftEvent(int id)
 {
-	clients[id][0] -= SPEED;
-	updatePlayerCollision(id, 3);
+	Location loc = gameData->getPlayer(id)->getLocation();
+	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+	//updatePlayerCollision(id, 3);
 }
 
 
@@ -321,11 +319,11 @@ void ServerGame::updatePlayerCollision(std::string id, int dir)
 	}
 }
 
-//void ServerGame::updatePlayerCollision2(int id, int dir)
 
 
-void ServerGame::updateCollision(std::string id)
+void ServerGame::updateCollision(int id)
 {
-	std::vector<int> loc = clients[id];
+	Location pLoc = gameData->getPlayer(id)->getLocation();
+	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 	walls->detectCollision(loc);
 }

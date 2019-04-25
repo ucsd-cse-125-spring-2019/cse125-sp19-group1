@@ -17,15 +17,12 @@ public:
 	void sendActionPackets();
 	void sendInitPackets();
 	void initNewClient();
-	void updateForwardEvent(std::string id);
-	void updateForwardEvent2(int id);
-	void updateBackwardEvent(std::string id);
-	void updateLeftEvent(std::string id);
-	void updateRightEvent(std::string id);
-	void updateCollision(std::string id);
-	//void updateCollision2(int id);
+	void updateForwardEvent(int id);
+	void updateBackwardEvent(int id);
+	void updateLeftEvent(int id);
+	void updateRightEvent(int id);
+	void updateCollision(int id);
 	void updatePlayerCollision(std::string id, int dir);
-	void updatePlayerCollision2(std::string id, int dir);
 
 	GameData * gameData;
 private:

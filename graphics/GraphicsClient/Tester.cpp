@@ -202,24 +202,31 @@ void SendPackets()
 void MovePlayer()
 {
 	Player * p = client->getGameData()->getPlayer(client->getMyID());
-
-	if (!client->clients2.empty()) {
-		/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
-			client->clients2["client_0"][1] * 0.1f,
-			client->clients2["client_0"][2] * 0.1f);
-		*/
-		Player * p = client->getGameData()->getPlayer(client->getMyID());
-		glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
-			client->allClients["client_0"].getLocation().getY() * 0.1f,
-			client->allClients["client_0"].getLocation().getZ() * 0.1f);
-		
-		/*glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
+	if (p)
+	{
+		glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
 			p->getLocation().getY() * 0.1f,
-			p->getLocation().getZ() * 0.1f);*/
+			p->getLocation().getZ() * 0.1f);
 
 		cam_pos = location;
 		UpdateView();
 	}
+	//if (!client->clients2.empty()) {
+	//	/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
+	//		client->clients2["client_0"][1] * 0.1f,
+	//		client->clients2["client_0"][2] * 0.1f);
+	//	*/
+	//	glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
+	//		client->allClients["client_0"].getLocation().getY() * 0.1f,
+	//		client->allClients["client_0"].getLocation().getZ() * 0.1f);
+	//	
+	//	/*glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
+	//		p->getLocation().getY() * 0.1f,
+	//		p->getLocation().getZ() * 0.1f);*/
+
+	//	cam_pos = location;
+	//	UpdateView();
+	//}
 }
 
 /* void DummyMovePlayer()
