@@ -52,7 +52,7 @@ void populateSkelBones(aiMesh * mesh, std::vector<Vertex *> * skelVertices, std:
 		for (unsigned int j = 0; j < bone->mNumWeights; j++) {
 			int vertexID = bone->mWeights[j].mVertexId;
 			if (vertexID < skelVertices->size()) {
-				(*skelVertices)[vertexID]->AddWeight(bone->mName.C_Str(), bone->mWeights[j].mWeight));
+				(*skelVertices)[vertexID]->AddWeight(bone->mName.C_Str(), bone->mWeights[j].mWeight);
 			}
 			else {
 				// create a new vertex, then add the weight to it
