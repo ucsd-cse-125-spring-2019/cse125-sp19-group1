@@ -3,6 +3,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <map>
 
 enum class Items { CAKE=200 };
 enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
@@ -44,6 +45,18 @@ public:
 	void setLocation(float argX, float argY, float argZ);
 
 	std::string encodePlayerData();
+	void decodePlayerData(std::string key, std::string value);
+
+	using decodeFunctionType =  void (Player::*)(std::string value);
+	//std::map<std::string, decodeFunctionType> encodingFunctions;
+	std::map<std::string, decodeFunctionType> decodingFunctions;
+
+	void addDecodeFunctions();
+	void decodeLocation(std::string value);
+	void decodeInventory(std::string value);
+	void decodeCakeStatus(std::string value);
+	void decodeChefStatus(std::string value);
+	void decodeModelType(std::string value);
 
 protected:
 	Location	location;

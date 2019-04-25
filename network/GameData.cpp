@@ -16,7 +16,7 @@ std::string GameData::encodeGameData()
 	std::stringstream encodedData;
 	encodedData.clear();
 
-	for (auto iter = clients.begin(); iter != clients.end(); iter++)
+	for (auto iter = players.begin(); iter != players.end(); iter++)
 	{
 		encodedData << iter->second->encodePlayerData();
 	}
@@ -29,7 +29,7 @@ std::string GameData::encodeGameData()
 
 void GameData::addNewClient(int anID)
 {
-	clients[anID] = new Player(anID);
+	players[anID] = new Player(anID);
 }
 
 void GameData::decodeGameData(const char * data)
@@ -37,9 +37,36 @@ void GameData::decodeGameData(const char * data)
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;
 	keyValuePairs = StringParser::parseKeyValueString(data);
 
+	int playerID = -1;
 	for (auto p : keyValuePairs)
 	{
-		std::cout << p.first << " : " << p.second << std::endl;
-	}
+		if (p.first == "client")
+		{
+			playerID = std::stoi(p.second);
+			if (players.count(playerID) == 0)
+			{
+				addNewClient(playerID);
+			}
+			std::cout << p.first << " : " << p.second << std::endl;
 
+		}
+		else
+		{
+
+
+			std::cout << p.first << " : " << p.second << std::endl;
+
+			if (playerID == GENERALDATA_ID)
+			{
+
+			}
+			else
+			{
+				if (players.count(playerID) > 0)
+				{
+					players[playerID]->decodePlayerData(p.first, p.second);
+				}
+			}
+		}
+	}
 }

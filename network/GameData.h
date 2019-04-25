@@ -52,15 +52,17 @@ public:
 	GameData();
 	GameData(Walls * aPtr);
 
-	std::map < int, Player * > clients;
+	std::map < int, Player * > players;
 	Walls * walls;
 	int ** layout;
 	Gate gate1;
 
 	void addNewClient(int anID);
 
-	//typedef std::string(*encodeFunctionType)(std::string key);
-	//std::map<std::string, encodeFunctionType> encodingFunctions;
+	typedef std::string(*decodeFunctionType)(std::string value);
+	//std::map<std::string, decodeFunctionType> encodingFunctions;
+	typedef std::map<std::string, decodeFunctionType> decodeFuncMap;
+	decodeFuncMap	decodingFunctions;
 	std::string encodeGameData();
 	void decodeGameData(const char * data);
 
