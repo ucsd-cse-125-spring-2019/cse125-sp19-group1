@@ -62,8 +62,8 @@ void ServerGame::receiveFromClients()
 			{
 				printf("Client disconnected\n");
 				closesocket(iter->second);
-				network->sessions.erase(iter++);
 				gameData->removeClient(iter->first);
+				network->sessions.erase(iter++);
 			}
 			else
 			{
