@@ -8,7 +8,8 @@
 
 void serverLoop(void *);
 void clientLoop(void);
- 
+void readDataLoop(void *);
+
 ServerGame * server;
 ClientGame * client;
 int elapsedTime = 0;
