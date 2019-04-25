@@ -3,12 +3,14 @@
 GameData::GameData()
 {
 	walls = new Walls();
+	addDecodeFunctions();
 }
 
 GameData::GameData(Walls * aPtr)
 {
 	walls = aPtr;
 	//layout = walls->layout;
+	addDecodeFunctions();
 }
 
 std::string GameData::encodeGameData()
@@ -32,6 +34,12 @@ void GameData::addNewClient(int anID)
 	players[anID] = new Player(anID);
 }
 
+void GameData::addDecodeFunctions()
+{
+
+}
+
+
 void GameData::decodeGameData(const char * data)
 {
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;
@@ -40,31 +48,37 @@ void GameData::decodeGameData(const char * data)
 	int playerID = -1;
 	for (auto p : keyValuePairs)
 	{
+		std::string & key = p.first;
+		std::string & value = p.second;
 		if (p.first == "client")
 		{
-			playerID = std::stoi(p.second);
+			playerID = std::stoi(value);
 			if (players.count(playerID) == 0)
 			{
 				addNewClient(playerID);
 			}
-			std::cout << p.first << " : " << p.second << std::endl;
+			std::cout << key << " : " << value << std::endl;
 
 		}
 		else
 		{
 
 
-			std::cout << p.first << " : " << p.second << std::endl;
+			std::cout << key << " : " << value << std::endl;
 
 			if (playerID == GENERALDATA_ID)
 			{
-
+				if (decodingFunctions.count(key) > 0)
+					(this->*decodingFunctions[key])(value); // Format for calling the functions from the map
+				else
+					std::cout << "No decoding function for key: " << key << std::endl;
 			}
 			else
 			{
+				// Makes sure this player ID exists before trying to decode data
 				if (players.count(playerID) > 0)
 				{
-					players[playerID]->decodePlayerData(p.first, p.second);
+					players[playerID]->decodePlayerData(key, value);
 				}
 			}
 		}

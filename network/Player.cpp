@@ -34,14 +34,15 @@ std::string Player::encodePlayerData()
 
 void Player::decodePlayerData(std::string key, std::string value)
 {
-	//Player * tmp;
-	//decodeFunctionType val = decodingFunctions[key];// (value);
-	(this->*decodingFunctions[key])(value);
+	// Safety check in case decoding function for the key doesn't exist
+	if (decodingFunctions.count(key) > 0)
+		(this->*decodingFunctions[key])(value); // Format for calling the functions from the map
+	else
+		std::cout << "No decoding function for key: " << key << std::endl;
 }
 
 void Player::decodeLocation(std::string value)
 {
-	std::cout << value << std::endl;
 	std::stringstream valueStream(value);
 	std::string x, y, z;
 	valueStream >> x >> y >> z;

@@ -59,12 +59,13 @@ public:
 
 	void addNewClient(int anID);
 
-	typedef std::string(*decodeFunctionType)(std::string value);
-	//std::map<std::string, decodeFunctionType> encodingFunctions;
-	typedef std::map<std::string, decodeFunctionType> decodeFuncMap;
-	decodeFuncMap	decodingFunctions;
+	using decodeFunctionType = void (GameData::*)(std::string value);
+	std::map<std::string, decodeFunctionType> decodingFunctions;
+
 	std::string encodeGameData();
 	void decodeGameData(const char * data);
+	void addDecodeFunctions();
+
 
 
 protected:
