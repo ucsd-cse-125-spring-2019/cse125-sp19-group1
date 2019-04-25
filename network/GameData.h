@@ -58,6 +58,7 @@ public:
 	Gate gate1;
 
 	void addNewClient(int anID);
+	void removeClient(int anID);
 
 	using decodeFunctionType = void (GameData::*)(std::string value);
 	std::map<std::string, decodeFunctionType> decodingFunctions;

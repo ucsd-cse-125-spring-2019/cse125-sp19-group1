@@ -34,6 +34,11 @@ void GameData::addNewClient(int anID)
 	players[anID] = new Player(anID);
 }
 
+void GameData::addNewClient(int anID)
+{
+	players.erase(anID);
+}
+
 void GameData::addDecodeFunctions()
 {
 
