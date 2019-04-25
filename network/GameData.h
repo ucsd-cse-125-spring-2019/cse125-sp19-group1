@@ -66,7 +66,7 @@ public:
 	std::string encodeGameData();
 	void decodeGameData(const char * data);
 	void addDecodeFunctions();
-
+	Player * getPlayer(int anID);
 
 
 protected:

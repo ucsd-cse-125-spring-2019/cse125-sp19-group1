@@ -206,6 +206,7 @@ void MovePlayer()
 			client->clients2["client_0"][1] * 0.1f,
 			client->clients2["client_0"][2] * 0.1f);
 		*/
+		Player * p = client->getGameData()->getPlayer(client->getMyID());
 		glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
 			client->allClients["client_0"].getLocation().getY() * 0.1f,
 			client->allClients["client_0"].getLocation().getZ() * 0.1f);

@@ -72,7 +72,21 @@ void ClientGame::update()
 	}
 
 	std::cout << "data received on client:\n" << network_data << std::endl;
-	gameData->decodeGameData(network_data);
+
+	if (myID == -1)
+	{
+		std::vector<std::pair<std::string, std::string>> keyValuePairs;
+		keyValuePairs = StringParser::parseKeyValueString(network_data);
+		std::string key = keyValuePairs[0].first;
+		std::string value = keyValuePairs[0].second;
+
+		if (key == "init")
+			myID = std::stoi(value);
+	}
+	else
+	{
+		gameData->decodeGameData(network_data);
+	}
 	decodeData(network_data);
 
 	// printing out client data for debug checking
@@ -200,3 +214,14 @@ void ClientGame::decodeData(const char * data)
 	//std::cout << data << std::endl;
 
 }
+
+GameData * ClientGame::getGameData()
+{
+	return gameData;
+}
+
+int ClientGame::getMyID()
+{
+	return myID;
+}
+

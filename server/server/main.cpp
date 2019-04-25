@@ -23,7 +23,7 @@ int main()
 
     // create thread with arbitrary argument for the run function
     //_beginthread( serverLoop, 0, (void*)12);
-    _beginthread( readDataLoop, 0, NULL);
+    //_beginthread( readDataLoop, 0, NULL);
  
     // initialize the client 
     //client = new ClientGame();
@@ -50,7 +50,8 @@ void serverLoop(void * arg)
 		if (clock() - elapsedTime > 1000.0 / 30)
 		{
 			elapsedTime = clock();
-			server->sendActionPackets();
+			server->update();
+			//server->sendActionPackets();
 		}
     }
 }

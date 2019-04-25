@@ -44,6 +44,13 @@ void GameData::addDecodeFunctions()
 
 }
 
+Player * GameData::getPlayer(int anID)
+{
+	if (players.count(anID) > 0)
+		return players[anID];
+	else
+		return nullptr;
+}
 
 void GameData::decodeGameData(const char * data)
 {

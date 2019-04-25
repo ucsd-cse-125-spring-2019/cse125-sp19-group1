@@ -37,7 +37,7 @@ void ServerGame::update()
     }
 
 	receiveFromClients();
-	//sendActionPackets();
+	sendActionPackets();
 }
 
 void ServerGame::receiveFromClients()
@@ -167,6 +167,8 @@ void ServerGame::sendInitPackets()
 	client_id++;
 
 	msg_string += "-----\n";
+	
+	msg_string = "init: " + std::to_string(client_id) + "\n";
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 

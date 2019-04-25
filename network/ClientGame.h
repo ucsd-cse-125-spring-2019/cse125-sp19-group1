@@ -37,6 +37,9 @@ public:
 	std::map < std::string, Player > allClients;
 	std::string my_client_id;
 
+	int myID = -1;
 	GameData * gameData;
 
+	GameData * getGameData();
+	int getMyID();
 };
