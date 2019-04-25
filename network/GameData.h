@@ -7,7 +7,7 @@
 #include "Walls.h"
 #include <vector>
 
-#define GENERALDATA_ID -10
+#define GENERALDATA_ID -999
 
 enum class Keys { KEY1 = 100, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9 };
 
@@ -43,7 +43,7 @@ protected:
 	Location location;
 	float progress;
 	int gateNum;
-	
+	std::vector<std::vector<int>> wallLayout;
 };
 
 class GameData
@@ -62,7 +62,7 @@ public:
 	//typedef std::string(*encodeFunctionType)(std::string key);
 	//std::map<std::string, encodeFunctionType> encodingFunctions;
 	std::string encodeGameData();
-	void decodeGameData();
+	void decodeGameData(const char * data);
 
 
 protected:

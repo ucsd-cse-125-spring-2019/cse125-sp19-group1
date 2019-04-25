@@ -2,7 +2,7 @@
 
 GameData::GameData()
 {
-	walls = nullptr;
+	walls = new Walls();
 }
 
 GameData::GameData(Walls * aPtr)
@@ -14,6 +14,7 @@ GameData::GameData(Walls * aPtr)
 std::string GameData::encodeGameData()
 {
 	std::stringstream encodedData;
+	encodedData.clear();
 
 	for (auto iter = clients.begin(); iter != clients.end(); iter++)
 	{
@@ -31,7 +32,14 @@ void GameData::addNewClient(int anID)
 	clients[anID] = new Player(anID);
 }
 
-void GameData::decodeGameData()
+void GameData::decodeGameData(const char * data)
 {
+	std::vector<std::pair<std::string, std::string>> keyValuePairs;
+	keyValuePairs = StringParser::parseKeyValueString(data);
+
+	for (auto p : keyValuePairs)
+	{
+		std::cout << p.first << " : " << p.second << std::endl;
+	}
 
 }

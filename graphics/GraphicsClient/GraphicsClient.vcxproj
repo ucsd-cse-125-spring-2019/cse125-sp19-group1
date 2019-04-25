@@ -135,6 +135,7 @@
     <ClInclude Include="..\..\network\Player.h" />
     <ClInclude Include="..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\network\ServerNetwork.h" />
+    <ClInclude Include="..\..\network\StringParser.h" />
     <ClInclude Include="..\..\network\Walls.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="DirLight.h" />
@@ -153,6 +154,7 @@
     <ClCompile Include="..\..\network\Player.cpp" />
     <ClCompile Include="..\..\network\ServerGame.cpp" />
     <ClCompile Include="..\..\network\ServerNetwork.cpp" />
+    <ClCompile Include="..\..\network\StringParser.cpp" />
     <ClCompile Include="..\..\network\Walls.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="FBXObject.cpp" />

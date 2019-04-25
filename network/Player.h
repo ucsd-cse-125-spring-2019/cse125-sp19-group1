@@ -2,8 +2,10 @@
 #include <string>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
 enum class Items { CAKE=200 };
+enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
 
 struct Location
 {
@@ -48,4 +50,6 @@ protected:
 	int			playerID;
 	std::string inventory;
 	bool		hasCake;
+	bool		isChef;
+	ModelType	modelType;
 };

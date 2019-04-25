@@ -3,6 +3,7 @@
 //initialization 
 ClientGame::ClientGame(void)
 {
+	gameData = new GameData();
 	network = new ClientNetwork();
 
 	// send init packet
@@ -71,6 +72,7 @@ void ClientGame::update()
 	}
 
 	std::cout << "data received on client:\n" << network_data << std::endl;
+	gameData->decodeGameData(network_data);
 	decodeData(network_data);
 
 	// printing out client data for debug checking

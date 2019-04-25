@@ -42,12 +42,12 @@ void Walls::detectCollision(std::vector<int> loc) {
 	int r = (int)(loc[0] / TILE_SIZE);
 	int c = (int)(loc[2] / TILE_SIZE);
 
-	std::cout << "R: " << r << std::endl;
-	std::cout << "C: " << c << std::endl;
+	//std::cout << "R: " << r << std::endl;
+	//std::cout << "C: " << c << std::endl;
 
 	//check collision
 	std::bitset<4> wall(layout[r][c]);
-	std::cout << "bit set for walls " << wall << std::endl;
+	//std::cout << "bit set for walls " << wall << std::endl;
 
 	std::cout << wall[3] << std::endl;
 	std::cout << wall[2] << std::endl;
