@@ -1,6 +1,6 @@
 #include "objloader.h"
 
-// load a model
+// load a model (and possibly a Skeleton, if the model is expected to have one)
 bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
 	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs, Skeleton * skel) 
 {
