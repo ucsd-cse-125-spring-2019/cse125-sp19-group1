@@ -7,7 +7,7 @@ public:
 	Walls();
 	~Walls();
 
-	void detectCollision(std::vector<float> loc);
+	void detectCollision(std::vector<float> & loc);
 
 	//Hardcode map for now 
 	const static int TILE_SIZE = 20;

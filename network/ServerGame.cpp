@@ -45,8 +45,7 @@ void ServerGame::update()
 
 	auto end_time = std::chrono::high_resolution_clock::now();
 	auto time = end_time - start_time;
-	std::cout << " took " <<
-		time / std::chrono::milliseconds(1) << "ms to run.\n";
+	//std::cout << " took " << time / std::chrono::milliseconds(1) << "ms to run.\n";
 }
 
 void ServerGame::receiveFromClients()
@@ -339,4 +338,6 @@ void ServerGame::updateCollision(int id)
 	Location pLoc = gameData->getPlayer(id)->getLocation();
 	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 	walls->detectCollision(loc);
+	gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
+
 }
