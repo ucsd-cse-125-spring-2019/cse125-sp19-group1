@@ -1,22 +1,31 @@
 #include "FBXObject.h"
 
 FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel) {
-	// initialize stuff
-	this->hasSkel = attachSkel;
+	// initialize variables
+	Init(attachSkel);
+	// read in the model and its texture from the given files
 	Parse(path, texPath);
-	Init();
+	// initialize rendering variables
+	RenderingSetup();
+}
+
+void FBXObject::Init(bool attachSkel) {
+	this->toWorld = glm::mat4(1.0f);
+	this->ambient = default_amb;
+	this->diffuse = default_diff;
+	this->specular = default_spec;
+	this->shininess = default_shininess;
+	skel = NULL;
+	if (attachSkel)
+		skel = new Skeleton();
 }
 
 void FBXObject::Parse(const char *filepath, const char *texFilepath)
 {
-	// Populate the face indices, vertices, and normals vectors with the object data:
-	if (this->hasSkel) {
-		this->skel = new Skeleton();
-		load(filepath, &vertices, &normals, &indices, &uvs, skel);
-	}
-	else {
-		load(filepath, &vertices, &normals, &indices, &uvs);
-	}
+	// Populate the face indices, vertices, and normals vectors with the object data,
+	// and potentially load in a Skeleton (if expecting a Skeleton)
+	load(filepath, &vertices, &normals, &indices, &uvs, skel);
+	// Load the corresponding model texture
 	loadTexture(texFilepath);
 }
 
@@ -38,6 +47,11 @@ void FBXObject::PrintMatrix(glm::mat4 * matrix) {
 		std::cerr << std::endl;
 	}
 	std::cerr << std::endl;
+}
+
+void FBXObject::PrintSkeleton() {
+	if (hasSkel)
+		skel->PrintBoneStructure();
 }
 
 void FBXObject::Update() {
@@ -143,14 +157,8 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 	glBindVertexArray(0);
 }
 
-void FBXObject::Init() {
-	// initialize stuff
-
-	this->toWorld = glm::mat4(1.0f);
-	this->ambient = default_amb;
-	this->diffuse = default_diff;
-	this->specular = default_spec;
-	this->shininess = default_shininess;
+// initialize all the rendering stuff
+void FBXObject::RenderingSetup() {
 
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &(this->VAO));

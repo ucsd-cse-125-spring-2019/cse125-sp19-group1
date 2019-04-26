@@ -2,6 +2,7 @@
 #define Skeleton_h
 
 #include "Core.h"
+#include <map>
 #include "Bone.h"
 #include "Vertex.h"
 
@@ -17,12 +18,15 @@ class Skeleton {
 public:
 	Skeleton();
 	~Skeleton();
-	void InitVertices(int numVerts);
-	std::vector<Bone *> * GetTree();
+	void AddNode(string name, Bone * newNode);
+	Bone * GetNode(string name);
+	std::map<string, Bone *> * GetBones();
 	std::vector<Vertex *> * GetVertices();
+	void PrintBoneStructure();
+	void PrintVertex(unsigned int id);
 private:
 	Bone * root;
-	std::vector<Bone *> tree;
+	std::map<string, Bone *> bones;
 	std::vector<Vertex *> vertices;
 	glm::mat4 worldMtx;
 };

@@ -36,9 +36,11 @@ private:
 public:
 	// creating. destroying, and debugging
 	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel);
+	void Init(bool attachSkel);
 	void Parse(const char* filepath, const char* texFilepath);
 	~FBXObject();
 	void PrintMatrix(glm::mat4 * matrix);
+	void PrintSkeleton();
 	// manipulation
 	void Update();
 	void MoveTo(float x, float y, float z);
@@ -58,7 +60,7 @@ public:
 	void SetShine(float newShine);
 	// rendering
 	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P);
-	void Init();
+	void RenderingSetup();
 };
 
 #endif

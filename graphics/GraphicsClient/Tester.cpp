@@ -103,7 +103,7 @@ void Init()
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
-	fbx = new FBXObject(DOOR_PATH, RACCOON_TEX_PATH, false); //LUMA_PATH
+	fbx = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
 	root = new Transform(glm::mat4(1.0));
 	Transform * player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	Geometry * playerModel = new Geometry(fbx, objShaderProgram);
