@@ -22,7 +22,7 @@ public:
 	void updateLeftEvent(int id);
 	void updateRightEvent(int id);
 	void updateCollision(int id);
-	void updatePlayerCollision(std::string id, int dir);
+	void updatePlayerCollision(int id, int dir);
 
 	GameData * gameData;
 private:

@@ -67,6 +67,7 @@ public:
 	void decodeGameData(const char * data);
 	void addDecodeFunctions();
 	Player * getPlayer(int anID);
+	std::map < int, Player * > & getAllPlayers();
 
 
 protected:

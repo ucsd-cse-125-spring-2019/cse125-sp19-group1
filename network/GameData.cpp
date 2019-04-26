@@ -52,6 +52,10 @@ Player * GameData::getPlayer(int anID)
 		return nullptr;
 }
 
+std::map < int, Player * > & GameData::getAllPlayers()
+{
+	return players;
+}
 void GameData::decodeGameData(const char * data)
 {
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;

@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 #include <cstring>
-
+#include <chrono>
 
 
 std::map < std::string, vector<int>> clients;
@@ -28,7 +28,11 @@ ServerGame::ServerGame(void)
  
 void ServerGame::update() 
 {
- 
+	auto start_time = std::chrono::high_resolution_clock::now();
+
+
+
+	
     // get new clients
     if(network->acceptNewClient(client_id))
     {
@@ -38,6 +42,11 @@ void ServerGame::update()
 
 	receiveFromClients();
 	//sendActionPackets();
+
+	auto end_time = std::chrono::high_resolution_clock::now();
+	auto time = end_time - start_time;
+	std::cout << " took " <<
+		time / std::chrono::milliseconds(1) << "ms to run.\n";
 }
 
 void ServerGame::receiveFromClients()
@@ -247,53 +256,56 @@ void ServerGame::updateRightEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
-	//updatePlayerCollision(id, 0);
+	updatePlayerCollision(id, 0);
 }
 
 void ServerGame::updateBackwardEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
-	//updatePlayerCollision(id, 1);
+	updatePlayerCollision(id, 1);
 }
 
 void ServerGame::updateForwardEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
-	//updatePlayerCollision2(id, 2);
+	updatePlayerCollision(id, 2);
 }
 
 void ServerGame::updateLeftEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
-	//updatePlayerCollision(id, 3);
+	updatePlayerCollision(id, 3);
 }
 
 
 
-void ServerGame::updatePlayerCollision(std::string id, int dir) 
+void ServerGame::updatePlayerCollision(int id, int dir) 
 {
-	std::vector<int> loc = clients[id];
-
+	Location pLoc = gameData->getPlayer(id)->getLocation();
+	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+	
 	//0 == right
 	//1 == down
 	//2 == forward
 	//3 == left
-	map<string, vector<int>>::iterator it;
-	for (it = clients.begin(); it != clients.end(); it++)
+	//dmap<string, vector<int>>::iterator it;
+
+	std::map < int, Player * > players = gameData->getAllPlayers();
+	for (auto it = players.begin(); it != players.end(); it++)
 	{
 		if (it->first == id) {
 			continue;
 		}
 
 		//calculate distance between two points 
-		int my_x = clients[id][0];
-		int my_z = clients[id][2];
+		int my_x = loc[0];
+		int my_z = loc[2];
 
-		int ot_x = it->second[0];
-		int ot_z = it->second[2];
+		int ot_x = it->second->getLocation().getX();
+		int ot_z = it->second->getLocation().getZ();
 
 		float dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
 		
@@ -301,20 +313,21 @@ void ServerGame::updatePlayerCollision(std::string id, int dir)
 		{
 			if (dir == 0) 
 			{
-				clients[id][0] = ot_x - 2 * Walls::PLAYER_RADIUS;
+				loc[0] = ot_x - 2 * Walls::PLAYER_RADIUS;
 			} 
 			else if (dir == 1)
 			{
-				clients[id][2] = ot_z - 2 * Walls::PLAYER_RADIUS;
+				loc[2] = ot_z - 2 * Walls::PLAYER_RADIUS;
 			}
 			else if (dir == 2)
 			{
-				clients[id][2] = ot_z + 2 * Walls::PLAYER_RADIUS;
+				loc[2] = ot_z + 2 * Walls::PLAYER_RADIUS;
 			}
 			else
 			{
-				clients[id][0] = ot_x + 2 * Walls::PLAYER_RADIUS;
+				loc[0] = ot_x + 2 * Walls::PLAYER_RADIUS;
 			}
+			gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 		}
 	}
 }

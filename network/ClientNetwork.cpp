@@ -28,10 +28,8 @@ ClientNetwork::ClientNetwork(void)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;  //TCP connection!!!
 	//resolve server address and port 
-	iResult = getaddrinfo("128.54.70.28", DEFAULT_PORT, &hints, &result);
-	// 100.81.32.201
-	//iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
-	//iResult = getaddrinfo("100.81.32.201", DEFAULT_PORT, &hints, &result);
+	//iResult = getaddrinfo("128.54.70.28", DEFAULT_PORT, &hints, &result);
+	iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
 
 	if (iResult != 0)
 	{
