@@ -11,7 +11,7 @@ enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
 struct Location
 {
 public:
-	Location(float argX = 0.0f, float argY = 0.0f, float argZ = 0.0f) : x(argX), y(argY), z(argZ) {}
+	Location(float argX = 10.0f, float argY = 0.0f, float argZ = 10.0f) : x(argX), y(argY), z(argZ) {}
 
 	float getX() { return x; }
 	float getY() { return y; }

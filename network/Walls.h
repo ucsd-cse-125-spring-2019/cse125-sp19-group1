@@ -15,7 +15,7 @@ public:
 	const static int WALL_SIZE = 2;
 
 	int layout[3][3] =
-				{ {12,2,5},
+				{ {12,4,5},
 				  {8,0,1},
 				  {10,2,3} };
 
