@@ -39,8 +39,8 @@ Walls::Walls()
 
 void Walls::detectCollision(std::vector<float> & loc) {
 	// find which tile player is in
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int c = (int)(loc[2] / TILE_SIZE);
+	int r = (int)(loc[0] / TILE_SIZE);
 
 	//std::cout << "R: " << r << std::endl;
 	//std::cout << "C: " << c << std::endl;
@@ -57,7 +57,7 @@ void Walls::detectCollision(std::vector<float> & loc) {
 	std::cout << "layout: " << layout[r][c] << std::endl;
 	//check left wall
 	if (wall[3]) {
-		int left_bound = r * TILE_SIZE + WALL_SIZE;
+		int left_bound = c * TILE_SIZE + WALL_SIZE;
 		if (loc[0] - PLAYER_RADIUS < left_bound) {
 			printf("collided with left wall\n");
 			std::cout << left_bound << "\tx: " << loc[0] << std::endl;
@@ -66,7 +66,7 @@ void Walls::detectCollision(std::vector<float> & loc) {
 	}
 	//check up wall
 	if (wall[2]) {
-		int up_bound = c * TILE_SIZE + WALL_SIZE;
+		int up_bound = r * TILE_SIZE + WALL_SIZE;
 		if (loc[2] - PLAYER_RADIUS < up_bound) {
 			printf("collided with up wall\n");
 			std::cout << up_bound << "\tz: " << loc[2] << std::endl;
@@ -75,7 +75,7 @@ void Walls::detectCollision(std::vector<float> & loc) {
 	}
 	//check down wall
 	if (wall[1]) {
-		int down_bound = c * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
+		int down_bound = r * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
 		if (loc[2] + PLAYER_RADIUS > down_bound) {
 			printf("collided with down wall\n");
 			std::cout << down_bound << "\tz: " << loc[2] << std::endl;
@@ -85,7 +85,7 @@ void Walls::detectCollision(std::vector<float> & loc) {
 	}
 	//check right wall
 	if (wall[0]) {
-		int right_bound = r * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
+		int right_bound = c * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
 		if (loc[0] + PLAYER_RADIUS > right_bound) {
 			printf("collided with right wall\n");
 			std::cout << right_bound << "\tx: " << loc[0] << std::endl;
