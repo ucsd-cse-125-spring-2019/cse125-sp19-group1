@@ -18,20 +18,32 @@ Walls::Walls()
 	std::ifstream infile("layout.txt");
 	std::string line;
 	printf("INITIALIZING WALLS!\n");	
+	layout.clear();
 	std::cout << infile.good() << std::endl;
-
+	int cols = 0;
 	while (std::getline(infile, line))
 	{
 		std::cout << "reading the file line by line" << std::endl;
 		std::cout << line << std::endl;
+
+		std::stringstream lineStream(line);
+		std::string num;
+		std::vector<int> row;
+		while (lineStream >> num)
+		{
+			row.push_back(std::stoi(num));
+		}
+		cols = row.size();
+		//layout.push_back(row);
 	}
 
 	//Hardcode layout for now
 	int c;
 	int r;
-	for (c = 0; c < 3; c++) {
-		for (r = 0; r < 3; r++) {
-			std::cout << layout[c][r] << " ";
+	for (r = 0; r < layout.size(); r++) {
+		for (c = 0; c < cols; c++) {
+
+			std::cout << layout[r][c] << " ";
 		}
 		std::cout << std::endl;
 	}
