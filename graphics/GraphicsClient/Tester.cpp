@@ -322,6 +322,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_RIGHT) {
 			directions[3] = true;
 		}
+
+		if (key == GLFW_KEY_SPACE) {
+			// interact key press
+			client->sendMovementPackets(INTERACT_EVENT);
+		}
 	}
 	else if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_UP) {
@@ -338,6 +343,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 		if (key == GLFW_KEY_RIGHT) {
 			directions[3] = false;
+		}
+
+		if (key == GLFW_KEY_SPACE) {
+			// interact key release
 		}
 	}
 }

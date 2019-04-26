@@ -158,6 +158,9 @@ void ServerGame::receiveFromClients()
 
 				break;
 
+			case INTERACT_EVENT:
+				std::cout << "interact received\n";
+				break;
 			default:
 
 				printf("error in packet types\n");
