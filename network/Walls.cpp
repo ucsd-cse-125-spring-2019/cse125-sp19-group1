@@ -39,8 +39,16 @@ Walls::Walls()
 
 void Walls::detectCollision(std::vector<float> & loc) {
 	// find which tile player is in
-	int c = (int)(loc[2] / TILE_SIZE);
-	int r = (int)(loc[0] / TILE_SIZE);
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= 3)
+		r = 2;
+
+	if (c >= 3)
+	{
+		c = 2;
+	}
 
 	//std::cout << "R: " << r << std::endl;
 	//std::cout << "C: " << c << std::endl;
