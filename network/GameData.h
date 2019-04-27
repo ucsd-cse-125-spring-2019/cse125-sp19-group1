@@ -57,7 +57,7 @@ public:
 	int ** layout;
 	Gate gate1;
 
-	void addNewClient(int anID);
+	void addNewClient(int anID, Location aLoc);
 	void removeClient(int anID);
 
 	using decodeFunctionType = void (GameData::*)(std::string value);
@@ -68,7 +68,6 @@ public:
 	void addDecodeFunctions();
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
-
 
 protected:
 

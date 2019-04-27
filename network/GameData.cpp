@@ -29,9 +29,9 @@ std::string GameData::encodeGameData()
 	return encodedData.str();
 }
 
-void GameData::addNewClient(int anID)
+void GameData::addNewClient(int anID, Location aLoc)
 {
-	players[anID] = new Player(anID);
+	players[anID] = new Player(anID, aLoc);
 }
 
 void GameData::removeClient(int anID)
@@ -66,22 +66,17 @@ void GameData::decodeGameData(const char * data)
 	{
 		std::string & key = p.first;
 		std::string & value = p.second;
+		//std::cout << key << " : " << value << std::endl;
 		if (p.first == "client")
 		{
 			playerID = std::stoi(value);
 			if (players.count(playerID) == 0 && playerID != GENERALDATA_ID)
 			{
-				addNewClient(playerID);
+				addNewClient(playerID, Location());
 			}
-			//std::cout << key << " : " << value << std::endl;
-
 		}
 		else
 		{
-
-
-			//std::cout << key << " : " << value << std::endl;
-
 			if (playerID == GENERALDATA_ID)
 			{
 				if (decodingFunctions.count(key) > 0)

@@ -7,13 +7,9 @@
 #include <cstring>
 #include <chrono>
 
-
-std::map < std::string, vector<int>> clients;
  
 unsigned int ServerGame::client_id; 
-
 unsigned int SPEED = 2;
-
 
 ServerGame::ServerGame(void)
 {
@@ -37,7 +33,6 @@ void ServerGame::update()
     if(network->acceptNewClient(client_id))
     {
         printf("client %d has been connected to the server\n",client_id); 
-		//initNewClient();
     }
 
 	receiveFromClients();
@@ -87,111 +82,66 @@ void ServerGame::receiveFromClients()
 			packet.deserialize(&(network_data[i]));
 			i += sizeof(Packet);
 
-
-			//std::string clientid;
-
 			if (packet.packet_type != INIT_CONNECTION && packet.id == "") {
 				continue;
 			}
 
-
 			switch (packet.packet_type) {
-
 			case INIT_CONNECTION:
-
 				printf("server received init packet from client\n");
-
 				initNewClient();
-
 				sendInitPackets();
-
 				break;
 
 			case ACTION_EVENT:
-
 				printf("server received action event packet from client\n");
-
-				//sendActionPackets();
-
 				break;
 
 			case FORWARD_EVENT:
-
-				//printf("Forward event called\n");
-				cout << "this is network data" << packet.id << endl;
-				//updateForwardEvent(std::string(packet.id));
 				updateForwardEvent(iter->first);
 				updateCollision(iter->first);
-
-				//sendActionPackets();
-
 				break;
 
 			case BACKWARD_EVENT:
-
 				updateBackwardEvent(iter->first);
 				updateCollision(iter->first);
-
-				//sendActionPackets();
-
 				break;
 
 			case LEFT_EVENT:
-
 				updateLeftEvent(iter->first);
 				updateCollision(iter->first);
-
-				//sendActionPackets();
-
 				break;
 
 			case RIGHT_EVENT:
-
-
-				//printf("Right event called\n");
-
 				updateRightEvent(iter->first);
 				updateCollision(iter->first);
-
-
-				//sendActionPackets();
-
 				break;
 
 			case INTERACT_EVENT:
 				std::cout << "interact received\n";
 				break;
 			default:
-
 				printf("error in packet types\n");
-
 				break;
 			}
+			sendActionPackets(); // sends data after processing input from one client
 		}
 		iter++;
-		sendActionPackets();
 	}
+	//sendActionPackets(); // uncomment to always send data from server
 }
 
 void ServerGame::sendInitPackets()
 {
-	std::string msg_string = "client_" + std::to_string(client_id) + "\n";
-	msg_string += "init:client_" + std::to_string(client_id) + "\n";
-
-	msg_string += "-----\n";
-	
-	msg_string = "init: " + std::to_string(client_id) + "\n";
+	std::string msg_string = "init: " + std::to_string(client_id) + "\n";
 	client_id++;
 
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 
-	int i;
-	for (i = 0; i < packet_size; i++) {
+	for (int i = 0; i < packet_size; i++) {
 		msg[i] = msg_string[i];
 	}
-
-	//printf("sendtoall\n");
 
 	network->sendToAll(msg, packet_size);
 	delete[] msg;
@@ -199,59 +149,26 @@ void ServerGame::sendInitPackets()
 
 void ServerGame::sendActionPackets()
 {
-
-	//READ IN DATA STRUCTURES AND SEND DATA ACCORDINGLY
-	std::string msg_string = "";
-	for (auto const& x : clients)
-	{
-		msg_string += x.first + "\n";
-		msg_string += "location:" + std::to_string(x.second[0]) + std::string(" ") + std::to_string(x.second[1]) + std::string(" ") + std::to_string(x.second[2]) + std::string("\n");
-	}
-	msg_string += "-----\n";
-	
 	// gets an encoded game data string for all players and general game data
-	msg_string = gameData->encodeGameData(); 
+	std::string msg_string = gameData->encodeGameData();
 	
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 
-	int i;
-	for (i = 0; i < packet_size; i++) {
+	for (int i = 0; i < packet_size; i++) {
 		msg[i] = msg_string[i];
 	}
-
-	//printf("sendtoall\n");
 
 	network->sendToAll(msg, packet_size);
 	delete[] msg;
 }
 
-
 void ServerGame::initNewClient()
 {
 	//updating current data structure to hold onto client
-	std::vector<int> loc{ 10, 0, 10 };
-	std::string id = "client_" + std::to_string(client_id);
-	clients[id] = loc;
+	//std::vector<int> loc{ 10, 0, 10 };
 
-	gameData->addNewClient(client_id);
-	/*
-	std::string msg_string = "SERVER INITIALIZATION\n";
-
-	msg_string += "id:                " + id;
-	msg_string += "\n-----";
-
-	int packet_size = msg_string.length();
-	char * msg = new char[packet_size];
-
-	int i;
-	for (i = 0; i < packet_size; i++) {
-		msg[i] = msg_string[i];
-
-	}
-	network->sendToClient(msg, packet_size, client_id);
-	client_id++;
-	*/
+	gameData->addNewClient(client_id, Location(30, 0, 30));
 }
 
 void ServerGame::updateRightEvent(int id)
@@ -281,8 +198,6 @@ void ServerGame::updateLeftEvent(int id)
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
 	updatePlayerCollision(id, 3);
 }
-
-
 
 void ServerGame::updatePlayerCollision(int id, int dir) 
 {
@@ -334,13 +249,10 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 	}
 }
 
-
-
 void ServerGame::updateCollision(int id)
 {
 	Location pLoc = gameData->getPlayer(id)->getLocation();
 	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 	walls->detectCollision(loc);
 	gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
-
 }
