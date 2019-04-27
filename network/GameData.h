@@ -4,7 +4,6 @@
 #include "StringParser.h"
 #include <sstream>
 #include <string>
-#include "Walls.h"
 #include "Atlas.h"
 #include <vector>
 
@@ -56,10 +55,9 @@ class GameData
 {
 public:
 	GameData();
-	GameData(Walls * aPtr);
+	GameData(Atlas * aPtr);
 
 	std::map < int, Player * > players;
-	Walls * walls;
 	Atlas * atlas;
 	std::vector<std::vector<int>> wallLayout;
 	Gate gate1;

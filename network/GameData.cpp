@@ -2,16 +2,13 @@
 
 GameData::GameData()
 {
-	walls = new Walls();
 	atlas = new Atlas();
 	addDecodeFunctions();
 }
 
-GameData::GameData(Walls * aPtr)
+GameData::GameData(Atlas * aPtr)
 {
-	walls = aPtr;
-	//layout = walls->layout;
-	atlas = new Atlas();
+	atlas = aPtr;
 	addDecodeFunctions();
 }
 
@@ -25,7 +22,7 @@ std::string GameData::encodeGameData()
 		encodedData << iter->second->encodePlayerData();
 	}
 	encodedData << "client: " << GENERALDATA_ID << std::endl;
-	encodedData << "walls: " << walls->encodeWallData();
+	encodedData << "walls: " << atlas->encodeWallData();
 	encodedData << "gate: " << gate1.encodeGateData();
 
 	return encodedData.str();

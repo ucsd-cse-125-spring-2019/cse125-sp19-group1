@@ -1,6 +1,6 @@
 #include "ServerNetwork.h"
 #include "NetworkData.h"
-#include "Walls.h"
+#include "Atlas.h"
 #include <string>
 #include "GameData.h"
 
@@ -33,8 +33,7 @@ private:
     // The ServerNetwork object 
     ServerNetwork* network;
 
-	// The Walls object
-	Walls* walls;
+	Atlas* atlas;
 
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];

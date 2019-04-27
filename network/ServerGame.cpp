@@ -1,5 +1,4 @@
 #include "ServerGame.h"
-#include "Walls.h"
 #include <map>
 #include <iostream>
 #include <vector>
@@ -18,8 +17,8 @@ ServerGame::ServerGame(void)
  
     // set up the server network to listen 
     network = new ServerNetwork(); 
-	walls = new Walls();
-	gameData = new GameData(walls);
+	atlas = new Atlas();
+	gameData = new GameData(atlas);
 }
  
 void ServerGame::update() 
@@ -239,23 +238,23 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 
 		float dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
 		
-		if (dist < 2 * Walls::PLAYER_RADIUS) 
+		if (dist < 2 * Atlas::PLAYER_RADIUS) 
 		{
 			if (dir == 0) 
 			{
-				loc[0] = ot_x - 2 * Walls::PLAYER_RADIUS;
+				loc[0] = ot_x - 2 * Atlas::PLAYER_RADIUS;
 			} 
 			else if (dir == 1)
 			{
-				loc[2] = ot_z - 2 * Walls::PLAYER_RADIUS;
+				loc[2] = ot_z - 2 * Atlas::PLAYER_RADIUS;
 			}
 			else if (dir == 2)
 			{
-				loc[2] = ot_z + 2 * Walls::PLAYER_RADIUS;
+				loc[2] = ot_z + 2 * Atlas::PLAYER_RADIUS;
 			}
 			else
 			{
-				loc[0] = ot_x + 2 * Walls::PLAYER_RADIUS;
+				loc[0] = ot_x + 2 * Atlas::PLAYER_RADIUS;
 			}
 			gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 		}
@@ -266,6 +265,6 @@ void ServerGame::updateCollision(int id)
 {
 	Location pLoc = gameData->getPlayer(id)->getLocation();
 	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-	walls->detectCollision(loc);
+	atlas->detectCollision(loc);
 	gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 }
