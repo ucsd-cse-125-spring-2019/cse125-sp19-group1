@@ -3,6 +3,7 @@
 GameData::GameData()
 {
 	walls = new Walls();
+	atlas = new Atlas();
 	addDecodeFunctions();
 }
 
@@ -10,6 +11,7 @@ GameData::GameData(Walls * aPtr)
 {
 	walls = aPtr;
 	//layout = walls->layout;
+	atlas = new Atlas();
 	addDecodeFunctions();
 }
 
@@ -55,6 +57,10 @@ Player * GameData::getPlayer(int anID)
 std::map < int, Player * > & GameData::getAllPlayers()
 {
 	return players;
+}
+Atlas * GameData::getAtlas()
+{
+	return atlas;
 }
 void GameData::decodeGameData(const char * data)
 {

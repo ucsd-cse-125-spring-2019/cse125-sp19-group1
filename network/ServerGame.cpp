@@ -26,9 +26,6 @@ void ServerGame::update()
 {
 	auto start_time = std::chrono::high_resolution_clock::now();
 
-
-
-	
     // get new clients
     if(network->acceptNewClient(client_id))
     {
@@ -118,8 +115,15 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case INTERACT_EVENT:
-				std::cout << "interact received\n";
+			{
+				Location pLoc = gameData->getPlayer(iter->first)->getLocation();
+				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+				if (int key = gameData->getAtlas()->hasKey(loc))
+				{
+					gameData->getPlayer(iter->first)->setInventory(static_cast<Item>(key));
+				}
 				break;
+			}
 			default:
 				printf("error in packet types\n");
 				break;

@@ -5,7 +5,8 @@
 #include <vector>
 #include <map>
 
-enum class Items { CAKE=200 };
+enum class Item { EMPTY = 0, KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
+
 enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
 
 struct Location
@@ -41,6 +42,8 @@ public:
 	Player();
 	Player(int anID);
 	Player(int anID, Location aLoc);
+	Item getInventory();
+	void setInventory(Item anItem);
 	Location getLocation();
 	void setLocation(float argX, float argY, float argZ);
 
@@ -61,7 +64,7 @@ public:
 protected:
 	Location	location;
 	int			playerID;
-	std::string inventory;
+	Item		inventory;
 	bool		hasCake;
 	bool		isChef;
 	ModelType	modelType;

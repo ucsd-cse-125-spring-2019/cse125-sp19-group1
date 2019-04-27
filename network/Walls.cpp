@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <bitset> 
+#include <string.h>
 
 //1000 = left = 8
 //0100 = up = 4
@@ -16,6 +17,9 @@ Walls::Walls()
 {
 	//Reading from a file to generate map
 	std::ifstream infile("layout.txt");
+	char errmsg[100];
+	strerror_s(errmsg, 100, errno);
+	std::cout << errmsg << std::endl;
 	std::string line;
 	printf("INITIALIZING WALLS!\n");	
 	//layout.clear();
