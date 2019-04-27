@@ -10,6 +10,7 @@
 #include <glm/glm.hpp>
 
 #include "Skeleton.h"
+#include "animloader.h"
 
 // Include Assimp
 #include <assimp/Importer.hpp> // C++ importer interface

@@ -20,8 +20,11 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 	populateMesh(mesh, vertices, normals, indices, uvs);
 
 	// if the Skeleton pointer is not null, it means we want a Skeleton, so we must load the proper data
-	if (skel)
+	if (skel) {
 		loadSkeleton(mesh, scene->mRootNode, vertices, skel);
+		AnimationPlayer * animPlayer = NULL;
+		loadAnimation((aiScene*)scene, skel, animPlayer);
+	}
 
 	// the scene will be destroyed automatically when we return
 	return true;
