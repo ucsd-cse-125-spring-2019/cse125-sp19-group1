@@ -122,6 +122,15 @@ void ServerGame::receiveFromClients()
 				{
 					gameData->getPlayer(iter->first)->setInventory(static_cast<Item>(key));
 				}
+				else if(gameData->getAtlas()->hasGate(loc))
+				{
+					if (gameData->getGate().isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
+					{
+						gameData->getGate().updateProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
+					}
+				}
+
+
 				break;
 			}
 			default:

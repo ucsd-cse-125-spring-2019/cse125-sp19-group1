@@ -73,6 +73,8 @@ public:
 	std::map < int, Player * > & getAllPlayers();
 	Atlas * getAtlas();
 
+	Gate & getGate();
+
 protected:
 
 private:

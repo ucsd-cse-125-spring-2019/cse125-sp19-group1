@@ -120,11 +120,24 @@ int Atlas::hasKey(std::vector<float> & loc)
 	if (r >= keyLayout.size() || c >= keyLayout[r].size())
 		return -1;
 
+	// if check to remove key from map when picked up
 	/*if (keyLayout[r][c])
 	{
 		keyLayout
 	}*/
 	return keyLayout[r][c];
+}
+
+bool Atlas::hasGate(std::vector<float> & loc)
+{
+	// find which tile player is in
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= gateLayout.size() || c >= gateLayout[r].size())
+		return false;
+
+	return gateLayout[r][c] != 0;
 }
 std::string Atlas::encodeWallData()
 {

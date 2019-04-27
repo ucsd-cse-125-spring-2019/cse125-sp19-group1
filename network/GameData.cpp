@@ -59,8 +59,10 @@ std::map < int, Player * > & GameData::getAllPlayers()
 	return players;
 }
 Atlas * GameData::getAtlas()
+{	return atlas; }
+Gate & GameData::getGate()
 {
-	return atlas;
+	return gate1;
 }
 void GameData::decodeGameData(const char * data)
 {
