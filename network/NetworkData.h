@@ -14,7 +14,8 @@ enum PacketTypes {
 	BACKWARD_EVENT = 3,
 	LEFT_EVENT = 4,
 	RIGHT_EVENT = 5,
-	INTERACT_EVENT = 6
+	INTERACT_EVENT = 6,
+	RELEASE_EVENT = 7,
 };
 
 struct Packet {

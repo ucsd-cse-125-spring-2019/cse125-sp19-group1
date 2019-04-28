@@ -186,16 +186,16 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 void SendPackets() 
 {
 	if (directions[0]) {
-		client->sendMovementPackets(FORWARD_EVENT);
+		client->sendPackets(FORWARD_EVENT);
 	}
 	if (directions[1]) {
-		client->sendMovementPackets(BACKWARD_EVENT);
+		client->sendPackets(BACKWARD_EVENT);
 	}
 	if (directions[2]) {
-		client->sendMovementPackets(LEFT_EVENT);
+		client->sendPackets(LEFT_EVENT);
 	}
 	if (directions[3]) {
-		client->sendMovementPackets(RIGHT_EVENT);
+		client->sendPackets(RIGHT_EVENT);
 	}
 }
 
@@ -325,7 +325,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 		if (key == GLFW_KEY_SPACE) {
 			// interact key press
-			client->sendMovementPackets(INTERACT_EVENT);
+			client->sendPackets(INTERACT_EVENT);
 		}
 	}
 	else if (action == GLFW_RELEASE) {
@@ -347,6 +347,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 		if (key == GLFW_KEY_SPACE) {
 			// interact key release
+			client->sendPackets(RELEASE_EVENT);
 		}
 	}
 }
