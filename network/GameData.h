@@ -62,6 +62,9 @@ public:
 	std::vector<std::vector<int>> wallLayout;
 	Gate gate1;
 
+	std::vector<std::vector<int>> wallLayout;
+	std::vector<std::vector<int>> keyLayout;
+	std::vector<std::vector<int>> gateLayout;
 	void addNewClient(int anID, Location aLoc);
 	void removeClient(int anID);
 
