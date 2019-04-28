@@ -27,7 +27,7 @@ public:
 
 	void sendActionPackets();
 	void decodeData(const char * data);
-	void sendMovementPackets(const int type);
+	void sendPackets(const int type);
 
 	char network_data[MAX_PACKET_SIZE];
 

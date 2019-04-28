@@ -128,8 +128,35 @@ void ServerGame::receiveFromClients()
 						gameData->getGate().updateProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
 					}
 				}
+				else if (gameData->getAtlas()->hasBox(loc))
+				{
+					std::cout << "HAS BOX" << std::endl;
+					if (!gameData->getPlayer(iter->first)->getInteracting()) {
+						std::cout << "starting to interact!" << std::endl;
+						gameData->getPlayer(iter->first)->setInteracting();
+						gameData->getPlayer(iter->first)->setStartTime();
+					}
+				}
+				break;
+			}
 
+			case RELEASE_EVENT:
+			{
+				Location pLoc = gameData->getPlayer(iter->first)->getLocation();
+				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+				if (gameData->getPlayer(iter->first)->getInteracting()) {
+					double seconds = gameData->getPlayer(iter->first)->checkBoxProgress();
+					if (seconds > gameData->getBoxTime()) {
+						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
+						gameData->getAtlas()->updateBoxLayout(loc);
+						gameData->getPlayer(iter->first)->setInteracting();
+					}
+				}
 
+				if (gameData->getPlayer(iter->first)->getInteracting()) {
+					std::cout << "RELEASED SPACE" << std::endl;
+					gameData->getPlayer(iter->first)->setInteracting();
+				}
 				break;
 			}
 			default:

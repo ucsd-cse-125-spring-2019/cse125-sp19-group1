@@ -117,7 +117,7 @@ int Atlas::hasKey(std::vector<float> & loc)
 	int r = (int)(loc[2] / TILE_SIZE);
 	int c = (int)(loc[0] / TILE_SIZE);
 
-	if (r >= keyLayout.size() || c >= keyLayout[r].size())
+	if (r >= clientKeyLayout.size() || c >= clientKeyLayout[r].size())
 		return -1;
 
 	// if check to remove key from map when picked up
@@ -125,7 +125,7 @@ int Atlas::hasKey(std::vector<float> & loc)
 	{
 		keyLayout
 	}*/
-	return keyLayout[r][c];
+	return clientKeyLayout[r][c];
 }
 
 bool Atlas::hasGate(std::vector<float> & loc)
@@ -139,6 +139,30 @@ bool Atlas::hasGate(std::vector<float> & loc)
 
 	return gateLayout[r][c] != 0;
 }
+
+bool Atlas::hasBox(std::vector<float> & loc)
+{
+	// find which tile player is in
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= boxLayout.size() || c >= boxLayout[r].size())
+		return false;
+
+	return boxLayout[r][c] != 0;
+}
+
+void Atlas::updateBoxLayout(std::vector<float> & loc) 
+{
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+	
+	boxLayout[r][c] = 0;
+	if (keyLayout[r][c]) {
+		clientKeyLayout[r][c] = keyLayout[r][c];
+	}
+}
+
 std::string Atlas::encodeWallData()
 {
 	std::stringstream encodedData;

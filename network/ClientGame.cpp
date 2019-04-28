@@ -33,7 +33,7 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-void ClientGame::sendMovementPackets(const int type)
+void ClientGame::sendPackets(const int type)
 {
 	// send action packet
 	const unsigned int packet_size = sizeof(Packet);
@@ -45,15 +45,6 @@ void ClientGame::sendMovementPackets(const int type)
 	if (my_client_id == "" && myID == -1) {
 		return;
 	}
-
-	std::cout << "About to send movement packet with ID: " << my_client_id << std::endl;
-	memset(packet.id, 0, sizeof(packet.id));
-	int i;
-	for (i = 0; i < my_client_id.size() && i < 8; i++) {
-		packet.id[i] = my_client_id[i];
-	}
-	//packet.id[8] = '\0';
-
 
 	packet.serialize(packet_data);
 

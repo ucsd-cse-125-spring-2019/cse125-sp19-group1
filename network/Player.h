@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <chrono>
+#include <ctime>
 
 enum class Item { EMPTY = 0, KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
 
@@ -46,6 +48,11 @@ public:
 	void setInventory(Item anItem);
 	Location getLocation();
 	void setLocation(float argX, float argY, float argZ);
+	bool getInteracting();
+	void setInteracting();
+
+	void setStartTime();
+	double checkBoxProgress();
 
 	std::string encodePlayerData();
 	void decodePlayerData(std::string key, std::string value);
@@ -68,4 +75,6 @@ protected:
 	bool		hasCake;
 	bool		isChef;
 	ModelType	modelType;
+	bool		interacting;
+	std::chrono::time_point<std::chrono::system_clock> start;
 };

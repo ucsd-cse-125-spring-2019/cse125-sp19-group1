@@ -14,6 +14,7 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 
 Location Player::getLocation() { return location; }
 Item Player::getInventory() { return inventory; }
+bool Player::getInteracting() { return interacting; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -24,6 +25,21 @@ void Player::setInventory(Item anItem)
 {
 	inventory = anItem;
 }
+
+void Player::setInteracting() {
+	interacting = !interacting;
+}
+
+void Player::setStartTime() {
+	start = std::chrono::system_clock::now();
+}
+
+double Player::checkBoxProgress() {
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - start;
+	return elapsed_seconds.count();
+}
+
 std::string Player::encodePlayerData()
 {
 	std::stringstream encodedData;
