@@ -77,6 +77,9 @@ public:
 
 	Gate & getGate();
 
+	int	getBoxTime() { return timeToOpenBox; }
+	int timeToOpenBox = 2; //in seconds
+
 protected:
 
 private:

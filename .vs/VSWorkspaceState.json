@@ -1,12 +1,14 @@
 {
   "ExpandedNodes": [
     "",
+    "\\graphics",
+    "\\graphics\\GraphicsClient",
     "\\network",
     "\\server",
     "\\server\\server",
     "\\server\\server\\server",
     "\\server\\server_vs"
   ],
-  "SelectedNode": "\\network\\ServerNetwork.h",
+  "SelectedNode": "\\graphics\\GraphicsClient\\GraphicsClient.sln",
   "PreviewInSolutionExplorer": false
 }

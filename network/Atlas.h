@@ -10,6 +10,9 @@ public:
 	void detectCollision(std::vector<float> & loc);
 	int hasKey(std::vector<float> & loc);
 	bool hasGate(std::vector<float> & loc);
+	bool hasBox(std::vector<float> & loc);
+
+	void updateBoxLayout(std::vector<float> & loc);
 	//Hardcode map for now 
 	const static int TILE_SIZE = 20;
 	const static int PLAYER_RADIUS = 2;
@@ -38,6 +41,15 @@ protected:
 	  {0,0,4},
 	  {1,2,3} };
 
+	std::vector<std::vector<int>> clientKeyLayout =
+	{ {0,0,0},
+	  {0,0,0},
+	  {0,0,0},
+	  {0,0,0},
+	  {0,0,0},
+	  {0,0,0},
+	  {0,0,0} };
+
 	std::vector<std::vector<int>> gateLayout =
 	{ {1,0,0},
 	  {0,0,0},
@@ -46,5 +58,14 @@ protected:
 	  {0,0,0},
 	  {0,0,0},
 	  {0,0,0} };
+
+	std::vector<std::vector<int>> boxLayout =
+	{ {0,0,1},
+	  {0,0,1},
+	  {0,0,1},
+	  {0,0,1},
+	  {0,0,1},
+	  {0,0,1},
+	  {1,1,1} };
 };
 
