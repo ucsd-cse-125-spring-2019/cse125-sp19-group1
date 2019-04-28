@@ -48,10 +48,10 @@ void AnimationChannel::setBoneOffset(float currTime, Skeleton * skel) {
 		newOffset = glm::rotate(newOffset, rotationAngle, rotationAxis);
 		newOffset = glm::translate(newOffset, keyframes[currKeyframe]->getPosition());
 		if ((*boneMap)[boneName] != nullptr) {
-		(*boneMap)[boneName]->SetOffset(&newOffset);
+			(*boneMap)[boneName]->SetOffset(&newOffset);
 		}
 		else {
-			std::cerr << boneName << "Bone nullptr\n";
+			//std::cerr << boneName << "Bone nullptr\n";
 		}
 	}
 }

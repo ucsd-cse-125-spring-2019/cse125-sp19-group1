@@ -27,6 +27,10 @@ void Bone::SetOffset(glm::mat4 * newOffset) {
 	}
 }
 
+glm::mat4 Bone::GetOffset() {
+	return offset;
+}
+
 void Bone::Print(string spaces) {
 	std::cout << spaces << name << std::endl;
 	for (int i = 0; i < children.size(); i++) {

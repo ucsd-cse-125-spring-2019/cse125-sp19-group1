@@ -23,7 +23,7 @@ AnimationPlayer::~AnimationPlayer()
 }
 
 void AnimationPlayer::play() {
-	std::cerr << durationFloat << "Timer value\n";
+	//std::cerr << durationFloat << "Timer value\n";
 	if (animation != NULL) {
 		animation->evaluateChannels(durationFloat, skeleton);
 		currTime = (Time::now());

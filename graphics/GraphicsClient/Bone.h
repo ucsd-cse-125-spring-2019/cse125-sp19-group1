@@ -11,6 +11,7 @@ public:
 	string GetName();
 	void Print(string spaces);
 	void SetOffset(glm::mat4 * offset);
+	glm::mat4 GetOffset();
 private:
 	Bone * parent;
 	std::vector<Bone *> children;
