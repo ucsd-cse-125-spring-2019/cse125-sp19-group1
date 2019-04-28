@@ -21,7 +21,7 @@
 #include "AnimationChannel.h"
 #include "Keyframe.h"
 
-bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer * animPlayer);
+bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer);
 void convertChannels(aiAnimation * aiAnim, AnimationChannel** channels);
 
 #endif

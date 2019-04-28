@@ -18,6 +18,15 @@ string Bone::GetName() {
 	return name;
 }
 
+void Bone::SetOffset(glm::mat4 * newOffset) {
+	try {
+		offset = glm::mat4(*newOffset);
+	}
+	catch (exception e) {
+		std::cerr << "Bone matrix couldn't be updated\n";
+	}
+}
+
 void Bone::Print(string spaces) {
 	std::cout << spaces << name << std::endl;
 	for (int i = 0; i < children.size(); i++) {

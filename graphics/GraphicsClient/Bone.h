@@ -10,6 +10,7 @@ public:
 	void AddChild(Bone * child);
 	string GetName();
 	void Print(string spaces);
+	void SetOffset(glm::mat4 * offset);
 private:
 	Bone * parent;
 	std::vector<Bone *> children;

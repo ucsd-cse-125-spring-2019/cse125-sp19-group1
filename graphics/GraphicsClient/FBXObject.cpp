@@ -16,6 +16,7 @@ void FBXObject::Init(bool attachSkel) {
 	this->specular = default_spec;
 	this->shininess = default_shininess;
 	skel = NULL;
+	animPlayer = NULL;
 	if (attachSkel)
 		skel = new Skeleton();
 }
@@ -24,7 +25,8 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data,
 	// and potentially load in a Skeleton (if expecting a Skeleton)
-	load(filepath, &vertices, &normals, &indices, &uvs, skel);
+	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer);
+	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	// Load the corresponding model texture
 	loadTexture(texFilepath);
 }
@@ -56,6 +58,10 @@ void FBXObject::PrintSkeleton() {
 
 void FBXObject::Update() {
 	// This function will handle anything that must continuously occur.
+	// right now trying to handle updating the animation through this function.
+	if (animPlayer != NULL) {
+		animPlayer->play();
+	}
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {

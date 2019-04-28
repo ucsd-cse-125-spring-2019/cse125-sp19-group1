@@ -25,6 +25,7 @@ private:
 	std::vector<glm::vec3> normals;
 
 	Skeleton * skel;
+	AnimationPlayer * animPlayer;
 	bool hasSkel;
 
 	// Luma values

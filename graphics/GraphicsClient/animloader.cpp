@@ -1,6 +1,6 @@
 #include "animloader.h"
 
-bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer * animPlayer) {
+bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer) {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
 
@@ -14,7 +14,8 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer * animPlaye
 	/* TODO */
 	// be sure to check if animations are there
 	// must also determine if we will have multiple animations in a file, but for now, assume 0-1
-	aiAnimation * anim = scene->mAnimations[0];
+	aiAnimation * anim = scene->mAnimations[1];
+	std::cerr << scene->mNumAnimations << "Number of animations\n";
 	if (!anim || anim->mNumChannels == 0) {
 		return false;
 	}
@@ -24,7 +25,7 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer * animPlaye
 	convertChannels(anim, newChannels);
 
 	Animation * newAnimation = new Animation(anim->mNumChannels, newChannels, 0, (float)anim->mDuration);
-	animPlayer = new AnimationPlayer(skel, newAnimation);
+	*animPlayer = new AnimationPlayer(skel, newAnimation);
 	return true;
 }
 

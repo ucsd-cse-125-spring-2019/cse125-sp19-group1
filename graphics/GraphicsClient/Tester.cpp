@@ -239,6 +239,7 @@ void IdleCallback()
 	SendPackets();
 	client->update();
 	MovePlayer();
+	fbx->Update();
 	//DummyMovePlayer();
 }
 

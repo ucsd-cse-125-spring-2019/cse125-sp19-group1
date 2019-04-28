@@ -9,6 +9,7 @@ private:
 	//note: setup assumes number of keyframes = 
 	// numPositionKeys = numRotationKeys = numScalingKeys
 	int numKeyframes;
+	int currKeyframe;
 	//keyframes will be in chronological order
 	Keyframe ** keyframes;
 public:
