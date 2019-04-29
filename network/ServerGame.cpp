@@ -159,6 +159,10 @@ void ServerGame::receiveFromClients()
 				}
 				break;
 			}
+			case DROP_EVENT:
+			{
+				gameData->getPlayer(iter->first)->setInventory(Item::EMPTY);
+			}
 			default:
 				printf("error in packet types\n");
 				break;
