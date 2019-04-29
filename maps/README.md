@@ -1,3 +1,5 @@
+If the create_map.exe will not build because the lodepng folder is empty, it's because you didn't run `git submodule init` and `git submodule update`.
+
 To use, open a command prompt window and run `create_map/create_map.exe input_png.png output_folder`.
 
 It will mkdir output_folder for you and within it create 2 files: heights.txt and walls.txt
