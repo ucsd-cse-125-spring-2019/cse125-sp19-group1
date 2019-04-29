@@ -11,6 +11,7 @@
 #define GENERALDATA_ID -999
 #define SERVER_GAMEDATA 123
 
+
 enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
 
 struct Gate
@@ -58,6 +59,15 @@ class GameData
 public:
 	GameData();
 	GameData(int serverInit);
+
+	std::vector<Location> initLocs =
+	{
+		Location(5 + TILE_SIZE * 0, 0, 5 + TILE_SIZE * 0),
+		Location(5 + TILE_SIZE * 2, 0, 5 + TILE_SIZE * 0),
+		Location(5 + TILE_SIZE * 0, 0, 5 + TILE_SIZE * 2),
+		Location(5 + TILE_SIZE * 2, 0, 5 + TILE_SIZE * 2),
+	};
+	int initIndex = 0;
 
 	std::map < int, Player * > players;
 	Atlas * atlas;

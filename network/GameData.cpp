@@ -33,7 +33,7 @@ std::string GameData::encodeGameData()
 
 void GameData::addNewClient(int anID, Location aLoc)
 {
-	players[anID] = new Player(anID, aLoc);
+	players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 }
 
 void GameData::removeClient(int anID)

@@ -15,6 +15,7 @@ struct Location
 {
 public:
 	Location(float argX = 10.0f, float argY = 0.0f, float argZ = 10.0f) : x(argX), y(argY), z(argZ) {}
+	//Location(Location & aCopy) : x(aCopy.getX()), y(aCopy.getY()), z(aCopy.getZ()) {}
 
 	float getX() { return x; }
 	float getY() { return y; }
