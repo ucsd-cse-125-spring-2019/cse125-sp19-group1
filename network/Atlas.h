@@ -11,6 +11,8 @@ public:
 	Atlas();
 	~Atlas();
 
+	static int getMapCoords(std::vector<float> & loc, int * row, int * col);
+
 	void detectCollision(std::vector<float> & loc);
 	int hasKey(std::vector<float> & loc);
 	bool hasGate(std::vector<float> & loc);

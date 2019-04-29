@@ -119,7 +119,7 @@ void ServerGame::receiveFromClients()
 				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 				if (int key = gameData->getAtlas()->hasKey(loc))
 				{
-					gameData->getPlayer(iter->first)->setInventory(static_cast<Item>(key));
+					gameData->getPlayer(iter->first)->setInventory(static_cast<ItemName>(key));
 				}
 				else if(gameData->getAtlas()->hasGate(loc))
 				{
@@ -161,7 +161,7 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
-				gameData->getPlayer(iter->first)->setInventory(Item::EMPTY);
+				gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
 			}
 			default:
 				printf("error in packet types\n");
