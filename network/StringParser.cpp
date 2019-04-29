@@ -48,3 +48,24 @@ std::vector<std::pair<std::string, std::string>> StringParser::parseKeyValueStri
 
 	return keyValuePairs;
 }
+
+std::vector<std::vector<int>> StringParser::parse2DIntArrayString(std::string data)
+{
+	std::vector<std::vector<int>> dataArray;
+	std::stringstream dataStream(data);
+	std::string line;
+	dataArray.clear();
+	while (std::getline(dataStream, line))
+	{
+		std::stringstream lineStream(line);
+		std::string num;
+		std::vector<int> row;
+		while (lineStream >> num)
+		{
+			row.push_back(std::stoi(num));
+		}
+		dataArray.push_back(row);
+	}
+
+	return dataArray;
+}

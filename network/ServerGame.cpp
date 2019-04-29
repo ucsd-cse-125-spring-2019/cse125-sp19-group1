@@ -17,8 +17,8 @@ ServerGame::ServerGame(void)
  
     // set up the server network to listen 
     network = new ServerNetwork(); 
-	atlas = new Atlas();
-	gameData = new GameData(atlas);
+	//atlas = new Atlas();
+	gameData = new GameData(SERVER_GAMEDATA);
 }
  
 void ServerGame::update() 
@@ -292,6 +292,6 @@ void ServerGame::updateCollision(int id)
 {
 	Location pLoc = gameData->getPlayer(id)->getLocation();
 	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-	atlas->detectCollision(loc);
+	gameData->getAtlas()->detectCollision(loc);
 	gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 }

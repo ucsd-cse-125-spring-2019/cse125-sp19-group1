@@ -6,8 +6,10 @@
 #include <string>
 #include "Atlas.h"
 #include <vector>
+#include <algorithm>
 
 #define GENERALDATA_ID -999
+#define SERVER_GAMEDATA 123
 
 enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
 
@@ -55,16 +57,16 @@ class GameData
 {
 public:
 	GameData();
-	GameData(Atlas * aPtr);
+	GameData(int serverInit);
 
 	std::map < int, Player * > players;
 	Atlas * atlas;
-	std::vector<std::vector<int>> wallLayout;
 	Gate gate1;
 
-	std::vector<std::vector<int>> wallLayout;
-	std::vector<std::vector<int>> keyLayout;
-	std::vector<std::vector<int>> gateLayout;
+	std::vector<std::vector<int>> clientWallLayout;
+	std::vector<std::vector<int>> clientKeyLayout;
+	std::vector<std::vector<int>> clientGateLayout;
+	std::vector<std::vector<int>> clientBoxLayout;
 	void addNewClient(int anID, Location aLoc);
 	void removeClient(int anID);
 
@@ -74,11 +76,19 @@ public:
 	std::string encodeGameData();
 	void decodeGameData(const char * data);
 	void addDecodeFunctions();
+	void decodeWallLayout(std::string value);
+	void decodeKeyLayout(std::string value);
+	void decodeGateLayout(std::string value);
+	void decodeBoxLayout(std::string value);
+
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
 	Atlas * getAtlas();
-
 	Gate & getGate();
+	std::vector<std::vector<int>> & getWallLayout();
+	std::vector<std::vector<int>> & getKeyLayout();
+	std::vector<std::vector<int>> & getGateLayout();
+	std::vector<std::vector<int>> & getBoxLayout();
 
 	int	getBoxTime() { return timeToOpenBox; }
 	int timeToOpenBox = 2; //in seconds

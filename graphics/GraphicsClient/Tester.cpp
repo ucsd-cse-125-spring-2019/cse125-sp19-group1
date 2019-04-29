@@ -3,6 +3,8 @@
 ////////////////////////////////////////
 
 #include "Tester.h"
+#include <ctime>
+int elapsedTime = 0;
 
 GLFWwindow * window;
 int windowWidth;
@@ -271,11 +273,17 @@ void MovePlayer()
 void IdleCallback()
 {
 	/* TODO: waiting for server implementation */
-	SendPackets();
-	client->update();
-	MovePlayer();
-	//DummyMovePlayer();
-	server->update();
+	if (clock() - elapsedTime > 1000.0 / 60)
+	{
+		elapsedTime = clock();
+		SendPackets();
+		client->update();
+		MovePlayer();
+		//DummyMovePlayer();
+		server->update();
+	}
+
+	
 }
 
 void DisplayCallback(GLFWwindow* window)

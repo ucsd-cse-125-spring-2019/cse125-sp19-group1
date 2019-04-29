@@ -20,7 +20,11 @@ public:
 
 	
 
-	std::string encodeWallData();
+	std::string encodeWallLayoutData();
+	std::string encodeClientKeyLayoutData();
+	std::string encodeGateLayoutData();
+	std::string encodeBoxLayoutData();
+	std::string encode2DVectorData(std::vector<std::vector<int>> layout);
 
 protected:
 	std::vector<std::vector<int>> wallLayout =

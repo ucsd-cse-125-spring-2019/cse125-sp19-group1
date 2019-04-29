@@ -23,7 +23,6 @@ Atlas::Atlas()
 	std::string line;
 	printf("INITIALIZING WALLS!\n");
 	//layout.clear();
-	int cols = 3;
 	while (std::getline(infile, line))
 	{
 		std::stringstream lineStream(line);
@@ -33,7 +32,6 @@ Atlas::Atlas()
 		{
 			row.push_back(std::stoi(num));
 		}
-		cols = row.size();
 		//layout.push_back(row);
 	}
 
@@ -163,18 +161,36 @@ void Atlas::updateBoxLayout(std::vector<float> & loc)
 	}
 }
 
-std::string Atlas::encodeWallData()
+std::string Atlas::encodeWallLayoutData()
+{
+	return encode2DVectorData(wallLayout);
+}
+
+std::string Atlas::encodeClientKeyLayoutData()
+{
+	return encode2DVectorData(clientKeyLayout);
+}
+std::string Atlas::encodeGateLayoutData()
+{
+	return encode2DVectorData(gateLayout);
+}
+std::string Atlas::encodeBoxLayoutData()
+{
+	return encode2DVectorData(boxLayout);
+}
+
+std::string Atlas::encode2DVectorData(std::vector<std::vector<int>> layout)
 {
 	std::stringstream encodedData;
 
-	for (int r = 0; r < wallLayout.size(); r++) {
-		for (int c = 0; c < wallLayout[r].size(); c++) {
-			encodedData << wallLayout[r][c];
+	for (int r = 0; r < layout.size(); r++) {
+		for (int c = 0; c < layout[r].size(); c++) {
+			encodedData << layout[r][c];
 
-			if (c < wallLayout[r].size() - 1)
+			if (c < layout[r].size() - 1)
 				encodedData << " ";
 		}
-		if (r < wallLayout.size() - 1)
+		if (r < layout.size() - 1)
 			encodedData << " | ";
 	}
 	encodedData << std::endl;
