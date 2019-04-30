@@ -22,7 +22,7 @@ Atlas::Atlas()
 	std::cout << errmsg << std::endl;
 	std::string line;
 	printf("INITIALIZING WALLS!\n");
-	//layout.clear();
+	wallLayout.clear();
 	int cols = 3;
 	while (std::getline(infile, line))
 	{
@@ -34,7 +34,7 @@ Atlas::Atlas()
 			row.push_back(std::stoi(num));
 		}
 		cols = row.size();
-		//layout.push_back(row);
+		wallLayout.push_back(row);
 	}
 
 	//Hardcode layout for now
@@ -151,6 +151,47 @@ bool Atlas::hasBox(std::vector<float> & loc)
 
 	return boxLayout[r][c] != 0;
 }
+
+bool Atlas::hasJail(std::vector<float> & loc)
+{
+	// find which tile player is in
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= jailLayout.size() || c >= jailLayout[r].size())
+		return false;
+
+	return jailLayout[r][c] != 0;
+}
+
+bool Atlas::isJailEmpty(std::vector<float> & loc)
+{
+	// find which tile player is in
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= jailEmptyLayout.size() || c >= jailEmptyLayout[r].size())
+		return false;
+
+	return jailLayout[r][c] != 0;
+}
+
+void Atlas::placeInJail(std::vector<float> & loc) 
+{
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	jailLayout[r][c] = 1;
+}
+
+void Atlas::removeFromJail(std::vector<float> & loc)
+{
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	jailLayout[r][c] = 0;
+}
+
 
 void Atlas::updateBoxLayout(std::vector<float> & loc) 
 {

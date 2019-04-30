@@ -30,6 +30,36 @@ void Player::setInteracting() {
 	interacting = !interacting;
 }
 
+ModelType Player::getModelType() {
+	return modelType;
+}
+
+void Player::setCaughtAnimal() {
+	caughtAnimal = !caughtAnimal;
+}
+
+void Player::setIsCaught() {
+	isCaught = !isCaught;
+}
+
+bool Player::getCaughtAnimal() {
+	return caughtAnimal;
+}
+
+bool Player::getIsCaught() {
+	return isCaught;
+}
+
+bool Player::inRange(std::vector<float> & myLoc, std::vector<float> & theirLoc) {
+	double dist = sqrt(pow(myLoc[0] - theirLoc[0], 2) +
+		pow(myLoc[1] - theirLoc[1], 2) + 
+		pow(myLoc[2] - theirLoc[2], 2) * 1.0);
+	if (dist < radius) {
+		return true;
+	}
+	return false;
+}
+
 void Player::setStartTime() {
 	start = std::chrono::system_clock::now();
 }
