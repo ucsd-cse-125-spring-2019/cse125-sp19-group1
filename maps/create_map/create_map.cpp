@@ -101,6 +101,14 @@ static void writeFile(string &folderName, const char *filename, vector<uint8_t> 
 		fprintf(file, "\n");
 	}
 	fclose(file);
+
+	int count = 0;
+	for (auto elem : map) {
+		count += (elem != 0);
+	}
+	if (count <= 0) {
+		cout << "WARNING: " << (filename + 1) << " is all zeros" << endl;
+	}
 }
 
 int main(int argc, char *argv[]) {
