@@ -28,7 +28,7 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer);
 	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	// Load the corresponding model texture
-	loadTexture(texFilepath);
+	texNum = loadTexture(texFilepath);
 }
 
 FBXObject::~FBXObject()
@@ -62,6 +62,10 @@ void FBXObject::Update() {
 	if (animPlayer != NULL) {
 		animPlayer->play();
 	}
+}
+
+void FBXObject::UpdateSkin() {
+	std::vector<Vertex *> * skelVertices = skel->GetVertices();
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -137,6 +141,8 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = (*V) * toWorld;
 
+	glBindTexture(GL_TEXTURE_2D, texNum);
+
 	// We need to calculate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
 	// Get the location of the uniform variables "projection" and "modelview"
@@ -161,6 +167,7 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 	glDrawElements(GL_TRIANGLES, (GLsizei)(this->indices).size(), GL_UNSIGNED_INT, 0);
 	// Unbind the VAO when we're done so we don't accidentally draw extra stuff or tamper with its bound buffers
 	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE, 0);
 }
 
 // initialize all the rendering stuff
@@ -173,50 +180,51 @@ void FBXObject::RenderingSetup() {
 	glGenBuffers(1, &(this->EBO));
 	glGenBuffers(1, &(this->VBO_UV));
 
+	SetBuffers();
+}
+
+/* Sending relevant data to the shaders
+ * glVertexAttribPointer: 
+ * - the first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex 
+ *   shader (in this case, it's 0,). Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
+ * - the second parameter tells us how any components there are per vertex (in this case, it's 3: x, y, and z)
+ * - the third parameter tells us what type these components are
+ * - the fourth parameter tells us whether or not the values should be normalized (true for yes and false for no)
+ * - the fifth parameter tells us the offset between consecutive indices (3 because each vertex has 3 floats)
+ * - the sixth paramter tells us the offset of the vertex's first component (0 because we don't pad vertices)
+ */
+void FBXObject::SetBuffers() {
+
 	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
 	// Consider the VAO as a container for all your buffers.
 	glBindVertexArray(this->VAO);
 
-	// Now bind a VBO to it as a GL_ARRAY_BUFFER. The GL_ARRAY_BUFFER is an array containing relevant data to what
-	// you want to draw, such as vertices, normals, colors, etc.
+	// GL_ARRAY_BUFFER is an array containing data relevant to what you want to draw (vertices, normals, colors, etc)
 	glBindBuffer(GL_ARRAY_BUFFER, (this->VBO_V));
-	// glBufferData populates the most recently bound buffer with data starting at the 3rd argument and ending after
-	// the 2nd argument number of indices. How does OpenGL know how long an index spans? Go to glVertexAttribPointer.
+	
+	/* send data about vertices */
+	// populating most recently bound buffer with data starting at the 3rd arg and ending after the 2nd arg number of indices
 	glBufferData(GL_ARRAY_BUFFER, ((this->vertices).size() * (3 * sizeof(GLfloat))), (this->vertices).data(), GL_STATIC_DRAW);
-	// Enable the usage of layout location 0 (check the vertex shader to see what this is)
+	// enable usage of layout location 0 (check vertex shader to see which location you need)
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
-		3, // This second line tells us how any components there are per vertex. In this case, it's 3 (we have an x, y, and z component)
-		GL_FLOAT, // What type these components are
-		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
-		3 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 3 floats, they should have the size of 3 floats in between
-		(GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
+	// see description in function header
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
+	/* send data about normals */
 	glBindBuffer(GL_ARRAY_BUFFER, (this->VBO_N));
 	glBufferData(GL_ARRAY_BUFFER, ((this->normals).size() * (3 * sizeof(GLfloat))), (this->normals).data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 
+	/* send data about uvs */
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO_UV);
 	glBufferData(GL_ARRAY_BUFFER, ((this->uvs).size() * (2 * sizeof(GLfloat))), (this->uvs).data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2,// This first parameter x should be the same as the number passed into the line "layout (location = x)" in the vertex shader. In this case, it's 0. Valid values are 0 to GL_MAX_UNIFORM_LOCATIONS.
-		2, // This second line tells us how any components there are per vertex. In this case, it's 2 (we have an x, y component)
-		GL_FLOAT, // What type these components are
-		GL_FALSE, // GL_TRUE means the values should be normalized. GL_FALSE means they shouldn't
-		2 * sizeof(GLfloat), // Offset between consecutive indices. Since each of our vertices have 2 floats, they should have the size of 3 floats in between
-		(GLvoid*)0); // Offset of the first vertex's component. In our case it's 0 since we don't pad the vertices array with anything.
-					 // We've sent the vertex data over to OpenGL, but there's still something missing.
-					 // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
-
-
-					 // We've sent the vertex data over to OpenGL, but there's still something missing.
-					 // In what order should it draw those vertices? That's why we'll need a GL_ELEMENT_ARRAY_BUFFER for this.
+	// tell the shader in what order it should draw the vertices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (this->EBO));
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((this->indices).size() * sizeof(GLuint)), &((this->indices)[0]), GL_STATIC_DRAW);
-
-
 
 	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -17,6 +17,7 @@ private:
 	GLuint VAO, VBO_V, VBO_N, VBO_UV, EBO;
 	GLuint uProjection, uModelview, uView;
 	GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
+	GLuint texNum;
 
 	glm::mat4 toWorld;
 	std::vector<unsigned int> indices;
@@ -44,6 +45,7 @@ public:
 	void PrintSkeleton();
 	// manipulation
 	void Update();
+	void UpdateSkin();
 	void MoveTo(float x, float y, float z);
 	void Translate(float x, float y, float z);
 	void Rotate(float angle, float x, float y, float z);
@@ -62,6 +64,7 @@ public:
 	// rendering
 	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P);
 	void RenderingSetup();
+	void SetBuffers();
 };
 
 #endif

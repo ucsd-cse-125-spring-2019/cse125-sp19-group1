@@ -8,16 +8,15 @@
 #include "Transform.h"
 #include "Geometry.h"
 #include <process.h>
-//#include "./server/ServerGame.h"
-//#include "./server/ClientGame.h"
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
-#define RACCOON_DAE_PATH "../Animations/chefWalk.dae"
-#define RACCOON_PATH "../Models/raccoon.fbx"
-#define RACCOON_TEX_PATH "../Textures/chef.ppm"
+#define CHEF_DAE_PATH "../Animations/chefWalk.dae"
+#define CHEF_TEX_PATH "../Textures/chef.ppm"
+#define RACCOON_DAE_PATH "../Animations/raccoonWalk.dae"
+#define RACCOON_TEX_PATH "../Textures/raccoon.ppm"
 
 // function declarations
 void ErrorCallback(int error, const char* description);

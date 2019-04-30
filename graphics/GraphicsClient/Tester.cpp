@@ -13,6 +13,7 @@ glm::mat4 P; // P for projection
 glm::mat4 V; // V for view
 DirLight * light;
 FBXObject * fbx;
+FBXObject * fbx2;
 GLuint objShaderProgram;
 
 Transform * root;
@@ -103,7 +104,8 @@ void Init()
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
-	fbx = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	fbx = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, true);
+	fbx2 = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, false);
 	root = new Transform(glm::mat4(1.0));
 	Transform * player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	Geometry * playerModel = new Geometry(fbx, objShaderProgram);
@@ -111,7 +113,7 @@ void Init()
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
 	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel2 = new Geometry(fbx, objShaderProgram);
+	Geometry * playerModel2 = new Geometry(fbx2, objShaderProgram);
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
