@@ -250,8 +250,8 @@ void DisplayCallback(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 
 	glUseProgram(objShaderProgram);
-	light->draw(objShaderProgram, &cam_pos);
 	root->draw(V, P);
+	light->draw(objShaderProgram, &cam_pos);
 	//fbx->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
