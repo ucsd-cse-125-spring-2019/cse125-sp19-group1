@@ -148,10 +148,23 @@ int main(int argc, char *argv[]) {
 	vector<uint8_t> walls;
 	vector<uint8_t> heights;
 	vector<uint8_t> rampDirections;
-
+	
 	walls.resize(mapWidth * mapHeight);
 	heights.resize(mapWidth * mapHeight);
 	rampDirections.resize(mapWidth * mapHeight);
+
+	static struct {
+		MapColorCode colorCode;
+		vector<uint8_t> map;
+		const char *filename;
+	} booleanMaps[] = {
+		{ itemSpawn,   vector<uint8_t>(mapWidth * mapHeight, 0), "/item_spawn.txt" },
+		{ playerSpawn, vector<uint8_t>(mapWidth * mapHeight, 0), "/player_spawn.txt" },
+		{ playerTrap,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_trap.txt" },
+		{ playerExit,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_exit.txt" },
+		{ keyDeposit,  vector<uint8_t>(mapWidth * mapHeight, 0), "/key_deposit.txt" },
+		{ table,       vector<uint8_t>(mapWidth * mapHeight, 0), "/table.txt" },
+	};
 
 	// Loop over tiles where (mapX, mapY) is the map position and
 	// (x, y) is the pixel position of the center of the tile
@@ -220,6 +233,13 @@ int main(int argc, char *argv[]) {
 						rampDirection = DirectionBitmask::westSide;
 						height = 1;
 						break;
+					default:
+						for (auto &boolMap : booleanMaps) {
+							if (colorCode == boolMap.colorCode) {
+								boolMap.map[mapY * mapWidth + mapX] = 1;
+							}
+						}
+						break;
 					}
 				}
 
@@ -238,6 +258,10 @@ int main(int argc, char *argv[]) {
 	writeFile(folderName, "/walls.txt", walls, mapWidth, mapHeight);
 	writeFile(folderName, "/heights.txt", heights, mapWidth, mapHeight);
 	writeFile(folderName, "/ramps.txt", rampDirections, mapWidth, mapHeight);
+
+	for (auto &boolMap : booleanMaps) {
+		writeFile(folderName, boolMap.filename, boolMap.map, mapWidth, mapHeight);
+	}
 
 	return EXIT_SUCCESS;
 }
