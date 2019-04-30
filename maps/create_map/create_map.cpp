@@ -83,6 +83,26 @@ bool decodePixel(MapColorCode &colorCode, const unsigned char *pixelBytes) {
 	}
 }
 
+// filename must be preceeded by a path separator character
+static void writeFile(string &folderName, const char *filename, vector<uint8_t> &map, unsigned mapWidth, unsigned mapHeight) {
+	FILE *file = nullptr;
+	string fullpath = folderName + filename;
+	if (fopen_s(&file, fullpath.c_str(), "w")) {
+		cout << "Error opening " << fullpath << endl;
+		exit(EXIT_FAILURE);
+	}
+	fprintf(file, "%d %d\n", mapWidth, mapHeight);
+	int i = 0;
+	for (unsigned y = 0; y < mapHeight; y++) {
+		for (unsigned x = 0; x < mapWidth; x++) {
+			fprintf(file, "%d ", map[i]);
+			i++;
+		}
+		fprintf(file, "\n");
+	}
+	fclose(file);
+}
+
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
 		cout << "Usage: create_map filename.png new_folder_name" << endl;
@@ -215,40 +235,9 @@ int main(int argc, char *argv[]) {
 
 	MY_MKDIR(folderName.c_str());
 
-	size_t i;
-	FILE *wallsFile = nullptr;
-	string wallsFilename = folderName + "/walls.txt";
-	if (fopen_s(&wallsFile, wallsFilename.c_str(), "w")) {
-		cout << "Error opening " << wallsFilename << endl;
-		return EXIT_FAILURE;
-	}
-	fprintf(wallsFile, "%d %d\n", mapWidth, mapHeight);
-	i = 0;
-	for (unsigned y = 0; y < mapHeight; y++) {
-		for (unsigned x = 0; x < mapWidth; x++) {
-			fprintf(wallsFile, "%d ", walls[i++]);
-		}
-		fprintf(wallsFile, "\n");
-	}
-	fclose(wallsFile);
-
-	FILE *heightsFile = nullptr;
-	string heightsFilename = folderName + "/heights.txt";
-	if (fopen_s(&heightsFile, heightsFilename.c_str(), "w")) {
-		cout << "Error opening " << heightsFilename << endl;
-		return EXIT_FAILURE;
-	}
-	fprintf(heightsFile, "%d %d\n", mapWidth, mapHeight);
-	i = 0;
-	for (unsigned y = 0; y < mapHeight; y++) {
-		for (unsigned x = 0; x < mapWidth; x++) {
-			fprintf(heightsFile, "%d ", heights[i]);
-			fprintf(heightsFile, "%d ", rampDirections[i]);
-			i++;
-		}
-		fprintf(heightsFile, "\n");
-	}
-	fclose(heightsFile);
+	writeFile(folderName, "/walls.txt", walls, mapWidth, mapHeight);
+	writeFile(folderName, "/heights.txt", heights, mapWidth, mapHeight);
+	writeFile(folderName, "/ramps.txt", rampDirections, mapWidth, mapHeight);
 
 	return EXIT_SUCCESS;
 }
