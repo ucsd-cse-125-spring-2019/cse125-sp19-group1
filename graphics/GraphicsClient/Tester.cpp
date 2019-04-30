@@ -3,6 +3,8 @@
 ////////////////////////////////////////
 
 #include "Tester.h"
+#include <ctime>
+int elapsedTime = 0;
 
 GLFWwindow * window = nullptr;
 int windowWidth;
@@ -103,7 +105,7 @@ void Init()
 {
 	server = new ServerGame();
 	client = new ClientGame();
-	_beginthread(serverLoop, 0, (void*)12);
+	//_beginthread(serverLoop, 0, (void*)12);
 
 	// load the map
 	// TODO: wait to get it from the server instead, display a loading screen
@@ -216,31 +218,54 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 void SendPackets() 
 {
 	if (directions[0]) {
-		client->sendMovementPackets(FORWARD_EVENT);
+		client->sendPackets(FORWARD_EVENT);
 	}
 	if (directions[1]) {
-		client->sendMovementPackets(BACKWARD_EVENT);
+		client->sendPackets(BACKWARD_EVENT);
 	}
 	if (directions[2]) {
-		client->sendMovementPackets(LEFT_EVENT);
+		client->sendPackets(LEFT_EVENT);
 	}
 	if (directions[3]) {
-		client->sendMovementPackets(RIGHT_EVENT);
+		client->sendPackets(RIGHT_EVENT);
 	}
 }
 
 void MovePlayer()
 {
-	if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
+	Player * p = client->getGameData()->getPlayer(client->getMyID());
+	if (p)
+	{
+		glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.5f,
+			p->getLocation().getY() * 0.5f,
+			p->getLocation().getZ() * 0.5f);
+
+	//if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
 		//glm::vec3 prevPos = raccoonModel->GetPosition();
-		Location location = client->allClients["client_0"].getLocation();
-		glm::vec3 newPos = glm::vec3(location.x * 0.1f, location.y * 0.1f, location.z * 0.1f);
+		glm::vec3 newPos = location;
 		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), newPos);
 		player->setOffset(newOffset);
 		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
 		MoveCamera(&newPos);
+
 		UpdateView();
 	}
+	//if (!client->clients2.empty()) {
+	//	/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
+	//		client->clients2["client_0"][1] * 0.1f,
+	//		client->clients2["client_0"][2] * 0.1f);
+	//	*/
+	//	glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
+	//		client->allClients["client_0"].getLocation().getY() * 0.1f,
+	//		client->allClients["client_0"].getLocation().getZ() * 0.1f);
+	//	
+	//	/*glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
+	//		p->getLocation().getY() * 0.1f,
+	//		p->getLocation().getZ() * 0.1f);*/
+
+	//	cam_pos = location;
+	//	UpdateView();
+	//}
 }
 
 void MoveCamera(glm::vec3 * newPlayerPos) {
@@ -260,10 +285,17 @@ void MoveCamera(glm::vec3 * newPlayerPos) {
 void IdleCallback()
 {
 	/* TODO: waiting for server implementation */
-	SendPackets();
-	client->update();
-	MovePlayer();
-	//DummyMovePlayer();
+	if (clock() - elapsedTime > 1000.0 / 60)
+	{
+		elapsedTime = clock();
+		SendPackets();
+		client->update();
+		MovePlayer();
+		//DummyMovePlayer();
+		server->update();
+	}
+
+	
 }
 
 void DisplayCallback(GLFWwindow* window)
@@ -311,6 +343,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_RIGHT) {
 			directions[3] = true;
 		}
+
+		if (key == GLFW_KEY_SPACE) {
+			// interact key press
+			client->sendPackets(INTERACT_EVENT);
+		}
+		if (key == GLFW_KEY_D) {
+			// interact key press
+			client->sendPackets(DROP_EVENT);
+		}
 	}
 	else if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_UP) {
@@ -327,6 +368,11 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 		if (key == GLFW_KEY_RIGHT) {
 			directions[3] = false;
+		}
+
+		if (key == GLFW_KEY_SPACE) {
+			// interact key release
+			client->sendPackets(RELEASE_EVENT);
 		}
 	}
 }

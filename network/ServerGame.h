@@ -1,7 +1,8 @@
 #include "ServerNetwork.h"
 #include "NetworkData.h"
-#include "Walls.h"
+#include "Atlas.h"
 #include <string>
+#include "GameData.h"
 
 class ServerGame
 {
@@ -16,13 +17,14 @@ public:
 	void sendActionPackets();
 	void sendInitPackets();
 	void initNewClient();
-	void updateForwardEvent(std::string id);
-	void updateBackwardEvent(std::string id);
-	void updateLeftEvent(std::string id);
-	void updateRightEvent(std::string id);
-	void updateCollision(std::string id);
-	void updatePlayerCollision(std::string id, int dir);
+	void updateForwardEvent(int id);
+	void updateBackwardEvent(int id);
+	void updateLeftEvent(int id);
+	void updateRightEvent(int id);
+	void updateCollision(int id);
+	void updatePlayerCollision(int id, int dir);
 
+	GameData * gameData;
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 
@@ -31,8 +33,7 @@ private:
     // The ServerNetwork object 
     ServerNetwork* network;
 
-	// The Walls object
-	Walls* walls;
+	Atlas* atlas;
 
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
