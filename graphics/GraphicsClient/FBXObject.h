@@ -46,6 +46,7 @@ public:
 	// manipulation
 	void Update();
 	void UpdateSkin();
+	void DeformVertex(Vertex * vertex);
 	void MoveTo(float x, float y, float z);
 	void Translate(float x, float y, float z);
 	void Rotate(float angle, float x, float y, float z);

@@ -15,7 +15,7 @@ void Skeleton::AddNode(string name, Bone * newNode) {
 	bones.insert(std::pair<string, Bone *>(name, newNode));
 }
 
-Bone * Skeleton::GetNode(string name) {
+Bone * Skeleton::GetBone(string name) {
 	return bones[name];
 }
 

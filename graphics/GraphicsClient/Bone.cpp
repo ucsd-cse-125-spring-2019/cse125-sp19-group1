@@ -3,6 +3,7 @@
 Bone::Bone(string newName, glm::mat4 * newOffset, Bone * newParent) {
 	name = string(newName);
 	offset = glm::mat4((*newOffset));
+	inverseBindingMatrix = glm::mat4(1.0f);
 	parent = newParent;
 }
 
@@ -27,8 +28,17 @@ void Bone::SetOffset(glm::mat4 * newOffset) {
 	}
 }
 
-glm::mat4 Bone::GetOffset() {
-	return offset;
+void Bone::SetSkinningMatrix() {
+
+}
+
+glm::mat4 * Bone::GetOffset() {
+	return &offset;
+}
+
+glm::mat4 * Bone::GetSkinningMatrix() {
+	glm::mat4 skinningMatrix = glm::mat4(offset * inverseBindingMatrix);
+	return &skinningMatrix;
 }
 
 void Bone::Print(string spaces) {

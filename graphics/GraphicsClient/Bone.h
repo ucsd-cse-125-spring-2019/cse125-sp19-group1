@@ -11,12 +11,15 @@ public:
 	string GetName();
 	void Print(string spaces);
 	void SetOffset(glm::mat4 * offset);
-	glm::mat4 GetOffset();
+	void SetSkinningMatrix();
+	glm::mat4 * GetOffset();
+	glm::mat4 * GetSkinningMatrix();
 private:
 	Bone * parent;
 	std::vector<Bone *> children;
 	string name;
 	glm::mat4 offset;
+	glm::mat4 inverseBindingMatrix;
 	unsigned int childCount;
 };
 

@@ -19,7 +19,7 @@ public:
 	Skeleton();
 	~Skeleton();
 	void AddNode(string name, Bone * newNode);
-	Bone * GetNode(string name);
+	Bone * GetBone(string name);
 	std::map<string, Bone *> * GetBones();
 	std::vector<Vertex *> * GetVertices();
 	void PrintBoneStructure();

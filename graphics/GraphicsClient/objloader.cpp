@@ -49,7 +49,7 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 	// if the node has a parent, find the parent and save a pointer to it
 	if (currNode->mParent) {
 		string parentName = currNode->mParent->mName.C_Str();
-		parent = skel->GetNode(parentName);
+		parent = skel->GetBone(parentName);
 	}
 
 	// create a Bone for the node and adding it to the Skeleton
@@ -62,7 +62,7 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 		traverseSkeleton(child, skel);
 		// after we've returned from the recursive call, the bone for the child node
 		// should now exist, so we can add it to the current bone's list of children
-		bone->AddChild(skel->GetNode(child->mName.C_Str()));
+		bone->AddChild(skel->GetBone(child->mName.C_Str()));
 	}
 }
 

@@ -61,11 +61,34 @@ void FBXObject::Update() {
 	// right now trying to handle updating the animation through this function.
 	if (animPlayer != NULL) {
 		animPlayer->play();
+		UpdateSkin();
 	}
 }
 
 void FBXObject::UpdateSkin() {
 	std::vector<Vertex *> * skelVertices = skel->GetVertices();
+	// --> M = W*(B^(-1))
+	// --> W = offset matrix for a given bone (TODO: setup animations to adjust these)
+	// --> (B^(-1)) = a precomputed inverse binding matrix (TODO: precompute these)
+	// ------> binding matrices are probably the ones stored in aiBones in Assimp? 
+	// ------> if so, just grab those and call glm::inverse(bindingMat) for each bone
+	/* once we have the inverse binding matrices, this step is done and you just have
+	 * to set up the animations so that they are changing the bones' offsets over time */
+	for (int i = 0; i < skelVertices->size(); i++)
+		DeformVertex((*skelVertices)[i]);
+	// after changing all the vertices and normals, we should update the buffers
+	SetBuffers();
+}
+
+void FBXObject::DeformVertex(Vertex * vertex) {
+	std::vector<std::pair<string, float>> * weights = vertex->GetWeights();
+	glm::mat4 M = glm::mat4(1.0f);
+	for (int i = 0; i < weights->size(); i++) {
+		std::pair<string, float> currWeight = (*weights)[i];
+		M = M + currWeight.second * (*((skel->GetBone(currWeight.first))->GetSkinningMatrix()));
+	}
+	vertices[vertex->GetID()] = M * glm::vec4((*(vertex->GetPos())), 1.0f);
+	// TODO: deform the corresponding normal as well (save the original normal value in the Vertex class
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
