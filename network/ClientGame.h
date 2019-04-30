@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "GameData.h"
 #include <cstdint>
 
 enum DirectionBitmask {
@@ -36,15 +37,22 @@ public:
 
 	void sendActionPackets();
 	void decodeData(const char * data);
-	void sendMovementPackets(const int type);
+	void sendPackets(const int type);
 
 	char network_data[MAX_PACKET_SIZE];
 
 	void update();
 
+
+	int myID = -1;
+	GameData * gameData;
+
+	GameData * getGameData();
+	int getMyID();
+
 	std::vector<std::vector<uint8_t>> heights;
 	std::vector<std::vector<uint8_t>> ramps;
-	std::map < std::string, Player > allClients;
-	std::string my_client_id;
+	//std::map < std::string, Player > allClients;
+	//std::string my_client_id;
 
 };

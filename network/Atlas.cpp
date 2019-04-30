@@ -1,4 +1,4 @@
-#include "Walls.h"
+#include "Atlas.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -13,7 +13,14 @@
 //0001 = right = 1
 //0000 = no wall = 0 
 
-Walls::Walls()
+void Atlas::getMapCoords(std::vector<float> & loc, int * row, int * col)
+{
+	*row = (int)(loc[2] / TILE_SIZE);
+	*col = (int)(loc[0] / TILE_SIZE);
+}
+
+
+Atlas::Atlas()
 {
 	//Reading from a file to generate map
 	std::ifstream infile("layout.txt");
@@ -21,15 +28,10 @@ Walls::Walls()
 	strerror_s(errmsg, 100, errno);
 	std::cout << errmsg << std::endl;
 	std::string line;
-	printf("INITIALIZING WALLS!\n");	
+	printf("INITIALIZING WALLS!\n");
 	//layout.clear();
-	//std::cout << infile.good() << std::endl;
-	int cols = 3;
 	while (std::getline(infile, line))
 	{
-		//std::cout << "reading the file line by line" << std::endl;
-		//std::cout << line << std::endl;
-
 		std::stringstream lineStream(line);
 		std::string num;
 		std::vector<int> row;
@@ -37,7 +39,6 @@ Walls::Walls()
 		{
 			row.push_back(std::stoi(num));
 		}
-		cols = row.size();
 		//layout.push_back(row);
 	}
 
@@ -51,17 +52,17 @@ Walls::Walls()
 	}
 }
 
-void Walls::detectCollision(std::vector<float> & loc) {
+void Atlas::detectCollision(std::vector<float> & loc) {
 	// find which tile player is in
 	int r = (int)(loc[2] / TILE_SIZE);
 	int c = (int)(loc[0] / TILE_SIZE);
 
 	if (r >= wallLayout.size())
-		r = wallLayout.size()-1;
+		r = wallLayout.size() - 1;
 
 	if (c >= wallLayout[r].size())
 	{
-		c = wallLayout[r].size()-1;
+		c = wallLayout[r].size() - 1;
 	}
 
 	//std::cout << "R: " << r << std::endl;
@@ -70,7 +71,6 @@ void Walls::detectCollision(std::vector<float> & loc) {
 	//check collision
 	std::bitset<4> wall(wallLayout[r][c]);
 	//std::cout << "bit set for walls " << wall << std::endl;
-
 	//std::cout << wall[3] << std::endl;
 	//std::cout << wall[2] << std::endl;
 	//std::cout << wall[1] << std::endl;
@@ -83,7 +83,7 @@ void Walls::detectCollision(std::vector<float> & loc) {
 		if (loc[0] - PLAYER_RADIUS < left_bound) {
 			printf("collided with left wall\n");
 			//std::cout << left_bound << "\tx: " << loc[0] << std::endl;
-			loc[0] = left_bound+PLAYER_RADIUS;
+			loc[0] = left_bound + PLAYER_RADIUS;
 		}
 	}
 	//check up wall
@@ -92,7 +92,7 @@ void Walls::detectCollision(std::vector<float> & loc) {
 		if (loc[2] - PLAYER_RADIUS < up_bound) {
 			printf("collided with up wall\n");
 			//std::cout << up_bound << "\tz: " << loc[2] << std::endl;
-			loc[2] = up_bound+PLAYER_RADIUS;
+			loc[2] = up_bound + PLAYER_RADIUS;
 		}
 	}
 	//check down wall
@@ -102,7 +102,7 @@ void Walls::detectCollision(std::vector<float> & loc) {
 			printf("collided with down wall\n");
 			//std::cout << down_bound << "\tz: " << loc[2] << std::endl;
 
-			loc[2] = down_bound-PLAYER_RADIUS;
+			loc[2] = down_bound - PLAYER_RADIUS;
 		}
 	}
 	//check right wall
@@ -111,23 +111,93 @@ void Walls::detectCollision(std::vector<float> & loc) {
 		if (loc[0] + PLAYER_RADIUS > right_bound) {
 			printf("collided with right wall\n");
 			//std::cout << right_bound << "\tx: " << loc[0] << std::endl;
-			loc[0] = right_bound-PLAYER_RADIUS;
+			loc[0] = right_bound - PLAYER_RADIUS;
 		}
 	}
 }
 
-std::string Walls::encodeWallData()
+int Atlas::hasKey(std::vector<float> & loc)
+{
+	// find which tile player is in
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= clientKeyLayout.size() || c >= clientKeyLayout[r].size())
+		return -1;
+
+	// if check to remove key from map when picked up
+	/*if (keyLayout[r][c])
+	{
+		keyLayout
+	}*/
+	return clientKeyLayout[r][c];
+}
+
+bool Atlas::hasGate(std::vector<float> & loc)
+{
+	// find which tile player is in
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= gateLayout.size() || c >= gateLayout[r].size())
+		return false;
+
+	return gateLayout[r][c] != 0;
+}
+
+bool Atlas::hasBox(std::vector<float> & loc)
+{
+	// find which tile player is in
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	if (r >= boxLayout.size() || c >= boxLayout[r].size())
+		return false;
+
+	return boxLayout[r][c] != 0;
+}
+
+void Atlas::updateBoxLayout(std::vector<float> & loc) 
+{
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+	
+	boxLayout[r][c] = 0;
+	if (keyLayout[r][c]) {
+		clientKeyLayout[r][c] = keyLayout[r][c];
+	}
+}
+
+std::string Atlas::encodeWallLayoutData()
+{
+	return encode2DVectorData(wallLayout);
+}
+
+std::string Atlas::encodeClientKeyLayoutData()
+{
+	return encode2DVectorData(clientKeyLayout);
+}
+std::string Atlas::encodeGateLayoutData()
+{
+	return encode2DVectorData(gateLayout);
+}
+std::string Atlas::encodeBoxLayoutData()
+{
+	return encode2DVectorData(boxLayout);
+}
+
+std::string Atlas::encode2DVectorData(std::vector<std::vector<int>> layout)
 {
 	std::stringstream encodedData;
 
-	for (int r = 0; r < wallLayout.size(); r++) {
-		for (int c = 0; c < wallLayout[r].size(); c++) {
-			encodedData << wallLayout[r][c];
+	for (int r = 0; r < layout.size(); r++) {
+		for (int c = 0; c < layout[r].size(); c++) {
+			encodedData << layout[r][c];
 
-			if(c < wallLayout[r].size() - 1)
+			if (c < layout[r].size() - 1)
 				encodedData << " ";
 		}
-		if(r < wallLayout.size() - 1)
+		if (r < layout.size() - 1)
 			encodedData << " | ";
 	}
 	encodedData << std::endl;

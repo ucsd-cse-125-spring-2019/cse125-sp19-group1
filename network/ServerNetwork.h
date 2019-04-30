@@ -10,6 +10,7 @@ using namespace std;
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "6881" 
 #define CONNECTION_RESET_ERROR 10054
+#define CONNECTION_ABORT_ERROR 10053
 
 class ServerNetwork
 {
