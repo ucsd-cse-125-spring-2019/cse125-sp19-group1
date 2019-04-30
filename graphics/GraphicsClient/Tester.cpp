@@ -6,18 +6,24 @@
 #include <ctime>
 int elapsedTime = 0;
 
-GLFWwindow * window;
+GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
 const char* window_title = "TESTER";
 
 glm::mat4 P; // P for projection
 glm::mat4 V; // V for view
-DirLight * light;
-FBXObject * fbx;
+DirLight * light = nullptr;
+FBXObject * raccoonModel = nullptr;
+FBXObject * catModel = nullptr;
+FBXObject * dogModel = nullptr;
+FBXObject * chefModel = nullptr;
+FBXObject * tileModel = nullptr;
 GLuint objShaderProgram;
 
-// 47, 62, 47
+Transform * root = nullptr;
+Transform * player;
+
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
@@ -101,11 +107,31 @@ void Init()
 	client = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
 
-	light = new DirLight();
-	fbx = new FBXObject(DOOR_PATH); //LUMA_PATH
-	fbx->rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+	// load the map
+	// TODO: wait to get it from the server instead, display a loading screen
+#define MAP_PATH "../../maps/tinytinymap/"
+	loadMapArray(client->heights, MAP_PATH "heights.txt");
+	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
+	
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	light = new DirLight();
+	
+	// Load models
+	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+
+	root = new Transform(glm::mat4(1.0));
+	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
+	root->addChild(player);
+	player->addChild(playerModel);
+	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
+	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	Geometry * playerModel2 = new Geometry(raccoonModel, objShaderProgram);
+	root->addChild(player2Translate);
+	player2Translate->addChild(player2Rotate);
+	player2Rotate->addChild(playerModel2);
+	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 }
 
 void serverLoop(void * args) {
@@ -116,8 +142,12 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
-	delete(fbx);
-	delete(light);
+	if (raccoonModel)     delete(raccoonModel);
+	if (catModel)         delete(catModel);
+	if (dogModel)         delete(dogModel);
+	if (chefModel)        delete(chefModel);
+	if (tileModel)        delete(tileModel);
+	if (light)            delete(light);
 	glDeleteProgram(objShaderProgram);
 }
 
@@ -206,11 +236,18 @@ void MovePlayer()
 	Player * p = client->getGameData()->getPlayer(client->getMyID());
 	if (p)
 	{
-		glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
-			p->getLocation().getY() * 0.1f,
-			p->getLocation().getZ() * 0.1f);
+		glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.5f,
+			p->getLocation().getY() * 0.5f,
+			p->getLocation().getZ() * 0.5f);
 
-		cam_pos = location;
+	//if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
+		//glm::vec3 prevPos = raccoonModel->GetPosition();
+		glm::vec3 newPos = location;
+		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), newPos);
+		player->setOffset(newOffset);
+		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
+		MoveCamera(&newPos);
+
 		UpdateView();
 	}
 	//if (!client->clients2.empty()) {
@@ -231,44 +268,19 @@ void MovePlayer()
 	//}
 }
 
-/* void DummyMovePlayer()
-{
-	if (directions[0]) {
-		fbx->translate(0.0f, 0.0f, -1.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[2] += -1.0f;
-			cam_pos[2] += -1.0f;
-			UpdateView();
-		}
+void MoveCamera(glm::vec3 * newPlayerPos) {
+	float playerX = newPlayerPos->x;
+	float playerZ = newPlayerPos->z;
+	if (playerX < 20.0f && playerX > -20.0f) {
+		cam_look_at[0] = (*newPlayerPos)[0];
+		cam_pos[0] = (*newPlayerPos)[0] + 45.0f;
 	}
-
-	if (directions[1]) {
-		fbx->translate(0.0f, 0.0f, 1.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[2] += 1.0f;
-			cam_pos[2] += 1.0f;
-			UpdateView();
-		}
+	if(playerZ <20.0f && playerZ > -20.0f){
+		cam_look_at[2] = (*newPlayerPos)[2];
+		cam_pos[2] = (*newPlayerPos)[2] + 45.0f;
 	}
-
-	if (directions[2]) {
-		fbx->translate(-1.0f, 0.0f, 0.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[0] += -1.0f;
-			cam_pos[0] += -1.0f;
-			UpdateView();
-		}
-	}
-
-	if (directions[3]) {
-		fbx->translate(1.0f, 0.0f, 0.0f);
-		if (fbx->within_bounds(-50.0f, 50.0f, -50.0f, 50.0f)) {
-			cam_look_at[2] += 1.0f;
-			cam_pos[2] += 1.0f;
-			UpdateView();
-		}
-	}
-} */
+	UpdateView();
+}
 
 void IdleCallback()
 {
@@ -294,8 +306,9 @@ void DisplayCallback(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 
 	glUseProgram(objShaderProgram);
+	root->draw(V, P);
 	light->draw(objShaderProgram, &cam_pos);
-	fbx->draw(objShaderProgram, &V, &P);
+	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
 	glfwSwapBuffers(window);
@@ -372,8 +385,8 @@ void UpdateView() {
 glm::vec3 TrackballMapping(double x, double y, int width, int height) {
 	float trackballX, trackballY, distance;
 	glm::vec3 toReturn;
-	trackballX = ((2.0f * x) - width) / width;
-	trackballY = (height - (2.0f * y)) / height;
+	trackballX = (float)(((2.0f * x) - width) / width);
+	trackballY = (float)((height - (2.0f * y)) / height);
 	distance = sqrtf((trackballX * trackballX) + (trackballY * trackballY));
 	distance = (distance < 1.0f) ? distance : 1.0f;
 	toReturn = glm::vec3(trackballX, trackballY, sqrtf(1.001f - (distance*distance)));
@@ -465,10 +478,24 @@ int main(void)
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
 	{
+		using namespace std::chrono;
+
+		auto start = high_resolution_clock::now();
+
 		// Main render display callback. Rendering of objects is done here.
 		DisplayCallback(window);
 		// Idle callback. Updating objects, etc. can be done here.
 		IdleCallback();
+
+		auto finish = high_resolution_clock::now();
+
+		// Limit to no more than 100fps
+		auto frameTime = duration_cast<microseconds>(finish - start);
+		if (frameTime < chrono::microseconds(10000)) {
+			this_thread::sleep_for(chrono::microseconds(10000) - frameTime);
+		}
+		
+		//cout << frameTime.count() / 1000.0 << endl;   // print # of milliseconds it took to process this frame
 	}
 
 	CleanUp();
