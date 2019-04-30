@@ -4,18 +4,22 @@
 
 #include "Tester.h"
 
-GLFWwindow * window;
+GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
 const char* window_title = "TESTER";
 
 glm::mat4 P; // P for projection
 glm::mat4 V; // V for view
-DirLight * light;
-FBXObject * fbx;
+DirLight * light = nullptr;
+FBXObject * raccoonModel = nullptr;
+FBXObject * catModel = nullptr;
+FBXObject * dogModel = nullptr;
+FBXObject * chefModel = nullptr;
+FBXObject * tileModel = nullptr;
 GLuint objShaderProgram;
 
-Transform * root;
+Transform * root = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
@@ -100,22 +104,35 @@ void Init()
 	client = new ClientGame();
 	_beginthread(serverLoop, 0, (void*)12);
 
+	// load the map
+	// TODO: wait to get it from the server instead, display a loading screen
+#define MAP_PATH "../../maps/tinytinymap/"
+	loadMapArray(client->heights, MAP_PATH "heights.txt");
+	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
+	
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
-	fbx = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	
+	// Load models
+	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	//Why is this broken? catModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
+	//Why is this broken? dogModel = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
+	//Why is this broken? chefModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
+	//Why is this broken? tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
+
 	root = new Transform(glm::mat4(1.0));
 	Transform * player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel = new Geometry(fbx, objShaderProgram);
+	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
 	root->addChild(player);
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
 	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel2 = new Geometry(fbx, objShaderProgram);
+	Geometry * playerModel2 = new Geometry(raccoonModel, objShaderProgram);
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
-	//fbx->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 }
 
 void serverLoop(void * args) {
@@ -126,8 +143,12 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
-	delete(fbx);
-	delete(light);
+	if (raccoonModel)     delete(raccoonModel);
+	if (catModel)         delete(catModel);
+	if (dogModel)         delete(dogModel);
+	if (chefModel)        delete(chefModel);
+	if (tileModel)        delete(tileModel);
+	if (light)            delete(light);
 	glDeleteProgram(objShaderProgram);
 }
 
@@ -214,17 +235,17 @@ void SendPackets()
 void MovePlayer()
 {
 	if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
-		glm::vec3 prevPos = fbx->GetPosition();
+		glm::vec3 prevPos = raccoonModel->GetPosition();
 		Location location = client->allClients["client_0"].getLocation();
 		glm::vec3 newPos = glm::vec3(location.x * 0.1f, location.y * 0.1f, location.z * 0.1f);
-		fbx->MoveTo(newPos[0], newPos[1], newPos[2]);
+		raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
 		MoveCamera(&newPos);
 		UpdateView();
 	}
 }
 
 void MoveCamera(glm::vec3 * newPlayerPos) {
-	if (fbx->WithinBounds(-20.0f, 20.0f, -20.0f, 20.0f)) {
+	if (raccoonModel->WithinBounds(-20.0f, 20.0f, -20.0f, 20.0f)) {
 		cam_look_at[0] = (*newPlayerPos)[0];
 		cam_pos[0] = (*newPlayerPos)[0] + 45.0f;
 		cam_look_at[2] = (*newPlayerPos)[2];
@@ -252,7 +273,7 @@ void DisplayCallback(GLFWwindow* window)
 	glUseProgram(objShaderProgram);
 	root->draw(V, P);
 	light->draw(objShaderProgram, &cam_pos);
-	//fbx->Draw(objShaderProgram, &V, &P);
+	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
 	glfwSwapBuffers(window);
@@ -315,8 +336,8 @@ void UpdateView() {
 glm::vec3 TrackballMapping(double x, double y, int width, int height) {
 	float trackballX, trackballY, distance;
 	glm::vec3 toReturn;
-	trackballX = ((2.0f * x) - width) / width;
-	trackballY = (height - (2.0f * y)) / height;
+	trackballX = (float)(((2.0f * x) - width) / width);
+	trackballY = (float)((height - (2.0f * y)) / height);
 	distance = sqrtf((trackballX * trackballX) + (trackballY * trackballY));
 	distance = (distance < 1.0f) ? distance : 1.0f;
 	toReturn = glm::vec3(trackballX, trackballY, sqrtf(1.001f - (distance*distance)));
