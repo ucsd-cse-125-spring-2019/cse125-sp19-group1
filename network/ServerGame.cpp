@@ -50,7 +50,7 @@ void ServerGame::receiveFromClients()
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); )//iter++)
 	{
 		int data_length = network->receiveData(iter->first, network_data);
-		cout << "size:" << network->sessions.size() << std::endl;
+		//cout << "size:" << network->sessions.size() << std::endl;
 		if (data_length <= 0)
 		{
 			//no data recieved

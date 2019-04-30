@@ -20,6 +20,7 @@ FBXObject * tileModel = nullptr;
 GLuint objShaderProgram;
 
 Transform * root = nullptr;
+Transform * player;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
@@ -116,13 +117,10 @@ void Init()
 	
 	// Load models
 	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
-	//Why is this broken? catModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
-	//Why is this broken? dogModel = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
-	//Why is this broken? chefModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
-	//Why is this broken? tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
+
 
 	root = new Transform(glm::mat4(1.0));
-	Transform * player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
 	root->addChild(player);
 	player->addChild(playerModel);
@@ -235,23 +233,29 @@ void SendPackets()
 void MovePlayer()
 {
 	if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
-		glm::vec3 prevPos = raccoonModel->GetPosition();
+		//glm::vec3 prevPos = raccoonModel->GetPosition();
 		Location location = client->allClients["client_0"].getLocation();
 		glm::vec3 newPos = glm::vec3(location.x * 0.1f, location.y * 0.1f, location.z * 0.1f);
-		raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
+		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), newPos);
+		player->setOffset(newOffset);
+		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
 		MoveCamera(&newPos);
 		UpdateView();
 	}
 }
 
 void MoveCamera(glm::vec3 * newPlayerPos) {
-	if (raccoonModel->WithinBounds(-20.0f, 20.0f, -20.0f, 20.0f)) {
+	float playerX = newPlayerPos->x;
+	float playerZ = newPlayerPos->z;
+	if (playerX < 20.0f && playerX > -20.0f) {
 		cam_look_at[0] = (*newPlayerPos)[0];
 		cam_pos[0] = (*newPlayerPos)[0] + 45.0f;
+	}
+	if(playerZ <20.0f && playerZ > -20.0f){
 		cam_look_at[2] = (*newPlayerPos)[2];
 		cam_pos[2] = (*newPlayerPos)[2] + 45.0f;
-		UpdateView();
 	}
+	UpdateView();
 }
 
 void IdleCallback()
