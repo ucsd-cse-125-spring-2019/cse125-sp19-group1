@@ -1,13 +1,16 @@
 #ifndef _TESTER_H_
 #define _TESTER_H_
 
+#include <process.h>
+#include <chrono>
+#include <thread>
+
 #include "Core.h"
 #include "DirLight.h"
 #include "FBXObject.h"
 #include "Node.h"
 #include "Transform.h"
 #include "Geometry.h"
-#include <process.h>
 //#include "./server/ServerGame.h"
 //#include "./server/ClientGame.h"
 #include "../../network/ServerGame.h"

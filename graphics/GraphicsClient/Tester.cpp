@@ -408,10 +408,24 @@ int main(void)
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
 	{
+		using namespace std::chrono;
+
+		auto start = high_resolution_clock::now();
+
 		// Main render display callback. Rendering of objects is done here.
 		DisplayCallback(window);
 		// Idle callback. Updating objects, etc. can be done here.
 		IdleCallback();
+
+		auto finish = high_resolution_clock::now();
+
+		// Limit to no more than 100fps
+		auto frameTime = duration_cast<microseconds>(finish - start);
+		if (frameTime < chrono::microseconds(10000)) {
+			this_thread::sleep_for(chrono::microseconds(10000) - frameTime);
+		}
+		
+		//cout << frameTime.count() / 1000.0 << endl;   // print # of milliseconds it took to process this frame
 	}
 
 	CleanUp();
