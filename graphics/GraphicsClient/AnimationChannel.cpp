@@ -2,7 +2,7 @@
 AnimationChannel::AnimationChannel(string boneName, int numKeyframes, Keyframe ** keyframes)
 {
 	this->boneName = boneName;
-	std::cerr << "Bone Name" << boneName << "\n";
+	//std::cerr << "Bone Name" << boneName << "\n";
 	this->numKeyframes = numKeyframes;
 	this->keyframes = keyframes;
 	this->currKeyframe = 0;
@@ -53,7 +53,7 @@ void AnimationChannel::setBoneOffset(float currTime, Skeleton * skel) {
 		newOffset = glm::rotate(newOffset, rotationAngle, rotationAxis);
 		newOffset = glm::translate(newOffset, keyframes[currKeyframe]->getPosition());
 		//std::cerr << skel << " Printing skeleton point" << "\n";
-		std::cerr << boneName << " Printing boneName" << "\n";
+		//std::cerr << boneName << " Printing boneName" << "\n";
 		if (boneMap->find(boneName) != (boneMap)->end()) {
 			(*boneMap)[boneName]->SetOffset(&newOffset);
 		}
