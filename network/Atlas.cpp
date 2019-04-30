@@ -13,7 +13,7 @@
 //0001 = right = 1
 //0000 = no wall = 0 
 
-int Atlas::getMapCoords(std::vector<float> & loc, int * row, int * col)
+void Atlas::getMapCoords(std::vector<float> & loc, int * row, int * col)
 {
 	*row = (int)(loc[2] / TILE_SIZE);
 	*col = (int)(loc[0] / TILE_SIZE);
