@@ -18,12 +18,13 @@
 class Transform : public Node
 {
 private:
-	glm::mat4 transform;
+	glm::mat4 offset;
 	bool type;
 	std::vector<Node*> children;
 public:
 	Transform(glm::mat4 mat);
 	void addChild(Node * n);
 	void draw(glm::mat4 V, glm::mat4 P);
+	void setOffset(glm::mat4);
 };
 #endif

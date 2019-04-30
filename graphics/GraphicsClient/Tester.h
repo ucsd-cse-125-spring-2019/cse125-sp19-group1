@@ -1,22 +1,44 @@
 #ifndef _TESTER_H_
 #define _TESTER_H_
 
+#include <process.h>
+#include <chrono>
+#include <thread>
+
 #include "Core.h"
 #include "DirLight.h"
 #include "FBXObject.h"
 #include "Node.h"
 #include "Transform.h"
 #include "Geometry.h"
-#include <process.h>
+//#include "./server/ServerGame.h"
+//#include "./server/ClientGame.h"
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
-#define CHEF_DAE_PATH "../Animations/chefWalk.dae"
-#define CHEF_TEX_PATH "../Textures/chef.ppm"
-#define RACCOON_DAE_PATH "../Animations/raccoonWalk.dae"
-#define RACCOON_TEX_PATH "../Textures/raccoon.ppm"
+
+#define ANIMATIONS_PATH  "../Animation/"
+#define MODELS_PATH      "../Models/"
+#define TEXTURES_PATH    "../Textures/"
+
+#define RACCOON_DAE_PATH  (ANIMATIONS_PATH "raccoonWalk.dae")
+#define RACCOON_MDL_PATH  (MODELS_PATH "raccoon.fbx")
+#define RACCOON_TEX_PATH  (TEXTURES_PATH "raccoon.ppm")
+
+#define CAT_MDL_PATH      (MODELS_PATH "cat.fbx")
+#define CAT_TEX_PATH      (TEXTURES_PATH "cat.ppm")
+
+#define DOG_MDL_PATH      (MODELS_PATH "doggo.fbx")
+#define DOG_TEX_PATH      (TEXTURES_PATH "doggo.ppm")
+
+#define CHEF_DAE_PATH     (ANIMATIONS_PATH "chefWalk.dae")
+#define CHEF_MDL_PATH     (MODELS_PATH "chef.fbx")
+#define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
+
+#define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
+#define TILE_TEX_PATH     (TEXTURES_PATH "tile.ppm")
 
 // function declarations
 void ErrorCallback(int error, const char* description);

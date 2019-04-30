@@ -127,13 +127,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\network\Atlas.h" />
     <ClInclude Include="..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\network\ClientNetwork.h" />
+    <ClInclude Include="..\..\network\GameData.h" />
     <ClInclude Include="..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\network\NetworkServices.h" />
     <ClInclude Include="..\..\network\Player.h" />
     <ClInclude Include="..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\network\ServerNetwork.h" />
+    <ClInclude Include="..\..\network\StringParser.h" />
     <ClInclude Include="..\..\network\Walls.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationChannel.h" />
@@ -156,12 +159,15 @@
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\network\Atlas.cpp" />
     <ClCompile Include="..\..\network\ClientGame.cpp" />
     <ClCompile Include="..\..\network\ClientNetwork.cpp" />
+    <ClCompile Include="..\..\network\GameData.cpp" />
     <ClCompile Include="..\..\network\NetworkServices.cpp" />
     <ClCompile Include="..\..\network\Player.cpp" />
     <ClCompile Include="..\..\network\ServerGame.cpp" />
     <ClCompile Include="..\..\network\ServerNetwork.cpp" />
+    <ClCompile Include="..\..\network\StringParser.cpp" />
     <ClCompile Include="..\..\network\Walls.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AnimationChannel.cpp" />

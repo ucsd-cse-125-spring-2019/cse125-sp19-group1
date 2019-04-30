@@ -83,6 +83,34 @@ bool decodePixel(MapColorCode &colorCode, const unsigned char *pixelBytes) {
 	}
 }
 
+// filename must be preceeded by a path separator character
+static void writeFile(string &folderName, const char *filename, vector<uint8_t> &map, unsigned mapWidth, unsigned mapHeight) {
+	FILE *file = nullptr;
+	string fullpath = folderName + filename;
+	if (fopen_s(&file, fullpath.c_str(), "w")) {
+		cout << "Error opening " << fullpath << endl;
+		exit(EXIT_FAILURE);
+	}
+	fprintf(file, "%d %d\n", mapWidth, mapHeight);
+	int i = 0;
+	for (unsigned y = 0; y < mapHeight; y++) {
+		for (unsigned x = 0; x < mapWidth; x++) {
+			fprintf(file, "%d ", map[i]);
+			i++;
+		}
+		fprintf(file, "\n");
+	}
+	fclose(file);
+
+	int count = 0;
+	for (auto elem : map) {
+		count += (elem != 0);
+	}
+	if (count <= 0) {
+		cout << "WARNING: " << (filename + 1) << " is all zeros" << endl;
+	}
+}
+
 int main(int argc, char *argv[]) {
 	if (argc < 2) {
 		cout << "Usage: create_map filename.png new_folder_name" << endl;
@@ -128,10 +156,23 @@ int main(int argc, char *argv[]) {
 	vector<uint8_t> walls;
 	vector<uint8_t> heights;
 	vector<uint8_t> rampDirections;
-
+	
 	walls.resize(mapWidth * mapHeight);
 	heights.resize(mapWidth * mapHeight);
 	rampDirections.resize(mapWidth * mapHeight);
+
+	static struct {
+		MapColorCode colorCode;
+		vector<uint8_t> map;
+		const char *filename;
+	} booleanMaps[] = {
+		{ itemSpawn,   vector<uint8_t>(mapWidth * mapHeight, 0), "/item_spawn.txt" },
+		{ playerSpawn, vector<uint8_t>(mapWidth * mapHeight, 0), "/player_spawn.txt" },
+		{ playerTrap,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_trap.txt" },
+		{ playerExit,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_exit.txt" },
+		{ keyDeposit,  vector<uint8_t>(mapWidth * mapHeight, 0), "/key_deposit.txt" },
+		{ table,       vector<uint8_t>(mapWidth * mapHeight, 0), "/table.txt" },
+	};
 
 	// Loop over tiles where (mapX, mapY) is the map position and
 	// (x, y) is the pixel position of the center of the tile
@@ -200,6 +241,13 @@ int main(int argc, char *argv[]) {
 						rampDirection = DirectionBitmask::westSide;
 						height = 1;
 						break;
+					default:
+						for (auto &boolMap : booleanMaps) {
+							if (colorCode == boolMap.colorCode) {
+								boolMap.map[mapY * mapWidth + mapX] = 1;
+							}
+						}
+						break;
 					}
 				}
 
@@ -215,40 +263,13 @@ int main(int argc, char *argv[]) {
 
 	MY_MKDIR(folderName.c_str());
 
-	size_t i;
-	FILE *wallsFile = nullptr;
-	string wallsFilename = folderName + "/walls.txt";
-	if (fopen_s(&wallsFile, wallsFilename.c_str(), "w")) {
-		cout << "Error opening " << wallsFilename << endl;
-		return EXIT_FAILURE;
-	}
-	fprintf(wallsFile, "%d %d\n", mapWidth, mapHeight);
-	i = 0;
-	for (unsigned y = 0; y < mapHeight; y++) {
-		for (unsigned x = 0; x < mapWidth; x++) {
-			fprintf(wallsFile, "%d ", walls[i++]);
-		}
-		fprintf(wallsFile, "\n");
-	}
-	fclose(wallsFile);
+	writeFile(folderName, "/walls.txt", walls, mapWidth, mapHeight);
+	writeFile(folderName, "/heights.txt", heights, mapWidth, mapHeight);
+	writeFile(folderName, "/ramps.txt", rampDirections, mapWidth, mapHeight);
 
-	FILE *heightsFile = nullptr;
-	string heightsFilename = folderName + "/heights.txt";
-	if (fopen_s(&heightsFile, heightsFilename.c_str(), "w")) {
-		cout << "Error opening " << heightsFilename << endl;
-		return EXIT_FAILURE;
+	for (auto &boolMap : booleanMaps) {
+		writeFile(folderName, boolMap.filename, boolMap.map, mapWidth, mapHeight);
 	}
-	fprintf(heightsFile, "%d %d\n", mapWidth, mapHeight);
-	i = 0;
-	for (unsigned y = 0; y < mapHeight; y++) {
-		for (unsigned x = 0; x < mapWidth; x++) {
-			fprintf(heightsFile, "%d ", heights[i]);
-			fprintf(heightsFile, "%d ", rampDirections[i]);
-			i++;
-		}
-		fprintf(heightsFile, "\n");
-	}
-	fclose(heightsFile);
 
 	return EXIT_SUCCESS;
 }
