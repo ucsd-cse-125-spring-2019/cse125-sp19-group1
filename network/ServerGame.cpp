@@ -277,11 +277,11 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 			} 
 			else if (dir == 1)
 			{
-				loc[2] = ot_z - 2 * PLAYER_RADIUS;
+				loc[2] = ot_z + 2 * PLAYER_RADIUS;
 			}
 			else if (dir == 2)
 			{
-				loc[2] = ot_z + 2 * PLAYER_RADIUS;
+				loc[2] = ot_z - 2 * PLAYER_RADIUS;
 			}
 			else
 			{
