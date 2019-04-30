@@ -32,6 +32,7 @@ void AnimationPlayer::play() {
 		lastTime = Time::now();
 		if (durationFloat > animation->getEndTime()) {
 			std::cerr << "Reset of animation";
+			animation->resetAnimation();
 			durationFloat = 0;
 		}
 	}

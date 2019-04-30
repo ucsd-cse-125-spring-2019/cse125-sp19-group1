@@ -14,6 +14,7 @@ private:
 public:
 	Animation(int numChannels, AnimationChannel ** animationChannels, float startTime, float endTime);
 	~Animation();
+	void resetAnimation();
 	float getStartTime();
 	float getEndTime();
 	int getNumChannels();

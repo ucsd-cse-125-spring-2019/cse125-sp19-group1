@@ -1,5 +1,5 @@
 #include "AnimationChannel.h"
-AnimationChannel::AnimationChannel(char * boneName, int numKeyframes, Keyframe ** keyframes)
+AnimationChannel::AnimationChannel(string boneName, int numKeyframes, Keyframe ** keyframes)
 {
 	this->boneName = boneName;
 	std::cerr << "Bone Name" << boneName << "\n";
@@ -13,7 +13,11 @@ AnimationChannel::~AnimationChannel()
 {
 }
 
-const char * AnimationChannel::getBoneName() {
+void AnimationChannel::resetChannel() {
+	currKeyframe = 0;
+}
+
+string AnimationChannel::getBoneName() {
 	return boneName;
 }
 
@@ -48,13 +52,13 @@ void AnimationChannel::setBoneOffset(float currTime, Skeleton * skel) {
 			rotationQuat.z / sqrt(1 - (rotationQuat.w * rotationQuat.w)));
 		newOffset = glm::rotate(newOffset, rotationAngle, rotationAxis);
 		newOffset = glm::translate(newOffset, keyframes[currKeyframe]->getPosition());
-		std::cerr << skel << " Printing skeleton point" << "\n";
+		//std::cerr << skel << " Printing skeleton point" << "\n";
 		std::cerr << boneName << " Printing boneName" << "\n";
-		if (boneName != nullptr && boneMap->find(boneName) != (boneMap)->end()) {
+		if (boneMap->find(boneName) != (boneMap)->end()) {
 			(*boneMap)[boneName]->SetOffset(&newOffset);
 		}
 		else {
-			//std::cerr << boneName << "Bone nullptr\n";
+			std::cerr << boneName << "Bone nullptr\n";
 		}
 	}
 }

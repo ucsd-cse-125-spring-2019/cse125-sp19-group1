@@ -13,6 +13,12 @@ Animation::~Animation()
 {
 }
 
+void Animation::resetAnimation() {
+	for (int i = 0; i < numChannels; i++) {
+		animationChannels[i]->resetChannel();
+	}
+}
+
 float Animation::getStartTime() {
 	return startTime;
 }
@@ -29,6 +35,7 @@ int Animation::getNumChannels() {
 * Skeleton is needed to set the right bones
 **/
 void Animation::evaluateChannels(float currTime, Skeleton * skel) {
+	//std::cerr << "Printing numChannels" << numChannels << "\n";
 	for (int i = 0; i < numChannels; i++) {
 		animationChannels[i]->setBoneOffset(currTime, skel);
 	}

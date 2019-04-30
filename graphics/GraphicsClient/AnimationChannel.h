@@ -2,10 +2,11 @@
 #define AnimationChannel_h
 #include "Keyframe.h"
 #include "Skeleton.h"
+#include <string>
 class AnimationChannel
 {
 private:
-	char * boneName;
+	string boneName;
 	//note: setup assumes number of keyframes = 
 	// numPositionKeys = numRotationKeys = numScalingKeys
 	int numKeyframes;
@@ -13,10 +14,11 @@ private:
 	//keyframes will be in chronological order
 	Keyframe ** keyframes;
 public:
-	AnimationChannel(char * boneName, int numKeyframes, Keyframe ** keyframes);
+	AnimationChannel(string boneName, int numKeyframes, Keyframe ** keyframes);
 	~AnimationChannel();
 
-	const char * getBoneName();
+	void resetChannel();
+	string getBoneName();
 	int getNumKeyframes();
 	Keyframe ** getKeyframes();
 	void setBoneOffset(float currTime, Skeleton * skel);
