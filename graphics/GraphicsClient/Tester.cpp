@@ -118,7 +118,6 @@ void Init()
 	// Load models
 	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
 
-
 	root = new Transform(glm::mat4(1.0));
 	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
 	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);

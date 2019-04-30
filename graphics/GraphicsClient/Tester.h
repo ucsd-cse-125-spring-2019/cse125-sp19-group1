@@ -33,6 +33,7 @@
 #define DOG_MDL_PATH      (MODELS_PATH "doggo.fbx")
 #define DOG_TEX_PATH      (TEXTURES_PATH "doggo.ppm")
 
+#define CHEF_DAE_PATH     (ANIMATIONS_PATH "chefWalk.dae")
 #define CHEF_MDL_PATH     (MODELS_PATH "chef.fbx")
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
 
