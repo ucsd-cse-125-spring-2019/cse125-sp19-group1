@@ -118,7 +118,7 @@ void Init()
 	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
 	//Why is this broken? catModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
 	//Why is this broken? dogModel = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
-	//Why is this broken? chefModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
+	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, true);
 	//Why is this broken? tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 
 	root = new Transform(glm::mat4(1.0));
@@ -128,7 +128,7 @@ void Init()
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
 	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel2 = new Geometry(raccoonModel, objShaderProgram);
+	Geometry * playerModel2 = new Geometry(chefModel, objShaderProgram);
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
