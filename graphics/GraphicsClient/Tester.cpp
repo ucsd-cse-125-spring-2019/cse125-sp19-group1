@@ -116,7 +116,7 @@ void Init()
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
-	
+	//light->toggleNormalShading();
 	// Load models
 	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
 	root = new Transform(glm::mat4(1.0));
@@ -130,7 +130,7 @@ void Init()
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
-	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+    //raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 }
 
 void serverLoop(void * args) {
@@ -293,6 +293,7 @@ void IdleCallback()
 		MovePlayer();
 		//DummyMovePlayer();
 		server->update();
+		raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 	}
 
 }
@@ -305,8 +306,8 @@ void DisplayCallback(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 
 	glUseProgram(objShaderProgram);
+	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	root->draw(V, P);
-	light->draw(objShaderProgram, &cam_pos);
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers

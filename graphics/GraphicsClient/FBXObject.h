@@ -30,10 +30,10 @@ private:
 	bool hasSkel;
 
 	// Luma values
-	glm::vec3 default_amb = glm::vec3(0.24725f, 0.1995f, 0.0745f);
-	glm::vec3 default_diff = glm::vec3(0.75164f, 0.60648f, 0.22648f);
-	glm::vec3 default_spec = glm::vec3(0.628281f, 0.555802f, 0.366065f);
-	float default_shininess = 52.0f;
+	glm::vec3 default_amb = glm::vec3(0.08725f, 0.0795f, 0.0245f);
+	glm::vec3 default_diff = glm::vec3(0.12164f, 0.10648f, 0.034648f);
+	glm::vec3 default_spec = glm::vec3(0.118281f, 0.085802f, 0.066065f);
+	float default_shininess =  0.5f;
 
 public:
 	// creating. destroying, and debugging
