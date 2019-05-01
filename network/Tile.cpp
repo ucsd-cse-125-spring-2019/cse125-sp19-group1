@@ -24,6 +24,7 @@ std::string Tile::encodeTileData()
 		<< boxStatus << " "
 		<< static_cast<int>(itemName);
 
+	dirty = false;
 	return encodedData.str();
 }
 void Tile::decodeTileData(std::string value)

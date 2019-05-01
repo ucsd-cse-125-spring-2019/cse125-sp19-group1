@@ -105,18 +105,17 @@ void GameData::decodeTileLayout(std::string value)
 				tileRow.clear();
 			}
 		}
-
 	}
 
 	// Debug printing
-	for (auto p : clientTileLayout)
+	/*for (auto p : clientTileLayout)
 	{
 		for (auto c : p)
 		{
 			std::cout << c.getWall() << " ";
 		}
 		std::cout << std::endl;
-	}
+	}*/
 }
 void GameData::decodeWallLayout(std::string value)
 {

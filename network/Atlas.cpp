@@ -216,8 +216,12 @@ std::string Atlas::encodeTileLayoutData()
 	{
 		for (int col = 0; col < tileLayout[row].size(); col++)
 		{
-			encodedData << "tile: " << row << " " << col << "|";
-			encodedData << "tileData: " << tileLayout[row][col].encodeTileData() << "|";
+			if (tileLayout[row][col].isDirty())
+			{
+				encodedData << "tile: " << row << " " << col << "|";
+				encodedData << "tileData: " << tileLayout[row][col].encodeTileData() << "|";
+			}
+			
 			
 			/*if(col < tileLayout[row].size() - 1)
 				encodedData << ", ";*/
