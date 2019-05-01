@@ -53,12 +53,13 @@ void GameData::addDecodeFunctions()
 void GameData::decodeTileLayout(std::string value)
 {
 	std::replace(value.begin(), value.end(), '|', '\n');
-	std::vector<std::pair<std::string, std::string>> tileDataPairs = StringParser::parseKeyValueString(value.c_str());
 
+	//clientTileLayout.clear();
 	bool init = false;
 	if (clientTileLayout.size() == 0)
 		init = true;
 
+	std::vector<std::pair<std::string, std::string>> tileDataPairs = StringParser::parseKeyValueString(value.c_str());
 
 	int row = -1;
 	int col = -1;
@@ -108,7 +109,50 @@ void GameData::decodeTileLayout(std::string value)
 
 	}
 
-	// Debug printing
+	/*while (std::getline(valueStream, line))
+	{
+		std::replace(line.begin(), line.end(), ',', '\n');
+
+		std::stringstream lineStream(line);
+		std::string tileData;
+		std::vector<Tile> tileRow;
+		while (std::getline(lineStream, tileData))
+		{
+			std::replace(tileData.begin(), tileData.end(), '/', '\n');
+			std::vector<std::pair<std::string, std::string>> tileDataPairs = StringParser::parseKeyValueString(tileData.c_str());
+			
+			int row = std::stoi(tileDataPairs[0].second);
+			int col = std::stoi(tileDataPairs[1].second);
+
+			tileData = tileDataPairs[2].second;
+			std::stringstream tileDataStream(tileData);
+			std::string wallLayout_str, height_str, tileType_str, boxStatus_str, itemName_str;
+
+			tileDataStream >> wallLayout_str >> height_str >> tileType_str >> boxStatus_str >> itemName_str;
+
+			int wallLayout = std::stoi(wallLayout_str);
+			int height = std::stoi(height_str);
+			TileType tileType = static_cast<TileType>(std::stoi(tileType_str));
+			bool boxStatus = boxStatus_str == "1";
+			ItemName itemName = static_cast<ItemName>(std::stoi(itemName_str));
+
+			Tile tmp(wallLayout, tileType, boxStatus, itemName, height);
+			if (init)
+			{
+				tileRow.push_back(tmp);
+			}
+			else
+			{
+				clientTileLayout[row][col] = tmp;
+			}
+		}
+		if (init)
+		{
+			clientTileLayout.push_back(tileRow);
+		}
+	}*/
+
+	std::cout << "SFS\n";
 	for (auto p : clientTileLayout)
 	{
 		for (auto c : p)
