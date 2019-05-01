@@ -1,11 +1,13 @@
 #include "Tile.h"
 
-Tile::Tile(int aWallLayout, TileType aType, bool aBoxStatus, ItemName anItem, int aHeight) :
-	wall(aWallLayout), tileType(aType), boxStatus(aBoxStatus), itemName(anItem), height(aHeight) {}
+Tile::Tile(int aWallLayout, TileType aType, bool aBoxStatus, ItemName anItem, int aHeight, bool aDirty) :
+	wall(aWallLayout), tileType(aType), boxStatus(aBoxStatus), itemName(anItem), height(aHeight), dirty(aDirty) {}
 
 void Tile::setItem(ItemName anItem) { itemName = anItem; }
 void Tile::setBoxStatus(bool aBoxStatus) { boxStatus = aBoxStatus; }
+void Tile::setDirty() { dirty = true; }
 
+bool Tile::isDirty() { return dirty; }
 bool Tile::hasBox() { return boxStatus; }
 int Tile::getWall() { return wall; }
 ItemName Tile::getItem() { return itemName; }

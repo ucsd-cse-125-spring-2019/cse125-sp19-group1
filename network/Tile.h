@@ -7,10 +7,12 @@ class Tile
 {
 public:
 
-	Tile(int aWallLayout = 0, TileType aType = TileType::DEFAULT, bool aBoxStatus = false, ItemName anItem = ItemName::EMPTY, int aHeight = 0);
+	Tile(int aWallLayout = 0, TileType aType = TileType::DEFAULT, bool aBoxStatus = false, ItemName anItem = ItemName::EMPTY, int aHeight = 0, bool aDirty=true);
 	void setItem(ItemName anItem);
 	void setBoxStatus(bool boxStatus);
+	void setDirty();
 
+	bool isDirty();
 	bool hasBox(); 
 	int getWall();
 	int getHeight();
@@ -26,4 +28,5 @@ protected:
 	TileType tileType;
 	bool boxStatus;
 	ItemName itemName;
+	bool dirty;
 };

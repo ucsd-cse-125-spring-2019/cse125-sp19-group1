@@ -212,17 +212,19 @@ std::string Atlas::encodeTileLayoutData()
 {
 	std::stringstream encodedData;
 
-	for (int i = 0; i < tileLayout.size(); i++)
+	for (int row = 0; row < tileLayout.size(); row++)
 	{
-		for (int j = 0; j < tileLayout[i].size(); j++)
+		for (int col = 0; col < tileLayout[row].size(); col++)
 		{
-			encodedData << tileLayout[i][j].encodeTileData();
+			encodedData << "row: " << row << "/";
+			encodedData << "col: " << col << "/";
+			encodedData << "tileData: " << tileLayout[row][col].encodeTileData() << "/";
 			
-			if(j < tileLayout[i].size() - 1)
+			if(col < tileLayout[row].size() - 1)
 				encodedData << ", ";
 			
 		}
-		if (i < tileLayout.size() - 1)
+		if (row < tileLayout.size() - 1)
 			encodedData << " | ";
 	}
 	encodedData << std::endl;

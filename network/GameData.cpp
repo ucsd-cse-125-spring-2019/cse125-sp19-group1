@@ -57,7 +57,10 @@ void GameData::decodeTileLayout(std::string value)
 	std::stringstream valueStream(value);
 
 	std::string line;
-	clientTileLayout.clear();
+	//clientTileLayout.clear();
+	bool init = false;
+	if (clientTileLayout.size() == 0)
+		init = true;
 	while (std::getline(valueStream, line))
 	{
 		std::replace(line.begin(), line.end(), ',', '\n');
@@ -67,7 +70,13 @@ void GameData::decodeTileLayout(std::string value)
 		std::vector<Tile> tileRow;
 		while (std::getline(lineStream, tileData))
 		{
+			std::replace(tileData.begin(), tileData.end(), '/', '\n');
+			std::vector<std::pair<std::string, std::string>> tileDataPairs = StringParser::parseKeyValueString(tileData.c_str());
 			
+			int row = std::stoi(tileDataPairs[0].second);
+			int col = std::stoi(tileDataPairs[1].second);
+
+			tileData = tileDataPairs[2].second;
 			std::stringstream tileDataStream(tileData);
 			std::string wallLayout_str, height_str, tileType_str, boxStatus_str, itemName_str;
 
@@ -79,20 +88,20 @@ void GameData::decodeTileLayout(std::string value)
 			bool boxStatus = boxStatus_str == "1";
 			ItemName itemName = static_cast<ItemName>(std::stoi(itemName_str));
 
-			tileRow.push_back(Tile(wallLayout, tileType, boxStatus, itemName, height));
+			Tile tmp(wallLayout, tileType, boxStatus, itemName, height);
+			if (init)
+			{
+				tileRow.push_back(tmp);
+			}
+			else
+			{
+				clientTileLayout[row][col] = tmp;
+			}
 		}
-		clientTileLayout.push_back(tileRow);
-	}
-
-	std::cout << "fmdlf\n";
-
-	for (auto v : clientTileLayout)
-	{
-		for (auto t : v)
+		if (init)
 		{
-			std::cout << t.getWall() << " ";
+			clientTileLayout.push_back(tileRow);
 		}
-		std::cout << std::endl;
 	}
 }
 void GameData::decodeWallLayout(std::string value)
