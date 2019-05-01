@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "Tile.h"
 
 #define TILE_SIZE 20
 #define PLAYER_RADIUS 2
@@ -20,6 +21,7 @@ public:
 
 	void updateBoxLayout(std::vector<float> & loc);
 
+	std::string encodeTileLayoutData();
 	std::string encodeWallLayoutData();
 	std::string encodeClientKeyLayoutData();
 	std::string encodeGateLayoutData();
@@ -71,5 +73,7 @@ protected:
 	  {0,0,0,0,0,0,1},
 	  {0,0,0,0,0,0,1},
 	  {1,1,1,1,1,1,1} };
+
+	std::vector<std::vector<Tile>> tileLayout;
 };
 

@@ -24,22 +24,26 @@ Atlas::Atlas()
 {
 	//Reading from a file to generate map
 	std::ifstream infile("layout.txt");
-	char errmsg[100];
+	/*char errmsg[100];
 	strerror_s(errmsg, 100, errno);
-	std::cout << errmsg << std::endl;
+	std::cout << errmsg << std::endl;*/
 	std::string line;
-	printf("INITIALIZING WALLS!\n");
+	//printf("INITIALIZING WALLS!\n");
 	//layout.clear();
+	std::getline(infile, line); // removes first line from file
 	while (std::getline(infile, line))
 	{
 		std::stringstream lineStream(line);
 		std::string num;
 		std::vector<int> row;
+		std::vector<Tile> tileRow;
 		while (lineStream >> num)
 		{
 			row.push_back(std::stoi(num));
+			tileRow.push_back(Tile(std::stoi(num)));
 		}
 		//layout.push_back(row);
+		tileLayout.push_back(tileRow);
 	}
 
 	//Hardcode layout for now
@@ -202,4 +206,26 @@ std::string Atlas::encode2DVectorData(std::vector<std::vector<int>> layout)
 	}
 	encodedData << std::endl;
 	return encodedData.str();
+}
+
+std::string Atlas::encodeTileLayoutData()
+{
+	std::stringstream encodedData;
+
+	for (int i = 0; i < tileLayout.size(); i++)
+	{
+		for (int j = 0; j < tileLayout[i].size(); j++)
+		{
+			encodedData << tileLayout[i][j].encodeTileData();
+			
+			if(j < tileLayout[i].size() - 1)
+				encodedData << ", ";
+			
+		}
+		if (i < tileLayout.size() - 1)
+			encodedData << " | ";
+	}
+	encodedData << std::endl;
+	return encodedData.str();
+
 }

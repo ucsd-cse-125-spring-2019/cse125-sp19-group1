@@ -67,7 +67,8 @@ void GameData::decodeTileLayout(std::string value)
 		std::vector<Tile> tileRow;
 		while (std::getline(lineStream, tileData))
 		{
-			
+			//if (tileData.size() == 0)
+			//	continue;
 			std::stringstream tileDataStream(tileData);
 			std::string wallLayout_str, height_str, tileType_str, boxStatus_str, itemName_str;
 

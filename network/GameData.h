@@ -98,6 +98,7 @@ public:
 	std::vector<std::vector<int>> clientKeyLayout;
 	std::vector<std::vector<int>> clientGateLayout;
 	std::vector<std::vector<int>> clientBoxLayout;
+	std::vector<std::vector<Tile>> clientTileLayout;
 	void addNewClient(int anID, Location aLoc);
 	void removeClient(int anID);
 
@@ -111,6 +112,7 @@ public:
 	void decodeKeyLayout(std::string value);
 	void decodeGateLayout(std::string value);
 	void decodeBoxLayout(std::string value);
+	void decodeTileLayout(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
