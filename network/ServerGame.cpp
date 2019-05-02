@@ -130,7 +130,7 @@ void ServerGame::receiveFromClients()
 				Location pLoc = gameData->getPlayer(iter->first)->getLocation();
 				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 
-				if (gameData->getPlayer(iter->first)->getModelType() == ModelType::CHEF) 
+				if (gameData->getPlayer(iter->first)->getIsChef()) 
 				{
 					if (gameData->getPlayer(iter->first)->getCaughtAnimal())
 					{
@@ -147,7 +147,7 @@ void ServerGame::receiveFromClients()
 						std::map<unsigned int, SOCKET>::iterator iter2;
 						for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
 						{
-							if (iter2 == iter)
+							if (iter2 == iter || gameData->getPlayer(iter2->first)->getIsChef())
 							{
 								continue;
 							}

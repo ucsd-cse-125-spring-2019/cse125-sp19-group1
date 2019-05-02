@@ -3,12 +3,20 @@
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
+	if (anID % 2 == 1) {
+		isChef = true;
+		modelType = ModelType::CHEF;
+	}
 	location = Location();
 	addDecodeFunctions();
 }
 
 Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
+	if (anID % 2 == 1) {
+		isChef = true;
+		modelType = ModelType::CHEF;
+	}
 	addDecodeFunctions();
 }
 
@@ -32,6 +40,10 @@ void Player::setInteracting() {
 
 ModelType Player::getModelType() {
 	return modelType;
+}
+
+bool Player::getIsChef() {
+	return isChef;
 }
 
 void Player::setCaughtAnimal() {

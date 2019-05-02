@@ -52,6 +52,7 @@ public:
 	bool getInteracting();
 	void setInteracting();
 	ModelType getModelType();
+	bool getIsChef();
 	bool getCaughtAnimal();
 	void setCaughtAnimal();
 	bool getIsCaught();
