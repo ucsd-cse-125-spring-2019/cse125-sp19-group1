@@ -12,22 +12,15 @@ void Atlas::getMapCoords(Location & loc, int & row, int & col)
 	col = (int)(loc.getX() / TILE_SIZE);
 }
 
-
 Atlas::Atlas()
 {
 	//Reading from a file to generate map
 	std::ifstream wallFile("layout.txt");
 	std::ifstream boxFile("box.txt");
-	/*char errmsg[100];
-	strerror_s(errmsg, 100, errno);
-	std::cout << errmsg << std::endl;*/
 	std::string wallLine;
 	std::string boxLine;
 	//printf("INITIALIZING WALLS!\n");
 
-	//wallLayout.clear();
-	//int cols = 3;
-	//layout.clear();
 	std::getline(wallFile, wallLine); // removes first line from file
 	std::getline(boxFile, boxLine); // removes first line from file
 	int row = 0;
@@ -39,12 +32,10 @@ Atlas::Atlas()
 		std::stringstream boxStream(boxLine);
 		std::string wallNum;
 		std::string boxNum;
-		//std::vector<int> row;
 		std::vector<Tile> tileRow;
 		while (wallStream >> wallNum)
 		{
 			boxStream >> boxNum;
-			//row.push_back(std::stoi(wallNum));
 			TileType type(TileType::DEFAULT);
 			bool boxStatus = false;
 			int height = 0;
@@ -57,52 +48,61 @@ Atlas::Atlas()
 			tileRow.push_back(Tile(std::stoi(wallNum), type, boxStatus, height));
 			col++;
 		}
-		//cols = row.size();
-		//wallLayout.push_back(row);
-		//layout.push_back(row);
 		tileLayout.push_back(tileRow);
 		row++;
 	}
 
-	//Hardcode layout for now
-	for (int r = 0; r < wallLayout.size(); r++) {
-		for (int c = 0; c < wallLayout[r].size(); c++) {
+	// Debug print out the wall layout
+	for (int r = 0; r < tileLayout.size(); r++) {
+		for (int c = 0; c < tileLayout[r].size(); c++) {
 
-			std::cout << wallLayout[r][c] << " ";
+			std::cout << tileLayout[r][c].getWall() << " ";
 		}
 		std::cout << std::endl;
 	}
-
-	// Initialize key locations
-	while (boxLocations.size() > MAX_KEYS)
+	srand(time(NULL));
+	// Remove extra boxes locations to use until box count matches item count
+	while (boxLocations.size() > MAX_ITEMS)
 	{
 		int randPos = rand() % boxLocations.size();
 		boxLocations.erase(boxLocations.begin() + randPos);
 	}
 
-	auto keyItemsIter = keyItems.begin();
-	auto boxLocationsIter = boxLocations.begin();
-	while(keyItemsIter != keyItems.end() && boxLocationsIter != boxLocations.end())
+	for(auto boxLocationsIter = boxLocations.begin(); boxLocationsIter != boxLocations.end(); boxLocationsIter++)
 	{
-		int row = (*boxLocationsIter).first;
-		int col = (*boxLocationsIter).second;
-		keyItemsIter++;
-		boxLocationsIter++;
+		// Gets row and col location of the box
+		int row = boxLocationsIter->first;
+		int col = boxLocationsIter->second;
+		ItemName randItem = ItemName::EMPTY;
+		
+		// Get random item that is still available
+		while(std::find(itemList.begin(), itemList.end(), randItem) == itemList.end())
+			randItem = static_cast<ItemName>(rand() % MAX_ITEMS + 1);
+
+		itemsMap.emplace(randItem, Item(randItem, row, col));
+		keyLayout[row][col] = static_cast<int>(randItem);
+
+		// Removes the item from the item list
+		itemList.erase(std::find(itemList.begin(), itemList.end(), randItem));
 	}
+
+	std::cout << "keys" << std::endl;
+	// Debug print key layout
+	for (auto v : keyLayout)
+	{
+		for (auto x : v)
+		{
+			std::cout << x << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "endconstructor\n";
 }
 
 void Atlas::detectCollision(Location & loc) {
 	// find which tile player is in
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
-
-	/*if (row >= wallLayout.size())
-		row = wallLayout.size() - 1;
-
-	if (col >= wallLayout[row].size())
-	{
-		col = wallLayout[row].size() - 1;
-	}*/
 
 	if (row >= tileLayout.size())
 		row = tileLayout.size() - 1;
@@ -121,7 +121,6 @@ void Atlas::detectCollision(Location & loc) {
 	//std::cout << "C: " << c << std::endl;
 
 	//check collision
-	//std::bitset<4> wall(wallLayout[row][col]);
 	std::bitset<4> wall(tileLayout[row][col].getWall());
 	//std::cout << "bit set for walls " << wall << std::endl;
 	//std::cout << wall[3] << std::endl;
@@ -129,7 +128,7 @@ void Atlas::detectCollision(Location & loc) {
 	//std::cout << wall[1] << std::endl;
 	//std::cout << wall[0] << std::endl;
 
-	std::cout << "mapCoord:(" << row << ", " << col << "): " << wallLayout[row][col] << std::endl;
+	std::cout << "mapCoord:(" << row << ", " << col << "): " << tileLayout[row][col].getWall() << std::endl;
 	//check left wall
 	if (wall[3]) {
 		int left_bound = col * TILE_SIZE + WALL_SIZE;

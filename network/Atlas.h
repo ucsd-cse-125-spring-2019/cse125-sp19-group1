@@ -8,11 +8,12 @@
 #include <string.h>
 #include "Tile.h"
 #include <map>
+#include <ctime>
 
 #define TILE_SIZE 20
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
-#define MAX_KEYS 9
+#define MAX_ITEMS 9
 
 class Atlas
 {
@@ -47,18 +48,21 @@ public:
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
-	std::map<ItemName, Item> keyItems =
+	std::map<ItemName, Item> itemsMap;
+
+	std::vector<ItemName> itemList = 
 	{
-		std::make_pair(ItemName::KEY1, Item()),
-		std::make_pair(ItemName::KEY2, Item()),
-		std::make_pair(ItemName::KEY3, Item()),
-		std::make_pair(ItemName::KEY4, Item()),
-		std::make_pair(ItemName::KEY5, Item()),
-		std::make_pair(ItemName::KEY6, Item()),
-		std::make_pair(ItemName::KEY7, Item()),
-		std::make_pair(ItemName::KEY8, Item()),
-		std::make_pair(ItemName::KEY9, Item()),
-	}
+		ItemName::KEY1,
+		ItemName::KEY2,
+		ItemName::KEY3,
+		ItemName::KEY4,
+		ItemName::KEY5,
+		ItemName::KEY6,
+		ItemName::KEY7,
+		ItemName::KEY8,
+		ItemName::KEY9
+
+	};
 
 protected:
 	std::vector<std::vector<int>> wallLayout =
