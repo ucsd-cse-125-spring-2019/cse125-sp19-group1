@@ -87,7 +87,7 @@ void GameData::decodeTileLayout(std::string value)
 			bool boxStatus = boxStatus_str == "1";
 			ItemName itemName = static_cast<ItemName>(std::stoi(itemName_str));
 
-			Tile tmp(wallLayout, tileType, boxStatus, itemName, height);
+			Tile tmp(wallLayout, tileType, boxStatus, height, itemName);
 			if (init)
 			{
 				tileRow.push_back(tmp);

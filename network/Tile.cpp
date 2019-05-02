@@ -1,6 +1,6 @@
 #include "Tile.h"
 
-Tile::Tile(int aWallLayout, TileType aType, bool aBoxStatus, ItemName anItem, int aHeight, bool aDirty) :
+Tile::Tile(int aWallLayout, TileType aType, bool aBoxStatus, int aHeight, ItemName anItem,  bool aDirty) :
 	wall(aWallLayout), tileType(aType), boxStatus(aBoxStatus), itemName(anItem), height(aHeight), dirty(aDirty) {}
 
 void Tile::setItem(ItemName anItem) { itemName = anItem; setDirty(); }

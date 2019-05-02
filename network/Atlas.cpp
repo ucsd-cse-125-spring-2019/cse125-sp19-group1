@@ -16,24 +16,39 @@ void Atlas::getMapCoords(Location & loc, int & row, int & col)
 Atlas::Atlas()
 {
 	//Reading from a file to generate map
-	std::ifstream infile("layout.txt");
+	std::ifstream wallFile("layout.txt");
+	std::ifstream boxFile("box.txt");
 	/*char errmsg[100];
 	strerror_s(errmsg, 100, errno);
 	std::cout << errmsg << std::endl;*/
-	std::string line;
+	std::string wallLine;
+	std::string boxLine;
 	//printf("INITIALIZING WALLS!\n");
 	//layout.clear();
-	std::getline(infile, line); // removes first line from file
-	while (std::getline(infile, line))
+	std::getline(wallFile, wallLine); // removes first line from file
+	std::getline(boxFile, boxLine); // removes first line from file
+	while (std::getline(wallFile, wallLine))
 	{
-		std::stringstream lineStream(line);
-		std::string num;
+		std::getline(boxFile, boxLine);
+		std::stringstream wallStream(wallLine);
+		std::stringstream boxStream(boxLine);
+		std::string wallNum;
+		std::string boxNum;
 		std::vector<int> row;
 		std::vector<Tile> tileRow;
-		while (lineStream >> num)
+		while (wallStream >> wallNum)
 		{
-			row.push_back(std::stoi(num));
-			tileRow.push_back(Tile(std::stoi(num)));
+			boxStream >> boxNum;
+			row.push_back(std::stoi(wallNum));
+			TileType type(TileType::DEFAULT);
+			bool boxStatus = false;
+			int height = 0;
+			if (boxNum == "1")
+			{
+				type = TileType::BOX;
+				boxStatus = true;
+			}
+			tileRow.push_back(Tile(std::stoi(wallNum), type, boxStatus, height));
 		}
 		//layout.push_back(row);
 		tileLayout.push_back(tileRow);
