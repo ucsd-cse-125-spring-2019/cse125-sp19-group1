@@ -21,6 +21,9 @@ public:
 	bool isJailEmpty(std::vector<float> & loc);
 	void placeInJail(std::vector<float> & loc);
 	void removeFromJail(std::vector<float> & loc);
+	void unlockJail(std::vector<float> & loc);
+	int getJailProgress(std::vector<float> & loc);
+	void resetJail(std::vector<float> & loc);
 
 	void updateBoxLayout(std::vector<float> & loc);
 	//Hardcode map for now 
@@ -92,6 +95,15 @@ protected:
 	  {0,0,0,0,0,0,0} };
 
 	std::vector<std::vector<int>> jailEmptyLayout =
+	{ {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0} };
+
+	std::vector<std::vector<int>> jailProgressLayout =
 	{ {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},

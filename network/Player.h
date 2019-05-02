@@ -51,6 +51,10 @@ public:
 	void setLocation(float argX, float argY, float argZ);
 	bool getInteracting();
 	void setInteracting();
+	bool getOpenJail();
+	void setOpenJail();
+	bool getOpenGate();
+	void setOpenGate();
 	ModelType getModelType();
 	bool getIsChef();
 	bool getCaughtAnimal();
@@ -61,7 +65,8 @@ public:
 	bool inRange(std::vector<float> & myLoc, std::vector<float> & theirLoc);
 
 	void setStartTime();
-	double checkProgress();
+	void setStartJailTime();
+	double checkProgress(int opt);
 
 	std::string encodePlayerData();
 	void decodePlayerData(std::string key, std::string value);
@@ -85,8 +90,13 @@ protected:
 	bool		isChef;
 	ModelType	modelType;
 	bool		interacting;
+	bool		openingJail;
+	bool		openingGate;
 	bool		caughtAnimal = false;
 	bool		isCaught = false;
 	int			radius = 10;
 	std::chrono::time_point<std::chrono::system_clock> start;
+	std::chrono::time_point<std::chrono::system_clock> startJail;
+	std::chrono::time_point<std::chrono::system_clock> startGate;
+
 };

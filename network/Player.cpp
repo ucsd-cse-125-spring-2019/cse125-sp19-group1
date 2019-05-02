@@ -23,6 +23,8 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 Location Player::getLocation() { return location; }
 ItemName Player::getInventory() { return inventory; }
 bool Player::getInteracting() { return interacting; }
+bool Player::getOpenJail() { return openingJail; }
+bool Player::getOpenGate() { return openingGate; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -37,6 +39,16 @@ void Player::setInventory(ItemName anItem)
 void Player::setInteracting() {
 	interacting = !interacting;
 }
+
+
+void Player::setOpenJail() {
+	openingJail = !openingJail;
+}
+
+void Player::setOpenGate() {
+	openingGate = !openingGate;
+}
+
 
 ModelType Player::getModelType() {
 	return modelType;
@@ -76,9 +88,17 @@ void Player::setStartTime() {
 	start = std::chrono::system_clock::now();
 }
 
-double Player::checkProgress() {
+void Player::setStartJailTime() {
+	startJail = std::chrono::system_clock::now();
+}
+
+double Player::checkProgress(int opt) {
 	auto now = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = now - start;
+	if (opt == 1) 
+	{
+		elapsed_seconds = now - startJail;
+	}
 	return elapsed_seconds.count();
 }
 

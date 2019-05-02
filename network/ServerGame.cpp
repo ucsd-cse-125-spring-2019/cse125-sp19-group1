@@ -94,21 +94,25 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case FORWARD_EVENT:
+				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateForwardEvent(iter->first);
 				updateCollision(iter->first);
 				break;
 
 			case BACKWARD_EVENT:
+				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateBackwardEvent(iter->first);
 				updateCollision(iter->first);
 				break;
 
 			case LEFT_EVENT:
+				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateLeftEvent(iter->first);
 				updateCollision(iter->first);
 				break;
 
 			case RIGHT_EVENT:
+				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateRightEvent(iter->first);
 				updateCollision(iter->first);
 				break;
@@ -168,6 +172,45 @@ void ServerGame::receiveFromClients()
 						{
 							gameData->getGate().updateProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
 						}
+						if (gameData->getGate().getHasKeys() && !gameData->getPlayer(iter->first)->getOpenGate())
+						{
+							gameData->getPlayer(iter->first)->setOpenGate();
+							gameData->getPlayer(iter->first)->setStartTime();
+						}
+					}
+					else if (gameData->getAtlas()->hasJail(loc))
+					{
+						if (!gameData->getAtlas()->isJailEmpty(loc))
+						{
+							gameData->getPlayer(iter->first)->setOpenJail();
+							gameData->getPlayer(iter->first)->setStartJailTime();
+							
+							//update jail progress
+							gameData->getAtlas()->unlockJail(loc);
+
+							//check if jail progress == 5
+							if (gameData->getAtlas()->getJailProgress(loc) >= 5)
+							{
+								//update animal 
+								std::map<unsigned int, SOCKET>::iterator iter2;
+								for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
+								{
+									if (iter2 == iter)
+									{
+										continue;
+									}
+									Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
+									std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
+									if (loc == theirLoc && gameData->getPlayer(iter2->first)->getIsCaught())
+									{
+										gameData->getPlayer(iter2->first)->setIsCaught();
+									}
+								}
+
+								//update jail
+								gameData->getAtlas()->resetJail(loc);
+							}
+						}
 					}
 					else if (gameData->getAtlas()->hasBox(loc))
 					{
@@ -192,6 +235,17 @@ void ServerGame::receiveFromClients()
 					!gameData->getPlayer(iter->first)->getIsChef()) {
 					std::cout << "RELEASED SPACE" << std::endl;
 					gameData->getPlayer(iter->first)->setInteracting();
+				}
+
+				if (gameData->getPlayer(iter->first)->getOpenGate() &&
+					!gameData->getPlayer(iter->first)->getIsChef() &&
+					!gameData->getGate().getIsOpen()) {
+					std::cout << "RELEASED SPACE" << std::endl;
+					gameData->getPlayer(iter->first)->setOpenGate();
+
+					//update progress of gate 
+					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+					gameData->getGate().constructGate(seconds);
 				}
 				break;
 			}
@@ -221,7 +275,7 @@ void ServerGame::receiveFromClients()
 
 			if (gameData->getPlayer(iter->first)->getInteracting())
 			{
-				double seconds = gameData->getPlayer(iter->first)->checkProgress();
+				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
 				if (gameData->getPlayer(iter->first)->getIsChef())
 				{
 					if (seconds > gameData->getChefSwingTime()) {
@@ -236,6 +290,29 @@ void ServerGame::receiveFromClients()
 						gameData->getAtlas()->updateBoxLayout(loc);
 						gameData->getPlayer(iter->first)->setInteracting();
 					}
+				}
+			}
+
+			if (gameData->getPlayer(iter->first)->getOpenJail()) 
+			{
+				double seconds = gameData->getPlayer(iter->first)->checkProgress(1);
+				if (!gameData->getPlayer(iter->first)->getIsChef())
+				{
+					if (seconds > gameData->getOpenJailTime()) {
+						std::cout << "CAN OPEN AGAIN" << std::endl;
+						gameData->getPlayer(iter->first)->setOpenJail();
+					}
+				}
+			}
+
+			if (gameData->getAtlas()->hasGate(loc) && !gameData->getGate().getIsOpen()) 
+			{
+				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+				if (seconds + gameData->getGate().getTotalConstructTime() >
+					gameData->getGate().getFinishTime())
+				{
+					gameData->getGate().setOpen();
+					gameData->getGate().constructGate(seconds);
 				}
 			}
 		}

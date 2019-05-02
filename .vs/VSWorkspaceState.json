@@ -9,10 +9,6 @@
     "\\server\\server\\server",
     "\\server\\server_vs"
   ],
-<<<<<<< HEAD
   "SelectedNode": "\\network\\ClientNetwork.cpp",
-=======
-  "SelectedNode": "\\server\\server\\server.sln",
->>>>>>> server
   "PreviewInSolutionExplorer": false
 }

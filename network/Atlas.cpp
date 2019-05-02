@@ -213,6 +213,31 @@ void Atlas::updateBoxLayout(std::vector<float> & loc)
 	}
 }
 
+void Atlas::unlockJail(std::vector<float> & loc)
+{
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	jailProgressLayout[r][c] += 1;
+}
+
+int Atlas::getJailProgress(std::vector<float> & loc)
+{
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	return jailProgressLayout[r][c];
+}
+
+void Atlas::resetJail(std::vector<float> & loc)
+{
+	int r = (int)(loc[2] / TILE_SIZE);
+	int c = (int)(loc[0] / TILE_SIZE);
+
+	jailProgressLayout[r][c] = 0;
+}
+
+
 std::string Atlas::encodeWallLayoutData()
 {
 	return encode2DVectorData(wallLayout);

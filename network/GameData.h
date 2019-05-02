@@ -23,6 +23,11 @@ public:
 	Location	getLocation() { return location; }
 	float		getProgress() { return progress; }
 	int			getGateNum() { return gateNum; }
+	bool		getHasKeys() { return hasAllKeys; }
+	void		setOpen() { isOpen = true; }
+	bool		getIsOpen() { return isOpen; }
+	double		getTotalConstructTime() { return totalConstructTime; }
+	double		getFinishTime() { return finishTime; }
 
 	void setProgress(float aProgress) { progress = aProgress; }
 
@@ -33,14 +38,20 @@ public:
 		progress++;
 		validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey)); 
 		if (progress == 3)
-			isOpen = true;
+			hasAllKeys = true;
 	}
+
+	void constructGate(double time)
+	{
+		totalConstructTime += time;
+	}
+
 
 	std::string encodeGateData() {
 		std::stringstream encodedData;
 		encodedData << "num: " << gateNum << "|"
 			<< "progress: " << progress << "|"
-			<< "isOpen: " << isOpen << "|"
+			<< "hasAllKeys: " << hasAllKeys << "|"
 			<< "location: " << location.getX() << " " << location.getY() << " " << location.getZ()
 			<< std::endl;
 		return encodedData.str();
@@ -51,7 +62,10 @@ protected:
 	float progress;
 	int gateNum;
 	std::vector<std::vector<int>> wallLayout;
+	bool hasAllKeys;
 	bool isOpen;
+	double totalConstructTime;
+	double finishTime = 60.0;
 };
 
 struct Item {
@@ -123,8 +137,10 @@ public:
 
 	int	getBoxTime() { return timeToOpenBox; }
 	int getChefSwingTime() { return timeToSwingNet; }
+	double getOpenJailTime() { return timeToOpenJail; }
 	int timeToOpenBox = 2; //in seconds
 	int timeToSwingNet = 1;
+	double timeToOpenJail = 1.5;
 
 protected:
 
