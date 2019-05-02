@@ -3,21 +3,21 @@
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
+	location = Location();
+	addDecodeFunctions();
 	if (anID % 2 == 1) {
 		isChef = true;
 		modelType = ModelType::CHEF;
 	}
-	location = Location();
-	addDecodeFunctions();
 }
 
 Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
+	addDecodeFunctions();
 	if (anID % 2 == 1) {
 		isChef = true;
 		modelType = ModelType::CHEF;
 	}
-	addDecodeFunctions();
 }
 
 Location Player::getLocation() { return location; }
@@ -76,7 +76,7 @@ void Player::setStartTime() {
 	start = std::chrono::system_clock::now();
 }
 
-double Player::checkBoxProgress() {
+double Player::checkProgress() {
 	auto now = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = now - start;
 	return elapsed_seconds.count();

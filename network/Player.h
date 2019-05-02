@@ -61,7 +61,7 @@ public:
 	bool inRange(std::vector<float> & myLoc, std::vector<float> & theirLoc);
 
 	void setStartTime();
-	double checkBoxProgress();
+	double checkProgress();
 
 	std::string encodePlayerData();
 	void decodePlayerData(std::string key, std::string value);
@@ -80,7 +80,7 @@ public:
 protected:
 	Location	location;
 	int			playerID;
-	ItemName		inventory;
+	ItemName	inventory;
 	bool		hasCake;
 	bool		isChef;
 	ModelType	modelType;

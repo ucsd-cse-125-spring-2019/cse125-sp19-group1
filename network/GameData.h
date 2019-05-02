@@ -122,7 +122,9 @@ public:
 	std::vector<std::vector<int>> & getBoxLayout();
 
 	int	getBoxTime() { return timeToOpenBox; }
+	int getChefSwingTime() { return timeToSwingNet; }
 	int timeToOpenBox = 2; //in seconds
+	int timeToSwingNet = 1;
 
 protected:
 
