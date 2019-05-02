@@ -175,6 +175,14 @@ ItemName Atlas::getTileItem(Location & loc)
 	return tileLayout[row][col].getItem();
 }
 
+void Atlas::getItem(ItemName anItem, Item & outputItem)
+{
+	if (itemsMap.count(anItem) > 0)
+	{
+		outputItem = itemsMap.at(anItem);
+	}
+}
+
 bool Atlas::hasGate(Location & loc)
 {
 	// find which tile player is in
@@ -267,7 +275,14 @@ void Atlas::updateTileItem(Location & loc, ItemName anItem)
 	{
 		if (itemsMap.count(anItem) > 0)
 		{
+			Item & temp = itemsMap.at(anItem);
 
+			/*if (temp.wasDropped() || !temp.isHeld())
+			{
+				temp.setDropped(false);
+				temp.setHoldStatus(true);
+			}*/
+			
 		}
 	}
 	tileLayout[row][col].setItem(anItem);
@@ -287,6 +302,47 @@ bool Atlas::tileHasItem(Location & loc)
 	int col = (int)(loc.getX() / TILE_SIZE);
 
 	return tileLayout[row][col].getItem() != ItemName::EMPTY;
+}
+
+void Atlas::updateDroppedItem(ItemName anItem, Location loc)
+{
+	if (itemsMap.count(anItem) > 0)
+	{
+		Item & temp = itemsMap.at(anItem);
+		temp.setHoldStatus(false);
+		int row, col;
+		Atlas::getMapCoords(loc, row, col);
+		if (temp.hasBeenMoved(row, col))
+		{
+			temp.setDropped(true);
+			temp.setDroppedTime(clock());
+			temp.setDroppedIndices(row, col);
+			std::cout << "dropTime:" << clock() << std::endl;
+
+		}
+	}
+
+}
+void Atlas::checkDroppedItems()
+{
+	for (auto iter = itemsMap.begin(); iter != itemsMap.end(); iter++)
+	{
+		if (iter->second.wasDropped())
+		{
+			std::cout << "elapsedTime:" << clock() - iter->second.getDroppedTime() << std::endl;
+			if (clock() - iter->second.getDroppedTime() > ITEM_DROP_DURATION)
+			{
+				int row, col;
+				iter->second.getStartLocation(row, col);
+
+				int dropRow, dropCol;
+				iter->second.getDropLocation(dropRow, dropCol);
+				tileLayout[dropRow][dropCol].setItem(ItemName::EMPTY);
+				tileLayout[row][col].setItem(iter->first);
+				iter->second.setDropped(false);
+			}
+		}
+	}
 }
 
 

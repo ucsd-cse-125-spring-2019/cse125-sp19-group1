@@ -14,6 +14,7 @@
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
 #define MAX_ITEMS 9
+#define ITEM_DROP_DURATION 1000
 
 class Atlas
 {
@@ -49,6 +50,11 @@ public:
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
 	std::map<ItemName, Item> itemsMap;
+
+	void getItem(ItemName anItem, Item & outputItem);
+
+	void checkDroppedItems();
+	void updateDroppedItem(ItemName anItem, Location loc);
 
 	std::vector<ItemName> itemList = 
 	{

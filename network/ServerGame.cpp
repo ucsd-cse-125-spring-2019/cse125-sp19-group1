@@ -172,6 +172,7 @@ void ServerGame::receiveFromClients()
 					{
 						gameData->getPlayer(iter->first)->setInventory(item);
 						gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
+
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
@@ -224,8 +225,24 @@ void ServerGame::receiveFromClients()
 				// PLayer cannot drop item if there is an item already on the current tile
 				if (!(gameData->getAtlas()->tileHasItem(loc)))
 				{
-					gameData->getAtlas()->updateTileItem(loc, gameData->getPlayer(iter->first)->getInventory());
+					ItemName itemName = gameData->getPlayer(iter->first)->getInventory();
+					gameData->getAtlas()->updateTileItem(loc, itemName);
 					gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+
+					gameData->getAtlas()->updateDroppedItem(itemName, loc);
+					/*Item temp;
+					gameData->getAtlas()->getItem(itemName, temp);
+					if (temp.getName() != ItemName::EMPTY)
+					{
+						temp.setHoldStatus(false);
+						int row, col;
+						Atlas::getMapCoords(loc, row, col);
+						if (temp.hasBeenMoved(row, col))
+						{
+							temp.setDropped(true);
+							temp.setDroppedTime(clock());
+						}
+					}*/
 				}
 				break;
 			}
@@ -237,6 +254,7 @@ void ServerGame::receiveFromClients()
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
 	}
+	gameData->getAtlas()->checkDroppedItems();
 	//sendActionPackets(); // uncomment to always send data from server
 }
 
