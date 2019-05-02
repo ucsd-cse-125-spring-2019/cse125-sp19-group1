@@ -4,6 +4,7 @@
 
 #include "Tester.h"
 #include <ctime>
+#include <algorithm>
 int elapsedTime = 0;
 
 GLFWwindow * window = nullptr;
@@ -116,9 +117,10 @@ void mapFinishedLoading()
 		return;
 	}
 
-#define TILE_HEIGHT_ADJUST -13.f
-#define TILE_SCALE 10.f
-#define TILE_LEVEL_OFFSET 0.15f
+#define TILE_HEIGHT_ADJUST -26.f
+#define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
+#define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
+#define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
 
 	if (floorTransform == nullptr) {
 		const auto adjustheight = glm::translate(glm::mat4(1.0f), glm::vec3(TILE_HEIGHT_ADJUST));
@@ -134,7 +136,7 @@ void mapFinishedLoading()
 
 		for (size_t x = 0; x < row.size(); x++) {
 			float y = (client->heights[z][x] / 2) * TILE_LEVEL_OFFSET;
-			row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z)));
+			row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, z * TILE_STRIDE)));
 			row[x]->addChild(tileGeometry);
 			floorTransform->addChild(row[x]);
 		}
@@ -149,18 +151,58 @@ void mapFinishedLoading()
 		row.resize(floorArray[clippedZ].size());
 
 		for (size_t x = 0; x < row.size(); x++) {
-			if ((clippedZ > 0 && (client->walls[clippedZ - 1][x] & DirectionBitmask::southSide)) ||
-				(clippedZ == z && (client->walls[clippedZ][x] & DirectionBitmask::northSide)))
+			if ((z > 0 && (client->walls[z - 1][x] & DirectionBitmask::southSide)) ||
+				(z == clippedZ && (client->walls[z][x] & DirectionBitmask::northSide)))
 			{
-				float y = 1.f + (client->heights[clippedZ][x] / 2) * TILE_LEVEL_OFFSET;
-				row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x, y, z - 0.5f)));
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (z == 0 || z != clippedZ) {
+					height = client->heights[clippedZ][x];
+				} else {
+					height = (client->heights[z - 1][x] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+				
+				// translate to the edge between tiles
+				row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)));
 				row[x]->addChild(wallGeometry);
 				floorTransform->addChild(row[x]);
 			}
 		}
 	}
 
-	//westWalls.resize(floorArray.size() + 1);
+	westWalls.resize(floorArray.size());
+	for (size_t z = 0; z < westWalls.size(); z++) {
+		auto &row = westWalls[z];
+
+		row.resize(floorArray[z].size() + 1);
+
+		for (size_t x = 0; x < row.size(); x++) {
+			auto clippedX = (x < row.size() - 1) ? x : (row.size() - 2);
+
+			if ((x > 0 && (client->walls[z][x - 1] & DirectionBitmask::eastSide)) ||
+				(x == clippedX && (client->walls[z][x] & DirectionBitmask::westSide)))
+			{
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (x == 0 || x != clippedX) {
+					height = client->heights[z][clippedX];
+				}
+				else {
+					height = (client->heights[z][x - 1] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+
+				// translate to the edge between tiles
+				const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3((x - 0.5f) * TILE_STRIDE, y, z * TILE_STRIDE));
+				// 90 degree rotation
+				const auto rotate = glm::rotate(translate, glm::half_pi<float>(), glm::vec3(0.f, 1.f, 0.f));
+				row[x] = new Transform(rotate);
+				row[x]->addChild(wallGeometry);
+				floorTransform->addChild(row[x]);
+			}
+		}
+	}
 
 	root->addChild(floorTransform);
 }
