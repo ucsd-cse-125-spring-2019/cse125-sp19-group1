@@ -2,9 +2,9 @@
 
 Bone::Bone(string newName, glm::mat4 * newOffset, Bone * newParent) {
 	name = string(newName);
-	offset = glm::mat4((*newOffset));
 	inverseBindingMatrix = glm::mat4(1.0f);
 	parent = newParent;
+	SetOffset(newOffset);
 }
 
 Bone::~Bone() {
@@ -24,12 +24,17 @@ void Bone::SetOffset(glm::mat4 * newOffset) {
 		offset = glm::mat4(*newOffset);
 	}
 	catch (exception e) {
-		std::cerr << "Bone matrix couldn't be updated\n";
+		std::cerr << "Bone's offset matrix could not be set" << std::endl;
 	}
 }
 
-void Bone::SetSkinningMatrix() {
-
+void Bone::SetIBM(glm::mat4 * bindingMatrix) {
+	try {
+		inverseBindingMatrix = glm::inverse(glm::mat4(*bindingMatrix));
+	}
+	catch (exception e) {
+		std::cerr << "Bone's inverse binding matrix could not be set" << std::endl;
+	}
 }
 
 glm::mat4 * Bone::GetOffset() {

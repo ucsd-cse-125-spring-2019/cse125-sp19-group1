@@ -11,7 +11,7 @@ public:
 	string GetName();
 	void Print(string spaces);
 	void SetOffset(glm::mat4 * offset);
-	void SetSkinningMatrix();
+	void SetIBM(glm::mat4 * bindingMatrix);
 	glm::mat4 * GetOffset();
 	glm::mat4 * GetSkinningMatrix();
 private:

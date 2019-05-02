@@ -21,7 +21,7 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 
 	// if the Skeleton pointer is not null, it means we want a Skeleton, so we must load the proper data
 	if (skel) {
-		loadSkeleton(mesh, scene->mRootNode, vertices, skel);
+		loadSkeleton(mesh, scene->mRootNode, vertices, normals, skel);
 		loadAnimation((aiScene*)scene, skel, animPlayer);
 		std::cerr << "Trying to get animPlayer pointer:" << *animPlayer << "\n";
 	}
@@ -31,13 +31,14 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 }
 
 // load a skeleton
-void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, Skeleton * skel)
+void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel)
 {
 	// extracting information about how bones affect vertices through weights
 	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	populateSkelVertices(mesh, vertices, skelVertices);
+	populateSkelVertices(mesh, vertices, normals, skelVertices);
 	// creating actual Bone objects and populating the Skeleton
 	traverseSkeleton(root, skel);
+	assignBindingMatrices(mesh, skel);
 }
 
 void traverseSkeleton(aiNode * currNode, Skeleton * skel)
@@ -66,12 +67,25 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 	}
 }
 
-void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<Vertex *> * skelVertices)
+void assignBindingMatrices(aiMesh * mesh, Skeleton * skel) {
+	aiBone * currAIBone = NULL;
+	Bone * currBone = NULL;
+	for (int i = 0; i < mesh->mNumBones; i++) {
+		currAIBone = mesh->mBones[i];
+		currBone = skel->GetBone(currAIBone->mName.C_Str());
+		if (currBone != NULL) {
+			currBone->SetIBM(aiMatTOglm(currAIBone->mOffsetMatrix));
+		}
+		currBone = NULL;
+	}
+}
+
+void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, std::vector<Vertex *> * skelVertices)
 {
 	// first, populate the skel Vertex array
 	skelVertices->reserve(vertices->size());
 	for (int i = 0; i < vertices->size(); i++) {
-		skelVertices->push_back(new Vertex(i, &((*vertices)[i])));
+		skelVertices->push_back(new Vertex(i, &((*vertices)[i]), &((*normals)[i])));
 	}
 
 	// next, extract weights from the aiBones
