@@ -220,6 +220,8 @@ void ServerGame::receiveFromClients()
 			case DROP_EVENT:
 			{
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
+
+				// PLayer cannot drop item if there is an item already on the current tile
 				if (!(gameData->getAtlas()->tileHasItem(loc)))
 				{
 					gameData->getAtlas()->updateTileItem(loc, gameData->getPlayer(iter->first)->getInventory());

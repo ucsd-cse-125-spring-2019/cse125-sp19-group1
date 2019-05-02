@@ -263,7 +263,13 @@ void Atlas::updateTileItem(Location & loc, ItemName anItem)
 	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return;
 
+	if (anItem != ItemName::EMPTY)
+	{
+		if (itemsMap.count(anItem) > 0)
+		{
 
+		}
+	}
 	tileLayout[row][col].setItem(anItem);
 	
 }

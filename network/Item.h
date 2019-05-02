@@ -21,6 +21,10 @@ public:
 	void setDroppedTime(int aTime) { droppedTime = aTime; }
 	void setIndices(int row, int col) { rowIndex = row; colIndex = col; }
 
+	bool hasBeenMoved(int row, int col)
+	{
+		return row != rowIndex || col != colIndex;
+	}
 
 protected:
 	ItemName name;
