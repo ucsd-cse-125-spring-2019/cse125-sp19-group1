@@ -24,6 +24,11 @@ public:
 	ItemName getItem(Location & loc);
 	bool hasGate(Location & loc);
 	bool hasBox(Location & loc);
+	
+	bool hasJail(std::vector<float> & loc);
+	bool isJailEmpty(std::vector<float> & loc);
+	void placeInJail(std::vector<float> & loc);
+	void removeFromJail(std::vector<float> & loc);
 
 	void updateBoxLayout(Location & loc);
 	Tile & getTileAt(int row, int col);
@@ -82,5 +87,24 @@ protected:
 	  {1,1,1,1,1,1,1} };
 
 	std::vector<std::vector<Tile>> tileLayout;
+
+	std::vector<std::vector<int>> jailLayout =
+	{ {0,0,0,0,0,0,0},
+	  {1,0,0,0,0,0,0},
+	  {1,0,0,0,0,0,0},
+	  {1,0,0,0,0,0,0},
+	  {1,0,0,0,0,0,0},
+	  {1,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0} };
+
+	std::vector<std::vector<int>> jailEmptyLayout =
+	{ {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0} };
+
 };
 

@@ -26,6 +26,14 @@ public:
 	void setLocation(Location aLoc);
 	bool getInteracting();
 	void setInteracting();
+	ModelType getModelType();
+	bool getIsChef();
+	bool getCaughtAnimal();
+	void setCaughtAnimal();
+	bool getIsCaught();
+	void setIsCaught();
+
+	bool inRange(std::vector<float> & myLoc, std::vector<float> & theirLoc);
 
 	void setStartTime();
 	double checkBoxProgress();
@@ -52,5 +60,8 @@ protected:
 	bool		isChef;
 	ModelType	modelType;
 	bool		interacting;
+	bool		caughtAnimal = false;
+	bool		isCaught = false;
+	int			radius = 10;
 	std::chrono::time_point<std::chrono::system_clock> start;
 };

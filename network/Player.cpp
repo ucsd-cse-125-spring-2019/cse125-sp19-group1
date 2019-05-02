@@ -3,12 +3,20 @@
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
+	if (anID % 2 == 1) {
+		isChef = true;
+		modelType = ModelType::CHEF;
+	}
 	location = Location();
 	addDecodeFunctions();
 }
 
 Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
+	if (anID % 2 == 1) {
+		isChef = true;
+		modelType = ModelType::CHEF;
+	}
 	addDecodeFunctions();
 }
 
@@ -33,6 +41,40 @@ void Player::setInventory(ItemName anItem)
 
 void Player::setInteracting() {
 	interacting = !interacting;
+}
+
+ModelType Player::getModelType() {
+	return modelType;
+}
+
+bool Player::getIsChef() {
+	return isChef;
+}
+
+void Player::setCaughtAnimal() {
+	caughtAnimal = !caughtAnimal;
+}
+
+void Player::setIsCaught() {
+	isCaught = !isCaught;
+}
+
+bool Player::getCaughtAnimal() {
+	return caughtAnimal;
+}
+
+bool Player::getIsCaught() {
+	return isCaught;
+}
+
+bool Player::inRange(std::vector<float> & myLoc, std::vector<float> & theirLoc) {
+	double dist = sqrt(pow(myLoc[0] - theirLoc[0], 2) +
+		pow(myLoc[1] - theirLoc[1], 2) + 
+		pow(myLoc[2] - theirLoc[2], 2) * 1.0);
+	if (dist < radius) {
+		return true;
+	}
+	return false;
 }
 
 void Player::setStartTime() {

@@ -19,7 +19,7 @@
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
 
-#define ANIMATIONS_PATH  "../Animation/"
+#define ANIMATIONS_PATH  "../Animations/"
 #define MODELS_PATH      "../Models/"
 #define TEXTURES_PATH    "../Textures/"
 
