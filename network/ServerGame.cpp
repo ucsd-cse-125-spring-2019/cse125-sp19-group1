@@ -166,11 +166,12 @@ void ServerGame::receiveFromClients()
 				else
 				{
 					Location loc = gameData->getPlayer(iter->first)->getLocation();
-					ItemName item = gameData->getAtlas()->getItem(loc);
+					ItemName item = gameData->getAtlas()->getTileItem(loc);
 					
-					if (item != ItemName::EMPTY)
+					if (item != ItemName::EMPTY && gameData->getPlayer(iter->first)->getInventory() == ItemName::EMPTY)
 					{
 						gameData->getPlayer(iter->first)->setInventory(item);
+						gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
@@ -218,7 +219,12 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
-				gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
+				if (!(gameData->getAtlas()->tileHasItem(loc)))
+				{
+					gameData->getAtlas()->updateTileItem(loc, gameData->getPlayer(iter->first)->getInventory());
+					gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+				}
 				break;
 			}
 			default:

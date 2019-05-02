@@ -21,7 +21,7 @@ public:
 	static void getMapCoords(Location & loc, int & row, int & col);
 
 	void detectCollision(Location & loc);
-	ItemName getItem(Location & loc);
+	ItemName getTileItem(Location & loc);
 	bool hasGate(Location & loc);
 	bool hasBox(Location & loc);
 	
@@ -31,7 +31,10 @@ public:
 	void removeFromJail(std::vector<float> & loc);
 
 	void updateBoxLayout(Location & loc);
-	Tile & getTileAt(int row, int col);
+	Tile & getTileAt(Location & loc);
+
+	bool tileHasItem(Location & loc);
+	void updateTileItem(Location & loc, ItemName anItem);
 
 	std::string encodeTileLayoutData();
 	std::string encodeWallLayoutData();

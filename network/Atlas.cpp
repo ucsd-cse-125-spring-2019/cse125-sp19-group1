@@ -142,7 +142,7 @@ void Atlas::detectCollision(Location & loc) {
 	}
 }
 
-ItemName Atlas::getItem(Location & loc)
+ItemName Atlas::getTileItem(Location & loc)
 {
 	// find which tile player is in
 	int row = (int)(loc.getZ() / TILE_SIZE);
@@ -233,9 +233,33 @@ void Atlas::updateBoxLayout(Location & loc)
 		tileLayout[row][col].setItem(static_cast<ItemName>(keyLayout[row][col]));
 	}
 }
-Tile & Atlas::getTileAt(int row, int col)
+
+void Atlas::updateTileItem(Location & loc, ItemName anItem)
 {
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
+		return;
+
+
+	tileLayout[row][col].setItem(anItem);
+	
+}
+
+Tile & Atlas::getTileAt(Location & loc)
+{
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
 	return tileLayout[row][col];
+}
+bool Atlas::tileHasItem(Location & loc)
+{
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	return tileLayout[row][col].getItem() != ItemName::EMPTY;
 }
 
 
