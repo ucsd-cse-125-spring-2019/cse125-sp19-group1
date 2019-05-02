@@ -9,13 +9,20 @@
 
 #include <glm/glm.hpp>
 
-#include "MeshEntry.h"
+#include "Skeleton.h"
 
 // Include Assimp
 #include <assimp/Importer.hpp> // C++ importer interface
 #include <assimp/scene.h>  // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
-bool loadAssimp(const char * path, std::vector<MeshEntry *> * meshes);
+bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
+	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs, Skeleton * skel);
+void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, Skeleton * skel);
+void traverseSkeleton(aiNode * currRoot, Skeleton * skel);
+void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<Vertex *> * skelVertices);
+glm::mat4 * aiMatTOglm(aiMatrix4x4 mat);
+void populateMesh(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
+	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs);
 
 #endif

@@ -2,13 +2,13 @@
 
 GameData::GameData()
 {
-	atlas = new Atlas();
+	atlas = nullptr;
 	addDecodeFunctions();
 }
 
-GameData::GameData(Atlas * aPtr)
+GameData::GameData(int serverInit)
 {
-	atlas = aPtr;
+	atlas = new Atlas();
 	addDecodeFunctions();
 }
 
@@ -22,7 +22,10 @@ std::string GameData::encodeGameData()
 		encodedData << iter->second->encodePlayerData();
 	}
 	encodedData << "client: " << GENERALDATA_ID << std::endl;
-	encodedData << "walls: " << atlas->encodeWallData();
+	encodedData << "wallLayout: " << atlas->encodeWallLayoutData();
+	encodedData << "keyLayout: " << atlas->encodeClientKeyLayoutData();
+	encodedData << "gateLayout: " << atlas->encodeGateLayoutData();
+	encodedData << "boxLayout: " << atlas->encodeBoxLayoutData();
 	encodedData << "gate: " << gate1.encodeGateData();
 
 	return encodedData.str();
@@ -30,7 +33,7 @@ std::string GameData::encodeGameData()
 
 void GameData::addNewClient(int anID, Location aLoc)
 {
-	players[anID] = new Player(anID, aLoc);
+	players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 }
 
 void GameData::removeClient(int anID)
@@ -40,7 +43,32 @@ void GameData::removeClient(int anID)
 
 void GameData::addDecodeFunctions()
 {
+	decodingFunctions["wallLayout"] = &GameData::decodeWallLayout;
+	decodingFunctions["keyLayout"] = &GameData::decodeKeyLayout;
+	decodingFunctions["gateLayout"] = &GameData::decodeGateLayout;
+	decodingFunctions["boxLayout"] = &GameData::decodeBoxLayout;
+}
 
+void GameData::decodeWallLayout(std::string value)
+{
+	std::replace(value.begin(), value.end(), '|', '\n');
+
+	clientWallLayout = StringParser::parse2DIntArrayString(value);
+}
+void GameData::decodeKeyLayout(std::string value)
+{
+	std::replace(value.begin(), value.end(), '|', '\n');
+	clientKeyLayout = StringParser::parse2DIntArrayString(value);
+}
+void GameData::decodeGateLayout(std::string value)
+{
+	std::replace(value.begin(), value.end(), '|', '\n');
+	clientGateLayout = StringParser::parse2DIntArrayString(value);
+}
+void GameData::decodeBoxLayout(std::string value)
+{
+	std::replace(value.begin(), value.end(), '|', '\n');
+	clientBoxLayout = StringParser::parse2DIntArrayString(value);
 }
 
 Player * GameData::getPlayer(int anID)
@@ -51,18 +79,15 @@ Player * GameData::getPlayer(int anID)
 		return nullptr;
 }
 
-std::map < int, Player * > & GameData::getAllPlayers()
-{
-	return players;
-}
+std::map < int, Player * > & GameData::getAllPlayers() { return players; }
+Atlas * GameData::getAtlas() { return atlas; }
+Gate & GameData::getGate() { return gate1; }
 
-Atlas * GameData::getAtlas()
-{	return atlas; }
+std::vector<std::vector<int>> & GameData::getWallLayout() { return clientWallLayout; }
+std::vector<std::vector<int>> & GameData::getKeyLayout() { return clientKeyLayout; }
+std::vector<std::vector<int>> & GameData::getGateLayout() { return clientGateLayout; }
+std::vector<std::vector<int>> & GameData::getBoxLayout() { return clientBoxLayout; }
 
-Gate & GameData::getGate()
-{
-	return gate1;
-}
 void GameData::decodeGameData(const char * data)
 {
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;

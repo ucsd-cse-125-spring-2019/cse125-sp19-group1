@@ -17,8 +17,8 @@ ServerGame::ServerGame(void)
  
     // set up the server network to listen 
     network = new ServerNetwork(); 
-	atlas = new Atlas();
-	gameData = new GameData(atlas);
+	//atlas = new Atlas();
+	gameData = new GameData(SERVER_GAMEDATA);
 }
  
 void ServerGame::update() 
@@ -132,7 +132,7 @@ void ServerGame::receiveFromClients()
 
 				if (gameData->getPlayer(iter->first)->getModelType() == ModelType::CHEF) 
 				{
-					if (gameData->getPlayer(iter->first)->getCaughtAnimal()) 
+					if (gameData->getPlayer(iter->first)->getCaughtAnimal())
 					{
 						//drop off animal
 						if (gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
@@ -142,7 +142,7 @@ void ServerGame::receiveFromClients()
 							gameData->getPlayer(iter->first)->setCaughtAnimal();
 						}
 					}
-					else 
+					else
 					{
 						std::map<unsigned int, SOCKET>::iterator iter2;
 						for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
@@ -165,7 +165,7 @@ void ServerGame::receiveFromClients()
 				{
 					if (int key = gameData->getAtlas()->hasKey(loc))
 					{
-						gameData->getPlayer(iter->first)->setInventory(static_cast<Item>(key));
+						gameData->getPlayer(iter->first)->setInventory(static_cast<ItemName>(key));
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
@@ -208,6 +208,10 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->setInteracting();
 				}
 				break;
+			}
+			case DROP_EVENT:
+			{
+				gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
 			}
 			default:
 				printf("error in packet types\n");
@@ -315,23 +319,23 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 
 		float dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
 		
-		if (dist < 2 * Atlas::PLAYER_RADIUS) 
+		if (dist < 2 * PLAYER_RADIUS) 
 		{
 			if (dir == 0) 
 			{
-				loc[0] = ot_x - 2 * Atlas::PLAYER_RADIUS;
+				loc[0] = ot_x - 2 * PLAYER_RADIUS;
 			} 
 			else if (dir == 1)
 			{
-				loc[2] = ot_z - 2 * Atlas::PLAYER_RADIUS;
+				loc[2] = ot_z + 2 * PLAYER_RADIUS;
 			}
 			else if (dir == 2)
 			{
-				loc[2] = ot_z + 2 * Atlas::PLAYER_RADIUS;
+				loc[2] = ot_z - 2 * PLAYER_RADIUS;
 			}
 			else
 			{
-				loc[0] = ot_x + 2 * Atlas::PLAYER_RADIUS;
+				loc[0] = ot_x + 2 * PLAYER_RADIUS;
 			}
 			gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 		}
@@ -342,6 +346,6 @@ void ServerGame::updateCollision(int id)
 {
 	Location pLoc = gameData->getPlayer(id)->getLocation();
 	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-	atlas->detectCollision(loc);
+	gameData->getAtlas()->detectCollision(loc);
 	gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 }

@@ -1,19 +1,19 @@
 #include "Player.h"
 
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
-Player::Player(int anID) : playerID(anID), inventory(Item::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
+Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
 	location = Location();
 	addDecodeFunctions();
 }
 
-Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(Item::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
+Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
 	addDecodeFunctions();
 }
 
 Location Player::getLocation() { return location; }
-Item Player::getInventory() { return inventory; }
+ItemName Player::getInventory() { return inventory; }
 bool Player::getInteracting() { return interacting; }
 
 void Player::setLocation(float argX, float argY, float argZ)
@@ -21,7 +21,7 @@ void Player::setLocation(float argX, float argY, float argZ)
 	location.update(argX, argY, argZ);
 }
 
-void Player::setInventory(Item anItem)
+void Player::setInventory(ItemName anItem)
 {
 	inventory = anItem;
 }
@@ -102,7 +102,7 @@ void Player::decodeLocation(std::string value)
 
 void Player::decodeInventory(std::string value)
 {
-	inventory = static_cast<Item>(std::stoi(value));
+	inventory = static_cast<ItemName>(std::stoi(value));
 }
 void Player::decodeCakeStatus(std::string value)
 {
