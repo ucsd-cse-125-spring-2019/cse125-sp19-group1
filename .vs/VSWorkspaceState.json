@@ -9,6 +9,6 @@
     "\\server\\server\\server",
     "\\server\\server_vs"
   ],
-  "SelectedNode": "\\graphics\\GraphicsClient\\GraphicsClient.sln",
+  "SelectedNode": "\\network\\ClientNetwork.cpp",
   "PreviewInSolutionExplorer": false
 }
