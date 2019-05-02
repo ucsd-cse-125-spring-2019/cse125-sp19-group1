@@ -30,19 +30,21 @@ Atlas::Atlas()
 	//layout.clear();
 	std::getline(wallFile, wallLine); // removes first line from file
 	std::getline(boxFile, boxLine); // removes first line from file
+	int row = 0;
 	while (std::getline(wallFile, wallLine))
 	{
+		int col = 0;
 		std::getline(boxFile, boxLine);
 		std::stringstream wallStream(wallLine);
 		std::stringstream boxStream(boxLine);
 		std::string wallNum;
 		std::string boxNum;
-		std::vector<int> row;
+		//std::vector<int> row;
 		std::vector<Tile> tileRow;
 		while (wallStream >> wallNum)
 		{
 			boxStream >> boxNum;
-			row.push_back(std::stoi(wallNum));
+			//row.push_back(std::stoi(wallNum));
 			TileType type(TileType::DEFAULT);
 			bool boxStatus = false;
 			int height = 0;
@@ -50,13 +52,16 @@ Atlas::Atlas()
 			{
 				type = TileType::BOX;
 				boxStatus = true;
+				boxLocations.push_back(std::pair<int, int>(row, col));
 			}
 			tileRow.push_back(Tile(std::stoi(wallNum), type, boxStatus, height));
+			col++;
 		}
 		//cols = row.size();
 		//wallLayout.push_back(row);
 		//layout.push_back(row);
 		tileLayout.push_back(tileRow);
+		row++;
 	}
 
 	//Hardcode layout for now
@@ -66,6 +71,23 @@ Atlas::Atlas()
 			std::cout << wallLayout[r][c] << " ";
 		}
 		std::cout << std::endl;
+	}
+
+	// Initialize key locations
+	while (boxLocations.size() > MAX_KEYS)
+	{
+		int randPos = rand() % boxLocations.size();
+		boxLocations.erase(boxLocations.begin() + randPos);
+	}
+
+	auto keyItemsIter = keyItems.begin();
+	auto boxLocationsIter = boxLocations.begin();
+	while(keyItemsIter != keyItems.end() && boxLocationsIter != boxLocations.end())
+	{
+		int row = (*boxLocationsIter).first;
+		int col = (*boxLocationsIter).second;
+		keyItemsIter++;
+		boxLocationsIter++;
 	}
 }
 
