@@ -115,11 +115,11 @@ void ServerGame::receiveFromClients()
 
 			case INTERACT_EVENT:
 			{
-				Location pLoc = gameData->getPlayer(iter->first)->getLocation();
-				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-				if (int key = gameData->getAtlas()->hasKey(loc))
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
+				ItemName item = gameData->getAtlas()->getItem(loc);
+				if (item != ItemName::EMPTY)
 				{
-					gameData->getPlayer(iter->first)->setInventory(static_cast<ItemName>(key));
+					gameData->getPlayer(iter->first)->setInventory(item);
 				}
 				else if(gameData->getAtlas()->hasGate(loc))
 				{
@@ -142,8 +142,7 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
-				Location pLoc = gameData->getPlayer(iter->first)->getLocation();
-				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
 				if (gameData->getPlayer(iter->first)->getInteracting()) {
 					double seconds = gameData->getPlayer(iter->first)->checkBoxProgress();
 					if (seconds > gameData->getBoxTime()) {
@@ -294,8 +293,9 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 
 void ServerGame::updateCollision(int id)
 {
-	Location pLoc = gameData->getPlayer(id)->getLocation();
-	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+	Location loc = gameData->getPlayer(id)->getLocation();
+	//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 	gameData->getAtlas()->detectCollision(loc);
-	gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
+	//gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
+	gameData->getPlayer(id)->setLocation(loc);
 }

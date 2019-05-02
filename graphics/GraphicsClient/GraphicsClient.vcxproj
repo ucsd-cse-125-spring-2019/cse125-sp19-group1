@@ -131,6 +131,9 @@
     <ClInclude Include="..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\network\ClientNetwork.h" />
     <ClInclude Include="..\..\network\GameData.h" />
+    <ClInclude Include="..\..\network\Gate.h" />
+    <ClInclude Include="..\..\network\Item.h" />
+    <ClInclude Include="..\..\network\Location.h" />
     <ClInclude Include="..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\network\NetworkServices.h" />
     <ClInclude Include="..\..\network\Player.h" />

@@ -1,5 +1,7 @@
 #pragma once
-#include "Player.h"
+#include "Item.h"
+#include <string>
+#include <sstream>
 
 enum class TileType {DEFAULT = 0, BOX, GATE, TABLE, KEY_DROP, JAIL, RAMP};
 

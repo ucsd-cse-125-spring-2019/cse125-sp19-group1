@@ -1,5 +1,11 @@
 #pragma once
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <iostream>
+#include <bitset> 
+#include <string.h>
 #include "Tile.h"
 
 #define TILE_SIZE 20
@@ -12,14 +18,15 @@ public:
 	Atlas();
 	~Atlas();
 
-	static void getMapCoords(std::vector<float> & loc, int * row, int * col);
+	static void getMapCoords(Location & loc, int & row, int & col);
 
-	void detectCollision(std::vector<float> & loc);
-	int hasKey(std::vector<float> & loc);
-	bool hasGate(std::vector<float> & loc);
-	bool hasBox(std::vector<float> & loc);
+	void detectCollision(Location & loc);
+	ItemName getItem(Location & loc);
+	bool hasGate(Location & loc);
+	bool hasBox(Location & loc);
 
-	void updateBoxLayout(std::vector<float> & loc);
+	void updateBoxLayout(Location & loc);
+	Tile & getTileAt(int row, int col);
 
 	std::string encodeTileLayoutData();
 	std::string encodeWallLayoutData();

@@ -3,8 +3,8 @@
 Tile::Tile(int aWallLayout, TileType aType, bool aBoxStatus, ItemName anItem, int aHeight, bool aDirty) :
 	wall(aWallLayout), tileType(aType), boxStatus(aBoxStatus), itemName(anItem), height(aHeight), dirty(aDirty) {}
 
-void Tile::setItem(ItemName anItem) { itemName = anItem; }
-void Tile::setBoxStatus(bool aBoxStatus) { boxStatus = aBoxStatus; }
+void Tile::setItem(ItemName anItem) { itemName = anItem; setDirty(); }
+void Tile::setBoxStatus(bool aBoxStatus) { boxStatus = aBoxStatus; setDirty(); }
 void Tile::setDirty() { dirty = true; }
 
 bool Tile::isDirty() { return dirty; }
