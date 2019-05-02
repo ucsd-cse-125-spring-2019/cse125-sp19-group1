@@ -1,5 +1,29 @@
 #include "ClientGame.h"
 
+#include <fstream>
+
+void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
+	std::ifstream inf(filepath);
+
+	if (!inf.is_open()) {
+		throw new std::invalid_argument("could not open filepath");
+	}
+
+	int width, height;
+	inf >> width >> height;
+
+	array.resize(height);
+	for (auto &v : array) {
+		v.resize(width);
+
+		for (auto &elim : v) {
+			inf >> elim;
+		}
+	}
+
+	inf.close();
+}
+
 //initialization 
 ClientGame::ClientGame(void)
 {
@@ -42,7 +66,7 @@ void ClientGame::sendPackets(const int type)
 	Packet packet;
 	packet.packet_type = type;
 
-	if (my_client_id == "" && myID == -1) {
+	if (myID == -1) {
 		return;
 	}
 

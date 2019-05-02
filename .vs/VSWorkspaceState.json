@@ -6,8 +6,7 @@
     "\\network",
     "\\server",
     "\\server\\server",
-    "\\server\\server\\server",
-    "\\server\\server_vs"
+    "\\server\\server\\server"
   ],
   "SelectedNode": "\\server\\server\\server.sln",
   "PreviewInSolutionExplorer": false

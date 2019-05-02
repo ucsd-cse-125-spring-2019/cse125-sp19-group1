@@ -1,0 +1,3 @@
+[submodule "maps/lodepng"]
+	path = maps/create_map/lodepng
+	url = https://github.com/lvandeve/lodepng.git

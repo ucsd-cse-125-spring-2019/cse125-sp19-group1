@@ -1,85 +1,135 @@
 #include "objloader.h"
 
-bool loadAssimp(const char * path, std::vector<MeshEntry *> * meshes) {
-  
-  std::vector<unsigned int> * indices;
-  std::vector<glm::vec3> * vertices;
-  std::vector<glm::vec2> * uvs;
-  std::vector<glm::vec3> * normals;
-
+// load a model (and possibly a Skeleton, if the model is expected to have one)
+bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
+	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs, Skeleton * skel) 
+{
+	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 
-	//const aiScene* scene = importer.ReadFile(path, 0/*aiProcess_JoinIdenticalVertices | aiProcess_SortByPType*/);
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate);// | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
-  
-	if(!scene) {
-		fprintf( stderr, importer.GetErrorString());
+	// exit if the scene fails to load properly
+	if (!scene) {
+		fprintf(stderr, importer.GetErrorString());
 		getchar();
 		return false;
 	}
-  
-  (*meshes).reserve(scene->mNumMeshes);
-  
-  const aiMesh* mesh;
-  
-  for (int mesh_index = 0; mesh_index < scene->mNumMeshes; mesh_index++) {
-    
-    mesh = scene->mMeshes[mesh_index];
-    
-    (*meshes).push_back(new MeshEntry());
-    indices = (*meshes)[mesh_index]->getFaces();
-    vertices = (*meshes)[mesh_index]->getVertices();
-    uvs = (*meshes)[mesh_index]->getUVs();
-    normals = (*meshes)[mesh_index]->getNormals();
-	if (mesh_index < scene->mNumMaterials) {
-		aiMaterial * mat = (scene->mMaterials)[mesh_index];
-		glm::vec3 color;
-		std::cerr<<"Num Textures = " << mat->GetTextureCount(aiTextureType_AMBIENT);
-		mat->Get(AI_MATKEY_COLOR_AMBIENT, color);
-		(*meshes)[mesh_index]->SetAmbient(color);
-		std::cerr << "Ambient Color : " << color.x;
-		mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-		(*meshes)[mesh_index]->SetDiffuse(color);
-		mat->Get(AI_MATKEY_COLOR_SPECULAR, color);
-		(*meshes)[mesh_index]->SetSpecular(color);
-		float shininess;
-		mat->Get(AI_MATKEY_SHININESS, shininess);
-		(*meshes)[mesh_index]->SetShine(shininess);
+
+	// grab the first mesh (assuming, for the purposes of CSE 125, that we will blend models into one mesh)
+	aiMesh * mesh = scene->mMeshes[0];
+	populateMesh(mesh, vertices, normals, indices, uvs);
+
+	// if the Skeleton pointer is not null, it means we want a Skeleton, so we must load the proper data
+	if (skel)
+		loadSkeleton(mesh, scene->mRootNode, vertices, skel);
+
+	// the scene will be destroyed automatically when we return
+	return true;
+}
+
+// load a skeleton
+void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, Skeleton * skel)
+{
+	// extracting information about how bones affect vertices through weights
+	std::vector<Vertex *> * skelVertices = skel->GetVertices();
+	populateSkelVertices(mesh, vertices, skelVertices);
+	// creating actual Bone objects and populating the Skeleton
+	traverseSkeleton(root, skel);
+}
+
+void traverseSkeleton(aiNode * currNode, Skeleton * skel)
+{
+	// get the name of the current node
+	string name = currNode->mName.C_Str();
+	Bone * parent = NULL;
+
+	// if the node has a parent, find the parent and save a pointer to it
+	if (currNode->mParent) {
+		string parentName = currNode->mParent->mName.C_Str();
+		parent = skel->GetNode(parentName);
 	}
 
-    // Fill vertices positions
-    (*vertices).reserve(mesh->mNumVertices);
-    for(unsigned int i=0; i<mesh->mNumVertices; i++){
-      aiVector3D pos = mesh->mVertices[i];
-      (*vertices).push_back(glm::vec3(pos.x, pos.y, pos.z));
-    }
-    
-    // Fill vertices texture coordinates
-    (*uvs).reserve(mesh->mNumVertices);
-    for(unsigned int i=0; i<mesh->mNumVertices; i++){
-      aiVector3D UVW = mesh->mTextureCoords[0][i]; // Assume only 1 set of UV coords; AssImp supports 8 UV sets.
-      (*uvs).push_back(glm::vec2(UVW.x, UVW.y));
-    }
-    
-    // Fill vertices normals
-    (*normals).reserve(mesh->mNumVertices);
-    for(unsigned int i=0; i<mesh->mNumVertices; i++){
-      aiVector3D n = mesh->mNormals[i];
-      (*normals).push_back(glm::vec3(n.x, n.y, n.z));
-    }
-    
-    // Fill face indices
-    (*indices).reserve(3*mesh->mNumFaces);
-    for (unsigned int i=0; i<mesh->mNumFaces; i++){
-      // Assume the model has only triangles.
-      (*indices).push_back(mesh->mFaces[i].mIndices[0]);
-      (*indices).push_back(mesh->mFaces[i].mIndices[1]);
-      (*indices).push_back(mesh->mFaces[i].mIndices[2]);
-    }
-    
-    (*meshes)[mesh_index]->Init();
-  }
-	
-	// The "scene" pointer will be deleted automatically by "importer"
-	return true;
+	// create a Bone for the node and adding it to the Skeleton
+	Bone * bone = new Bone(name, aiMatTOglm(currNode->mTransformation), parent);
+	skel->AddNode(name, bone);
+
+	// recurse through the tree to add the children to the Skeleton
+	for (int i = 0; i < currNode->mNumChildren; i++) {
+		aiNode * child = currNode->mChildren[i];
+		traverseSkeleton(child, skel);
+		// after we've returned from the recursive call, the bone for the child node
+		// should now exist, so we can add it to the current bone's list of children
+		bone->AddChild(skel->GetNode(child->mName.C_Str()));
+	}
+}
+
+void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<Vertex *> * skelVertices)
+{
+	// first, populate the skel Vertex array
+	skelVertices->reserve(vertices->size());
+	for (int i = 0; i < vertices->size(); i++) {
+		skelVertices->push_back(new Vertex(i, &((*vertices)[i])));
+	}
+
+	// next, extract weights from the aiBones
+	for (unsigned int i = 0; i < mesh->mNumBones; i++) {
+		aiBone * bone = mesh->mBones[i];
+		for (unsigned int j = 0; j < bone->mNumWeights; j++) {
+			aiVertexWeight weight = bone->mWeights[j];
+			int vertexID = weight.mVertexId;
+			// add the weight to the Vertex that it is supposed to influence
+			if (vertexID < skelVertices->size())
+				(*skelVertices)[vertexID]->AddWeight(bone->mName.C_Str(), weight.mWeight);
+			else
+				std::cout << "Error loading the bones of the skeleton!" << std::endl;
+		}
+	}
+}
+
+// convert aiMatrix4x4 to glm::mat4
+glm::mat4 * aiMatTOglm(aiMatrix4x4 mat)
+{
+	glm::mat4 newMat = glm::mat4(1.0f);
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			newMat[i][j] = mat[i][j];
+		}
+	}
+
+	return &newMat;
+}
+
+// extract rendering information for a mesh (vertices, noramls, indices/faces, and uvs)
+void populateMesh(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
+	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs)
+{
+	// Fill vertices positions
+	vertices->reserve(mesh->mNumVertices);
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+		aiVector3D pos = mesh->mVertices[i];
+		vertices->push_back(glm::vec3(pos.x, pos.y, pos.z));
+	}
+
+	// Fill vertices texture coordinates
+	uvs->reserve(mesh->mNumVertices);
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+		aiVector3D UVW = mesh->mTextureCoords[0][i]; // Assume only 1 set of UV coords; AssImp supports 8 UV sets.
+		uvs->push_back(glm::vec2(UVW.x, UVW.y));
+	}
+
+	// Fill vertices normals
+	normals->reserve(mesh->mNumVertices);
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+		aiVector3D n = mesh->mNormals[i];
+		normals->push_back(glm::vec3(n.x, n.y, n.z));
+	}
+
+	// Fill face indices
+	indices->reserve(3 * mesh->mNumFaces);
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+		// Assume the model has only triangles.
+		indices->push_back(mesh->mFaces[i].mIndices[0]);
+		indices->push_back(mesh->mFaces[i].mIndices[1]);
+		indices->push_back(mesh->mFaces[i].mIndices[2]);
+	}
 }
