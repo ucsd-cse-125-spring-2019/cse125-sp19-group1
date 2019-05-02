@@ -134,11 +134,9 @@ void ServerGame::receiveFromClients()
 				{
 					if (gameData->getPlayer(iter->first)->getCaughtAnimal())
 					{
-						std::cout << "ANIMAL ALREADY CAUGHT" << std::endl;
 						//drop off animal
 						if (gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 						{
-							std::cout << "DROPPING OFF ANIMAL" << std::endl;
 							//update jail with animal
 							gameData->getAtlas()->placeInJail(loc);
 							gameData->getPlayer(iter->first)->setCaughtAnimal();
@@ -146,7 +144,6 @@ void ServerGame::receiveFromClients()
 					}
 					else
 					{
-						std::cout << "CATCHING ANIMAL" << std::endl;
 						std::map<unsigned int, SOCKET>::iterator iter2;
 						for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
 						{
@@ -160,7 +157,6 @@ void ServerGame::receiveFromClients()
 							{
 								gameData->getPlayer(iter->first)->setCaughtAnimal();
 								gameData->getPlayer(iter2->first)->setIsCaught();
-								std::cout << "ANIMAL CAUGHT NOW" << std::endl;
 								break;
 							}
 						}
@@ -222,8 +218,8 @@ void ServerGame::receiveFromClients()
 				printf("error in packet types\n");
 				break;
 			}
-			sendActionPackets(); // sends data after processing input from one client
 		}
+		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
 	}
 	//sendActionPackets(); // uncomment to always send data from server
