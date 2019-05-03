@@ -2,24 +2,29 @@
 #define Bone_h
 
 #include "Core.h"
+#include "AnimationChannel.h"
 
 class Bone {
 public:
-	Bone(string newName, glm::mat4 * newOffset, Bone * newParent);
+	Bone(string newName, glm::mat4 * nodeMat, Bone * newParent);
 	~Bone();
 	void AddChild(Bone * child);
 	string GetName();
 	void Print(string spaces);
-	void SetOffset(glm::mat4 * offset);
-	void SetIBM(glm::mat4 * bindingMatrix);
 	glm::mat4 * GetOffset();
-	glm::mat4 * GetSkinningMatrix();
+	glm::mat4 * GetTransform();
+	void SetOffset(glm::mat4 * newOffset);
+	void SetTransform(glm::mat4 * newTransform);
+	void SetChannel(AnimationChannel * newChannel);
+	void Update(glm::mat4 * globalInverseT, glm::mat4 * parentT);
 private:
 	Bone * parent;
 	std::vector<Bone *> children;
+	AnimationChannel * channel;
 	string name;
 	glm::mat4 offset;
-	glm::mat4 inverseBindingMatrix;
+	glm::mat4 transform;
+	glm::mat4 nodeTransform;
 	unsigned int childCount;
 };
 

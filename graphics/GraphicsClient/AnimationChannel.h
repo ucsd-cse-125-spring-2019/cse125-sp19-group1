@@ -1,7 +1,6 @@
 #ifndef AnimationChannel_h
 #define AnimationChannel_h
 #include "Keyframe.h"
-#include "Skeleton.h"
 #include <string>
 class AnimationChannel
 {
@@ -13,6 +12,7 @@ private:
 	int currKeyframe;
 	//keyframes will be in chronological order
 	Keyframe ** keyframes;
+	glm::mat4 transform;
 public:
 	AnimationChannel(string boneName, int numKeyframes, Keyframe ** keyframes);
 	~AnimationChannel();
@@ -21,8 +21,8 @@ public:
 	string getBoneName();
 	int getNumKeyframes();
 	Keyframe ** getKeyframes();
-	void setBoneOffset(float currTime, Skeleton * skel);
-
+	void SetTransform(float currTime);
+	glm::mat4 * GetTransform();
 };
 
 #endif

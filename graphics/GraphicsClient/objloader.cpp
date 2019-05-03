@@ -38,7 +38,7 @@ void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertice
 	populateSkelVertices(mesh, vertices, normals, skelVertices);
 	// creating actual Bone objects and populating the Skeleton
 	traverseSkeleton(root, skel);
-	assignBindingMatrices(mesh, skel);
+	assignOffsetMatrices(mesh, skel);
 }
 
 void traverseSkeleton(aiNode * currNode, Skeleton * skel)
@@ -67,14 +67,14 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 	}
 }
 
-void assignBindingMatrices(aiMesh * mesh, Skeleton * skel) {
+void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 	aiBone * currAIBone = NULL;
 	Bone * currBone = NULL;
 	for (int i = 0; i < mesh->mNumBones; i++) {
 		currAIBone = mesh->mBones[i];
 		currBone = skel->GetBone(currAIBone->mName.C_Str());
 		if (currBone != NULL) {
-			currBone->SetIBM(aiMatTOglm(currAIBone->mOffsetMatrix));
+			currBone->SetOffset(aiMatTOglm(currAIBone->mOffsetMatrix));
 		}
 		currBone = NULL;
 	}

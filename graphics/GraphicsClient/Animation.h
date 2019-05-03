@@ -6,20 +6,19 @@
 class Animation
 {
 private:
-	int numChannels;
-	AnimationChannel** animationChannels;
+	std::vector<AnimationChannel*> channels;
 	float startTime;
 	float endTime;
-
+	glm::mat4 globalInverseT;
 public:
-	Animation(int numChannels, AnimationChannel ** animationChannels, float startTime, float endTime);
+	Animation(float startTime, float endTime, glm::mat4 * globalInverseTransform);
 	~Animation();
+	std::vector<AnimationChannel*> * GetChannels();
 	void resetAnimation();
 	float getStartTime();
 	float getEndTime();
-	int getNumChannels();
-	AnimationChannel ** getAnimationChannels();
-	void evaluateChannels(float currTime, Skeleton * skel);
+	void evaluateChannels(float currTime);
+	glm::mat4 * GetGlobalInverseT();
 };
 
 #endif

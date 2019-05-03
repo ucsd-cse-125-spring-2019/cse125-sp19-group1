@@ -61,13 +61,12 @@ void FBXObject::Update() {
 	// right now trying to handle updating the animation through this function.
 	if (animPlayer != NULL) {
 		animPlayer->play();
-		//UpdateSkin();
+		UpdateSkin();
 	}
 }
 
 void FBXObject::UpdateSkin() {
 	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	// --> M = W*(B^(-1))
 	for (int i = 0; i < skelVertices->size(); i++)
 		DeformVertex((*skelVertices)[i]);
 	// after changing all the vertices and normals, we should update the buffers
@@ -79,7 +78,8 @@ void FBXObject::DeformVertex(Vertex * vertex) {
 	glm::mat4 M = glm::mat4(1.0f);
 	for (int i = 0; i < weights->size(); i++) {
 		std::pair<string, float> currWeight = (*weights)[i];
-		M = M + currWeight.second * (*((skel->GetBone(currWeight.first))->GetSkinningMatrix()));
+		// --> M = W*(B^(-1))
+		M = M + currWeight.second * (*((skel->GetBone(currWeight.first))->GetTransform()));
 	}
 	vertices[vertex->GetID()] = M * glm::vec4((*(vertex->GetPos())), 1.0f);
 	normals[vertex->GetID()] = M * glm::vec4((*(vertex->GetNorm())), 0.0f);

@@ -21,6 +21,8 @@ public:
 	~AnimationPlayer();
 	void play();
 	void setCurrTime(float new_time);
+	void SetAnimation(Animation * newAnimation);
+	void SetBoneChannels();
 };
 
 #endif
