@@ -19,7 +19,7 @@
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
 
-#define ANIMATIONS_PATH  "../Animation/"
+#define ANIMATIONS_PATH  "../Animations/"
 #define MODELS_PATH      "../Models/"
 #define TEXTURES_PATH    "../Textures/"
 
@@ -39,6 +39,9 @@
 
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.ppm")
+
+#define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
+#define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
 
 // function declarations
 void ErrorCallback(int error, const char* description);

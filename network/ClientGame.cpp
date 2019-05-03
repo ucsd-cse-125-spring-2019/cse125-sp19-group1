@@ -17,7 +17,9 @@ void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath
 		v.resize(width);
 
 		for (auto &elim : v) {
-			inf >> elim;
+			unsigned x;
+			inf >> x;
+			elim = x;
 		}
 	}
 

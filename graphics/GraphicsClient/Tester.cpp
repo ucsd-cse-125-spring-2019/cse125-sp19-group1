@@ -4,6 +4,7 @@
 
 #include "Tester.h"
 #include <ctime>
+#include <algorithm>
 int elapsedTime = 0;
 
 GLFWwindow * window = nullptr;
@@ -19,10 +20,18 @@ FBXObject * catModel = nullptr;
 FBXObject * dogModel = nullptr;
 FBXObject * chefModel = nullptr;
 FBXObject * tileModel = nullptr;
+FBXObject * wallModel = nullptr;
 GLuint objShaderProgram;
 
+Geometry * tileGeometry;
+Geometry * wallGeometry;
+std::vector<std::vector<Transform *>> floorArray;
+std::vector<std::vector<Transform *>> northWalls;
+std::vector<std::vector<Transform *>> westWalls;
+
 Transform * root = nullptr;
-Transform * player;
+Transform * player = nullptr;
+Transform * floorTransform = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
@@ -101,24 +110,161 @@ void PrintVersions()
 #endif
 }
 
+void mapFinishedLoading()
+{
+	if (!client->heights.size()) {
+		cerr << "mapFinishedLoading(): map is empty\n";
+		return;
+	}
+
+#define TILE_HEIGHT_ADJUST -26.f
+#define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
+#define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
+#define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
+
+	if (floorTransform == nullptr) {
+		const auto adjustheight = glm::translate(glm::mat4(1.0f), glm::vec3(TILE_HEIGHT_ADJUST));
+		floorTransform = new Transform(glm::scale(adjustheight, glm::vec3(TILE_SCALE)));
+	}
+
+	// Floor tiles
+	floorArray.resize(client->heights.size());
+	for (size_t z = 0; z < floorArray.size(); z++) {
+		auto &row = floorArray[z];
+
+		row.resize(client->heights[z].size());
+
+		for (size_t x = 0; x < row.size(); x++) {
+
+			float y = client->heights[z][x] * 0.5f * TILE_LEVEL_OFFSET;
+			auto skew = glm::mat4(1.0f);
+			switch (client->ramps[z][x]) {
+			case DirectionBitmask::eastSide:
+				skew[0][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::westSide:
+				skew[0][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::northSide:
+				skew[2][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::southSide:
+				skew[2][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			default:
+				break;
+			}
+			const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, z * TILE_STRIDE));
+
+			row[x] = new Transform(translate * skew);
+			row[x]->addChild(tileGeometry);
+			floorTransform->addChild(row[x]);
+		}
+	}
+
+	// North walls
+	northWalls.resize(floorArray.size() + 1);
+	for (size_t z = 0; z < northWalls.size(); z++) {
+		auto &row = northWalls[z];
+
+		auto clippedZ = (z < floorArray.size()) ? z : (floorArray.size() - 1);
+		row.resize(floorArray[clippedZ].size());
+
+		for (size_t x = 0; x < row.size(); x++) {
+			if ((z > 0 && (client->walls[z - 1][x] & DirectionBitmask::southSide)) ||
+				(z == clippedZ && (client->walls[z][x] & DirectionBitmask::northSide)))
+			{
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (z == 0 || z != clippedZ) {
+					height = client->heights[clippedZ][x];
+				} else {
+					height = (client->heights[z - 1][x] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+				
+				// translate to the edge between tiles
+				row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)));
+				row[x]->addChild(wallGeometry);
+				floorTransform->addChild(row[x]);
+			}
+		}
+	}
+
+	westWalls.resize(floorArray.size());
+	for (size_t z = 0; z < westWalls.size(); z++) {
+		auto &row = westWalls[z];
+
+		row.resize(floorArray[z].size() + 1);
+
+		for (size_t x = 0; x < row.size(); x++) {
+			auto clippedX = (x < row.size() - 1) ? x : (row.size() - 2);
+
+			if ((x > 0 && (client->walls[z][x - 1] & DirectionBitmask::eastSide)) ||
+				(x == clippedX && (client->walls[z][x] & DirectionBitmask::westSide)))
+			{
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (x == 0 || x != clippedX) {
+					height = client->heights[z][clippedX];
+				}
+				else {
+					height = (client->heights[z][x - 1] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+
+				// translate to the edge between tiles
+				const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3((x - 0.5f) * TILE_STRIDE, y, z * TILE_STRIDE));
+				// 90 degree rotation
+				const auto rotate = glm::rotate(translate, glm::half_pi<float>(), glm::vec3(0.f, 1.f, 0.f));
+				row[x] = new Transform(rotate);
+				row[x]->addChild(wallGeometry);
+				floorTransform->addChild(row[x]);
+			}
+		}
+	}
+
+	root->addChild(floorTransform);
+}
+
+void deallocFloor()
+{
+	if (floorTransform) {
+		delete floorTransform;
+		floorTransform = nullptr;
+	}
+
+	for (size_t z = 0; z < floorArray.size(); z++) {
+		auto &row = floorArray[z];
+
+		for (size_t x = 0; x < row.size(); x++) {
+			delete row[x];
+		}
+
+		row.resize(0);
+	}
+}
+
 void Init()
 {
 	server = new ServerGame();
 	client = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
 
-	// load the map
-	// TODO: wait to get it from the server instead, display a loading screen
-#define MAP_PATH "../../maps/tinytinymap/"
-	loadMapArray(client->heights, MAP_PATH "heights.txt");
-	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
-	
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
 	
 	// Load models
 	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	catModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
+	dogModel = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
+	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, true);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
+
+	tileGeometry = new Geometry(tileModel, objShaderProgram);
+	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	root = new Transform(glm::mat4(1.0));
 	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
@@ -127,11 +273,20 @@ void Init()
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
 	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel2 = new Geometry(raccoonModel, objShaderProgram);
+	Geometry * playerModel2 = new Geometry(chefModel, objShaderProgram);
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
 	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+
+	// load the map
+	// TODO: wait to get it from the server instead, display a loading screen
+#define MAP_PATH "../../maps/tinytinymap/"
+	loadMapArray(client->heights, MAP_PATH "heights.txt");
+	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
+	loadMapArray(client->walls, MAP_PATH "walls.txt");
+
+	mapFinishedLoading();
 }
 
 void serverLoop(void * args) {
@@ -142,12 +297,22 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
-	if (raccoonModel)     delete(raccoonModel);
-	if (catModel)         delete(catModel);
-	if (dogModel)         delete(dogModel);
-	if (chefModel)        delete(chefModel);
-	if (tileModel)        delete(tileModel);
-	if (light)            delete(light);
+	if (raccoonModel)     delete raccoonModel;
+	if (catModel)         delete catModel;
+	if (dogModel)         delete dogModel;
+	if (chefModel)        delete chefModel;
+	if (tileModel)        delete tileModel;
+	if (wallModel)        delete wallModel;
+	if (tileGeometry)     delete tileGeometry;
+	if (wallGeometry)     delete wallGeometry;
+	if (light)            delete light;
+
+	deallocFloor();
+
+	if (floorTransform)   delete floorTransform;
+	if (player)           delete player;
+	if (root)             delete root;
+
 	glDeleteProgram(objShaderProgram);
 }
 
@@ -236,9 +401,10 @@ void MovePlayer()
 	Player * p = client->getGameData()->getPlayer(client->getMyID());
 	if (p)
 	{
-		glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.5f,
-			p->getLocation().getY() * 0.5f,
-			p->getLocation().getZ() * 0.5f);
+		glm::vec3 location = glm::vec3(
+			p->getLocation().getX(),
+			p->getLocation().getY(),
+			p->getLocation().getZ());
 
 	//if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
 		//glm::vec3 prevPos = raccoonModel->GetPosition();
