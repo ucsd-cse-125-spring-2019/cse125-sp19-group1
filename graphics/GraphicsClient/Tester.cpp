@@ -135,8 +135,28 @@ void mapFinishedLoading()
 		row.resize(client->heights[z].size());
 
 		for (size_t x = 0; x < row.size(); x++) {
-			float y = (client->heights[z][x] / 2) * TILE_LEVEL_OFFSET;
-			row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, z * TILE_STRIDE)));
+
+			float y = client->heights[z][x] * 0.5f * TILE_LEVEL_OFFSET;
+			auto skew = glm::mat4(1.0f);
+			switch (client->ramps[z][x]) {
+			case DirectionBitmask::eastSide:
+				skew[0][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::westSide:
+				skew[0][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::northSide:
+				skew[2][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::southSide:
+				skew[2][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			default:
+				break;
+			}
+			const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, z * TILE_STRIDE));
+
+			row[x] = new Transform(translate * skew);
 			row[x]->addChild(tileGeometry);
 			floorTransform->addChild(row[x]);
 		}
@@ -381,7 +401,7 @@ void MovePlayer()
 	Player * p = client->getGameData()->getPlayer(client->getMyID());
 	if (p)
 	{
-		glm::vec3 location = 0.5f * glm::vec3(
+		glm::vec3 location = glm::vec3(
 			p->getLocation().getX(),
 			p->getLocation().getY(),
 			p->getLocation().getZ());
