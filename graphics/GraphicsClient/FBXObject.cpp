@@ -59,10 +59,11 @@ void FBXObject::PrintSkeleton() {
 void FBXObject::Update() {
 	// This function will handle anything that must continuously occur.
 	// right now trying to handle updating the animation through this function.
-	if (animPlayer != NULL) {
+	/*if (animPlayer != NULL) {
 		animPlayer->play();
+		skel->Update(animPlayer->GetGlobalInverseT());
 		UpdateSkin();
-	}
+	}*/
 }
 
 void FBXObject::UpdateSkin() {
@@ -81,8 +82,11 @@ void FBXObject::DeformVertex(Vertex * vertex) {
 		// --> M = W*(B^(-1))
 		M = M + currWeight.second * (*((skel->GetBone(currWeight.first))->GetTransform()));
 	}
+	/* TODO: fix malformed matrices (here and in Bone class) */
 	vertices[vertex->GetID()] = M * glm::vec4((*(vertex->GetPos())), 1.0f);
 	normals[vertex->GetID()] = M * glm::vec4((*(vertex->GetNorm())), 0.0f);
+	/* TODO: a simple test demonstrating that we can modify vertices this way: */
+	//vertices[vertex->GetID()] += glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -272,4 +276,12 @@ void FBXObject::SetBuffers() {
 	// Unbind the VAO now so we don't accidentally tamper with it.
 	// NOTE: You must NEVER unbind the element array buffer associated with a VAO!
 	glBindVertexArray(0);
+}
+
+void FBXObject::ToNextKeyframe() {
+	if (animPlayer != NULL) {
+		animPlayer->ToNextKeyframe();
+		skel->Update(animPlayer->GetGlobalInverseT());
+		// TODO: UpdateSkin(); -> NaN error makes the model disappear
+	}
 }

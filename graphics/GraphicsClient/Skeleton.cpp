@@ -36,6 +36,6 @@ void Skeleton::PrintVertex(unsigned int id) {
 }
 
 void Skeleton::Update(glm::mat4 * globalInverseT) {
-	glm::mat4 identity = glm::mat4(1.0f);
+	glm::mat4 identity = glm::mat4(1.0);
 	root->Update(globalInverseT, &identity);
 }

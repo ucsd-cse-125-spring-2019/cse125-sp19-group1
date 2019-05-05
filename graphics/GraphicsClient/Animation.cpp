@@ -1,10 +1,10 @@
 #include "Animation.h"
 
-Animation::Animation(float startTime, float endTime, glm::mat4 * globalInverseTransform)
+Animation::Animation(float startTime, float endTime, glm::mat4 globalInverseTransform)
 {
 	this->startTime = startTime;
 	this->endTime = endTime;
-	this->globalInverseT = glm::mat4(*globalInverseTransform);
+	this->globalInverseT = glm::mat4(globalInverseTransform);
 }
 
 
@@ -43,4 +43,10 @@ void Animation::evaluateChannels(float currTime) {
 
 glm::mat4 * Animation::GetGlobalInverseT() {
 	return &globalInverseT;
+}
+
+void Animation::ToNextKeyframe() {
+	for (int i = 0; i < channels.size(); i++) {
+		channels[i]->ToNextKeyframe();
+	}
 }

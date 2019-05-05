@@ -11,7 +11,7 @@ private:
 	float endTime;
 	glm::mat4 globalInverseT;
 public:
-	Animation(float startTime, float endTime, glm::mat4 * globalInverseTransform);
+	Animation(float startTime, float endTime, glm::mat4 globalInverseTransform);
 	~Animation();
 	std::vector<AnimationChannel*> * GetChannels();
 	void resetAnimation();
@@ -19,6 +19,8 @@ public:
 	float getEndTime();
 	void evaluateChannels(float currTime);
 	glm::mat4 * GetGlobalInverseT();
+
+	void ToNextKeyframe();
 };
 
 #endif

@@ -76,6 +76,9 @@ void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 		if (currBone != NULL) {
 			currBone->SetOffset(aiMatTOglm(currAIBone->mOffsetMatrix));
 		}
+		else
+			std::cout << "OBJLOADER: MISSING A BONE FOR " << currAIBone->mName.C_Str() << std::endl;
+
 		currBone = NULL;
 	}
 }
@@ -106,7 +109,7 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 // convert aiMatrix4x4 to glm::mat4
 glm::mat4 * aiMatTOglm(aiMatrix4x4 mat)
 {
-	glm::mat4 newMat = glm::mat4(1.0f);
+	glm::mat4 newMat = glm::mat4(1.0);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			newMat[i][j] = mat[i][j];

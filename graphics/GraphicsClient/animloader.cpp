@@ -18,15 +18,15 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 		return false;
 	}
 	aiAnimation * anim = scene->mAnimations[1];
-	std::cerr << scene->mNumAnimations << "Number of animations\n";
+	std::cerr << "Number of animations: " << scene->mNumAnimations << std::endl;
 	if (anim == nullptr || anim->mNumChannels == 0) {
 		return false;
 	}
 
 	aiMatrix4x4 globalT = scene->mRootNode->mTransformation;
-	glm::mat4 globalInverseT = glm::inverse((*aiMatTOglm_ANIM(globalT)));
+	glm::mat4 globalInverseT = glm::mat4(*aiMatTOglm_ANIM(globalT.Inverse()));
 
-	Animation * newAnimation = new Animation(0, (float)anim->mDuration, &globalInverseT);
+	Animation * newAnimation = new Animation(0, (float)anim->mDuration, globalInverseT);
 	std::vector<AnimationChannel*> * channels = newAnimation->GetChannels();
 
 	std::cerr << anim->mNumChannels << "\n";
@@ -73,7 +73,7 @@ void convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * chann
 // convert aiMatrix4x4 to glm::mat4
 glm::mat4 * aiMatTOglm_ANIM(aiMatrix4x4 mat)
 {
-	glm::mat4 newMat = glm::mat4(1.0f);
+	glm::mat4 newMat = glm::mat4(1.0);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			newMat[i][j] = mat[i][j];

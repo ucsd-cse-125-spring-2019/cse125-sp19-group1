@@ -67,6 +67,8 @@ public:
 	void RenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();
+
+	void ToNextKeyframe();
 };
 
 #endif

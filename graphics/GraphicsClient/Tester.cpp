@@ -130,7 +130,8 @@ void Init()
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
-    //raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+    
+	raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 }
 
 void serverLoop(void * args) {
@@ -308,8 +309,8 @@ void DisplayCallback(GLFWwindow* window)
 
 	glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	root->draw(V, P);
-	//raccoonModel->Draw(objShaderProgram, &V, &P);
+	//root->draw(V, P);
+	raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
 	glfwSwapBuffers(window);
@@ -327,6 +328,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+
+		if (key == GLFW_KEY_A) {
+			raccoonModel->ToNextKeyframe();
 		}
 
 		if (key == GLFW_KEY_UP) {

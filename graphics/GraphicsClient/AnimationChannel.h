@@ -23,6 +23,8 @@ public:
 	Keyframe ** getKeyframes();
 	void SetTransform(float currTime);
 	glm::mat4 * GetTransform();
+
+	void ToNextKeyframe();
 };
 
 #endif

@@ -26,7 +26,6 @@ void AnimationPlayer::play() {
 	//std::cerr << durationFloat << "Timer value\n";
 	if (animation != NULL) {
 		animation->evaluateChannels(durationFloat);
-		skeleton->Update(animation->GetGlobalInverseT());
 		currTime = (Time::now());
 		fsec fs = currTime - lastTime;
 		durationFloat += fs.count();
@@ -53,6 +52,17 @@ void AnimationPlayer::SetBoneChannels() {
 	for (int i = 0; i < channels->size(); i++) {
 		AnimationChannel * currChannel = (*channels)[i];
 		string currName = currChannel->getBoneName();
-		skeleton->GetBone(currName)->SetChannel(currChannel);
+		if (skeleton->GetBone(currName))
+			skeleton->GetBone(currName)->SetChannel(currChannel);
+		else
+			std::cout << "ANIMPLAYER: NO BONE MATCHES THIS CHANNEL" << std::endl;
 	}
+}
+
+void AnimationPlayer::ToNextKeyframe() {
+	animation->ToNextKeyframe();
+}
+
+glm::mat4 * AnimationPlayer::GetGlobalInverseT() {
+	return animation->GetGlobalInverseT();
 }
