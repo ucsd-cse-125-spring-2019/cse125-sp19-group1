@@ -271,16 +271,13 @@ void Atlas::updateTileItem(Location & loc, ItemName anItem)
 	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return;
 
-	// If param is EMPTY, then item has been picked up
+	// If param is EMPTY, then an item has been picked up
 	if (anItem == ItemName::EMPTY)
 	{
 		ItemName currItem = tileLayout[row][col].getItem();
 		if (itemsMap.count(currItem) > 0)
 		{
-			Item & temp = itemsMap.at(currItem);
-
-			temp.setDropped(false);
-			temp.resetDropStatus();
+			itemsMap.at(currItem).resetDropStatus();
 		}
 	}
 	tileLayout[row][col].setItem(anItem);
@@ -317,7 +314,6 @@ void Atlas::updateDroppedItem(ItemName anItem, Location loc)
 
 		}
 	}
-
 }
 void Atlas::checkDroppedItems()
 {
@@ -325,11 +321,11 @@ void Atlas::checkDroppedItems()
 	{
 		if (iter->second.hasBeenMoved())
 		{
-			std::cout << "elapsedTime:" << iter->second.getDropDuration() << std::endl;
+			//std::cout << "elapsedTime:" << iter->second.getDropDuration() << std::endl;
 			if (iter->second.getDropDuration() > ITEM_DROP_DURATION)
 			{
 				int row, col;
-				iter->second.getStartLocation(row, col);
+				iter->second.getSpawnLocation(row, col);
 
 				int dropRow, dropCol;
 				iter->second.getDropLocation(dropRow, dropCol);
