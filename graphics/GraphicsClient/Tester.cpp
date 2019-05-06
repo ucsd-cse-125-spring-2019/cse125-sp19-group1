@@ -428,8 +428,8 @@ void MovePlayer()
 		const auto oldPos = playerPos;
 		playerPos = location;
 		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), playerPos);
-		if (directions) {
-			auto dir = directionBitmaskToVector(directions);
+		auto dir = directionBitmaskToVector(directions);
+		if (dir.x != 0.f || dir.z != 0.f) {
 			playerAngle = glm::atan(-dir.x, dir.z);
 		}
 		auto playerRotation = glm::rotate(newOffset, playerAngle, glm::vec3(0.f, 1.f, 0.f));
