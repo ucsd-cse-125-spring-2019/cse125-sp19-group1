@@ -39,6 +39,8 @@ public:
 
 	bool tileHasItem(Location & loc);
 	void updateTileItem(Location & loc, ItemName anItem);
+	void getAdjacentFreeTile(int currRow, int currCol, int & row, int & col);
+	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
 
 	std::string encodeTileLayoutData();
 	std::string encodeWallLayoutData();
