@@ -254,12 +254,13 @@ void Init()
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
+	//light->toggleNormalShading();
 	
 	// Load models
-	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, false);
 	catModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
 	dogModel = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
-	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, true);
+	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
 
@@ -277,6 +278,7 @@ void Init()
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
+
 	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 
 	// load the map
@@ -287,6 +289,8 @@ void Init()
 	loadMapArray(client->walls, MAP_PATH "walls.txt");
 
 	mapFinishedLoading();
+    
+	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 }
 
 void serverLoop(void * args) {
@@ -451,6 +455,7 @@ void MoveCamera(glm::vec3 * newPlayerPos) {
 void IdleCallback()
 {
 	/* TODO: waiting for server implementation */
+
 	if (clock() - elapsedTime > 1000.0 / 60)
 	{
 		elapsedTime = clock();
@@ -459,9 +464,10 @@ void IdleCallback()
 		MovePlayer();
 		//DummyMovePlayer();
 		server->update();
+		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
+		raccoonModel->Update();
 	}
 
-	
 }
 
 void DisplayCallback(GLFWwindow* window)
@@ -472,8 +478,8 @@ void DisplayCallback(GLFWwindow* window)
 	glDepthMask(GL_TRUE);
 
 	glUseProgram(objShaderProgram);
+	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	root->draw(V, P);
-	light->draw(objShaderProgram, &cam_pos);
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
@@ -492,6 +498,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		{
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
+		}
+
+		if (key == GLFW_KEY_A) {
+			raccoonModel->ToNextKeyframe();
 		}
 
 		if (key == GLFW_KEY_UP) {
