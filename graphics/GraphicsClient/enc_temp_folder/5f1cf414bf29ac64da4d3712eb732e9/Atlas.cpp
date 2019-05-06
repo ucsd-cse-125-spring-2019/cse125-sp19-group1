@@ -281,6 +281,13 @@ void Atlas::updateTileItem(Location & loc, ItemName anItem)
 
 			temp.setDropped(false);
 			temp.resetDropStatus();
+
+			/*if (temp.wasDropped() || !temp.isHeld())
+			{
+				temp.setDropped(false);
+				temp.setHoldStatus(true);
+			}*/
+			
 		}
 	}
 	tileLayout[row][col].setItem(anItem);
@@ -307,11 +314,13 @@ void Atlas::updateDroppedItem(ItemName anItem, Location loc)
 	if (itemsMap.count(anItem) > 0)
 	{
 		Item & temp = itemsMap.at(anItem);
+		temp.setHoldStatus(false);
 		int row, col;
 		Atlas::getMapCoords(loc, row, col);
 		temp.setDroppedIndices(row, col);
 		if (temp.hasBeenMoved())
 		{
+			temp.setDropped(true);
 			temp.setDropTime();
 			std::cout << "dropTime:" << clock() << std::endl;
 
@@ -335,6 +344,7 @@ void Atlas::checkDroppedItems()
 				iter->second.getDropLocation(dropRow, dropCol);
 				tileLayout[dropRow][dropCol].setItem(ItemName::EMPTY);
 				tileLayout[row][col].setItem(iter->first);
+				iter->second.setDropped(false);
 				iter->second.resetDropStatus();
 			}
 		}
