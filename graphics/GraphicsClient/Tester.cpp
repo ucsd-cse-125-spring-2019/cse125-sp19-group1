@@ -5,6 +5,12 @@
 #include "Tester.h"
 #include <ctime>
 #include <algorithm>
+
+#define TILE_HEIGHT_ADJUST -26.f
+#define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
+#define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
+#define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
+
 int elapsedTime = 0;
 
 GLFWwindow * window = nullptr;
@@ -38,7 +44,8 @@ glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);      // up | What orientation "up" is
 
-glm::vec3 playerPos;
+glm::vec3 playerPos = glm::vec3(0.f);
+float playerAngle = 0.f;
 
 bool mouseRotation = false;
 glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
@@ -117,14 +124,9 @@ void mapFinishedLoading()
 		return;
 	}
 
-#define TILE_HEIGHT_ADJUST -26.f
-#define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
-#define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
-#define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
-
 	if (floorTransform == nullptr) {
-		const auto adjustheight = glm::translate(glm::mat4(1.0f), glm::vec3(TILE_HEIGHT_ADJUST));
-		floorTransform = new Transform(glm::scale(adjustheight, glm::vec3(TILE_SCALE)));
+		const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2));
+		floorTransform = new Transform(glm::scale(translate, glm::vec3(TILE_SCALE)));
 	}
 
 	// Floor tiles
@@ -268,12 +270,12 @@ void Init()
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	root = new Transform(glm::mat4(1.0));
-	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	player = new Transform(glm::mat4(1.0));
 	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
 	root->addChild(player);
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
-	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
+	Transform * player2Rotate = new Transform(glm::mat4(1.0));
 	Geometry * playerModel2 = new Geometry(chefModel, objShaderProgram);
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
@@ -289,7 +291,8 @@ void Init()
 	loadMapArray(client->walls, MAP_PATH "walls.txt");
 
 	mapFinishedLoading();
-    
+	MoveCamera(playerPos);
+
 	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 }
 
@@ -384,23 +387,29 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 	return window;
 }
 
-void SendPackets() 
-{
+glm::vec3 directionBitmaskToVector(int bitmask) {
 	int dirX = ((directions & DirectionBitmask::eastSide) != 0) - ((directions & DirectionBitmask::westSide) != 0);
 	int dirZ = ((directions & DirectionBitmask::northSide) != 0) - ((directions & DirectionBitmask::southSide) != 0);
 
-	if (dirZ > 0) {
+	return glm::vec3((float)dirX, 0.f, (float)dirZ);
+}
+
+void SendPackets() 
+{
+	auto dir = directionBitmaskToVector(directions);
+
+	if (dir.z > 0) {
 		client->sendPackets(FORWARD_EVENT);
 	}
-	else if (dirZ < 0) {
+	else if (dir.z < 0) {
 		client->sendPackets(BACKWARD_EVENT);
 	}
 
-	if (dirX > 0) {
-		client->sendPackets(RIGHT_EVENT);
-	} 
-	else if (dirX < 0) {
+	if (dir.x > 0) {
 		client->sendPackets(LEFT_EVENT);
+	} 
+	else if (dir.x < 0) {
+		client->sendPackets(RIGHT_EVENT);
 	}
 }
 
@@ -416,11 +425,17 @@ void MovePlayer()
 
 	//if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
 		//glm::vec3 prevPos = raccoonModel->GetPosition();
-		glm::vec3 newPos = location;
-		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), newPos);
-		player->setOffset(newOffset);
+		const auto oldPos = playerPos;
+		playerPos = location;
+		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), playerPos);
+		if (directions) {
+			auto dir = directionBitmaskToVector(directions);
+			playerAngle = glm::atan(-dir.x, dir.z);
+		}
+		auto playerRotation = glm::rotate(newOffset, playerAngle, glm::vec3(0.f, 1.f, 0.f));
+		player->setOffset(playerRotation);
 		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
-		MoveCamera(&newPos);
+		MoveCamera(playerPos, oldPos);
 
 		UpdateView();
 	}
@@ -442,17 +457,42 @@ void MovePlayer()
 	//}
 }
 
-void MoveCamera(glm::vec3 * newPlayerPos) {
-	float playerX = newPlayerPos->x;
-	float playerZ = newPlayerPos->z;
-	if (playerX < 20.0f && playerX > -20.0f) {
-		cam_look_at[0] = (*newPlayerPos)[0];
-		cam_pos[0] = (*newPlayerPos)[0] + 45.0f;
+void MoveCamera(const glm::vec3 &newPlayerPos) {
+	if (true) {
+		cam_look_at.x = newPlayerPos.x;
+		cam_pos.x = newPlayerPos.x - 15.0f;
 	}
-	if(playerZ <20.0f && playerZ > -20.0f){
-		cam_look_at[2] = (*newPlayerPos)[2];
-		cam_pos[2] = (*newPlayerPos)[2] + 45.0f;
+	if (true) {
+		cam_look_at.z = newPlayerPos.z;
+		cam_pos.z = newPlayerPos.z - 45.0f;
 	}
+
+	cam_look_at.y = 0.f;
+	cam_pos.y = 100.f;
+
+	UpdateView();
+}
+
+void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+	auto screenPos = glm::project(newPlayerPos, glm::mat4(1.f), P * V, glm::vec4(0.f, 0.f, 1.f, 1.f));
+	
+	// Make the coordinates range from -1 to 1
+	screenPos = (screenPos - glm::vec3(0.5f, 0.5f, 0.f)) * 2.f;
+
+	// If the player is outside a circle of radius 0.3, then move camera
+	if (screenPos.x * screenPos.x + screenPos.y * screenPos.y > 0.3f * 0.3f) {
+		const auto offsetX = newPlayerPos.x - oldPlayerPos.x;
+		cam_look_at.x += offsetX;
+		cam_pos.x += offsetX;
+
+		const auto offsetZ = newPlayerPos.z - oldPlayerPos.z;
+		cam_look_at.z += offsetZ;
+		cam_pos.z += offsetZ;
+	}
+	
+	cam_look_at.y = 0.f;
+	cam_pos.y = 100.f;
+
 	UpdateView();
 }
 

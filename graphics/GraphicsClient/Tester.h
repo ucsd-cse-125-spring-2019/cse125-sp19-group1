@@ -44,6 +44,7 @@
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
 
 // function declarations
+glm::vec3 directionBitmaskToVector(int bitmask);
 void ErrorCallback(int error, const char* description);
 void SetupGlew();
 void SetupOpenGLSettings();
@@ -55,7 +56,8 @@ void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight);
 GLFWwindow* CreateWindowFrame(int width, int height);
 void SendPackets();
 void MovePlayer();
-void MoveCamera(glm::vec3 * newPlayerPos);
+void MoveCamera(const glm::vec3 &newPlayerPos);
+void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos);
 void IdleCallback();
 void DisplayCallback(GLFWwindow* window);
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
