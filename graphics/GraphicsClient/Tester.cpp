@@ -45,6 +45,7 @@ glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);      // up | What orientation "up" is
 
 glm::vec3 playerPos = glm::vec3(0.f);
+float playerTargetAngle = 0.f;
 float playerAngle = 0.f;
 
 bool mouseRotation = false;
@@ -430,8 +431,22 @@ void MovePlayer()
 		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), playerPos);
 		auto dir = directionBitmaskToVector(directions);
 		if (dir.x != 0.f || dir.z != 0.f) {
-			playerAngle = glm::atan(-dir.x, dir.z);
+			playerTargetAngle = glm::atan(-dir.x, dir.z);
+			float alternateTarget = playerTargetAngle - glm::two_pi<float>();
+			if (abs(playerTargetAngle - playerAngle) > abs(alternateTarget - playerAngle)) {
+				playerTargetAngle = alternateTarget;
+			}
+			alternateTarget = playerTargetAngle + glm::two_pi<float>();
+			if (abs(playerTargetAngle - playerAngle) > abs(alternateTarget - playerAngle)) {
+				playerTargetAngle = alternateTarget;
+			}
 		}
+		
+		playerAngle += (playerTargetAngle - playerAngle) * 0.675f;
+		if (abs(playerTargetAngle - playerAngle) < 0.01) {
+			playerAngle = playerTargetAngle = fmod(playerTargetAngle, glm::two_pi<float>());
+		}
+		
 		auto playerRotation = glm::rotate(newOffset, playerAngle, glm::vec3(0.f, 1.f, 0.f));
 		player->setOffset(playerRotation);
 		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
