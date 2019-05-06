@@ -46,10 +46,10 @@ float scaleDownMouseOps = 30.0f;
 float scaleUpAngle = 4.0f;
 float scaleMouseWheel = 1.05f;
 
-ServerGame * server;
-ClientGame * client;
+ServerGame * server = nullptr;
+ClientGame * client = nullptr;
 
-bool directions[4] = { false, false, false, false };
+int directions = 0;   // use DirectionBitmask
 
 void ErrorCallback(int error, const char* description)
 {
@@ -386,17 +386,21 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 
 void SendPackets() 
 {
-	if (directions[0]) {
+	int dirX = ((directions & DirectionBitmask::eastSide) != 0) - ((directions & DirectionBitmask::westSide) != 0);
+	int dirZ = ((directions & DirectionBitmask::northSide) != 0) - ((directions & DirectionBitmask::southSide) != 0);
+
+	if (dirZ > 0) {
 		client->sendPackets(FORWARD_EVENT);
 	}
-	if (directions[1]) {
+	else if (dirZ < 0) {
 		client->sendPackets(BACKWARD_EVENT);
 	}
-	if (directions[2]) {
-		client->sendPackets(LEFT_EVENT);
-	}
-	if (directions[3]) {
+
+	if (dirX > 0) {
 		client->sendPackets(RIGHT_EVENT);
+	} 
+	else if (dirX < 0) {
+		client->sendPackets(LEFT_EVENT);
 	}
 }
 
@@ -505,19 +509,19 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 
 		if (key == GLFW_KEY_UP) {
-			directions[0] = true;
+			directions |= DirectionBitmask::northSide;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-			directions[1] = true;
+			directions |= DirectionBitmask::southSide;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-			directions[2] = true;
+			directions |= DirectionBitmask::westSide;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-			directions[3] = true;
+			directions |= DirectionBitmask::eastSide;
 		}
 
 		if (key == GLFW_KEY_SPACE) {
@@ -531,19 +535,19 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	else if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_UP) {
-			directions[0] = false;
+			directions &= ~ DirectionBitmask::northSide;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-			directions[1] = false;
+			directions &= ~DirectionBitmask::southSide;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-			directions[2] = false;
+			directions &= ~DirectionBitmask::westSide;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-			directions[3] = false;
+			directions &= ~DirectionBitmask::eastSide;
 		}
 
 		if (key == GLFW_KEY_SPACE) {
