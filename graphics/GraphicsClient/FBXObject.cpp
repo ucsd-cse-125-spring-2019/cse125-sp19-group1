@@ -80,11 +80,11 @@ void FBXObject::DeformVertex(Vertex * vertex) {
 	for (int i = 0; i < weights->size(); i++) {
 		std::pair<string, float> currWeight = (*weights)[i];
 		// --> M = W*(B^(-1))
-		M = M + currWeight.second * (*((skel->GetBone(currWeight.first))->GetTransform()));
+		M = M + currWeight.second * (((skel->GetBone(currWeight.first))->GetTransform()));
 	}
 	/* TODO: fix malformed matrices (here and in Bone class) */
-	vertices[vertex->GetID()] = M * glm::vec4((*(vertex->GetPos())), 1.0f);
-	normals[vertex->GetID()] = M * glm::vec4((*(vertex->GetNorm())), 0.0f);
+	vertices[vertex->GetID()] = M * glm::vec4(((vertex->GetPos())), 1.0f);
+	normals[vertex->GetID()] = M * glm::vec4(((vertex->GetNorm())), 0.0f);
 	/* TODO: a simple test demonstrating that we can modify vertices this way: */
 	//vertices[vertex->GetID()] += glm::vec3(0.0f, 1.0f, 0.0f);
 }
@@ -281,7 +281,9 @@ void FBXObject::SetBuffers() {
 void FBXObject::ToNextKeyframe() {
 	if (animPlayer != NULL) {
 		animPlayer->ToNextKeyframe();
-		skel->Update(animPlayer->GetGlobalInverseT());
-		// TODO: UpdateSkin(); -> NaN error makes the model disappear
+		//skel->Update(animPlayer->GetGlobalInverseT());
+		glm::mat4 identity = glm::mat4(1.0f);
+		skel->Update(&identity);
+		UpdateSkin();// -> NaN error makes the model disappear
 	}
 }

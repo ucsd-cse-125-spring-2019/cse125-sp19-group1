@@ -74,6 +74,7 @@ void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 		currAIBone = mesh->mBones[i];
 		currBone = skel->GetBone(currAIBone->mName.C_Str());
 		if (currBone != NULL) {
+			//std::cout << currBone->GetName() << "OFFSET: " << std::endl;
 			currBone->SetOffset(aiMatTOglm(currAIBone->mOffsetMatrix));
 		}
 		else
@@ -107,16 +108,18 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 }
 
 // convert aiMatrix4x4 to glm::mat4
-glm::mat4 * aiMatTOglm(aiMatrix4x4 mat)
+glm::mat4 aiMatTOglm(aiMatrix4x4 mat)
 {
 	glm::mat4 newMat = glm::mat4(1.0);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
+			//std::cout << mat[i][j] << " ";
 			newMat[i][j] = mat[i][j];
 		}
+		//std::cout << std::endl;
 	}
 
-	return &newMat;
+	return newMat;
 }
 
 // extract rendering information for a mesh (vertices, noramls, indices/faces, and uvs)

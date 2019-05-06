@@ -11,8 +11,8 @@ public:
 	~Vertex();
 	void AddWeight(string boneName, float boneWeight);
 	std::vector<std::pair<string, float>> * GetWeights();
-	glm::vec3 * GetPos();
-	glm::vec3 * GetNorm();
+	glm::vec3 GetPos();
+	glm::vec3 GetNorm();
 	unsigned int GetID();
 	void Print();
 private:

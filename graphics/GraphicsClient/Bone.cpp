@@ -1,9 +1,10 @@
 #include "Bone.h"
 
-Bone::Bone(string newName, glm::mat4 * nodeMat, Bone * newParent) {
+Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
 	name = string(newName);
 	transform = glm::mat4(1.0f);
-	nodeTransform = glm::mat4(*nodeMat);
+	offset = glm::mat4(1.0f);
+	nodeTransform = glm::mat4(nodeMat);
 	parent = newParent;
 }
 
@@ -23,13 +24,14 @@ glm::mat4 * Bone::GetOffset() {
 	return &offset;
 }
 
-glm::mat4 * Bone::GetTransform() {
-	return &transform;
+glm::mat4 Bone::GetTransform() {
+	return transform;
 }
 
-void Bone::SetOffset(glm::mat4 * newOffset) {
+void Bone::SetOffset(glm::mat4 newOffset) {
 	try {
-		offset = glm::mat4(*newOffset);
+		offset = glm::mat4(newOffset);
+
 	}
 	catch (exception e) {
 		std::cerr << "Bone's inverse binding matrix could not be set" << std::endl;
@@ -65,14 +67,17 @@ void Bone::Update(glm::mat4 * globalInverseT, glm::mat4 * parentT) {
 		// --> parentT yields inf matrices by the time we reach the arm!
 		// --> channel->GetTransform() yields NaN matrices for several bones
 		globalT = (*parentT) * (*(channel->GetTransform()));
+		//std::cerr << "GLOBALT MAT" << "\n";
+		//PrintMatrix(&globalT);
 		// updating the transform matrix, which the vertices will access when updating skin
-		transform = (*globalInverseT) * globalT * offset;
-		std::cout << "CHANNEL IS __NOT__ NULL FOR " << name << std::endl;
-		PrintMatrix(&transform);
+		transform = (*globalInverseT) * globalT *offset;
+		//std::cerr << "OFFSET UPDATE FOR " << name << "\n";
+		//PrintMatrix(&offset);
+		//std::cout << "CHANNEL IS __NOT__ NULL FOR " << name << std::endl;
+		//PrintMatrix(&transform);
 	}
 	else {
 		globalT = (*parentT) * nodeTransform;
-		std::cout << "CHANNEL IS NULL FOR " << name << std::endl;
 	}
 
 	for (int i = 0; i < children.size(); i++) {

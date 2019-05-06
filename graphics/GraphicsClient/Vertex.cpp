@@ -15,12 +15,12 @@ std::vector<std::pair<string, float>> * Vertex::GetWeights() {
 	return &weights;
 }
 
-glm::vec3 * Vertex::GetPos() {
-	return &position;
+glm::vec3 Vertex::GetPos() {
+	return position;
 }
 
-glm::vec3 * Vertex::GetNorm() {
-	return &normal;
+glm::vec3 Vertex::GetNorm() {
+	return normal;
 }
 
 unsigned int Vertex::GetID() {

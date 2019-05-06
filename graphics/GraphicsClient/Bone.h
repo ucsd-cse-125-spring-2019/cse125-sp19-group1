@@ -6,14 +6,14 @@
 
 class Bone {
 public:
-	Bone(string newName, glm::mat4 * nodeMat, Bone * newParent);
+	Bone(string newName, glm::mat4 nodeMat, Bone * newParent);
 	~Bone();
 	void AddChild(Bone * child);
 	string GetName();
 	void Print(string spaces);
 	glm::mat4 * GetOffset();
-	glm::mat4 * GetTransform();
-	void SetOffset(glm::mat4 * newOffset);
+	glm::mat4 GetTransform();
+	void SetOffset(glm::mat4 newOffset);
 	void SetTransform(glm::mat4 * newTransform);
 	void SetChannel(AnimationChannel * newChannel);
 	void Update(glm::mat4 * globalInverseT, glm::mat4 * parentT);
