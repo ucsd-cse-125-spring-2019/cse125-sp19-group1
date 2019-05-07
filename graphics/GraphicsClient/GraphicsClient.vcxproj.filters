@@ -73,6 +73,11 @@
     <ClCompile Include="..\..\network\Walls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationChannel.cpp" />
+    <ClCompile Include="AnimationPlayer.cpp" />
+    <ClCompile Include="Keyframe.cpp" />
+    <ClCompile Include="FogGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animloader.h">
@@ -165,6 +170,7 @@
     <ClInclude Include="AnimationPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FogGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag">

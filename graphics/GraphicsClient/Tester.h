@@ -7,6 +7,7 @@
 
 #include "Core.h"
 #include "DirLight.h"
+#include "FogGenerator.h"
 #include "FBXObject.h"
 #include "Node.h"
 #include "Transform.h"
@@ -39,6 +40,10 @@
 
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.ppm")
+
+
+#define CHEF_FOG_DISTANCE 85.0f
+#define RACCOON_FOG_DISTANCE 160
 
 // function declarations
 void ErrorCallback(int error, const char* description);

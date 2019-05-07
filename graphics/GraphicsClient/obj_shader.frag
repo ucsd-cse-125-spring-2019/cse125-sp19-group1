@@ -9,6 +9,12 @@ struct Light {
   vec3 cam_look_at;
 };
 
+struct Fog {
+  vec3 player_pos;
+  float fog_distance;
+};
+
+uniform Fog fog;
 uniform Light light;
 uniform bool shadowsOn = false;
 uniform sampler2D renderedTexture;
@@ -19,6 +25,7 @@ in float transparency;
 in float test;
 in vec3 fragNormal;
 in vec3 fragPos;
+in vec3 vecPos;
 in mat4 originalModel;
 in vec3 diffuse;
 in vec3 ambient;
@@ -79,6 +86,19 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
   return toonColor;
 }
 
+vec3 CalcFogOfWar(vec3 inputColor) {
+	//hide items beyound certain threshold of playerposition
+   vec3 distanceFromPlayer = vecPos - fog.player_pos;
+   float distance = length(distanceFromPlayer);
+   if(abs(distance) > fog.fog_distance) {
+      inputColor = inputColor * 0.1;
+   }
+   else if(abs(distance) > fog.fog_distance - 20) {
+	  inputColor = inputColor * 0.45;
+   }
+   return inputColor;
+}
+
 void main()
 {
   vec4 texColor = texture(renderedTexture, UV);
@@ -97,6 +117,7 @@ void main()
   } else {
     res = CalcDirLight(normal, viewDir);
   }
+  res = CalcFogOfWar(res);
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);

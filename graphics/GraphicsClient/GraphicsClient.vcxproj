@@ -146,6 +146,7 @@
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="FBXObject.h" />
     <ClInclude Include="Bone.h" />
+    <ClInclude Include="FogGenerator.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Keyframe.h" />
     <ClInclude Include="MeshEntry.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="FBXObject.cpp" />
     <ClCompile Include="Bone.cpp" />
+    <ClCompile Include="FogGenerator.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Keyframe.cpp" />
     <ClCompile Include="MeshEntry.cpp" />

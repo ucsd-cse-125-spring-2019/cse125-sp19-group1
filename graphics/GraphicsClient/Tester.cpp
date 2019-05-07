@@ -14,6 +14,7 @@ const char* window_title = "TESTER";
 glm::mat4 P; // P for projection
 glm::mat4 V; // V for view
 DirLight * light = nullptr;
+FogGenerator * fog = nullptr;
 FBXObject * raccoonModel = nullptr;
 FBXObject * catModel = nullptr;
 FBXObject * dogModel = nullptr;
@@ -116,12 +117,14 @@ void Init()
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
+	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
 	// Load models
 	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, true);
 	root = new Transform(glm::mat4(1.0));
 	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
+	Geometry * playerModel = new Geometry(chefModel, objShaderProgram);
 	root->addChild(player);
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
@@ -131,6 +134,7 @@ void Init()
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
     //raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+	UpdateView();
 }
 
 void serverLoop(void * args) {
@@ -244,27 +248,12 @@ void MovePlayer()
 		glm::vec3 newPos = location;
 		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), newPos);
 		player->setOffset(newOffset);
-		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
 		MoveCamera(&newPos);
+		playerPos = P * V * glm::vec4(newPos,1.0f);
 
 		UpdateView();
 	}
-	//if (!client->clients2.empty()) {
-	//	/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
-	//		client->clients2["client_0"][1] * 0.1f,
-	//		client->clients2["client_0"][2] * 0.1f);
-	//	*/
-	//	glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
-	//		client->allClients["client_0"].getLocation().getY() * 0.1f,
-	//		client->allClients["client_0"].getLocation().getZ() * 0.1f);
-	//	
-	//	/*glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
-	//		p->getLocation().getY() * 0.1f,
-	//		p->getLocation().getZ() * 0.1f);*/
 
-	//	cam_pos = location;
-	//	UpdateView();
-	//}
 }
 
 void MoveCamera(glm::vec3 * newPlayerPos) {
@@ -307,6 +296,7 @@ void DisplayCallback(GLFWwindow* window)
 
 	glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
+	fog->draw(objShaderProgram, playerPos);
 	root->draw(V, P);
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
