@@ -164,11 +164,13 @@ void ServerGame::receiveFromClients()
 				else
 				{
 					Location loc = gameData->getPlayer(iter->first)->getLocation();
-					ItemName item = gameData->getAtlas()->getItem(loc);
+					ItemName item = gameData->getAtlas()->getTileItem(loc);
 					
-					if (item != ItemName::EMPTY)
+					if (item != ItemName::EMPTY && gameData->getPlayer(iter->first)->getInventory() == ItemName::EMPTY)
 					{
 						gameData->getPlayer(iter->first)->setInventory(item);
+						gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
+
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
@@ -270,7 +272,30 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
-				gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
+
+				// PLayer cannot drop item if there is an item already on the current tile
+				if (!(gameData->getAtlas()->tileHasItem(loc)))
+				{
+					ItemName itemName = gameData->getPlayer(iter->first)->getInventory();
+					gameData->getAtlas()->updateTileItem(loc, itemName);
+					gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+
+					gameData->getAtlas()->updateDroppedItem(itemName, loc);
+					/*Item temp;
+					gameData->getAtlas()->getItem(itemName, temp);
+					if (temp.getName() != ItemName::EMPTY)
+					{
+						temp.setHoldStatus(false);
+						int row, col;
+						Atlas::getMapCoords(loc, row, col);
+						if (temp.hasBeenMoved(row, col))
+						{
+							temp.setDropped(true);
+							temp.setDroppedTime(clock());
+						}
+					}*/
+				}
 				break;
 			}
 			default:
@@ -281,6 +306,7 @@ void ServerGame::receiveFromClients()
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
 	}
+	gameData->getAtlas()->checkDroppedItems();
 	//sendActionPackets(); // uncomment to always send data from server
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
