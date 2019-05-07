@@ -166,16 +166,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\Item.h">
-    <ClInclude Include="AnimationChannel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyframe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -13,7 +13,7 @@ public:
 
   DirLight();
   void toggleNormalShading();
-  void draw(GLuint program, glm::vec3 * cam_pos, glm::vec3 cam_look_at);
+  void draw(GLuint program, glm::vec3 * cam_pos);
 };
 
 #endif /* DirLight_h */

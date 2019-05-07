@@ -2,7 +2,7 @@
 
 // load a model (and possibly a Skeleton, if the model is expected to have one)
 bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
-	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs, Skeleton * skel, AnimationPlayer ** animPlayer) 
+	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs, Skeleton * skel) 
 {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
@@ -20,25 +20,21 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 	populateMesh(mesh, vertices, normals, indices, uvs);
 
 	// if the Skeleton pointer is not null, it means we want a Skeleton, so we must load the proper data
-	if (skel) {
-		loadSkeleton(mesh, scene->mRootNode, vertices, normals, skel);
-		loadAnimation((aiScene*)scene, skel, animPlayer);
-		std::cerr << "Trying to get animPlayer pointer:" << *animPlayer << "\n";
-	}
+	if (skel)
+		loadSkeleton(mesh, scene->mRootNode, vertices, skel);
 
 	// the scene will be destroyed automatically when we return
 	return true;
 }
 
 // load a skeleton
-void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel)
+void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, Skeleton * skel)
 {
 	// extracting information about how bones affect vertices through weights
 	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	populateSkelVertices(mesh, vertices, normals, skelVertices);
+	populateSkelVertices(mesh, vertices, skelVertices);
 	// creating actual Bone objects and populating the Skeleton
 	traverseSkeleton(root, skel);
-	assignOffsetMatrices(mesh, skel);
 }
 
 void traverseSkeleton(aiNode * currNode, Skeleton * skel)
@@ -50,7 +46,7 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 	// if the node has a parent, find the parent and save a pointer to it
 	if (currNode->mParent) {
 		string parentName = currNode->mParent->mName.C_Str();
-		parent = skel->GetBone(parentName);
+		parent = skel->GetNode(parentName);
 	}
 
 	// create a Bone for the node and adding it to the Skeleton
@@ -63,32 +59,16 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 		traverseSkeleton(child, skel);
 		// after we've returned from the recursive call, the bone for the child node
 		// should now exist, so we can add it to the current bone's list of children
-		bone->AddChild(skel->GetBone(child->mName.C_Str()));
+		bone->AddChild(skel->GetNode(child->mName.C_Str()));
 	}
 }
 
-void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
-	aiBone * currAIBone = NULL;
-	Bone * currBone = NULL;
-	for (int i = 0; i < mesh->mNumBones; i++) {
-		currAIBone = mesh->mBones[i];
-		currBone = skel->GetBone(currAIBone->mName.C_Str());
-		if (currBone != NULL) {
-			currBone->SetOffset(aiMatTOglm(currAIBone->mOffsetMatrix));
-		}
-		else
-			std::cout << "OBJLOADER: MISSING A BONE FOR " << currAIBone->mName.C_Str() << std::endl;
-
-		currBone = NULL;
-	}
-}
-
-void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, std::vector<Vertex *> * skelVertices)
+void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<Vertex *> * skelVertices)
 {
 	// first, populate the skel Vertex array
 	skelVertices->reserve(vertices->size());
 	for (int i = 0; i < vertices->size(); i++) {
-		skelVertices->push_back(new Vertex(i, &((*vertices)[i]), &((*normals)[i])));
+		skelVertices->push_back(new Vertex(i, &((*vertices)[i])));
 	}
 
 	// next, extract weights from the aiBones
@@ -109,7 +89,7 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 // convert aiMatrix4x4 to glm::mat4
 glm::mat4 * aiMatTOglm(aiMatrix4x4 mat)
 {
-	glm::mat4 newMat = glm::mat4(1.0);
+	glm::mat4 newMat = glm::mat4(1.0f);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			newMat[i][j] = mat[i][j];

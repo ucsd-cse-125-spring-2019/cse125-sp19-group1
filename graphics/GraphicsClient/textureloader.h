@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 
 
-GLuint loadTexture(const char * textureName);
+void loadTexture(const char * textureName);
 unsigned char* loadPPM(const char* filename, int& width, int& height);
 #endif
 

@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string>
 #include <cstring>
-#include <map>
 
 #include <glm/glm.hpp>
 
@@ -15,14 +14,6 @@
 #include <assimp/scene.h>  // Output data structure
 #include <assimp/postprocess.h> // Post processing flags
 
-#include "Skeleton.h"
-#include "Animation.h"
-#include "AnimationPlayer.h"
-#include "AnimationChannel.h"
-#include "Keyframe.h"
-
-bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer);
-void convertChannels(aiAnimation * aiAnim, std::vector<AnimationChannel *> * channels);
-glm::mat4 * aiMatTOglm_ANIM(aiMatrix4x4 mat);
+bool load(const char * path);
 
 #endif
