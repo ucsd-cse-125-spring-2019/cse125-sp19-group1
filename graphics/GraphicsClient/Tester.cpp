@@ -451,7 +451,7 @@ void MovePlayer()
 			}
 		}
 		
-		playerAngle += (playerTargetAngle - playerAngle) * 0.675f;
+		playerAngle += (playerTargetAngle - playerAngle) * 0.375f;
 		if (abs(playerTargetAngle - playerAngle) < 0.01) {
 			playerAngle = playerTargetAngle = fmod(playerTargetAngle, glm::two_pi<float>());
 		}
