@@ -43,20 +43,19 @@ void AnimationChannel::SetTransform(float currTime) {
 		else {
 			currKeyframe += 1;
 		}
-		glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), keyframes[currKeyframe]->getScaling());
-		glm::vec4 rotationQuat = keyframes[currKeyframe]->getRotation();
-		float rotationAngle = acos(rotationQuat.w) * 2;
-		glm::vec3 rotationAxis = glm::vec3(rotationQuat.x / sqrt(1 - (rotationQuat.w * rotationQuat.w)),
-			rotationQuat.y / sqrt(1 - (rotationQuat.w * rotationQuat.w)),
-			rotationQuat.z / sqrt(1 - (rotationQuat.w * rotationQuat.w)));
-		glm::mat4 rotationMatrix = rotate(glm::mat4(1.0f), rotationAngle, rotationAxis);
-		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), keyframes[currKeyframe]->getPosition());
+		Keyframe * key = keyframes[currKeyframe];
+		glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), key->getScaling());
+		glm::quat rotationQuat = glm::quat(key->getRotation());
+		glm::mat4 rotationMatrix = rotationQuat.operator glm::mat<4, 4, float, glm::packed_highp>();
+		//	std::cout << "ROTATION MATRIX" << std::endl;
+		//PrintMatrix(&rotationMatrix);
+		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), key->getPosition());
 		transform = translationMatrix * rotationMatrix * scalingMatrix;
 	}
 }
 
-glm::mat4 * AnimationChannel::GetTransform() {
-	return &transform;
+glm::mat4 AnimationChannel::GetTransform() {
+	return transform;
 }
 
 void AnimationChannel::ToNextKeyframe() {

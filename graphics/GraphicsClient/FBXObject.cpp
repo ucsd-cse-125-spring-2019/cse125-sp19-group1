@@ -281,9 +281,9 @@ void FBXObject::SetBuffers() {
 void FBXObject::ToNextKeyframe() {
 	if (animPlayer != NULL) {
 		animPlayer->ToNextKeyframe();
-		//skel->Update(animPlayer->GetGlobalInverseT());
+		skel->Update(animPlayer->GetGlobalInverseT());
 		glm::mat4 identity = glm::mat4(1.0f);
-		skel->Update(&identity);
-		UpdateSkin();// -> NaN error makes the model disappear
+		//skel->Update(&identity);
+		UpdateSkin();
 	}
 }

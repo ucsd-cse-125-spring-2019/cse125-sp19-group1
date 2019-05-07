@@ -23,7 +23,7 @@ public:
 	int getNumKeyframes();
 	Keyframe ** getKeyframes();
 	void SetTransform(float currTime);
-	glm::mat4 * GetTransform();
+	glm::mat4 GetTransform();
 
 	void ToNextKeyframe();
 	void PrintMatrix(glm::mat4 * matrix);

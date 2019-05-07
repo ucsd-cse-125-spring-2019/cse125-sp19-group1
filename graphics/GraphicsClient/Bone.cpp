@@ -6,6 +6,7 @@ Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
 	offset = glm::mat4(1.0f);
 	nodeTransform = glm::mat4(nodeMat);
 	parent = newParent;
+	isBone = false;
 }
 
 Bone::~Bone() {
@@ -62,19 +63,22 @@ void Bone::Print(string spaces) {
 void Bone::Update(glm::mat4 * globalInverseT, glm::mat4 * parentT) {
 	glm::mat4 globalT;
 
-	if (channel != NULL) {
+	if (isBone && channel != NULL) {
 		// TODO: globalInverseT and offset are fine, but globalT introduces NaN issues
 		// --> parentT yields inf matrices by the time we reach the arm!
 		// --> channel->GetTransform() yields NaN matrices for several bones
-		globalT = (*parentT) * (*(channel->GetTransform()));
+		globalT = (*parentT) * (channel->GetTransform());
 		//std::cerr << "GLOBALT MAT" << "\n";
 		//PrintMatrix(&globalT);
 		// updating the transform matrix, which the vertices will access when updating skin
-		transform = (*globalInverseT) * globalT *offset;
-		//std::cerr << "OFFSET UPDATE FOR " << name << "\n";
-		//PrintMatrix(&offset);
+		transform = (*globalInverseT) * globalT * offset;
+		std::cerr << "OFFSET FOR " << name << "\n";
+		PrintMatrix(&offset);
 		//std::cout << "CHANNEL IS __NOT__ NULL FOR " << name << std::endl;
 		//PrintMatrix(&transform);
+	}
+	else if (channel != NULL) {
+		globalT = (*parentT) * (channel->GetTransform());
 	}
 	else {
 		globalT = (*parentT) * nodeTransform;
@@ -93,4 +97,8 @@ void Bone::PrintMatrix(glm::mat4 * matrix) {
 		std::cerr << std::endl;
 	}
 	std::cerr << std::endl;
+}
+
+void Bone::SetIsBone(bool input) {
+	isBone = input;
 }

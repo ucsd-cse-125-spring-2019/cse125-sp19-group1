@@ -70,12 +70,14 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 	aiBone * currAIBone = NULL;
 	Bone * currBone = NULL;
+	std::cout << "NUM BONES: " << mesh->mNumBones << std::endl;
 	for (int i = 0; i < mesh->mNumBones; i++) {
 		currAIBone = mesh->mBones[i];
 		currBone = skel->GetBone(currAIBone->mName.C_Str());
 		if (currBone != NULL) {
-			//std::cout << currBone->GetName() << "OFFSET: " << std::endl;
+			std::cout << currBone->GetName() << " OFFSET: " << std::endl;
 			currBone->SetOffset(aiMatTOglm(currAIBone->mOffsetMatrix));
+			currBone->SetIsBone(true);
 		}
 		else
 			std::cout << "OBJLOADER: MISSING A BONE FOR " << currAIBone->mName.C_Str() << std::endl;
@@ -113,10 +115,10 @@ glm::mat4 aiMatTOglm(aiMatrix4x4 mat)
 	glm::mat4 newMat = glm::mat4(1.0);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			//std::cout << mat[i][j] << " ";
-			newMat[i][j] = mat[i][j];
+			std::cout << mat[j][i] << " ";
+			newMat[i][j] = mat[j][i];
 		}
-		//std::cout << std::endl;
+		std::cout << std::endl;
 	}
 
 	return newMat;
