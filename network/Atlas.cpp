@@ -310,8 +310,7 @@ void Atlas::updateDroppedItem(ItemName anItem, Location loc)
 		if (temp.hasBeenMoved())
 		{
 			temp.setDropTime();
-			std::cout << "dropTime:" << clock() << std::endl;
-
+			//std::cout << "dropTime:" << clock() << std::endl;
 		}
 	}
 }
@@ -326,29 +325,7 @@ void Atlas::checkDroppedItems()
 			{
 				int spawnRow, spawnCol;
 				iter->second.getSpawnLocation(spawnRow, spawnCol);
-
-				int dropRow, dropCol;
-				iter->second.getDropLocation(dropRow, dropCol);
-				tileLayout[dropRow][dropCol].setItem(ItemName::EMPTY);
-				
-				// Check if spawn tile location has an item
-				if(tileLayout[spawnRow][spawnCol].getItem() != ItemName::EMPTY)
-				{
-					ItemName temp = tileLayout[spawnRow][spawnCol].getItem();
-
-					int destRow, destCol;
-					getAdjacentFreeTile(spawnRow, spawnCol, destRow, destCol);
-
-					// If dest indices are not -1, then move the item, otherwise, it gets erased
-					if (destRow != -1 && destCol != -1)
-					{
-						tileLayout[destRow][destCol].setItem(temp);
-						itemsMap[temp].setDroppedIndices(destRow, destCol);
-
-					}
-				}
-				tileLayout[spawnRow][spawnCol].setItem(iter->first);
-				iter->second.resetDropStatus();
+				returnItemToSpawn(iter->first, spawnRow, spawnCol);
 			}
 		}
 	}
@@ -498,6 +475,7 @@ std::string Atlas::encodeTileLayoutData()
 			if (tileLayout[row][col].isDirty())
 			{
 				encodedData << "tile: " << row << " " << col << "|";
+				encodedData << "tileType: " << static_cast<int>(tileLayout[row][col].getTileType()) << "|";
 				encodedData << "tileData: " << tileLayout[row][col].encodeTileData() << "|";
 				tileCount++;
 			}
