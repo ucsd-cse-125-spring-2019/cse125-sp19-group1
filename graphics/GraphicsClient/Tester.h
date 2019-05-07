@@ -51,6 +51,7 @@ void SetupOpenGLSettings();
 void PrintVersions();
 void Init();
 void serverLoop(void * args);
+void deallocFloor();
 void CleanUp();
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight);
 GLFWwindow* CreateWindowFrame(int width, int height);

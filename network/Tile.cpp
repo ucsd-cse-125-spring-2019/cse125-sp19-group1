@@ -7,12 +7,12 @@ void Tile::setItem(ItemName anItem) { itemName = anItem; setDirty(); }
 void Tile::setBoxStatus(bool aBoxStatus) { boxStatus = aBoxStatus; setDirty(); }
 void Tile::setDirty() { dirty = true; }
 
-bool Tile::isDirty() { return dirty; }
-bool Tile::hasBox() { return boxStatus; }
-int Tile::getWall() { return wall; }
-ItemName Tile::getItem() { return itemName; }
-TileType Tile::getTileType() { return tileType; }
-int Tile::getHeight() { return height; }
+bool Tile::isDirty() const { return dirty; }
+bool Tile::hasBox() const { return boxStatus; }
+int Tile::getWall() const { return wall; }
+ItemName Tile::getItem() const { return itemName; }
+TileType Tile::getTileType() const { return tileType; }
+int Tile::getHeight() const { return height; }
 
 std::string Tile::encodeTileData()
 {

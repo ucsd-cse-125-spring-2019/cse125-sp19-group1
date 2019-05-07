@@ -118,10 +118,14 @@ void PrintVersions()
 #endif
 }
 
-void mapFinishedLoading()
+void reloadMap()
 {
-	if (!client->heights.size()) {
-		cerr << "mapFinishedLoading(): map is empty\n";
+	deallocFloor();
+
+	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	
+	if (!tileLayout.size()) {
+		cerr << "reloadMap(): map is empty\n";
 		return;
 	}
 
@@ -131,17 +135,22 @@ void mapFinishedLoading()
 	}
 
 	// Floor tiles
-	floorArray.resize(client->heights.size());
+	floorArray.resize(tileLayout.size());
 	for (size_t z = 0; z < floorArray.size(); z++) {
 		auto &row = floorArray[z];
 
-		row.resize(client->heights[z].size());
+		row.resize(tileLayout[z].size());
 
 		for (size_t x = 0; x < row.size(); x++) {
 
-			float y = client->heights[z][x] * 0.5f * TILE_LEVEL_OFFSET;
+			float y = tileLayout[z][x].getHeight() * 0.5f * TILE_LEVEL_OFFSET;
 			auto skew = glm::mat4(1.0f);
-			switch (client->ramps[z][x]) {
+
+			//TODO: add ramp direction to the Tile class
+			// For now, randomize as a reminder
+			int rampDirection = tileLayout[z][x].getTileType() == TileType::RAMP ? (1 << (rand() % 4)) : 0;
+
+			switch (rampDirection) {
 			case DirectionBitmask::eastSide:
 				skew[0][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
 				break;
@@ -174,8 +183,8 @@ void mapFinishedLoading()
 		row.resize(floorArray[clippedZ].size());
 
 		for (size_t x = 0; x < row.size(); x++) {
-			if ((z > 0 && (client->walls[z - 1][x] & DirectionBitmask::southSide)) ||
-				(z == clippedZ && (client->walls[z][x] & DirectionBitmask::northSide)))
+			if ((z > 0 && (tileLayout[z - 1][x].getWall() & DirectionBitmask::southSide)) ||
+				(z == clippedZ && (tileLayout[z][x].getWall() & DirectionBitmask::northSide)))
 			{
 				// Calculate the altitude of the wall
 				int height = 1;
@@ -203,8 +212,8 @@ void mapFinishedLoading()
 		for (size_t x = 0; x < row.size(); x++) {
 			auto clippedX = (x < row.size() - 1) ? x : (row.size() - 2);
 
-			if ((x > 0 && (client->walls[z][x - 1] & DirectionBitmask::eastSide)) ||
-				(x == clippedX && (client->walls[z][x] & DirectionBitmask::westSide)))
+			if ((x > 0 && (tileLayout[z][x - 1].getWall() & DirectionBitmask::eastSide)) ||
+				(x == clippedX && (tileLayout[z][x].getWall() & DirectionBitmask::westSide)))
 			{
 				// Calculate the altitude of the wall
 				int height = 1;
@@ -284,14 +293,14 @@ void Init()
 
 	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 
-	// load the map
+/*	// load the map
 	// TODO: wait to get it from the server instead, display a loading screen
 #define MAP_PATH "../../maps/tinytinymap/"
 	loadMapArray(client->heights, MAP_PATH "heights.txt");
 	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
 	loadMapArray(client->walls, MAP_PATH "walls.txt");
 
-	mapFinishedLoading();
+	mapFinishedLoading();*/
 	MoveCamera(playerPos);
 
 	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
@@ -520,6 +529,8 @@ void IdleCallback()
 		elapsedTime = clock();
 		SendPackets();
 		client->update();
+		if (!floorArray.size())
+			reloadMap();
 		MovePlayer();
 		//DummyMovePlayer();
 		server->update();

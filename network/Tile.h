@@ -14,12 +14,12 @@ public:
 	void setBoxStatus(bool boxStatus);
 	void setDirty();
 
-	bool isDirty();
-	bool hasBox(); 
-	int getWall();
-	int getHeight();
-	ItemName getItem();
-	TileType getTileType();
+	bool isDirty() const;
+	bool hasBox() const; 
+	int getWall() const;
+	int getHeight() const;
+	ItemName getItem() const;
+	TileType getTileType() const;
 
 	std::string encodeTileData();
 	void decodeTileData(std::string value);
