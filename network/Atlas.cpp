@@ -1,11 +1,4 @@
 #include "Atlas.h"
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <bitset> 
-#include <string.h>
 
 //1000 = left = 8
 //0100 = up = 4
@@ -13,152 +6,205 @@
 //0001 = right = 1
 //0000 = no wall = 0 
 
-void Atlas::getMapCoords(std::vector<float> & loc, int * row, int * col)
+void Atlas::getMapCoords(Location & loc, int & row, int & col)
 {
-	*row = (int)(loc[2] / TILE_SIZE);
-	*col = (int)(loc[0] / TILE_SIZE);
+	row = (int)(loc.getZ() / TILE_SIZE);
+	col = (int)(loc.getX() / TILE_SIZE);
 }
-
 
 Atlas::Atlas()
 {
 	//Reading from a file to generate map
-	std::ifstream infile("layout.txt");
-	char errmsg[100];
-	strerror_s(errmsg, 100, errno);
-	std::cout << errmsg << std::endl;
-	std::string line;
-	printf("INITIALIZING WALLS!\n");
-	//wallLayout.clear();
-	//int cols = 3;
-	//layout.clear();
-	while (std::getline(infile, line))
+	std::ifstream wallFile("layout.txt");
+	std::ifstream boxFile("box.txt");
+	std::string wallLine;
+	std::string boxLine;
+	//printf("INITIALIZING WALLS!\n");
+
+	std::getline(wallFile, wallLine); // removes first line from file
+	std::getline(boxFile, boxLine); // removes first line from file
+	int row = 0;
+	while (std::getline(wallFile, wallLine))
 	{
-		std::stringstream lineStream(line);
-		std::string num;
-		std::vector<int> row;
-		while (lineStream >> num)
+		int col = 0;
+		std::getline(boxFile, boxLine);
+		std::stringstream wallStream(wallLine);
+		std::stringstream boxStream(boxLine);
+		std::string wallNum;
+		std::string boxNum;
+		std::vector<Tile> tileRow;
+		while (wallStream >> wallNum)
 		{
-			row.push_back(std::stoi(num));
+			boxStream >> boxNum;
+			TileType type(TileType::DEFAULT);
+			bool boxStatus = false;
+			int height = 0;
+			if (boxNum == "1")
+			{
+				type = TileType::BOX;
+				boxStatus = true;
+				boxLocations.push_back(std::pair<int, int>(row, col));
+			}
+			tileRow.push_back(Tile(std::stoi(wallNum), type, boxStatus, height));
+			col++;
 		}
-		//cols = row.size();
-		//wallLayout.push_back(row);
-		//layout.push_back(row);
+		tileLayout.push_back(tileRow);
+		row++;
 	}
 
-	//Hardcode layout for now
-	for (int r = 0; r < wallLayout.size(); r++) {
-		for (int c = 0; c < wallLayout[r].size(); c++) {
+	// Debug print out the wall layout
+	for (int r = 0; r < tileLayout.size(); r++) {
+		for (int c = 0; c < tileLayout[r].size(); c++) {
 
-			std::cout << wallLayout[r][c] << " ";
+			std::cout << tileLayout[r][c].getWall() << " ";
 		}
 		std::cout << std::endl;
 	}
+	srand(time(NULL));
+	// Remove extra boxes locations to use until box count matches item count
+	while (boxLocations.size() > MAX_ITEMS)
+	{
+		int randPos = rand() % boxLocations.size();
+		boxLocations.erase(boxLocations.begin() + randPos);
+	}
+
+	for(auto boxLocationsIter = boxLocations.begin(); boxLocationsIter != boxLocations.end(); boxLocationsIter++)
+	{
+		// Gets row and col location of the box
+		int row = boxLocationsIter->first;
+		int col = boxLocationsIter->second;
+		ItemName randItem = ItemName::EMPTY;
+		
+		// Get random item that is still available
+		while(std::find(itemList.begin(), itemList.end(), randItem) == itemList.end())
+			randItem = static_cast<ItemName>(rand() % MAX_ITEMS + 1);
+
+		itemsMap.emplace(randItem, Item(randItem, row, col));
+		keyLayout[row][col] = static_cast<int>(randItem);
+
+		// Removes the item from the item list
+		itemList.erase(std::find(itemList.begin(), itemList.end(), randItem));
+	}
+
+	std::cout << "keys" << std::endl;
+	// Debug print key layout
+	for (auto v : keyLayout)
+	{
+		for (auto x : v)
+		{
+			std::cout << x << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "endconstructor\n";
 }
 
-void Atlas::detectCollision(std::vector<float> & loc) {
+void Atlas::detectCollision(Location & loc) {
 	// find which tile player is in
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (r >= wallLayout.size())
-		r = wallLayout.size() - 1;
+	if (row >= tileLayout.size())
+		row = tileLayout.size() - 1;
 
-	if (c >= wallLayout[r].size())
+	else if (row < 0)
+		row = 0;
+
+	if (col >= tileLayout[row].size())
 	{
-		c = wallLayout[r].size() - 1;
+		col = tileLayout[row].size() - 1;
 	}
+	else if (col < 0)
+		col = 0;
 
 	//std::cout << "R: " << r << std::endl;
 	//std::cout << "C: " << c << std::endl;
 
 	//check collision
-	std::bitset<4> wall(wallLayout[r][c]);
+	std::bitset<4> wall(tileLayout[row][col].getWall());
 	//std::cout << "bit set for walls " << wall << std::endl;
 	//std::cout << wall[3] << std::endl;
 	//std::cout << wall[2] << std::endl;
 	//std::cout << wall[1] << std::endl;
 	//std::cout << wall[0] << std::endl;
 
-	std::cout << "layout(" << r << ", " << c << "): " << wallLayout[r][c] << std::endl;
+	std::cout << "mapCoord:(" << row << ", " << col << "): " << tileLayout[row][col].getWall() << std::endl;
 	//check left wall
 	if (wall[3]) {
-		int left_bound = c * TILE_SIZE + WALL_SIZE;
-		if (loc[0] - PLAYER_RADIUS < left_bound) {
+		int left_bound = col * TILE_SIZE + WALL_SIZE;
+		if (loc.getX() - PLAYER_RADIUS < left_bound) {
 			printf("collided with left wall\n");
-			//std::cout << left_bound << "\tx: " << loc[0] << std::endl;
-			loc[0] = left_bound + PLAYER_RADIUS;
+			loc.setX(left_bound + PLAYER_RADIUS);
 		}
 	}
 	//check up wall
 	if (wall[2]) {
-		int up_bound = r * TILE_SIZE + WALL_SIZE;
-		if (loc[2] - PLAYER_RADIUS < up_bound) {
+		int up_bound = row * TILE_SIZE + WALL_SIZE;
+		if (loc.getZ() - PLAYER_RADIUS < up_bound) {
 			printf("collided with up wall\n");
-			//std::cout << up_bound << "\tz: " << loc[2] << std::endl;
-			loc[2] = up_bound + PLAYER_RADIUS;
+			loc.setZ(up_bound + PLAYER_RADIUS);
 		}
 	}
 	//check down wall
 	if (wall[1]) {
-		int down_bound = r * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
-		if (loc[2] + PLAYER_RADIUS > down_bound) {
+		int down_bound = row * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
+		if (loc.getZ() + PLAYER_RADIUS > down_bound) {
 			printf("collided with down wall\n");
-			//std::cout << down_bound << "\tz: " << loc[2] << std::endl;
-
-			loc[2] = down_bound - PLAYER_RADIUS;
+			loc.setZ(down_bound - PLAYER_RADIUS);
 		}
 	}
 	//check right wall
 	if (wall[0]) {
-		int right_bound = c * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
-		if (loc[0] + PLAYER_RADIUS > right_bound) {
+		int right_bound = col * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
+		if (loc.getX() + PLAYER_RADIUS > right_bound) {
 			printf("collided with right wall\n");
-			//std::cout << right_bound << "\tx: " << loc[0] << std::endl;
-			loc[0] = right_bound - PLAYER_RADIUS;
+			loc.setX(right_bound - PLAYER_RADIUS);
 		}
 	}
 }
 
-int Atlas::hasKey(std::vector<float> & loc)
+ItemName Atlas::getTileItem(Location & loc)
 {
 	// find which tile player is in
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (r >= clientKeyLayout.size() || c >= clientKeyLayout[r].size())
-		return -1;
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
+		return ItemName::EMPTY;
 
-	// if check to remove key from map when picked up
-	/*if (keyLayout[r][c])
+	return tileLayout[row][col].getItem();
+}
+
+void Atlas::getItem(ItemName anItem, Item & outputItem)
+{
+	if (itemsMap.count(anItem) > 0)
 	{
-		keyLayout
-	}*/
-	return clientKeyLayout[r][c];
+		outputItem = itemsMap.at(anItem);
+	}
 }
 
-bool Atlas::hasGate(std::vector<float> & loc)
+bool Atlas::hasGate(Location & loc)
 {
 	// find which tile player is in
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (r >= gateLayout.size() || c >= gateLayout[r].size())
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
 
-	return gateLayout[r][c] != 0;
+	return tileLayout[row][col].getTileType() == TileType::GATE;
 }
 
-bool Atlas::hasBox(std::vector<float> & loc)
+bool Atlas::hasBox(Location & loc)
 {
 	// find which tile player is in
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (r >= boxLayout.size() || c >= boxLayout[r].size())
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
 
-	return boxLayout[r][c] != 0;
+	return tileLayout[row][col].getTileType() == TileType::BOX && tileLayout[row][col].hasBox();
 }
 
 bool Atlas::hasJail(std::vector<float> & loc)
@@ -202,16 +248,103 @@ void Atlas::removeFromJail(std::vector<float> & loc)
 }
 
 
-void Atlas::updateBoxLayout(std::vector<float> & loc) 
+void Atlas::updateBoxLayout(Location & loc)
 {
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
-	
-	boxLayout[r][c] = 0;
-	if (keyLayout[r][c]) {
-		clientKeyLayout[r][c] = keyLayout[r][c];
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
+		return;
+
+	tileLayout[row][col].setBoxStatus(false);
+
+	if (keyLayout[row][col]) {
+		tileLayout[row][col].setItem(static_cast<ItemName>(keyLayout[row][col]));
 	}
 }
+
+void Atlas::updateTileItem(Location & loc, ItemName anItem)
+{
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
+		return;
+
+	if (anItem != ItemName::EMPTY)
+	{
+		if (itemsMap.count(anItem) > 0)
+		{
+			Item & temp = itemsMap.at(anItem);
+
+			/*if (temp.wasDropped() || !temp.isHeld())
+			{
+				temp.setDropped(false);
+				temp.setHoldStatus(true);
+			}*/
+			
+		}
+	}
+	tileLayout[row][col].setItem(anItem);
+	
+}
+
+Tile & Atlas::getTileAt(Location & loc)
+{
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	return tileLayout[row][col];
+}
+bool Atlas::tileHasItem(Location & loc)
+{
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	return tileLayout[row][col].getItem() != ItemName::EMPTY;
+}
+
+void Atlas::updateDroppedItem(ItemName anItem, Location loc)
+{
+	if (itemsMap.count(anItem) > 0)
+	{
+		Item & temp = itemsMap.at(anItem);
+		temp.setHoldStatus(false);
+		int row, col;
+		Atlas::getMapCoords(loc, row, col);
+		if (temp.hasBeenMoved(row, col))
+		{
+			temp.setDropped(true);
+			temp.setDroppedTime(clock());
+			temp.setDroppedIndices(row, col);
+			std::cout << "dropTime:" << clock() << std::endl;
+
+		}
+	}
+
+}
+void Atlas::checkDroppedItems()
+{
+	for (auto iter = itemsMap.begin(); iter != itemsMap.end(); iter++)
+	{
+		if (iter->second.wasDropped())
+		{
+			std::cout << "elapsedTime:" << clock() - iter->second.getDroppedTime() << std::endl;
+			if (clock() - iter->second.getDroppedTime() > ITEM_DROP_DURATION)
+			{
+				int row, col;
+				iter->second.getStartLocation(row, col);
+
+				int dropRow, dropCol;
+				iter->second.getDropLocation(dropRow, dropCol);
+				tileLayout[dropRow][dropCol].setItem(ItemName::EMPTY);
+				tileLayout[row][col].setItem(iter->first);
+				iter->second.setDropped(false);
+			}
+		}
+	}
+}
+
 
 void Atlas::unlockJail(std::vector<float> & loc)
 {
@@ -272,4 +405,34 @@ std::string Atlas::encode2DVectorData(std::vector<std::vector<int>> layout)
 	}
 	encodedData << std::endl;
 	return encodedData.str();
+}
+
+std::string Atlas::encodeTileLayoutData()
+{
+	std::stringstream encodedData;
+	for (int row = 0; row < tileLayout.size(); row++)
+	{
+		int tileCount = 0;
+		for (int col = 0; col < tileLayout[row].size(); col++)
+		{
+			if (tileLayout[row][col].isDirty())
+			{
+				encodedData << "tile: " << row << " " << col << "|";
+				encodedData << "tileData: " << tileLayout[row][col].encodeTileData() << "|";
+				tileCount++;
+			}
+			
+			
+			/*if(col < tileLayout[row].size() - 1)
+				encodedData << ", ";*/
+			
+		}
+		/*if (row < tileLayout.size() - 1)
+			encodedData << " | ";*/
+		if(tileCount > 0)
+			encodedData << "newRow: break|";
+	}
+	encodedData << std::endl;
+	return encodedData.str();
+
 }

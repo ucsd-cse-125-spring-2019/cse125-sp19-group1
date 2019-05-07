@@ -11,7 +11,8 @@ public:
 protected:
 	Location location;
 	std::vector<int> capturedAnimals;
-	float progress;
+	int progress;
+
 
 
 

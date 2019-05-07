@@ -1,9 +1,20 @@
 #pragma once
 #include <vector>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <iostream>
+#include <bitset> 
+#include <string.h>
+#include "Tile.h"
+#include <map>
+#include <ctime>
 
 #define TILE_SIZE 20
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
+#define MAX_ITEMS 9
+#define ITEM_DROP_DURATION 1000
 
 class Atlas
 {
@@ -11,12 +22,13 @@ public:
 	Atlas();
 	~Atlas();
 
-	static void getMapCoords(std::vector<float> & loc, int * row, int * col);
+	static void getMapCoords(Location & loc, int & row, int & col);
 
-	void detectCollision(std::vector<float> & loc);
-	int hasKey(std::vector<float> & loc);
-	bool hasGate(std::vector<float> & loc);
-	bool hasBox(std::vector<float> & loc);
+	void detectCollision(Location & loc);
+	ItemName getTileItem(Location & loc);
+	bool hasGate(Location & loc);
+	bool hasBox(Location & loc);
+	
 	bool hasJail(std::vector<float> & loc);
 	bool isJailEmpty(std::vector<float> & loc);
 	void placeInJail(std::vector<float> & loc);
@@ -25,19 +37,41 @@ public:
 	int getJailProgress(std::vector<float> & loc);
 	void resetJail(std::vector<float> & loc);
 
-	void updateBoxLayout(std::vector<float> & loc);
-	//Hardcode map for now 
-	/*const static int TILE_SIZE = 20;
-	const static int PLAYER_RADIUS = 2;
-	const static int WALL_SIZE = 2;
-*/
-	
+	void updateBoxLayout(Location & loc);
+	Tile & getTileAt(Location & loc);
 
+	bool tileHasItem(Location & loc);
+	void updateTileItem(Location & loc, ItemName anItem);
+
+	std::string encodeTileLayoutData();
 	std::string encodeWallLayoutData();
 	std::string encodeClientKeyLayoutData();
 	std::string encodeGateLayoutData();
 	std::string encodeBoxLayoutData();
 	std::string encode2DVectorData(std::vector<std::vector<int>> layout);
+
+	std::vector<Item> itemLocations;
+	std::vector<std::pair<int, int>> boxLocations;
+	std::map<ItemName, Item> itemsMap;
+
+	void getItem(ItemName anItem, Item & outputItem);
+
+	void checkDroppedItems();
+	void updateDroppedItem(ItemName anItem, Location loc);
+
+	std::vector<ItemName> itemList = 
+	{
+		ItemName::KEY1,
+		ItemName::KEY2,
+		ItemName::KEY3,
+		ItemName::KEY4,
+		ItemName::KEY5,
+		ItemName::KEY6,
+		ItemName::KEY7,
+		ItemName::KEY8,
+		ItemName::KEY9
+
+	};
 
 protected:
 	std::vector<std::vector<int>> wallLayout =
@@ -50,13 +84,13 @@ protected:
 	  {10,2,2,2,2,2,3} };
 
 	std::vector<std::vector<int>> keyLayout =
-	{ {0,0,0,0,0,0,9},
-	  {0,0,0,0,0,0,8},
-	  {0,0,0,0,0,0,7},
-	  {0,0,0,0,0,0,6},
-	  {0,0,0,0,0,0,5},
-	  {0,0,0,0,0,0,4},
-	  {1,2,2,2,2,2,3} };
+	{ {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0} };
 
 	std::vector<std::vector<int>> clientKeyLayout =
 	{ {0,0,0,0,0,0,0},
@@ -85,6 +119,8 @@ protected:
 	  {0,0,0,0,0,0,1},
 	  {1,1,1,1,1,1,1} };
 
+	std::vector<std::vector<Tile>> tileLayout;
+
 	std::vector<std::vector<int>> jailLayout =
 	{ {0,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
@@ -111,5 +147,6 @@ protected:
 	  {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0} };
+
 };
 

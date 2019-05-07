@@ -31,6 +31,11 @@ void Player::setLocation(float argX, float argY, float argZ)
 	location.update(argX, argY, argZ);
 }
 
+void Player::setLocation(Location aLoc)
+{
+	location.update(aLoc.getX(), aLoc.getY(), aLoc.getZ());
+}
+
 void Player::setInventory(ItemName anItem)
 {
 	inventory = anItem;

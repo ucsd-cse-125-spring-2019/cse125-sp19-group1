@@ -119,6 +119,7 @@ void ServerGame::receiveFromClients()
 
 			case INTERACT_EVENT:
 			{
+
 				Location pLoc = gameData->getPlayer(iter->first)->getLocation();
 				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 				if (gameData->getPlayer(iter->first)->getIsChef()) 
@@ -162,9 +163,14 @@ void ServerGame::receiveFromClients()
 				}
 				else
 				{
-					if (int key = gameData->getAtlas()->hasKey(loc))
+					Location loc = gameData->getPlayer(iter->first)->getLocation();
+					ItemName item = gameData->getAtlas()->getTileItem(loc);
+					
+					if (item != ItemName::EMPTY && gameData->getPlayer(iter->first)->getInventory() == ItemName::EMPTY)
 					{
-						gameData->getPlayer(iter->first)->setInventory(static_cast<ItemName>(key));
+						gameData->getPlayer(iter->first)->setInventory(item);
+						gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
+
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
@@ -227,9 +233,24 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
+
+
 				if (gameData->getPlayer(iter->first)->getIsCaught()) {
 					break;
 				}
+<<<<<<< HEAD
+=======
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
+
+				if (gameData->getPlayer(iter->first)->getInteracting()) {
+					double seconds = gameData->getPlayer(iter->first)->checkBoxProgress();
+					if (seconds > gameData->getBoxTime()) {
+						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
+						gameData->getAtlas()->updateBoxLayout(loc);
+						gameData->getPlayer(iter->first)->setInteracting();
+					}
+				}
+>>>>>>> remotes/origin/rd
 
 				if (gameData->getPlayer(iter->first)->getInteracting() && 
 					!gameData->getPlayer(iter->first)->getIsChef()) {
@@ -251,7 +272,31 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
-				gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
+
+				// PLayer cannot drop item if there is an item already on the current tile
+				if (!(gameData->getAtlas()->tileHasItem(loc)))
+				{
+					ItemName itemName = gameData->getPlayer(iter->first)->getInventory();
+					gameData->getAtlas()->updateTileItem(loc, itemName);
+					gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+
+					gameData->getAtlas()->updateDroppedItem(itemName, loc);
+					/*Item temp;
+					gameData->getAtlas()->getItem(itemName, temp);
+					if (temp.getName() != ItemName::EMPTY)
+					{
+						temp.setHoldStatus(false);
+						int row, col;
+						Atlas::getMapCoords(loc, row, col);
+						if (temp.hasBeenMoved(row, col))
+						{
+							temp.setDropped(true);
+							temp.setDroppedTime(clock());
+						}
+					}*/
+				}
+				break;
 			}
 			default:
 				printf("error in packet types\n");
@@ -261,6 +306,7 @@ void ServerGame::receiveFromClients()
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
 	}
+	gameData->getAtlas()->checkDroppedItems();
 	//sendActionPackets(); // uncomment to always send data from server
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
@@ -439,8 +485,9 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 
 void ServerGame::updateCollision(int id)
 {
-	Location pLoc = gameData->getPlayer(id)->getLocation();
-	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+	Location loc = gameData->getPlayer(id)->getLocation();
+	//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 	gameData->getAtlas()->detectCollision(loc);
-	gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
+	//gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
+	gameData->getPlayer(id)->setLocation(loc);
 }
