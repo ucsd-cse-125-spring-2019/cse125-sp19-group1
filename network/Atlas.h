@@ -29,13 +29,13 @@ public:
 	bool hasGate(Location & loc);
 	bool hasBox(Location & loc);
 	
-	bool hasJail(std::vector<float> & loc);
-	bool isJailEmpty(std::vector<float> & loc);
-	void placeInJail(std::vector<float> & loc);
-	void removeFromJail(std::vector<float> & loc);
-	void unlockJail(std::vector<float> & loc);
-	int getJailProgress(std::vector<float> & loc);
-	void resetJail(std::vector<float> & loc);
+	bool hasJail(Location & loc);
+	bool isJailEmpty(Location & loc);
+	void placeInJail(Location & loc);
+	void removeFromJail(Location & loc);
+	void unlockJail(Location & loc);
+	int getJailProgress(Location & loc);
+	void resetJail(Location & loc);
 
 	void updateBoxLayout(Location & loc);
 	Tile & getTileAt(Location & loc);

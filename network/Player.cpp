@@ -79,10 +79,10 @@ bool Player::getIsCaught() {
 	return isCaught;
 }
 
-bool Player::inRange(std::vector<float> & myLoc, std::vector<float> & theirLoc) {
-	double dist = sqrt(pow(myLoc[0] - theirLoc[0], 2) +
-		pow(myLoc[1] - theirLoc[1], 2) + 
-		pow(myLoc[2] - theirLoc[2], 2) * 1.0);
+bool Player::inRange(Location & myLoc, Location & theirLoc) {
+	double dist = sqrt(pow(myLoc.getX() - theirLoc.getX(), 2) +
+		pow(myLoc.getY() - theirLoc.getY(), 2) +
+		pow(myLoc.getZ() - theirLoc.getZ(), 2) * 1.0);
 	if (dist < radius) {
 		return true;
 	}

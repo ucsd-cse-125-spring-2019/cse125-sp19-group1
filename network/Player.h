@@ -37,7 +37,7 @@ public:
 	bool getIsCaught();
 	void setIsCaught();
 
-	bool inRange(std::vector<float> & myLoc, std::vector<float> & theirLoc);
+	bool inRange(Location & myLoc, Location & theirLoc);
 
 	void setStartTime();
 	void setStartJailTime();

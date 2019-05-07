@@ -207,44 +207,44 @@ bool Atlas::hasBox(Location & loc)
 	return tileLayout[row][col].getTileType() == TileType::BOX && tileLayout[row][col].hasBox();
 }
 
-bool Atlas::hasJail(std::vector<float> & loc)
+bool Atlas::hasJail(Location & loc)
 {
 	// find which tile player is in
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (r >= jailLayout.size() || c >= jailLayout[r].size())
+	if (row >= jailLayout.size() || col >= jailLayout[row].size())
 		return false;
 
-	return jailLayout[r][c] != 0;
+	return jailLayout[row][col] != 0;
 }
 
-bool Atlas::isJailEmpty(std::vector<float> & loc)
+bool Atlas::isJailEmpty(Location & loc)
 {
 	// find which tile player is in
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (r >= jailEmptyLayout.size() || c >= jailEmptyLayout[r].size())
+	if (row >= jailEmptyLayout.size() || col >= jailEmptyLayout[row].size())
 		return false;
 
-	return jailLayout[r][c] != 0;
+	return jailLayout[row][col] != 0;
 }
 
-void Atlas::placeInJail(std::vector<float> & loc) 
+void Atlas::placeInJail(Location & loc) 
 {
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	jailLayout[r][c] = 1;
+	jailLayout[row][col] = 1;
 }
 
-void Atlas::removeFromJail(std::vector<float> & loc)
+void Atlas::removeFromJail(Location & loc)
 {
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	jailLayout[r][c] = 0;
+	jailLayout[row][col] = 0;
 }
 
 
@@ -428,28 +428,28 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 		}
 }
 
-void Atlas::unlockJail(std::vector<float> & loc)
+void Atlas::unlockJail(Location & loc)
 {
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	jailProgressLayout[r][c] += 1;
+	jailProgressLayout[row][col] += 1;
 }
 
-int Atlas::getJailProgress(std::vector<float> & loc)
+int Atlas::getJailProgress(Location & loc)
 {
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	return jailProgressLayout[r][c];
+	return jailProgressLayout[row][col];
 }
 
-void Atlas::resetJail(std::vector<float> & loc)
+void Atlas::resetJail(Location & loc)
 {
-	int r = (int)(loc[2] / TILE_SIZE);
-	int c = (int)(loc[0] / TILE_SIZE);
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-	jailProgressLayout[r][c] = 0;
+	jailProgressLayout[row][col] = 0;
 }
 
 
