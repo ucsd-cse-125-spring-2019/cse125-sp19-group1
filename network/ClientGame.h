@@ -31,8 +31,6 @@ public:
 	ClientGame();
 	~ClientGame(void);
 
-	std::map < std::string, std::vector<float> > clients2;
-
 	ClientNetwork* network;
 
 	void sendActionPackets();

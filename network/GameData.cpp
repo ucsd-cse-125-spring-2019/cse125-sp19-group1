@@ -26,6 +26,7 @@ std::string GameData::encodeGameData()
 	encodedData << "keyLayout: " << atlas->encodeClientKeyLayoutData();
 	encodedData << "gateLayout: " << atlas->encodeGateLayoutData();
 	encodedData << "boxLayout: " << atlas->encodeBoxLayoutData();
+	encodedData << "tileLayout: " << atlas->encodeTileLayoutData();
 	encodedData << "gate: " << gate1.encodeGateData();
 
 	return encodedData.str();
@@ -47,8 +48,75 @@ void GameData::addDecodeFunctions()
 	decodingFunctions["keyLayout"] = &GameData::decodeKeyLayout;
 	decodingFunctions["gateLayout"] = &GameData::decodeGateLayout;
 	decodingFunctions["boxLayout"] = &GameData::decodeBoxLayout;
+	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 }
+void GameData::decodeTileLayout(std::string value)
+{
+	std::replace(value.begin(), value.end(), '|', '\n');
+	std::vector<std::pair<std::string, std::string>> tileDataPairs = StringParser::parseKeyValueString(value.c_str());
 
+	bool init = false;
+	if (clientTileLayout.size() == 0)
+		init = true;
+
+
+	int row = -1;
+	int col = -1;
+	std::vector<Tile> tileRow;
+	for (auto p : tileDataPairs)
+	{
+		if (p.first == "tile")
+		{
+			std::stringstream tmpStream(p.second);
+			std::string r, c;
+
+			tmpStream >> r >> c;
+			row = std::stoi(r);
+			col = std::stoi(c);
+		}
+		else if (p.first == "tileData" && row != -1 && col != -1)
+		{
+			std::stringstream tileDataStream(p.second);
+			std::string wallLayout_str, height_str, tileType_str, boxStatus_str, itemName_str;
+
+			tileDataStream >> wallLayout_str >> height_str >> tileType_str >> boxStatus_str >> itemName_str;
+
+			int wallLayout = std::stoi(wallLayout_str);
+			int height = std::stoi(height_str);
+			TileType tileType = static_cast<TileType>(std::stoi(tileType_str));
+			bool boxStatus = boxStatus_str == "1";
+			ItemName itemName = static_cast<ItemName>(std::stoi(itemName_str));
+
+			Tile tmp(wallLayout, tileType, boxStatus, height, itemName);
+			if (init)
+			{
+				tileRow.push_back(tmp);
+			}
+			else
+			{
+				clientTileLayout[row][col] = tmp;
+			}
+		}
+		else if (p.first == "newRow")
+		{
+			if (init)
+			{
+				clientTileLayout.push_back(tileRow);
+				tileRow.clear();
+			}
+		}
+	}
+
+	// Debug printing
+	/*for (auto p : clientTileLayout)
+	{
+		for (auto c : p)
+		{
+			std::cout << c.getWall() << " ";
+		}
+		std::cout << std::endl;
+	}*/
+}
 void GameData::decodeWallLayout(std::string value)
 {
 	std::replace(value.begin(), value.end(), '|', '\n');

@@ -98,10 +98,10 @@ void ClientGame::update()
 		if (key == "init")
 			myID = std::stoi(value);
 	}
-	else
-	{
+	//else
+	//{
 		gameData->decodeGameData(network_data);
-	}
+	//}
 
 	// empties the buffer after parsing
 	memset(network_data, 0, sizeof(network_data)); 
