@@ -8,7 +8,6 @@ private:
 	glm::vec3 position;
 	glm::vec4 rotation;
 	glm::vec3 scaling;
-	glm::vec4 coeffs;
 public:
 	Keyframe(float time, glm::vec3 position, glm::vec4 rotation, glm::vec3 scaling);
 	~Keyframe();

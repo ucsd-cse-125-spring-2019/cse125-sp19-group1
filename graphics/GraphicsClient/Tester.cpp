@@ -4,6 +4,13 @@
 
 #include "Tester.h"
 #include <ctime>
+#include <algorithm>
+
+#define TILE_HEIGHT_ADJUST -26.f
+#define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
+#define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
+#define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
+
 int elapsedTime = 0;
 
 GLFWwindow * window = nullptr;
@@ -20,17 +27,27 @@ FBXObject * catModel = nullptr;
 FBXObject * dogModel = nullptr;
 FBXObject * chefModel = nullptr;
 FBXObject * tileModel = nullptr;
+FBXObject * wallModel = nullptr;
 GLuint objShaderProgram;
 
+Geometry * tileGeometry;
+Geometry * wallGeometry;
+std::vector<std::vector<Transform *>> floorArray;
+std::vector<std::vector<Transform *>> northWalls;
+std::vector<std::vector<Transform *>> westWalls;
+
 Transform * root = nullptr;
-Transform * player;
+Transform * player = nullptr;
+Transform * floorTransform = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);      // up | What orientation "up" is
 
-glm::vec3 playerPos;
+glm::vec3 playerPos = glm::vec3(0.f);
+float playerTargetAngle = 0.f;
+float playerAngle = 0.f;
 
 bool mouseRotation = false;
 glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
@@ -38,10 +55,10 @@ float scaleDownMouseOps = 30.0f;
 float scaleUpAngle = 4.0f;
 float scaleMouseWheel = 1.05f;
 
-ServerGame * server;
-ClientGame * client;
+ServerGame * server = nullptr;
+ClientGame * client = nullptr;
 
-bool directions[4] = { false, false, false, false };
+int directions = 0;   // use DirectionBitmask
 
 void ErrorCallback(int error, const char* description)
 {
@@ -102,39 +119,186 @@ void PrintVersions()
 #endif
 }
 
+void mapFinishedLoading()
+{
+	if (!client->heights.size()) {
+		cerr << "mapFinishedLoading(): map is empty\n";
+		return;
+	}
+
+	if (floorTransform == nullptr) {
+		const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2));
+		floorTransform = new Transform(glm::scale(translate, glm::vec3(TILE_SCALE)));
+	}
+
+	// Floor tiles
+	floorArray.resize(client->heights.size());
+	for (size_t z = 0; z < floorArray.size(); z++) {
+		auto &row = floorArray[z];
+
+		row.resize(client->heights[z].size());
+
+		for (size_t x = 0; x < row.size(); x++) {
+
+			float y = client->heights[z][x] * 0.5f * TILE_LEVEL_OFFSET;
+			auto skew = glm::mat4(1.0f);
+			switch (client->ramps[z][x]) {
+			case DirectionBitmask::eastSide:
+				skew[0][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::westSide:
+				skew[0][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::northSide:
+				skew[2][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::southSide:
+				skew[2][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			default:
+				break;
+			}
+			const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, z * TILE_STRIDE));
+
+			row[x] = new Transform(translate * skew);
+			row[x]->addChild(tileGeometry);
+			floorTransform->addChild(row[x]);
+		}
+	}
+
+	// North walls
+	northWalls.resize(floorArray.size() + 1);
+	for (size_t z = 0; z < northWalls.size(); z++) {
+		auto &row = northWalls[z];
+
+		auto clippedZ = (z < floorArray.size()) ? z : (floorArray.size() - 1);
+		row.resize(floorArray[clippedZ].size());
+
+		for (size_t x = 0; x < row.size(); x++) {
+			if ((z > 0 && (client->walls[z - 1][x] & DirectionBitmask::southSide)) ||
+				(z == clippedZ && (client->walls[z][x] & DirectionBitmask::northSide)))
+			{
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (z == 0 || z != clippedZ) {
+					height = client->heights[clippedZ][x];
+				} else {
+					height = (client->heights[z - 1][x] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+				
+				// translate to the edge between tiles
+				row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)));
+				row[x]->addChild(wallGeometry);
+				floorTransform->addChild(row[x]);
+			}
+		}
+	}
+
+	westWalls.resize(floorArray.size());
+	for (size_t z = 0; z < westWalls.size(); z++) {
+		auto &row = westWalls[z];
+
+		row.resize(floorArray[z].size() + 1);
+
+		for (size_t x = 0; x < row.size(); x++) {
+			auto clippedX = (x < row.size() - 1) ? x : (row.size() - 2);
+
+			if ((x > 0 && (client->walls[z][x - 1] & DirectionBitmask::eastSide)) ||
+				(x == clippedX && (client->walls[z][x] & DirectionBitmask::westSide)))
+			{
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (x == 0 || x != clippedX) {
+					height = client->heights[z][clippedX];
+				}
+				else {
+					height = (client->heights[z][x - 1] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+
+				// translate to the edge between tiles
+				const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3((x - 0.5f) * TILE_STRIDE, y, z * TILE_STRIDE));
+				// 90 degree rotation
+				const auto rotate = glm::rotate(translate, glm::half_pi<float>(), glm::vec3(0.f, 1.f, 0.f));
+				row[x] = new Transform(rotate);
+				row[x]->addChild(wallGeometry);
+				floorTransform->addChild(row[x]);
+			}
+		}
+	}
+
+	root->addChild(floorTransform);
+}
+
+void deallocFloor()
+{
+	if (floorTransform) {
+		delete floorTransform;
+		floorTransform = nullptr;
+	}
+
+	for (size_t z = 0; z < floorArray.size(); z++) {
+		auto &row = floorArray[z];
+
+		for (size_t x = 0; x < row.size(); x++) {
+			delete row[x];
+		}
+
+		row.resize(0);
+	}
+}
+
 void Init()
 {
 	server = new ServerGame();
 	client = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
 
-	// load the map
-	// TODO: wait to get it from the server instead, display a loading screen
-#define MAP_PATH "../../maps/tinytinymap/"
-	loadMapArray(client->heights, MAP_PATH "heights.txt");
-	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
-	
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	light = new DirLight();
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
+	
 	// Load models
-	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
-	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, true);
+	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, false);
+	catModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
+	dogModel = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
+	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
+
+	tileGeometry = new Geometry(tileModel, objShaderProgram);
+	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
 	root = new Transform(glm::mat4(1.0));
-	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel = new Geometry(chefModel, objShaderProgram);
+	player = new Transform(glm::mat4(1.0));
+	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
 	root->addChild(player);
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
-	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel2 = new Geometry(raccoonModel, objShaderProgram);
+	Transform * player2Rotate = new Transform(glm::mat4(1.0));
+	Geometry * playerModel2 = new Geometry(chefModel, objShaderProgram);
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
     //raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 	UpdateView();
+
+	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+
+	// load the map
+	// TODO: wait to get it from the server instead, display a loading screen
+#define MAP_PATH "../../maps/tinytinymap/"
+	loadMapArray(client->heights, MAP_PATH "heights.txt");
+	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
+	loadMapArray(client->walls, MAP_PATH "walls.txt");
+
+	mapFinishedLoading();
+	MoveCamera(playerPos);
+
+	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 }
 
 void serverLoop(void * args) {
@@ -145,12 +309,22 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
-	if (raccoonModel)     delete(raccoonModel);
-	if (catModel)         delete(catModel);
-	if (dogModel)         delete(dogModel);
-	if (chefModel)        delete(chefModel);
-	if (tileModel)        delete(tileModel);
-	if (light)            delete(light);
+	if (raccoonModel)     delete raccoonModel;
+	if (catModel)         delete catModel;
+	if (dogModel)         delete dogModel;
+	if (chefModel)        delete chefModel;
+	if (tileModel)        delete tileModel;
+	if (wallModel)        delete wallModel;
+	if (tileGeometry)     delete tileGeometry;
+	if (wallGeometry)     delete wallGeometry;
+	if (light)            delete light;
+
+	deallocFloor();
+
+	if (floorTransform)   delete floorTransform;
+	if (player)           delete player;
+	if (root)             delete root;
+
 	glDeleteProgram(objShaderProgram);
 }
 
@@ -218,18 +392,28 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 	return window;
 }
 
+glm::vec3 directionBitmaskToVector(int bitmask) {
+	int dirX = ((directions & DirectionBitmask::eastSide) != 0) - ((directions & DirectionBitmask::westSide) != 0);
+	int dirZ = ((directions & DirectionBitmask::northSide) != 0) - ((directions & DirectionBitmask::southSide) != 0);
+
+	return glm::vec3((float)dirX, 0.f, (float)dirZ);
+}
+
 void SendPackets() 
 {
-	if (directions[0]) {
+	auto dir = directionBitmaskToVector(directions);
+
+	if (dir.z > 0) {
 		client->sendPackets(FORWARD_EVENT);
 	}
-	if (directions[1]) {
+	else if (dir.z < 0) {
 		client->sendPackets(BACKWARD_EVENT);
 	}
-	if (directions[2]) {
+
+	if (dir.x > 0) {
 		client->sendPackets(LEFT_EVENT);
-	}
-	if (directions[3]) {
+	} 
+	else if (dir.x < 0) {
 		client->sendPackets(RIGHT_EVENT);
 	}
 }
@@ -239,34 +423,79 @@ void MovePlayer()
 	Player * p = client->getGameData()->getPlayer(client->getMyID());
 	if (p)
 	{
-		glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.5f,
-			p->getLocation().getY() * 0.5f,
-			p->getLocation().getZ() * 0.5f);
+		glm::vec3 location = glm::vec3(
+			p->getLocation().getX(),
+			p->getLocation().getY(),
+			p->getLocation().getZ());
 
 	//if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
 		//glm::vec3 prevPos = raccoonModel->GetPosition();
-		glm::vec3 newPos = location;
-		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), newPos);
-		player->setOffset(newOffset);
-		MoveCamera(&newPos);
-		playerPos = P * V * glm::vec4(newPos,1.0f);
-
+		const auto oldPos = playerPos;
+		playerPos = location;
+		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), playerPos);
+		auto dir = directionBitmaskToVector(directions);
+		if (dir.x != 0.f || dir.z != 0.f) {
+			playerTargetAngle = glm::atan(-dir.x, dir.z);
+			float alternateTarget = playerTargetAngle - glm::two_pi<float>();
+			if (abs(playerTargetAngle - playerAngle) > abs(alternateTarget - playerAngle)) {
+				playerTargetAngle = alternateTarget;
+			}
+			alternateTarget = playerTargetAngle + glm::two_pi<float>();
+			if (abs(playerTargetAngle - playerAngle) > abs(alternateTarget - playerAngle)) {
+				playerTargetAngle = alternateTarget;
+			}
+		}
+		
+		playerAngle += (playerTargetAngle - playerAngle) * 0.675f;
+		if (abs(playerTargetAngle - playerAngle) < 0.01) {
+			playerAngle = playerTargetAngle = fmod(playerTargetAngle, glm::two_pi<float>());
+		}
+		
+		auto playerRotation = glm::rotate(newOffset, playerAngle, glm::vec3(0.f, 1.f, 0.f));
+		player->setOffset(playerRotation);
+		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
+		MoveCamera(playerPos, oldPos);
 		UpdateView();
 	}
 
 }
 
-void MoveCamera(glm::vec3 * newPlayerPos) {
-	float playerX = newPlayerPos->x;
-	float playerZ = newPlayerPos->z;
-	if (playerX < 20.0f && playerX > -20.0f) {
-		cam_look_at[0] = (*newPlayerPos)[0];
-		cam_pos[0] = (*newPlayerPos)[0] + 45.0f;
+void MoveCamera(const glm::vec3 &newPlayerPos) {
+	if (true) {
+		cam_look_at.x = newPlayerPos.x;
+		cam_pos.x = newPlayerPos.x - 15.0f;
 	}
-	if(playerZ <20.0f && playerZ > -20.0f){
-		cam_look_at[2] = (*newPlayerPos)[2];
-		cam_pos[2] = (*newPlayerPos)[2] + 45.0f;
+	if (true) {
+		cam_look_at.z = newPlayerPos.z;
+		cam_pos.z = newPlayerPos.z - 45.0f;
 	}
+
+	cam_look_at.y = 0.f;
+	cam_pos.y = 100.f;
+
+	UpdateView();
+}
+
+void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+	auto screenPos = glm::project(newPlayerPos, glm::mat4(1.f), P * V, glm::vec4(0.f, 0.f, 1.f, 1.f));
+	
+	// Make the coordinates range from -1 to 1
+	screenPos = (screenPos - glm::vec3(0.5f, 0.5f, 0.f)) * 2.f;
+
+	// If the player is outside a circle of radius 0.3, then move camera
+	if (screenPos.x * screenPos.x + screenPos.y * screenPos.y > 0.3f * 0.3f) {
+		const auto offsetX = newPlayerPos.x - oldPlayerPos.x;
+		cam_look_at.x += offsetX;
+		cam_pos.x += offsetX;
+
+		const auto offsetZ = newPlayerPos.z - oldPlayerPos.z;
+		cam_look_at.z += offsetZ;
+		cam_pos.z += offsetZ;
+	}
+	
+	cam_look_at.y = 0.f;
+	cam_pos.y = 100.f;
+
 	UpdateView();
 }
 
@@ -319,20 +548,24 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
+		if (key == GLFW_KEY_A) {
+			raccoonModel->ToNextKeyframe();
+		}
+
 		if (key == GLFW_KEY_UP) {
-			directions[0] = true;
+			directions |= DirectionBitmask::northSide;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-			directions[1] = true;
+			directions |= DirectionBitmask::southSide;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-			directions[2] = true;
+			directions |= DirectionBitmask::westSide;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-			directions[3] = true;
+			directions |= DirectionBitmask::eastSide;
 		}
 
 		if (key == GLFW_KEY_SPACE) {
@@ -346,19 +579,19 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	}
 	else if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_UP) {
-			directions[0] = false;
+			directions &= ~ DirectionBitmask::northSide;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-			directions[1] = false;
+			directions &= ~DirectionBitmask::southSide;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-			directions[2] = false;
+			directions &= ~DirectionBitmask::westSide;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-			directions[3] = false;
+			directions &= ~DirectionBitmask::eastSide;
 		}
 
 		if (key == GLFW_KEY_SPACE) {

@@ -6,37 +6,11 @@
 #include <map>
 #include <chrono>
 #include <ctime>
+#include "Item.h"
+#include "Location.h"
 
-enum class ItemName { EMPTY = 0, KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
 
 enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
-
-struct Location
-{
-public:
-	Location(float argX = 10.0f, float argY = 0.0f, float argZ = 10.0f) : x(argX), y(argY), z(argZ) {}
-	//Location(Location & aCopy) : x(aCopy.getX()), y(aCopy.getY()), z(aCopy.getZ()) {}
-
-	float getX() { return x; }
-	float getY() { return y; }
-	float getZ() { return z; }
-
-	float setX(float argX) { x = argX; }
-	float setY(float argY) { y = argY; }
-	float setZ(float argZ) { z = argZ; }
-
-	void update(float argX, float argY, float argZ)
-	{
-		x = argX;
-		y = argY;
-		z = argZ;
-	}
-
-protected:
-	float x;
-	float y;
-	float z;
-};
 
 class Player
 {
@@ -49,11 +23,25 @@ public:
 	void setInventory(ItemName anItem);
 	Location getLocation();
 	void setLocation(float argX, float argY, float argZ);
+	void setLocation(Location aLoc);
 	bool getInteracting();
 	void setInteracting();
+	bool getOpenJail();
+	void setOpenJail();
+	bool getOpenGate();
+	void setOpenGate();
+	ModelType getModelType();
+	bool getIsChef();
+	bool getCaughtAnimal();
+	void setCaughtAnimal();
+	bool getIsCaught();
+	void setIsCaught();
+
+	bool inRange(Location & myLoc, Location & theirLoc);
 
 	void setStartTime();
-	double checkBoxProgress();
+	void setStartJailTime();
+	double checkProgress(int opt);
 
 	std::string encodePlayerData();
 	void decodePlayerData(std::string key, std::string value);
@@ -72,10 +60,18 @@ public:
 protected:
 	Location	location;
 	int			playerID;
-	ItemName		inventory;
+	ItemName	inventory;
 	bool		hasCake;
 	bool		isChef;
 	ModelType	modelType;
 	bool		interacting;
+	bool		openingJail;
+	bool		openingGate;
+	bool		caughtAnimal = false;
+	bool		isCaught = false;
+	int			radius = 10;
 	std::chrono::time_point<std::chrono::system_clock> start;
+	std::chrono::time_point<std::chrono::system_clock> startJail;
+	std::chrono::time_point<std::chrono::system_clock> startGate;
+
 };

@@ -17,7 +17,9 @@ void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath
 		v.resize(width);
 
 		for (auto &elim : v) {
-			inf >> elim;
+			unsigned x;
+			inf >> x;
+			elim = x;
 		}
 	}
 
@@ -98,10 +100,10 @@ void ClientGame::update()
 		if (key == "init")
 			myID = std::stoi(value);
 	}
-	else
-	{
+	//else
+	//{
 		gameData->decodeGameData(network_data);
-	}
+	//}
 
 	// empties the buffer after parsing
 	memset(network_data, 0, sizeof(network_data)); 

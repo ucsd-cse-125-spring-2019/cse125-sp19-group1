@@ -38,7 +38,7 @@ void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertice
 	populateSkelVertices(mesh, vertices, normals, skelVertices);
 	// creating actual Bone objects and populating the Skeleton
 	traverseSkeleton(root, skel);
-	assignBindingMatrices(mesh, skel);
+	assignOffsetMatrices(mesh, skel);
 }
 
 void traverseSkeleton(aiNode * currNode, Skeleton * skel)
@@ -67,15 +67,18 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 	}
 }
 
-void assignBindingMatrices(aiMesh * mesh, Skeleton * skel) {
+void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 	aiBone * currAIBone = NULL;
 	Bone * currBone = NULL;
 	for (int i = 0; i < mesh->mNumBones; i++) {
 		currAIBone = mesh->mBones[i];
 		currBone = skel->GetBone(currAIBone->mName.C_Str());
 		if (currBone != NULL) {
-			currBone->SetIBM(aiMatTOglm(currAIBone->mOffsetMatrix));
+			currBone->SetOffset(aiMatTOglm(currAIBone->mOffsetMatrix));
 		}
+		else
+			std::cout << "OBJLOADER: MISSING A BONE FOR " << currAIBone->mName.C_Str() << std::endl;
+
 		currBone = NULL;
 	}
 }
@@ -106,7 +109,7 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 // convert aiMatrix4x4 to glm::mat4
 glm::mat4 * aiMatTOglm(aiMatrix4x4 mat)
 {
-	glm::mat4 newMat = glm::mat4(1.0f);
+	glm::mat4 newMat = glm::mat4(1.0);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			newMat[i][j] = mat[i][j];
