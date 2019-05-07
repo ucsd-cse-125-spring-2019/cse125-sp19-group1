@@ -47,8 +47,6 @@ void AnimationChannel::SetTransform(float currTime) {
 		glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), key->getScaling());
 		glm::quat rotationQuat = glm::quat(key->getRotation());
 		glm::mat4 rotationMatrix = rotationQuat.operator glm::mat<4, 4, float, glm::packed_highp>();
-		//	std::cout << "ROTATION MATRIX" << std::endl;
-		//PrintMatrix(&rotationMatrix);
 		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), key->getPosition());
 		transform = translationMatrix * rotationMatrix * scalingMatrix;
 	}

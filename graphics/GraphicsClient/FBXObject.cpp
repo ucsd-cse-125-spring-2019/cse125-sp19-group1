@@ -283,7 +283,6 @@ void FBXObject::ToNextKeyframe() {
 		animPlayer->ToNextKeyframe();
 		skel->Update(animPlayer->GetGlobalInverseT());
 		glm::mat4 identity = glm::mat4(1.0f);
-		//skel->Update(&identity);
 		UpdateSkin();
 	}
 }

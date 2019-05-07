@@ -25,7 +25,7 @@ public:
 	void SetBoneChannels();
 
 	void ToNextKeyframe();
-	glm::mat4 * GetGlobalInverseT();
+	glm::mat4 GetGlobalInverseT();
 };
 
 #endif

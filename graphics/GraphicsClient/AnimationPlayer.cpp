@@ -63,6 +63,6 @@ void AnimationPlayer::ToNextKeyframe() {
 	animation->ToNextKeyframe();
 }
 
-glm::mat4 * AnimationPlayer::GetGlobalInverseT() {
+glm::mat4 AnimationPlayer::GetGlobalInverseT() {
 	return animation->GetGlobalInverseT();
 }

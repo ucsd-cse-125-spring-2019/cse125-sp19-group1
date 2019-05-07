@@ -41,8 +41,8 @@ void Animation::evaluateChannels(float currTime) {
 	}
 }
 
-glm::mat4 * Animation::GetGlobalInverseT() {
-	return &globalInverseT;
+glm::mat4 Animation::GetGlobalInverseT() {
+	return globalInverseT;
 }
 
 void Animation::ToNextKeyframe() {

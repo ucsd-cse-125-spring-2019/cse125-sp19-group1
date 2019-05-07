@@ -18,7 +18,7 @@ public:
 	float getStartTime();
 	float getEndTime();
 	void evaluateChannels(float currTime);
-	glm::mat4 * GetGlobalInverseT();
+	glm::mat4 GetGlobalInverseT();
 
 	void ToNextKeyframe();
 };
