@@ -27,7 +27,7 @@
 #define RACCOON_MDL_PATH  (MODELS_PATH "raccoon.fbx")
 #define RACCOON_TEX_PATH  (TEXTURES_PATH "raccoon.ppm")
 
-#define CAT_MDL_PATH      (MODELS_PATH "cat.fbx")
+#define CAT_DAE_PATH      (ANIMATIONS_PATH "catWalk.dae")
 #define CAT_TEX_PATH      (TEXTURES_PATH "cat.ppm")
 
 #define DOG_MDL_PATH      (MODELS_PATH "doggo.fbx")

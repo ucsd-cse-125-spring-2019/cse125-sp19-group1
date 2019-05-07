@@ -110,6 +110,7 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 }
 
 // convert aiMatrix4x4 to glm::mat4
+// aiMatrix4x4 is row major, while glm is column major
 glm::mat4 aiMatTOglm(aiMatrix4x4 mat)
 {
 	glm::mat4 newMat = glm::mat4(1.0);
