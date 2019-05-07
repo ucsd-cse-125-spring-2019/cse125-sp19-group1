@@ -54,7 +54,7 @@ unsigned char* loadPPM(const char* filename, int& width, int& height)
 }
 
 
-void loadTexture(const char * textureName)
+GLuint loadTexture(const char * textureName)
 {
 	GLuint texture[1];     // storage for one texture
 	int twidth, theight;   // texture width/height [pixels]
@@ -63,7 +63,7 @@ void loadTexture(const char * textureName)
 	// Load image file
 	tdata = loadPPM(textureName, twidth, theight);
 	//std::cerr << "Cat Image: " << twidth << " X " << theight << std::endl;
-	if (tdata == NULL) return;
+	if (tdata == NULL) return -1;
 
 	// Create ID for texture
 	glGenTextures(1, &texture[0]);
@@ -77,4 +77,5 @@ void loadTexture(const char * textureName)
 	// Set bi-linear filtering for both minification and magnification
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	return texture[0];
 }

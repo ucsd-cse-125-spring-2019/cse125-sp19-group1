@@ -6,6 +6,7 @@ struct Light {
   vec3 light_dir;
   vec3 light_pos;
   vec3 cam_pos;
+  vec3 cam_look_at;
 };
 
 uniform Light light;
@@ -47,41 +48,35 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
     specularCoeff = pow(max(0.0f, dot(viewDir, reflect(-surfaceToLight, normal))), shininess);
   }
   //vec3 spec = specular * specularCoeff;
-  vec3 spec = texColorNoAlpha * specularCoeff;
-  //TOON SHADING SHIT
-  /**
-  vec4 tempColor;
-  float edge = max(0.0,dot(normal, viewDir));
-  float intensity = max(dot(normal, normalize(light.light_pos.xyz)), 0);
-  
-  if (intensity > 0.50) {
-    //tempColor = vec4(1.0,1.0,0.0,1.0) * visibility;
-    tempColor = vec4((diffuse * 1.25) + (spec * 1.25), 1.0);
-    tempColor = vec4(tempColor.xyz, 1.0);
-  }
-  else if (intensity > 0.20) {
-    //tempColor = vec4(1.0,1.0,0.0,1.0) * visibility;
-    tempColor = vec4(diffuse + spec, 1.0);
-    tempColor = vec4(tempColor.xyz, 1.0);
-  }
-  else if (intensity > 0.05) {
-    //tempColor = vec4(1.0,0.64,0.0,1.0) * visibility;
-    tempColor = vec4((diffuse * 0.75) + (spec * 0.75), 1.0);
-    tempColor = vec4(tempColor.xyz, 1.0);
-  }
-  else {
-    //tempColor = vec4(0.2,0.05,0.0,1.0) * visibility;
-    tempColor = vec4((diffuse * 0.05) + (spec * 0.05 ), 1.0);
-    tempColor = vec4(tempColor.xyz, 1.0);;
-  }
-  
-  //If it's on the edge we want it to add a black outline
-  if (edge < 0.4) {
-    return amb;
-  }**/
-  
+  vec3 spec = texColorNoAlpha * specularCoeff * specular;
+  //Toon shader Hung Edition
+  	float intensity;
+	vec3 toonColor = amb + diff + spec;
+	intensity = dot(normalize(-light.light_dir),normalize(normal));
+	float viewAngle = dot(normalize(viewDir), normalize(normal));
+
+	if(abs(viewAngle) < 0.2f) { //outline
+		toonColor = vec3(0,0,0);
+	}
+	else if (intensity > 0.95){//otherwise, intensities
+		//toonColor = vec4(1.0,0.5,0.5,1.0);
+		toonColor = toonColor * 0.95;
+	}
+	else if (intensity > 0.5){
+		//toonColor = vec4(0.6,0.3,0.3,1.0);
+		toonColor = toonColor * 0.80;
+	}
+	else if (intensity > 0.25){
+		//toonColor = vec4(0.4,0.2,0.2,1.0);
+		toonColor = toonColor * 0.70;
+	}
+	else
+		//toonColor = vec4(0.2,0.1,0.1,1.0);
+		toonColor = toonColor * 0.5;  
+
   //return tempColor.xyz + amb;
-  return amb + diff + spec;
+  //return amb + diff + spec;
+  return toonColor;
 }
 
 void main()
@@ -96,7 +91,7 @@ void main()
     }
   }
   normal = normalize((mat3(transpose(inverse(mat3(originalModel))))) * fragNormal);
-  viewDir = normalize(light.cam_pos - fragPos);
+  viewDir = normalize(light.cam_look_at - light.cam_pos);
   if (light.normal_shading) {
     res = vec3(normal[0], normal[1], normal[2]);
   } else {
