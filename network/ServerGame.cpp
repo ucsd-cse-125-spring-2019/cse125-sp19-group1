@@ -238,8 +238,7 @@ void ServerGame::receiveFromClients()
 				if (gameData->getPlayer(iter->first)->getIsCaught()) {
 					break;
 				}
-<<<<<<< HEAD
-=======
+
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 
 				if (gameData->getPlayer(iter->first)->getInteracting()) {
@@ -250,7 +249,6 @@ void ServerGame::receiveFromClients()
 						gameData->getPlayer(iter->first)->setInteracting();
 					}
 				}
->>>>>>> server
 
 				if (gameData->getPlayer(iter->first)->getInteracting() && 
 					!gameData->getPlayer(iter->first)->getIsChef()) {
