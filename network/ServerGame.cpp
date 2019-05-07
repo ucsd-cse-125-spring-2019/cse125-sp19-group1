@@ -5,6 +5,7 @@
 #include <string>
 #include <cstring>
 #include <chrono>
+#include "Gate.h"
 
  
 unsigned int ServerGame::client_id; 
@@ -120,8 +121,8 @@ void ServerGame::receiveFromClients()
 			case INTERACT_EVENT:
 			{
 
-				Location pLoc = gameData->getPlayer(iter->first)->getLocation();
-				std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
+				//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 				if (gameData->getPlayer(iter->first)->getIsChef()) 
 				{
 					if (gameData->getPlayer(iter->first)->getCaughtAnimal())
@@ -150,8 +151,8 @@ void ServerGame::receiveFromClients()
 									continue;
 								}
 								Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-								std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-								if (gameData->getPlayer(iter->first)->inRange(loc, theirLoc))
+								//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
+								if (gameData->getPlayer(iter->first)->inRange(loc, tLoc))
 								{
 									gameData->getPlayer(iter->first)->setCaughtAnimal();
 									gameData->getPlayer(iter2->first)->setIsCaught();
@@ -207,7 +208,7 @@ void ServerGame::receiveFromClients()
 									}
 									Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
 									std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-									if (loc == theirLoc && gameData->getPlayer(iter2->first)->getIsCaught())
+									if (loc == tLoc && gameData->getPlayer(iter2->first)->getIsCaught())
 									{
 										gameData->getPlayer(iter2->first)->setIsCaught();
 									}
@@ -233,8 +234,6 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
-
-
 				if (gameData->getPlayer(iter->first)->getIsCaught()) {
 					break;
 				}
@@ -242,7 +241,7 @@ void ServerGame::receiveFromClients()
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 
 				if (gameData->getPlayer(iter->first)->getInteracting()) {
-					double seconds = gameData->getPlayer(iter->first)->checkBoxProgress();
+					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
 					if (seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
@@ -309,8 +308,8 @@ void ServerGame::receiveFromClients()
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		if (gameData->getPlayer(iter->first)) {
-			Location pLoc = gameData->getPlayer(iter->first)->getLocation();
-			std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+			Location loc = gameData->getPlayer(iter->first)->getLocation();
+			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 
 			if (gameData->getPlayer(iter->first)->getIsCaught())
 			{
