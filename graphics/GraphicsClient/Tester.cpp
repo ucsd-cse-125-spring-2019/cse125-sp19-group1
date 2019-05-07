@@ -282,7 +282,8 @@ void IdleCallback()
 		MovePlayer();
 		//DummyMovePlayer();
 		server->update();
-		raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
+		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
+		raccoonModel->Update();
 	}
 
 }

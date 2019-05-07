@@ -61,23 +61,17 @@ void FBXObject::Update() {
 	// right now trying to handle updating the animation through this function.
 	if (animPlayer != NULL) {
 		animPlayer->play();
-		UpdateSkin();
+		//UpdateSkin();
 	}
 }
 
 void FBXObject::UpdateSkin() {
 	std::vector<Vertex *> * skelVertices = skel->GetVertices();
 	// --> M = W*(B^(-1))
-	// --> W = offset matrix for a given bone (TODO: setup animations to adjust these)
-	// --> (B^(-1)) = a precomputed inverse binding matrix (TODO: precompute these)
-	// ------> binding matrices are probably the ones stored in aiBones in Assimp? 
-	// ------> if so, just grab those and call glm::inverse(bindingMat) for each bone
-	/* once we have the inverse binding matrices, this step is done and you just have
-	 * to set up the animations so that they are changing the bones' offsets over time */
 	for (int i = 0; i < skelVertices->size(); i++)
 		DeformVertex((*skelVertices)[i]);
 	// after changing all the vertices and normals, we should update the buffers
-	SetBuffers();
+	UpdateBuffers();
 }
 
 void FBXObject::DeformVertex(Vertex * vertex) {
@@ -88,7 +82,7 @@ void FBXObject::DeformVertex(Vertex * vertex) {
 		M = M + currWeight.second * (*((skel->GetBone(currWeight.first))->GetSkinningMatrix()));
 	}
 	vertices[vertex->GetID()] = M * glm::vec4((*(vertex->GetPos())), 1.0f);
-	// TODO: deform the corresponding normal as well (save the original normal value in the Vertex class
+	normals[vertex->GetID()] = M * glm::vec4((*(vertex->GetNorm())), 0.0f);
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -204,6 +198,29 @@ void FBXObject::RenderingSetup() {
 	glGenBuffers(1, &(this->VBO_UV));
 
 	SetBuffers();
+}
+
+void FBXObject::UpdateBuffers() {
+	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
+	// Consider the VAO as a container for all your buffers.
+	glBindVertexArray(this->VAO);
+	/* send data about vertices */
+	glBindBuffer(GL_ARRAY_BUFFER, (this->VBO_V));
+	glBufferData(GL_ARRAY_BUFFER, ((this->vertices).size() * (3 * sizeof(GLfloat))), (this->vertices).data(), GL_STATIC_DRAW);
+	/* send data about normals */
+	glBindBuffer(GL_ARRAY_BUFFER, (this->VBO_N));
+	glBufferData(GL_ARRAY_BUFFER, ((this->normals).size() * (3 * sizeof(GLfloat))), (this->normals).data(), GL_STATIC_DRAW);
+	/* send data about uvs */
+	glBindBuffer(GL_ARRAY_BUFFER, this->VBO_UV);
+	glBufferData(GL_ARRAY_BUFFER, ((this->uvs).size() * (2 * sizeof(GLfloat))), (this->uvs).data(), GL_STATIC_DRAW);
+	// tell the shader in what order it should draw the vertices
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (this->EBO));
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((this->indices).size() * sizeof(GLuint)), &((this->indices)[0]), GL_STATIC_DRAW);
+	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// Unbind the VAO now so we don't accidentally tamper with it.
+	// NOTE: You must NEVER unbind the element array buffer associated with a VAO!
+	glBindVertexArray(0);
 }
 
 /* Sending relevant data to the shaders

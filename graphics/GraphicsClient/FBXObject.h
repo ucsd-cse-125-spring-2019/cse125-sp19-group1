@@ -65,6 +65,7 @@ public:
 	// rendering
 	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P);
 	void RenderingSetup();
+	void UpdateBuffers();
 	void SetBuffers();
 };
 

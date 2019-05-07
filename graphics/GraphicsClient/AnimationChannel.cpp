@@ -44,16 +44,16 @@ void AnimationChannel::setBoneOffset(float currTime, Skeleton * skel) {
 			currKeyframe += 1;
 		}
 		std::map<string, Bone*> *boneMap = skel->GetBones();
-		glm::mat4 newOffset = glm::scale(glm::mat4(), keyframes[currKeyframe]->getScaling());
+		glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), keyframes[currKeyframe]->getScaling());
 		glm::vec4 rotationQuat = keyframes[currKeyframe]->getRotation();
 		float rotationAngle = acos(rotationQuat.w) * 2;
 		glm::vec3 rotationAxis = glm::vec3(rotationQuat.x / sqrt(1 - (rotationQuat.w * rotationQuat.w)),
 			rotationQuat.y / sqrt(1 - (rotationQuat.w * rotationQuat.w)),
 			rotationQuat.z / sqrt(1 - (rotationQuat.w * rotationQuat.w)));
-		newOffset = glm::rotate(newOffset, rotationAngle, rotationAxis);
-		newOffset = glm::translate(newOffset, keyframes[currKeyframe]->getPosition());
-		//std::cerr << skel << " Printing skeleton point" << "\n";
-		//std::cerr << boneName << " Printing boneName" << "\n";
+		glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotationAngle, rotationAxis);
+		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), keyframes[currKeyframe]->getPosition());
+		//glm::mat4 newOffset = translationMatrix * rotationMatrix * scalingMatrix;
+		glm::mat4 newOffset = scalingMatrix * rotationMatrix * translationMatrix;
 		if (boneMap->find(boneName) != (boneMap)->end()) {
 			(*boneMap)[boneName]->SetOffset(&newOffset);
 		}
