@@ -59,6 +59,7 @@ public:
 	std::vector<std::vector<int>> & getKeyLayout();
 	std::vector<std::vector<int>> & getGateLayout();
 	std::vector<std::vector<int>> & getBoxLayout();
+	std::vector<std::vector<Tile>> getTileLayout();
 
 	int	getBoxTime() { return timeToOpenBox; }
 	int getChefSwingTime() { return timeToSwingNet; }
