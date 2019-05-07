@@ -27,6 +27,7 @@ out float transparency;
 out vec3 fragNormal;
 out vec3 fragPos;
 out vec3 vecPos;
+out vec3 viewPos;
 out mat4 originalModel;
 out vec3 diffuse;
 out vec3 ambient;
@@ -43,6 +44,7 @@ void main()
   fragNormal = normal;
   fragPos = vec3(model * vec4(position, 1.0f));
   vec4 vecPos4 = modelview * vec4(position.x, position.y, position.z, 1.0);
+  viewPos = vec3(vecPos4);
   vecPos = vec3(gl_Position.x, gl_Position.y, gl_Position.z);
   originalModel = model;
   diffuse = diffColor;

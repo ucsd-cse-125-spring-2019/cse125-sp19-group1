@@ -26,6 +26,7 @@ in float test;
 in vec3 fragNormal;
 in vec3 fragPos;
 in vec3 vecPos;
+in vec3 viewPos;
 in mat4 originalModel;
 in vec3 diffuse;
 in vec3 ambient;
@@ -99,6 +100,13 @@ vec3 CalcFogOfWar(vec3 inputColor) {
    return inputColor;
 }
 
+vec3 OverrideUI(vec3 inputColor) {
+   if(viewPos.x > 0) {
+      return vec3(1,0,0);
+   }
+   return inputColor;
+}
+
 void main()
 {
   vec4 texColor = texture(renderedTexture, UV);
@@ -118,6 +126,7 @@ void main()
     res = CalcDirLight(normal, viewDir);
   }
   res = CalcFogOfWar(res);
+  res = OverrideUI(res);
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);
