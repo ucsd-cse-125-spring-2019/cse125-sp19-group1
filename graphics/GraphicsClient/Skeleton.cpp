@@ -15,7 +15,7 @@ void Skeleton::AddNode(string name, Bone * newNode) {
 	bones.insert(std::pair<string, Bone *>(name, newNode));
 }
 
-Bone * Skeleton::GetNode(string name) {
+Bone * Skeleton::GetBone(string name) {
 	return bones[name];
 }
 
@@ -33,4 +33,9 @@ void Skeleton::PrintBoneStructure() {
 
 void Skeleton::PrintVertex(unsigned int id) {
 	vertices[id]->Print();
+}
+
+void Skeleton::Update(glm::mat4 * globalInverseT) {
+	glm::mat4 identity = glm::mat4(1.0);
+	root->Update(globalInverseT, &identity);
 }
