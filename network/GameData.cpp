@@ -62,7 +62,8 @@ void GameData::decodeTileLayout(std::string value)
 
 	int row = -1;
 	int col = -1;
-	std::vector<Tile> tileRow;
+	TileType type = TileType::DEFAULT;
+	std::vector<Tile *> tileRow;
 	for (auto p : tileDataPairs)
 	{
 		if (p.first == "tile")
@@ -73,6 +74,15 @@ void GameData::decodeTileLayout(std::string value)
 			tmpStream >> r >> c;
 			row = std::stoi(r);
 			col = std::stoi(c);
+			type = TileType::DEFAULT; // reset type to be default
+		}
+		else if (p.first == "tileType")
+		{
+			std::stringstream tmpStream(p.second);
+			std::string typeStr;
+
+			tmpStream >> typeStr;
+			type = static_cast<TileType>(std::stoi(typeStr));
 		}
 		else if (p.first == "tileData" && row != -1 && col != -1)
 		{
@@ -90,12 +100,38 @@ void GameData::decodeTileLayout(std::string value)
 			Tile tmp(wallLayout, tileType, boxStatus, height, itemName);*/
 			if (init)
 			{
-				Tile tmp(wallLayout, tileType, boxStatus, height, itemName);
-				tileRow.push_back(tmp);
+				Tile * tmp = nullptr;// = new Tile();
+				
+				switch (type)
+				{
+				case TileType::BOX:
+					tmp = new BoxTile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				case TileType::JAIL:
+					break;
+				case TileType::GATE:
+					break;
+				case TileType::RAMP:
+					break;
+				case TileType::KEY_DROP:
+					break;
+				case TileType::TABLE:
+					break;
+				case TileType::DEFAULT: default:
+					//tileRow.push_back(new Tile(std::stoi(wallNum), type, boxStatus, height));
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+
+					break;
+
+				}
 			}
 			else
 			{
-				clientTileLayout[row][col].decodeTileData(p.second);
+				clientTileLayout[row][col]->decodeTileData(p.second);
 			}
 		}
 		else if (p.first == "newRow")
@@ -156,7 +192,7 @@ std::vector<std::vector<int>> & GameData::getWallLayout() { return clientWallLay
 std::vector<std::vector<int>> & GameData::getKeyLayout() { return clientKeyLayout; }
 std::vector<std::vector<int>> & GameData::getGateLayout() { return clientGateLayout; }
 std::vector<std::vector<int>> & GameData::getBoxLayout() { return clientBoxLayout; }
-std::vector<std::vector<Tile>> GameData::getTileLayout() { return clientTileLayout; }
+std::vector<std::vector<Tile *>> GameData::getTileLayout() { return clientTileLayout; }
 void GameData::decodeGameData(const char * data)
 {
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;

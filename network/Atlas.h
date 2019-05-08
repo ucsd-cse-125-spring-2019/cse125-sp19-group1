@@ -7,6 +7,7 @@
 #include <bitset> 
 #include <string.h>
 #include "Tile.h"
+#include "BoxTile.h"
 #include <map>
 #include <ctime>
 
@@ -128,7 +129,7 @@ protected:
 	std::vector<std::vector<int>> jailLayout =
 	{ {0,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
-	  {1,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},

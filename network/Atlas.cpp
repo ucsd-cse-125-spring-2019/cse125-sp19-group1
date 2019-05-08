@@ -15,10 +15,10 @@ void Atlas::getMapCoords(Location & loc, int & row, int & col)
 Atlas::Atlas()
 {
 	//Reading from a file to generate map
-	//std::ifstream wallFile("layout.txt");
-	//std::ifstream boxFile("box.txt");
-	std::ifstream boxFile("../../maps/tinytinymap/item_spawn.txt");
-	std::ifstream wallFile("../../maps/tinytinymap/walls.txt");
+	std::ifstream wallFile("layout.txt");
+	std::ifstream boxFile("box.txt");
+	//std::ifstream boxFile("../../maps/tinytinymap/item_spawn.txt");
+	//std::ifstream wallFile("../../maps/tinytinymap/walls.txt");
 	//std::ifstream heightFile("../../maps/tinytinymap/walls.txt");
 
 	std::string wallLine;
@@ -51,11 +51,11 @@ Atlas::Atlas()
 				boxLocations.push_back(std::pair<int, int>(row, col));
 			}
 
-			keyLocationsRow.push_back(0);
-
 			switch (type)
 			{
 			case TileType::BOX:
+				tileRow.push_back(new BoxTile(std::stoi(wallNum), height));
+				boxLocations.push_back(std::pair<int, int>(row, col));
 				break;
 			case TileType::JAIL:
 				break;
@@ -68,17 +68,20 @@ Atlas::Atlas()
 			case TileType::TABLE:
 				break;
 			case TileType::DEFAULT: default:
-				tileRow.push_back(new Tile(std::stoi(wallNum), type, boxStatus, height));
+				//tileRow.push_back(new Tile(std::stoi(wallNum), type, boxStatus, height));
+				tileRow.push_back(new Tile(TileType::DEFAULT, std::stoi(wallNum), height));
 
 				break;
 
 			}
+			keyLocationsRow.push_back(0);
 			col++;
 		}
 		tileLayout.push_back(tileRow);
 		keyLocations.push_back(keyLocationsRow);
 		row++;
 	}
+
 
 	// Debug print out the wall layout
 	for (int r = 0; r < tileLayout.size(); r++) {
@@ -124,7 +127,7 @@ Atlas::Atlas()
 		}
 		std::cout << std::endl;
 	}
-	std::cout << "endconstructor\n";
+	std::cout << "end atlas constructor\n";
 }
 
 void Atlas::detectCollision(Location & loc) {
@@ -232,7 +235,12 @@ bool Atlas::hasBox(Location & loc)
 	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
 
-	return tileLayout[row][col]->getTileType() == TileType::BOX && tileLayout[row][col]->hasBox();
+	if (tileLayout[row][col]->getTileType() == TileType::BOX)
+	{
+		return dynamic_cast<BoxTile*>(tileLayout[row][col])->hasBox();
+	}
+
+	return false;
 }
 
 bool Atlas::hasJail(Location & loc)
@@ -284,7 +292,10 @@ void Atlas::updateBoxLayout(Location & loc)
 	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return;
 
-	tileLayout[row][col]->setBoxStatus(false);
+	if (tileLayout[row][col]->getTileType() == TileType::BOX)
+	{
+		dynamic_cast<BoxTile*>(tileLayout[row][col])->setBoxStatus(false);
+	}
 
 	if (keyLocations[row][col]) {
 		tileLayout[row][col]->setItem(static_cast<ItemName>(keyLocations[row][col]));

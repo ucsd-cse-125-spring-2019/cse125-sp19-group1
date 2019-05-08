@@ -1,6 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationChannel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="animloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -26,6 +35,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyframe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MeshEntry.cpp">
@@ -64,6 +76,9 @@
     <ClCompile Include="textureloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\network\Tile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -73,11 +88,17 @@
     <ClCompile Include="..\..\network\Walls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\network\Tile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="animloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -105,7 +126,19 @@
     <ClInclude Include="..\..\network\GameData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\network\Gate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\Item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyframe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\Location.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MeshEntry.h">
@@ -121,9 +154,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="objloader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Walls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\Player.h">
@@ -150,32 +180,19 @@
     <ClInclude Include="textureloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\network\Tile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\network\Tile.h">
+    <ClInclude Include="..\..\network\Walls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\network\Location.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Gate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Item.h">
-    <ClInclude Include="AnimationChannel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyframe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Animation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationPlayer.h">
+    <ClInclude Include="..\..\network\BoxTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -192,13 +209,13 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{0c821200-4528-4730-bd15-e0d561fa4b9b}</UniqueIdentifier>
+      <UniqueIdentifier>{5aaa1faf-8e5d-48fc-b7fa-09b982f736a1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{102e3889-f5b2-4937-8345-6606cf0c3a3b}</UniqueIdentifier>
+      <UniqueIdentifier>{ba9d01ad-c425-47cb-ad01-34841766dcf4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Resource Files">
-      <UniqueIdentifier>{efa26b7a-5d0d-46ce-8e06-5105a17fa90a}</UniqueIdentifier>
+      <UniqueIdentifier>{730a19a7-5a57-4ade-b49e-0d260ce8f7e1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
