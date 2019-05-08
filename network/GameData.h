@@ -12,7 +12,7 @@
 #define GENERALDATA_ID -999
 #define SERVER_GAMEDATA 123
 
-<<<<<<< HEAD
+
 
 enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
 
@@ -91,8 +91,7 @@ protected:
 	Location location;
 	int droppedTime;
 };
-=======
->>>>>>> remotes/origin/rd
+
 class GameData
 {
 public:

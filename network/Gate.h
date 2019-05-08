@@ -13,6 +13,11 @@ public:
 	Location	getLocation() { return location; }
 	float		getProgress() { return progress; }
 	int			getGateNum() { return gateNum; }
+	bool		getHasKeys() { return hasAllKeys; }
+	void		setOpen() { isOpen = true; }
+	bool		getIsOpen() { return isOpen; }
+	double		getTotalConstructTime() { return totalConstructTime; }
+	double		getFinishTime() { return finishTime; }
 
 	void setProgress(float aProgress) { progress = aProgress; }
 
@@ -23,9 +28,14 @@ public:
 		progress++;
 		validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey));
 		if (progress == 3)
-			isOpen = true;
+			hasAllKeys = true;
 	}
 
+	void constructGate(double time)
+	{
+		totalConstructTime += time;
+
+	}
 	std::string encodeGateData() {
 		std::stringstream encodedData;
 		encodedData << "num: " << gateNum << "|"
@@ -41,5 +51,8 @@ protected:
 	float progress;
 	int gateNum;
 	std::vector<std::vector<int>> wallLayout;
+	bool hasAllKeys;
 	bool isOpen;
+	double totalConstructTime;
+	double finishTime = 60.0;
 };

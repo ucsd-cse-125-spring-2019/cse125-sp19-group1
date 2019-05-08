@@ -1,13 +1,30 @@
 #include "Vertex.h"
 
-Vertex::Vertex(unsigned int newID, glm::vec3 * newPos) 
+Vertex::Vertex(unsigned int newID, glm::vec3 * newPos, glm::vec3 * newNorm) 
 {
 	id = newID;
 	position = glm::vec3(*newPos);
+	normal = glm::vec3(*newNorm);
 }
 
 void Vertex::AddWeight(string boneName, float boneWeight) {
 	weights.push_back(std::pair<string, float>(boneName, boneWeight));
+}
+
+std::vector<std::pair<string, float>> * Vertex::GetWeights() {
+	return &weights;
+}
+
+glm::vec3 * Vertex::GetPos() {
+	return &position;
+}
+
+glm::vec3 * Vertex::GetNorm() {
+	return &normal;
+}
+
+unsigned int Vertex::GetID() {
+	return id;
 }
 
 void Vertex::Print() {

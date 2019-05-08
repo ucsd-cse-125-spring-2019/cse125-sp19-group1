@@ -20,6 +20,11 @@ public:
 		z = argZ;
 	}
 
+	bool operator ==(Location & loc)
+	{
+
+		return x == loc.x && y == loc.y && z == loc.z;
+	}
 protected:
 	float x;
 	float y;

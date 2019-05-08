@@ -14,7 +14,7 @@
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
 #define MAX_ITEMS 9
-#define ITEM_DROP_DURATION 1000
+#define ITEM_DROP_DURATION 10
 
 class Atlas
 {
@@ -29,19 +29,21 @@ public:
 	bool hasGate(Location & loc);
 	bool hasBox(Location & loc);
 	
-	bool hasJail(std::vector<float> & loc);
-	bool isJailEmpty(std::vector<float> & loc);
-	void placeInJail(std::vector<float> & loc);
-	void removeFromJail(std::vector<float> & loc);
-	void unlockJail(std::vector<float> & loc);
-	int getJailProgress(std::vector<float> & loc);
-	void resetJail(std::vector<float> & loc);
+	bool hasJail(Location & loc);
+	bool isJailEmpty(Location & loc);
+	void placeInJail(Location & loc);
+	void removeFromJail(Location & loc);
+	void unlockJail(Location & loc);
+	int getJailProgress(Location & loc);
+	void resetJail(Location & loc);
 
 	void updateBoxLayout(Location & loc);
 	Tile & getTileAt(Location & loc);
 
 	bool tileHasItem(Location & loc);
 	void updateTileItem(Location & loc, ItemName anItem);
+	void getAdjacentFreeTile(int currRow, int currCol, int & row, int & col);
+	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
 
 	std::string encodeTileLayoutData();
 	std::string encodeWallLayoutData();
@@ -149,4 +151,3 @@ protected:
 	  {0,0,0,0,0,0,0} };
 
 };
-
