@@ -15,65 +15,123 @@ void Atlas::getMapCoords(Location & loc, int & row, int & col)
 Atlas::Atlas()
 {
 	//Reading from a file to generate map
-	std::ifstream wallFile("layout.txt");
-	std::ifstream boxFile("box.txt");
-	//std::ifstream boxFile("../../maps/tinytinymap/item_spawn.txt");
-	//std::ifstream wallFile("../../maps/tinytinymap/walls.txt");
-	//std::ifstream heightFile("../../maps/tinytinymap/walls.txt");
+	//std::ifstream wallFile("layout.txt");
+	//std::ifstream boxFile("box.txt");
+	std::ifstream boxFile("../../maps/tinytinymap/item_spawn.txt");
+	std::ifstream wallFile("../../maps/tinytinymap/walls.txt");
+	std::ifstream heightFile("../../maps/tinytinymap/heights.txt");
+	std::ifstream gateFile("../../maps/tinytinymap/player_exit.txt");
+	std::ifstream jailFile("../../maps/tinytinymap/player_trap.txt");
+	std::ifstream rampFile("../../maps/tinytinymap/ramps.txt");
+	std::ifstream keyDepositFile("../../maps/tinytinymap/key_deposit.txt");
 
 	std::string wallLine;
 	std::string boxLine;
+	std::string gateLine;
+	std::string heightLine;
+	std::string jailLine;
+	std::string rampLine;
+	std::string keyDepositLine;
+
 	//printf("INITIALIZING WALLS!\n");
 
 	std::getline(wallFile, wallLine); // removes first line from file
 	std::getline(boxFile, boxLine); // removes first line from file
+	std::getline(gateFile, gateLine); // removes first line from file
+	std::getline(heightFile, heightLine); // removes first line from file
+	std::getline(jailFile, jailLine); // removes first line from file
+	std::getline(rampFile, rampLine); // removes first line from file
+	std::getline(keyDepositFile, keyDepositLine); // removes first line from file
 	int row = 0;
 	while (std::getline(wallFile, wallLine))
 	{
 		int col = 0;
 		std::getline(boxFile, boxLine);
+		std::getline(gateFile, gateLine);
+		std::getline(heightFile, heightLine);
+		std::getline(jailFile, jailLine);
+		std::getline(rampFile, rampLine);
+		std::getline(keyDepositFile, keyDepositLine);
 		std::stringstream wallStream(wallLine);
 		std::stringstream boxStream(boxLine);
+		std::stringstream gateStream(gateLine);
+		std::stringstream heightStream(heightLine);
+		std::stringstream jailStream(jailLine);
+		std::stringstream rampStream(rampLine);
+		std::stringstream keyDepositStream(keyDepositLine);
 		std::string wallNum;
 		std::string boxNum;
+		std::string gateNum;
+		std::string heightNum;
+		std::string jailNum;
+		std::string rampNum;
+		std::string keyDepositNum;
 		std::vector<Tile *> tileRow;
 		std::vector<int> keyLocationsRow;
 		while (wallStream >> wallNum)
 		{
+			// Read next num from the line
 			boxStream >> boxNum;
+			gateStream >> gateNum;
+			heightStream >> heightNum;
+			jailStream >> jailNum;
+			rampStream >> rampNum;
+			keyDepositStream >> keyDepositNum;
+
+			// Initialize default variables for a tile
 			TileType type(TileType::DEFAULT);
-			bool boxStatus = false;
-			int height = 0;
-			if (boxNum == "1")
+			int wall = std::stoi(wallNum);
+			int height = std::stoi(heightNum);
+
+			if (boxNum != "0")
 			{
 				type = TileType::BOX;
-				boxStatus = true;
 				boxLocations.push_back(std::pair<int, int>(row, col));
+			}
+			else if (gateNum != "0")
+			{
+				type = TileType::GATE;
+			}
+			else if (jailNum != "0")
+			{
+				type = TileType::JAIL;
+			}
+			else if (rampNum != "0")
+			{
+				type = TileType::RAMP;
+			}
+			else if (keyDepositNum != "0")
+			{
+				type = TileType::KEY_DROP;
 			}
 
 			switch (type)
 			{
 			case TileType::BOX:
-				tileRow.push_back(new BoxTile(std::stoi(wallNum), height));
+				tileRow.push_back(new BoxTile(wall, height));
 				boxLocations.push_back(std::pair<int, int>(row, col));
 				break;
-			case TileType::JAIL:
+			case TileType::JAIL: // change to JailTile
+				tileRow.push_back(new Tile(TileType::JAIL, wall, height));
 				break;
-			case TileType::GATE:
+			case TileType::GATE: // change to GateTile
+				tileRow.push_back(new Tile(TileType::GATE, wall, height));
 				break;
-			case TileType::RAMP:
+			case TileType::RAMP: // change to RampTile
+				tileRow.push_back(new Tile(TileType::RAMP, wall, height));
 				break;
-			case TileType::KEY_DROP:
+			case TileType::KEY_DROP: // change to KeyDropTile
+				tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
 				break;
 			case TileType::TABLE:
+				tileRow.push_back(new Tile(TileType::TABLE, wall, height));
 				break;
 			case TileType::DEFAULT: default:
-				//tileRow.push_back(new Tile(std::stoi(wallNum), type, boxStatus, height));
-				tileRow.push_back(new Tile(TileType::DEFAULT, std::stoi(wallNum), height));
-
+				tileRow.push_back(new Tile(TileType::DEFAULT, wall, height));
 				break;
 
 			}
+			// Populate keyLocations 2D vector
 			keyLocationsRow.push_back(0);
 			col++;
 		}
@@ -543,14 +601,8 @@ std::string Atlas::encodeTileLayoutData()
 				encodedData << "tileData: " << tileLayout[row][col]->encodeTileData() << "|";
 				tileCount++;
 			}
-			
-			
-			/*if(col < tileLayout[row].size() - 1)
-				encodedData << ", ";*/
-			
 		}
-		/*if (row < tileLayout.size() - 1)
-			encodedData << " | ";*/
+
 		if(tileCount > 0)
 			encodedData << "newRow: break|";
 	}
