@@ -1,4 +1,5 @@
 #include "Atlas.h"
+#include <string>
 
 //1000 = left = 8
 //0100 = up = 4
@@ -191,7 +192,9 @@ bool Atlas::hasGate(Location & loc)
 
 	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
-
+	std::cout << "HAS GATE FUNCTION CALLED" << std::endl;
+	std::cout << std::to_string(row) + " " + std::to_string(col) << std::endl;
+	std::cout << std::to_string(tileLayout[row][col].getTileType() == TileType::GATE) << std::endl;
 	return tileLayout[row][col].getTileType() == TileType::GATE;
 }
 

@@ -10,6 +10,8 @@
  
 unsigned int ServerGame::client_id; 
 unsigned int SPEED = 2;
+bool chefWin = false;
+bool animalWin = false;
 
 ServerGame::ServerGame(void)
 {
@@ -32,6 +34,7 @@ void ServerGame::update()
         printf("client %d has been connected to the server\n",client_id); 
     }
 
+	if (chefWin || animalWin) { return; }
 	receiveFromClients();
 	//sendActionPackets();
 
@@ -175,8 +178,10 @@ void ServerGame::receiveFromClients()
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
+						std::cout << "HAS GATE" << std::endl;
 						if (gameData->getGate().isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
 						{
+							std::cout << "UPDATING GATE PROGRESS" << std::endl;
 							gameData->getGate().updateProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
 						}
 						if (gameData->getGate().getHasKeys() && !gameData->getPlayer(iter->first)->getOpenGate())
@@ -187,6 +192,7 @@ void ServerGame::receiveFromClients()
 					}
 					else if (gameData->getAtlas()->hasJail(loc))
 					{
+						std::cout << "HAS JAIL" << std::endl;
 						if (!gameData->getAtlas()->isJailEmpty(loc))
 						{
 							gameData->getPlayer(iter->first)->setOpenJail();
@@ -305,11 +311,18 @@ void ServerGame::receiveFromClients()
 	}
 	gameData->getAtlas()->checkDroppedItems();
 	//sendActionPackets(); // uncomment to always send data from server
+	chefWin = true;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		if (gameData->getPlayer(iter->first)) {
 			Location loc = gameData->getPlayer(iter->first)->getLocation();
 			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+
+			if (!gameData->getPlayer(iter->first)->getIsChef() &&
+				!gameData->getPlayer(iter->first)->getIsCaught()) 
+			{
+				chefWin = false;
+			}
 
 			if (gameData->getPlayer(iter->first)->getIsCaught())
 			{
@@ -348,7 +361,7 @@ void ServerGame::receiveFromClients()
 				}
 			}
 
-			if (gameData->getAtlas()->hasGate(loc) && !gameData->getGate().getIsOpen()) 
+			/*if (gameData->getAtlas()->hasGate(loc) && !gameData->getGate().getIsOpen()) 
 			{
 				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
 				if (seconds + gameData->getGate().getTotalConstructTime() >
@@ -357,7 +370,7 @@ void ServerGame::receiveFromClients()
 					gameData->getGate().setOpen();
 					gameData->getGate().constructGate(seconds);
 				}
-			}
+			}*/
 		}
 	}
 }
