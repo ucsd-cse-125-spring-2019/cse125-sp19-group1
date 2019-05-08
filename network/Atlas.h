@@ -7,6 +7,7 @@
 #include <bitset> 
 #include <string.h>
 #include "Tile.h"
+#include "BoxTile.h"
 #include <map>
 #include <ctime>
 
@@ -38,7 +39,7 @@ public:
 	void resetJail(Location & loc);
 
 	void updateBoxLayout(Location & loc);
-	Tile & getTileAt(Location & loc);
+	Tile * getTileAt(Location & loc);
 
 	bool tileHasItem(Location & loc);
 	void updateTileItem(Location & loc, ItemName anItem);
@@ -85,14 +86,16 @@ protected:
 	  {8,0,0,0,0,0,1},
 	  {10,2,2,2,2,2,3} };
 
-	std::vector<std::vector<int>> keyLayout =
+	std::vector<std::vector<int>> keyLocations;
+	
+	/*std::vector<std::vector<int>> keyLayout =
 	{ {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},
 	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
+	  {0,0,0,0,0,0,0} };*/
 
 	std::vector<std::vector<int>> clientKeyLayout =
 	{ {0,0,0,0,0,0,0},
@@ -121,12 +124,12 @@ protected:
 	  {0,0,0,0,0,0,1},
 	  {1,1,1,1,1,1,1} };
 
-	std::vector<std::vector<Tile>> tileLayout;
+	std::vector<std::vector<Tile *>> tileLayout;
 
 	std::vector<std::vector<int>> jailLayout =
 	{ {0,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
-	  {1,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},

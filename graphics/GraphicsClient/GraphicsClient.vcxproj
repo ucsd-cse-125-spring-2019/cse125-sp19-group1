@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h" />
+    <ClInclude Include="..\..\network\BoxTile.h" />
     <ClInclude Include="..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\network\ClientNetwork.h" />
     <ClInclude Include="..\..\network\GameData.h" />
