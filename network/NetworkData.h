@@ -17,7 +17,12 @@ enum PacketTypes {
 	INTERACT_EVENT = 6,
 	RELEASE_EVENT = 7,
 	DROP_EVENT = 8,
-	HIDE_EVENT = 9
+	HIDE_EVENT = 9,
+	SELECT0_EVENT,
+	SELECT1_EVENT,
+	SELECT2_EVENT,
+	SELECT3_EVENT,
+	SELECT4_EVENT,
 };
 
 struct Packet {
@@ -28,7 +33,7 @@ struct Packet {
 
 	//std::string packet_id;
 
-	char id [9];
+	int id;
 
 
 	void serialize(char * data) {
