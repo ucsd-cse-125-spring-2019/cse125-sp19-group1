@@ -276,6 +276,7 @@ void Init()
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
 	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
+	uiCanvas->SetDepthTest(false);
 
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
@@ -535,13 +536,14 @@ void DisplayCallback(GLFWwindow* window)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, windowWidth, windowHeight);
-	glDepthMask(GL_TRUE);
+	//glDepthMask(GL_TRUE);
 
 	//glUseProgram(objShaderProgram);
-	uiCanvas->Draw(uiShaderProgram, &V, &P);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	fog->draw(objShaderProgram, P * V * glm::vec4(playerPos, 1.0f));
-	root->draw(V, P);
+	root->draw(V, P, glm::mat4(1.0));
+	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
+
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 

@@ -63,7 +63,7 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
 	intensity = dot(normalize(-light.light_dir),normalize(normal));
 	float viewAngle = dot(normalize(viewDir), normalize(normal));
 
-	if(abs(viewAngle) < 0.1f) { //outline
+	if(abs(viewAngle) < 0.5f) { //outline
 		toonColor = vec3(0,0,0);
 	}
 	else if (intensity > 0.95){//otherwise, intensities
@@ -126,10 +126,15 @@ void main()
   } else {
     res = CalcDirLight(normal, viewDir);
   }
-  //res = CalcFogOfWar(res);
+  res = CalcFogOfWar(res);
   //res = OverrideUI(res);
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
+  if(fract(fragPos.x / 20)  < 0.1 && fract(fragPos.z / 20) < 0.1) {
+    color = vec4(0.0,1.0,0.0,1.0);
+  }
+  else {
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);
+  }
   //color = texColor;
 }

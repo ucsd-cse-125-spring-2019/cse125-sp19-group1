@@ -15,6 +15,7 @@ void FBXObject::Init(bool attachSkel) {
 	this->diffuse = default_diff;
 	this->specular = default_spec;
 	this->shininess = default_shininess;
+	this->depthTest = true;
 	skel = NULL;
 	animPlayer = NULL;
 	if (attachSkel)
@@ -156,15 +157,24 @@ void FBXObject::SetShine(float newShine) {
 	shininess = newShine;
 }
 
+void FBXObject::SetDepthTest(bool depthTestEnabled) {
+	depthTest = depthTestEnabled;
+}
 
-void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
+
+void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model)
 {
 	glUseProgram(shaderProgram);
-	glEnable(GL_DEPTH_TEST);
-	// Related to shaders and z value comparisons for the depth buffer
-	glDepthFunc(GL_LEQUAL);
+	if (depthTest) {
+		glEnable(GL_DEPTH_TEST);
+		// Related to shaders and z value comparisons for the depth buffer
+		glDepthFunc(GL_LEQUAL);
+	}
+	else {
+		glDisable(GL_DEPTH_TEST);
+	}
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = (*V) * toWorld;
+	glm::mat4 modelview = (*V) * model;
 
 	glBindTexture(GL_TEXTURE_2D, texNum);
 
@@ -185,7 +195,7 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 	glUniform3f(uMaterialS, (this->specular)[0], (this->specular)[1], (this->specular)[2]);
 	glUniform1f(uShine, (this->shininess));
 	// Sending the model without the view:
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &toWorld[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 	// Now draw the object. We simply need to bind the VAO associated with it.
 	glBindVertexArray(this->VAO);
 	// Tell OpenGL to draw with triangles, the number of triangles, the type of the indices, and the offset to start from

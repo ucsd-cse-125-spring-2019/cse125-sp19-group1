@@ -9,11 +9,11 @@ void Transform::addChild(Node * n) {
 }
 
 
-void Transform::draw(glm::mat4 V, glm::mat4 P)
+void Transform::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model)
 {
-	glm::mat4 new_t = V * offset;
+	glm::mat4 new_t = model * offset;
 	for (int i = 0; i < children.size(); i++) {
-		children[i]->draw(new_t, P);
+		children[i]->draw(V, P, new_t);
 	}
 }
 
