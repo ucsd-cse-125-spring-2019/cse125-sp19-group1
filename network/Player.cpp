@@ -41,17 +41,17 @@ void Player::setInventory(ItemName anItem)
 	inventory = anItem;
 }
 
-void Player::setInteracting() {
-	interacting = !interacting;
+void Player::setInteracting(bool interact) {
+	interacting = interact;
 }
 
 
-void Player::setOpenJail() {
-	openingJail = !openingJail;
+void Player::setOpenJail(bool interact) {
+	openingJail = interact;
 }
 
-void Player::setOpenGate() {
-	openingGate = !openingGate;
+void Player::setOpenGate(bool interact) {
+	openingGate = interact;
 }
 
 

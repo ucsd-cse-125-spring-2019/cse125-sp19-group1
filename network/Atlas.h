@@ -13,6 +13,7 @@
 #include <ctime>
 
 #define TILE_SIZE 20
+#define TILE_HEIGHT 10
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
 #define MAX_ITEMS 9

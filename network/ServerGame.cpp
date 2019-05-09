@@ -144,8 +144,11 @@ void ServerGame::receiveFromClients()
 						if (!gameData->getPlayer(iter->first)->getInteracting())
 						{
 							std::cout << "CAN SWING" << std::endl;
-							gameData->getPlayer(iter->first)->setInteracting();
+							gameData->getPlayer(iter->first)->setInteracting(true);
 							gameData->getPlayer(iter->first)->setStartTime();
+
+							chefWin = true;
+
 							std::map<unsigned int, SOCKET>::iterator iter2;
 							for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
 							{
@@ -155,12 +158,17 @@ void ServerGame::receiveFromClients()
 								}
 								Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
 								//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-								if (gameData->getPlayer(iter->first)->inRange(loc, tLoc))
+								if (gameData->getPlayer(iter->first)->inRange(loc, tLoc) &&
+									!gameData->getPlayer(iter2->first)->getIsCaught())
 								{
 									gameData->getPlayer(iter->first)->setCaughtAnimal(true);
 									gameData->getPlayer(iter->first)->setCaughtAnimalId(iter2->first);
 									gameData->getPlayer(iter2->first)->setIsCaught(true);
-									break;
+								}
+
+								if (gameData->getPlayer(iter2->first)->getIsCaught())
+								{
+									chefWin = false;
 								}
 							}
 						}
@@ -187,8 +195,15 @@ void ServerGame::receiveFromClients()
 						}
 						if (gameData->getGate().getHasKeys() && !gameData->getPlayer(iter->first)->getOpenGate())
 						{
-							gameData->getPlayer(iter->first)->setOpenGate();
+							gameData->getPlayer(iter->first)->setOpenGate(true);
 							gameData->getPlayer(iter->first)->setStartTime();
+						}
+						if (gameData->getGate().getHasKeys() && gameData->getGate().getIsOpen())
+						{
+							if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
+							{
+								animalWin = true;
+							}
 						}
 					}
 					else if (gameData->getAtlas()->hasJail(loc))
@@ -196,7 +211,7 @@ void ServerGame::receiveFromClients()
 						std::cout << "HAS JAIL" << std::endl;
 						if (!gameData->getAtlas()->isJailEmpty(loc))
 						{
-							gameData->getPlayer(iter->first)->setOpenJail();
+							gameData->getPlayer(iter->first)->setOpenJail(true);
 							gameData->getPlayer(iter->first)->setStartJailTime();
 							
 							//update jail progress
@@ -231,7 +246,7 @@ void ServerGame::receiveFromClients()
 						std::cout << "HAS BOX" << std::endl;
 						if (!gameData->getPlayer(iter->first)->getInteracting()) {
 							std::cout << "starting to interact!" << std::endl;
-							gameData->getPlayer(iter->first)->setInteracting();
+							gameData->getPlayer(iter->first)->setInteracting(true);
 							gameData->getPlayer(iter->first)->setStartTime();
 						}
 					}
@@ -252,21 +267,21 @@ void ServerGame::receiveFromClients()
 					if (seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
-						gameData->getPlayer(iter->first)->setInteracting();
+						gameData->getPlayer(iter->first)->setInteracting(false);
 					}
 				}
 
 				if (gameData->getPlayer(iter->first)->getInteracting() && 
 					!gameData->getPlayer(iter->first)->getIsChef()) {
 					std::cout << "RELEASED SPACE" << std::endl;
-					gameData->getPlayer(iter->first)->setInteracting();
+					gameData->getPlayer(iter->first)->setInteracting(false);
 				}
 
 				if (gameData->getPlayer(iter->first)->getOpenGate() &&
 					!gameData->getPlayer(iter->first)->getIsChef() &&
 					!gameData->getGate().getIsOpen()) {
 					std::cout << "RELEASED SPACE" << std::endl;
-					gameData->getPlayer(iter->first)->setOpenGate();
+					gameData->getPlayer(iter->first)->setOpenGate(false);
 
 					//update progress of gate 
 					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
@@ -319,12 +334,6 @@ void ServerGame::receiveFromClients()
 			Location loc = gameData->getPlayer(iter->first)->getLocation();
 			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 
-			if (!gameData->getPlayer(iter->first)->getIsChef() &&
-				!gameData->getPlayer(iter->first)->getIsCaught()) 
-			{
-				chefWin = false;
-			}
-
 			if (gameData->getPlayer(iter->first)->getIsCaught())
 			{
 				continue;
@@ -337,7 +346,7 @@ void ServerGame::receiveFromClients()
 				{
 					if (seconds > gameData->getChefSwingTime()) {
 						std::cout << "CAN SWING AGAIN" << std::endl;
-						gameData->getPlayer(iter->first)->setInteracting();
+						gameData->getPlayer(iter->first)->setInteracting(false);
 					}
 				}
 				else
@@ -345,7 +354,7 @@ void ServerGame::receiveFromClients()
 					if (seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
-						gameData->getPlayer(iter->first)->setInteracting();
+						gameData->getPlayer(iter->first)->setInteracting(false);
 					}
 				}
 			}
@@ -356,8 +365,7 @@ void ServerGame::receiveFromClients()
 				if (!gameData->getPlayer(iter->first)->getIsChef())
 				{
 					if (seconds > gameData->getOpenJailTime()) {
-						std::cout << "CAN OPEN AGAIN" << std::endl;
-						gameData->getPlayer(iter->first)->setOpenJail();
+						gameData->getPlayer(iter->first)->setOpenJail(false);
 					}
 				}
 			}
@@ -442,6 +450,35 @@ void ServerGame::updateLeftEvent(int id)
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
 	updatePlayerCollision(id, 3);
+}
+
+void ServerGame::updateHeight(int id)
+{
+	Location loc = gameData->getPlayer(id)->getLocation();
+	int x = loc.getX();
+	int y;
+	int z = loc.getZ();
+	if (gameData->getAtlas()->getRampDirection() == Orientation::North)
+	{
+		y = (int) (TILE_SIZE - z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE) 
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight()/2 +1);
+	}
+	else if (gameData->getAtlas()->getRampDirection() == Orientation::South)
+	{
+		y = (int)(z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
+	}
+	else if (gameData->getAtlas()->getRampDirection() == Orientation::East)
+	{
+		y = (int)(TILE_SIZE - x % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
+	}
+	else if (gameData->getAtlas()->getRampDirection() == Orientation::West)
+	{
+		y = (int)(x % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
+	}
+	gameData->getPlayer(id)->setLocation(loc.getX(), y, loc.getZ());
 }
 
 void ServerGame::updatePlayerCollision(int id, int dir) 
