@@ -25,6 +25,7 @@ ItemName Player::getInventory() { return inventory; }
 bool Player::getInteracting() { return interacting; }
 bool Player::getOpenJail() { return openingJail; }
 bool Player::getOpeningGate() { return openingGate; }
+bool Player::getHidden() { return hidden; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -39,6 +40,11 @@ void Player::setLocation(Location aLoc)
 void Player::setInventory(ItemName anItem)
 {
 	inventory = anItem;
+}
+
+void Player::setHidden(bool hide)
+{
+	hidden = hide;
 }
 
 void Player::setInteracting(bool interact) {
@@ -124,6 +130,7 @@ std::string Player::encodePlayerData()
 	encodedData << "model: " << static_cast<int>(modelType) << std::endl;
 	encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
 	encodedData << "hasCake: " << hasCake << std::endl;
+	encodedData << "hidden: " << hidden << std::endl;
 	encodedData << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
 
 	return encodedData.str();

@@ -136,6 +136,7 @@
     <ClInclude Include="..\..\..\network\Atlas.h" />
     <ClInclude Include="..\..\..\network\Gate.h" />
     <ClInclude Include="..\..\..\network\GateTile.h" />
+    <ClInclude Include="..\..\..\network\HideTile.h" />
     <ClInclude Include="..\..\..\network\Item.h" />
     <ClInclude Include="..\..\..\network\JailTile.h" />
     <ClInclude Include="..\..\..\network\Location.h" />

@@ -3,7 +3,7 @@
 #include <string>
 #include <sstream>
 
-enum class TileType {DEFAULT = 0, BOX, GATE, TABLE, KEY_DROP, JAIL, RAMP};
+enum class TileType {DEFAULT = 0, BOX, GATE, TABLE, KEY_DROP, JAIL, RAMP, HIDE};
 
 class Tile
 {

@@ -24,6 +24,8 @@ public:
 	Location getLocation();
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
+	bool getHidden();
+	void setHidden(bool hide);
 	bool getInteracting();
 	void setInteracting(bool interact);
 	bool getOpenJail();
@@ -73,6 +75,7 @@ protected:
 	bool		isCaught = false;
 	int			radius = 10;
 	int			caughtAnimalId;
+	bool		hidden = false;
 	std::chrono::time_point<std::chrono::system_clock> start;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;
