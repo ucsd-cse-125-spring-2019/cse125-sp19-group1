@@ -63,7 +63,7 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
 	intensity = dot(normalize(-light.light_dir),normalize(normal));
 	float viewAngle = dot(normalize(viewDir), normalize(normal));
 
-	if(abs(viewAngle) < 0.2f) { //outline
+	if(abs(viewAngle) < 0.1f) { //outline
 		toonColor = vec3(0,0,0);
 	}
 	else if (intensity > 0.95){//otherwise, intensities
@@ -85,6 +85,7 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
   //return tempColor.xyz + amb;
   //return amb + diff + spec;
   return toonColor;
+  
 }
 
 vec3 CalcFogOfWar(vec3 inputColor) {
@@ -101,7 +102,7 @@ vec3 CalcFogOfWar(vec3 inputColor) {
 }
 
 vec3 OverrideUI(vec3 inputColor) {
-   if(viewPos.x > 0) {
+   if(viewPos.x > 20) {
       return vec3(1,0,0);
    }
    return inputColor;
@@ -113,11 +114,11 @@ void main()
   vec3 normal, res, viewDir;
   float visibility = 1.0;
   float bias = 0.005;
-  if (shadowsOn) {
+  /**if (shadowsOn) {
     if ( texture( renderedTexture, ShadowCoord.xy ).x  <  ShadowCoord.z-bias) {
       visibility = 0.5;
     }
-  }
+  }**/
   normal = normalize((mat3(transpose(inverse(mat3(originalModel))))) * fragNormal);
   viewDir = normalize(light.cam_look_at - light.cam_pos);
   if (light.normal_shading) {
@@ -125,8 +126,8 @@ void main()
   } else {
     res = CalcDirLight(normal, viewDir);
   }
-  res = CalcFogOfWar(res);
-  res = OverrideUI(res);
+  //res = CalcFogOfWar(res);
+  //res = OverrideUI(res);
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);

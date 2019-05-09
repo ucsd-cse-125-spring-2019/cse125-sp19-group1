@@ -159,6 +159,10 @@ void FBXObject::SetShine(float newShine) {
 
 void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 {
+	glUseProgram(shaderProgram);
+	glEnable(GL_DEPTH_TEST);
+	// Related to shaders and z value comparisons for the depth buffer
+	glDepthFunc(GL_LEQUAL);
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = (*V) * toWorld;
 

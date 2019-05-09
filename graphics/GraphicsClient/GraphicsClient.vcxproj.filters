@@ -93,6 +93,9 @@
     <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="Keyframe.cpp" />
     <ClCompile Include="FogGenerator.cpp" />
+    <ClCompile Include="UIObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -198,6 +201,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FogGenerator.h" />
+    <ClInclude Include="UIObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag">
@@ -207,6 +213,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="packages.config">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="ui_shader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="ui_shader.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

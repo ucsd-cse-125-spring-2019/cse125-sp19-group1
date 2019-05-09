@@ -12,13 +12,13 @@
 #define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
 
 int elapsedTime = 0;
-
 GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
 const char* window_title = "TESTER";
 
 glm::mat4 P; // P for projection
+glm::mat4 orthoP; // P for 2d elements;
 glm::mat4 V; // V for view
 DirLight * light = nullptr;
 FogGenerator * fog = nullptr;
@@ -28,7 +28,12 @@ FBXObject * dogModel = nullptr;
 FBXObject * chefModel = nullptr;
 FBXObject * tileModel = nullptr;
 FBXObject * wallModel = nullptr;
+
+FBXObject * uiCanvas = nullptr;
 GLuint objShaderProgram;
+GLuint uiShaderProgram;
+
+GLuint uiTexture;
 
 Geometry * tileGeometry;
 Geometry * wallGeometry;
@@ -257,6 +262,8 @@ void Init()
 
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	
 	light = new DirLight();
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
@@ -268,6 +275,8 @@ void Init()
 	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
+	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
+
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
@@ -341,6 +350,8 @@ void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 	if (windowHeight > 0)
 	{
 		P = glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4000.0f);
+		//orthoP = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, -1.0f, 1.0f);
+		orthoP = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	}
 }
@@ -521,13 +532,17 @@ void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, windowWidth, windowHeight);
 	glDepthMask(GL_TRUE);
 
-	glUseProgram(objShaderProgram);
+	//glUseProgram(objShaderProgram);
+	uiCanvas->Draw(uiShaderProgram, &V, &P);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	fog->draw(objShaderProgram, playerPos);
+	fog->draw(objShaderProgram, P * V * glm::vec4(playerPos, 1.0f));
 	root->draw(V, P);
+
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
