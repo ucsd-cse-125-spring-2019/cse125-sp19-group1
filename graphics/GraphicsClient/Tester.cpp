@@ -12,7 +12,7 @@
 #define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
 
 // Uncomment to render an additional dummy Chef that mirrors the player's movements
-#define DUMMY_ID -4000
+// #define DUMMY_ID -4000
 
 int elapsedTime = 0;
 GLFWwindow * window = nullptr;

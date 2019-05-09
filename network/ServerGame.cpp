@@ -95,31 +95,36 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case FORWARD_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() || 
+					gameData->getPlayer(iter->first)->getIsCaught()) { break; }
 				updateForwardEvent(iter->first);
 				updateCollision(iter->first);
 				break;
 
 			case BACKWARD_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught()) { break; }
 				updateBackwardEvent(iter->first);
 				updateCollision(iter->first);
 				break;
 
 			case LEFT_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught()) { break; }
 				updateLeftEvent(iter->first);
 				updateCollision(iter->first);
 				break;
 
 			case RIGHT_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught()) { break; }
 				updateRightEvent(iter->first);
 				updateCollision(iter->first);
 				break;
 
 			case INTERACT_EVENT:
 			{
+				if (gameData->getPlayer(iter->first)->getIsCaught()) { break; }
 
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 				//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
@@ -270,6 +275,8 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
+				if (gameData->getPlayer(iter->first)->getIsCaught()) { break; }
+
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 
 				// PLayer cannot drop item if there is an item already on the current tile
