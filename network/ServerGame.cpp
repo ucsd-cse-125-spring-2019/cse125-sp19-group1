@@ -131,8 +131,8 @@ void ServerGame::receiveFromClients()
 						if (gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 						{
 							//update jail with animal
-							gameData->getAtlas()->placeInJail(loc);
-							gameData->getPlayer(iter->first)->setCaughtAnimal();
+							gameData->getAtlas()->placeInJail(loc, gameData->getPlayer(iter->first)->getCaughtAnimalId());
+							gameData->getPlayer(iter->first)->setCaughtAnimal(false);
 						}
 					}
 					else
@@ -154,8 +154,9 @@ void ServerGame::receiveFromClients()
 								//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
 								if (gameData->getPlayer(iter->first)->inRange(loc, tLoc))
 								{
-									gameData->getPlayer(iter->first)->setCaughtAnimal();
-									gameData->getPlayer(iter2->first)->setIsCaught();
+									gameData->getPlayer(iter->first)->setCaughtAnimal(true);
+									gameData->getPlayer(iter->first)->setCaughtAnimalId(iter2->first);
+									gameData->getPlayer(iter2->first)->setIsCaught(true);
 									break;
 								}
 							}
@@ -210,7 +211,7 @@ void ServerGame::receiveFromClients()
 									std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
 									if (loc == tLoc && gameData->getPlayer(iter2->first)->getIsCaught())
 									{
-										gameData->getPlayer(iter2->first)->setIsCaught();
+										gameData->getPlayer(iter2->first)->setIsCaught(false);
 									}
 								}
 

@@ -33,9 +33,11 @@ public:
 	ModelType getModelType();
 	bool getIsChef();
 	bool getCaughtAnimal();
-	void setCaughtAnimal();
+	void setCaughtAnimal(bool caught);
 	bool getIsCaught();
-	void setIsCaught();
+	void setIsCaught(bool caught);
+	int getCaughtAnimalId();
+	void setCaughtAnimalId(int id);
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
@@ -70,6 +72,7 @@ protected:
 	bool		caughtAnimal = false;
 	bool		isCaught = false;
 	int			radius = 10;
+	int			caughtAnimalId;
 	std::chrono::time_point<std::chrono::system_clock> start;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;

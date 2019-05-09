@@ -63,16 +63,24 @@ bool Player::getIsChef() {
 	return isChef;
 }
 
-void Player::setCaughtAnimal() {
-	caughtAnimal = !caughtAnimal;
+void Player::setCaughtAnimal(bool caught) {
+	caughtAnimal = caught;
 }
 
-void Player::setIsCaught() {
-	isCaught = !isCaught;
+void Player::setIsCaught(bool caught) {
+	isCaught = caught;
 }
 
 bool Player::getCaughtAnimal() {
 	return caughtAnimal;
+}
+
+int Player::getCaughtAnimalId() {
+	return caughtAnimalId;
+}
+
+void Player::setCaughtAnimalId(int id) {
+	caughtAnimalId = id;
 }
 
 bool Player::getIsCaught() {

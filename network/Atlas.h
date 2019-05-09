@@ -8,6 +8,7 @@
 #include <string.h>
 #include "Tile.h"
 #include "BoxTile.h"
+#include "JailTile.h"
 #include <map>
 #include <ctime>
 
@@ -32,7 +33,7 @@ public:
 	
 	bool hasJail(Location & loc);
 	bool isJailEmpty(Location & loc);
-	void placeInJail(Location & loc);
+	void placeInJail(Location & loc, int iter);
 	void removeFromJail(Location & loc);
 	void unlockJail(Location & loc);
 	int getJailProgress(Location & loc);

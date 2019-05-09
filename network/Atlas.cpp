@@ -310,7 +310,12 @@ bool Atlas::hasJail(Location & loc)
 	if (row >= jailLayout.size() || col >= jailLayout[row].size())
 		return false;
 
-	return jailLayout[row][col] != 0;
+	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
+	{
+		return dynamic_cast<JailTile*>(tileLayout[row][col])->hasJail();
+	}
+
+	return false;
 }
 
 bool Atlas::isJailEmpty(Location & loc)
@@ -322,23 +327,57 @@ bool Atlas::isJailEmpty(Location & loc)
 	if (row >= jailEmptyLayout.size() || col >= jailEmptyLayout[row].size())
 		return false;
 
-	return jailLayout[row][col] != 0;
+	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
+	{
+		return dynamic_cast<JailTile*>(tileLayout[row][col])->isJailEmpty();
+	}
+
+	return false;
 }
 
-void Atlas::placeInJail(Location & loc) 
+void Atlas::placeInJail(Location & loc, int iter)
 {
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	jailLayout[row][col] = 1;
+	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
+	{
+		dynamic_cast<JailTile*>(tileLayout[row][col])->placeAnimalInJail(iter);
+	}
 }
 
-void Atlas::removeFromJail(Location & loc)
+void Atlas::unlockJail(Location & loc)
 {
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	jailLayout[row][col] = 0;
+	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
+	{
+		dynamic_cast<JailTile*>(tileLayout[row][col])->unlockJail();
+	}
+}
+
+int Atlas::getJailProgress(Location & loc)
+{
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
+	{
+		dynamic_cast<JailTile*>(tileLayout[row][col])->getProgress();
+	}
+	return 0;
+}
+
+void Atlas::resetJail(Location & loc)
+{
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
+	{
+		dynamic_cast<JailTile*>(tileLayout[row][col])->resetJail();
+	}
 }
 
 
@@ -524,31 +563,6 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 			destCol = -1;
 		}
 }
-
-void Atlas::unlockJail(Location & loc)
-{
-	int row = (int)(loc.getZ() / TILE_SIZE);
-	int col = (int)(loc.getX() / TILE_SIZE);
-
-	jailProgressLayout[row][col] += 1;
-}
-
-int Atlas::getJailProgress(Location & loc)
-{
-	int row = (int)(loc.getZ() / TILE_SIZE);
-	int col = (int)(loc.getX() / TILE_SIZE);
-
-	return jailProgressLayout[row][col];
-}
-
-void Atlas::resetJail(Location & loc)
-{
-	int row = (int)(loc.getZ() / TILE_SIZE);
-	int col = (int)(loc.getX() / TILE_SIZE);
-
-	jailProgressLayout[row][col] = 0;
-}
-
 
 std::string Atlas::encodeWallLayoutData()
 {
