@@ -6,7 +6,7 @@ Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(f
 	location = Location();
 	addEncodeFunctions();
 	addDecodeFunctions();
-	if (anID % 2 == 1) {
+	if (anID == 1) {
 		modelType = ModelType::CHEF;
 	}
 }
@@ -15,7 +15,7 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
-	if (anID % 2 == 1) {
+	if (anID == 1) {
 		modelType = ModelType::CHEF;
 	}
 }

@@ -181,10 +181,17 @@ void ServerGame::receiveFromClients()
 						//drop off animal
 						if (gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 						{
+							int animal = gameData->getPlayer(iter->first)->getCaughtAnimalId();
 							//update jail with animal
 							std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
-							gameData->getAtlas()->placeInJail(loc, gameData->getPlayer(iter->first)->getCaughtAnimalId());
+							gameData->getAtlas()->placeInJail(loc, animal);
 							gameData->getPlayer(iter->first)->setCaughtAnimal(false);
+
+							//update animal's location to jail
+							int x = (int)(loc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+							int y = loc.getY();
+							int z = (int)(loc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+							gameData->getPlayer(animal)->setLocation(x, y, z);
 						}
 					}
 					else
@@ -217,6 +224,9 @@ void ServerGame::receiveFromClients()
 									gameData->getPlayer(iter->first)->setCaughtAnimal(true);
 									gameData->getPlayer(iter->first)->setCaughtAnimalId(iter2->first);
 									gameData->getPlayer(iter2->first)->setIsCaught(true);
+
+									//update animal's location to somewhere off map
+									gameData->getPlayer(iter2->first)->setLocation(-100, -100, -100);
 								}
 
 								if (!gameData->getPlayer(iter2->first)->getIsCaught())
@@ -279,7 +289,7 @@ void ServerGame::receiveFromClients()
 							//check if jail progress == 5
 							if (jailTile->getProgress() >= 5)
 							{
-								std::cout << "ANIMAL IS RELEASED" << std::endl;
+							std::cout << "ANIMAL IS RELEASED" << std::endl;
 								//update animal 
 								int animal = jailTile->getCapturedAnimal();
 								gameData->getPlayer(animal)->setIsCaught(false);
