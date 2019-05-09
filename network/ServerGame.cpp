@@ -31,7 +31,6 @@ void ServerGame::update()
     {
         printf("client %d has been connected to the server\n",client_id); 
     }
-
 	if (chefWin || animalWin) { return; }
 	receiveFromClients();
 	//sendActionPackets();
@@ -99,24 +98,28 @@ void ServerGame::receiveFromClients()
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateForwardEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case BACKWARD_EVENT:
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateBackwardEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case LEFT_EVENT:
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateLeftEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case RIGHT_EVENT:
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateRightEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case INTERACT_EVENT:
@@ -146,12 +149,16 @@ void ServerGame::receiveFromClients()
 							gameData->getPlayer(iter->first)->setStartTime();
 
 							chefWin = true;
-
 							std::map<unsigned int, SOCKET>::iterator iter2;
 							for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
 							{
 								if (iter2 == iter || gameData->getPlayer(iter2->first)->getIsChef())
 								{
+									if (!gameData->getPlayer(iter2->first)->getIsChef() &&
+										!gameData->getPlayer(iter2->first)->getIsCaught()) 
+									{
+										chefWin = false;
+									}
 									continue;
 								}
 								Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
@@ -331,7 +338,6 @@ void ServerGame::receiveFromClients()
 	}
 	gameData->getAtlas()->checkDroppedItems();
 	//sendActionPackets(); // uncomment to always send data from server
-	chefWin = true;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		if (gameData->getPlayer(iter->first)) {
@@ -459,7 +465,14 @@ void ServerGame::updateLeftEvent(int id)
 void ServerGame::updateHeight(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
-	if (!gameData->getAtlas()->hasRamp(loc)) { return; }
+	if (!gameData->getAtlas()->hasRamp(loc)) 
+	{ 
+		int y = gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 * TILE_HEIGHT;
+		gameData->getPlayer(id)->setLocation(loc.getX(), y, loc.getZ());
+		return; 
+	}
+
+	std::cout << "THERES A RAMP" << std::endl;
 
 	int x = loc.getX();
 	int y;
@@ -479,15 +492,15 @@ void ServerGame::updateHeight(int id)
 	}
 	else if (rampTile->getRampDirection() == Orientation::EAST)
 	{
-		y = (int)(TILE_SIZE - x % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+		y = (int)(x % TILE_SIZE) * ((double)TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	else if (rampTile->getRampDirection() == Orientation::WEST)
 	{
-		y = (int)(x % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+		y = (int)(TILE_SIZE - x % TILE_SIZE) * ((double)TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
-	gameData->getPlayer(id)->setLocation(loc.getX(), y, loc.getZ());
+	gameData->getPlayer(id)->setLocation(x, y, z);
 }
 
 void ServerGame::updatePlayerCollision(int id, int dir) 
