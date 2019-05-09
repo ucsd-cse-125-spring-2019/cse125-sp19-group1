@@ -17,11 +17,14 @@ public:
 	FBXObject * fbx;
 	glm::mat4 t;
 	GLint shaderProgram;
+	int refCount;
 	Geometry(FBXObject * fbx, GLint shaderProgram);
 	//~Geometry();
 	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);
 	void addChild(Node * child);
 	void removeAllChildren();
+	bool decrementRefCount();
+	void incrementRefCount();
 	//void draw(glm::mat4 C, float alpha);
 };
 #endif

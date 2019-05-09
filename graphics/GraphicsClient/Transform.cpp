@@ -2,6 +2,7 @@
 
 Transform::Transform(glm::mat4 mat) {
 	offset = mat;
+	refCount = 1;
 	this->type = type;
 }
 
@@ -23,4 +24,14 @@ void Transform::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model)
 
 void Transform::setOffset(glm::mat4 newOffset) {
 	offset = newOffset;
+}
+
+bool Transform::decrementRefCount()
+{
+	return (--refCount <= 0);
+}
+
+void Transform::incrementRefCount()
+{
+	++refCount;
 }

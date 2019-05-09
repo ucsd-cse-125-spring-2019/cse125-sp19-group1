@@ -22,17 +22,11 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 	}
 }
 
-Location Player::getLocation() { return location; }
-ItemName Player::getInventory() { return inventory; }
-bool Player::getInteracting() { return interacting; }
-bool Player::getOpenJail() { return openingJail; }
-bool Player::getOpeningGate() { return openingGate; }
-
 Location Player::getLocation() const { return location; }
 ItemName Player::getInventory() const { return inventory; }
 bool Player::getInteracting() const { return interacting; }
 bool Player::getOpenJail() const { return openingJail; }
-bool Player::getOpenGate() const { return openingGate; }
+bool Player::getOpeningGate() const { return openingGate; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -89,7 +83,7 @@ bool Player::getCaughtAnimal() const {
 	return caughtAnimal;
 }
 
-int Player::getCaughtAnimalId() {
+int Player::getCaughtAnimalId() const {
 	return caughtAnimalId;
 }
 
@@ -146,7 +140,7 @@ std::string Player::encodePlayerData(bool newPlayerInit)
 		bool dirty = p.second;
 		if (dirty || newPlayerInit)
 		{
-			encodedData << (this->*encodingFunctions[key])();
+			encodedData << (this->*encodingFunctions.at(key))();
 		}
 	}
 

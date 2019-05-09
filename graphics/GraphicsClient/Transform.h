@@ -20,6 +20,7 @@ class Transform : public Node
 private:
 	glm::mat4 offset;
 	bool type;
+	int refCount;
 	std::vector<Node*> children;
 public:
 	Transform(glm::mat4 mat);
@@ -27,5 +28,7 @@ public:
 	void removeAllChildren();
 	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);
 	void setOffset(glm::mat4);
+	bool decrementRefCount();
+	void incrementRefCount();
 };
 #endif
