@@ -35,7 +35,7 @@ public:
 	std::vector<std::vector<int>> clientKeyLayout;
 	std::vector<std::vector<int>> clientGateLayout;
 	std::vector<std::vector<int>> clientBoxLayout;
-	std::vector<std::vector<Tile>> clientTileLayout;
+	std::vector<std::vector<Tile *>> clientTileLayout;
 	void addNewClient(int anID, Location aLoc);
 	void removeClient(int anID);
 
@@ -59,6 +59,7 @@ public:
 	std::vector<std::vector<int>> & getKeyLayout();
 	std::vector<std::vector<int>> & getGateLayout();
 	std::vector<std::vector<int>> & getBoxLayout();
+	std::vector<std::vector<Tile *>> getTileLayout();
 
 	int	getBoxTime() { return timeToOpenBox; }
 	int getChefSwingTime() { return timeToSwingNet; }
