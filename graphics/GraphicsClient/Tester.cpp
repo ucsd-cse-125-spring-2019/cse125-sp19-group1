@@ -293,13 +293,18 @@ void reloadMap()
 		row.resize(tileLayout[z].size());
 
 		for (size_t x = 0; x < row.size(); x++) {
+			const auto &tile = tileLayout[z][x];
 
-			float y = tileLayout[z][x]->getHeight() * 0.5f * TILE_LEVEL_OFFSET;
+			float y = tile->getHeight() * 0.5f * TILE_LEVEL_OFFSET;
 			auto skew = glm::mat4(1.0f);
 
 			//TODO: add ramp direction to the Tile class
 			// For now, randomize as a reminder
-			int rampDirection = tileLayout[z][x]->getTileType() == TileType::RAMP ? (1 << (rand() % 4)) : 0;
+			int rampDirection = 0;
+			if (tile->getTileType() == TileType::RAMP) {
+				const RampTile *rampTile = (RampTile *)tile;
+				rampDirection = static_cast<int>(rampTile->getRampDirection());
+			}
 
 			switch (rampDirection) {
 			case DirectionBitmask::eastSide:

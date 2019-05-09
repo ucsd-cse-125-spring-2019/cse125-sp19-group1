@@ -11,7 +11,7 @@ public:
 	RampTile(Orientation aRampDir = Orientation::NORTH, int aWallLayout = 0, int aHeight = 0) : Tile(TileType::RAMP, aWallLayout, aHeight), rampDirection(aRampDir) {}
 
 	// Getter
-	Orientation getRampDirection() { return rampDirection; }
+	Orientation getRampDirection() const { return rampDirection; }
 	// Setter
 
 	// Encode function
