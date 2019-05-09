@@ -6,7 +6,7 @@
 #include <ctime>
 #include <algorithm>
 
-#define TILE_HEIGHT_ADJUST -26.f
+#define TILE_HEIGHT_ADJUST -2.f
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
 #define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
 #define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
@@ -142,8 +142,9 @@ void reloadMap()
 	}
 
 	if (floorTransform == nullptr) {
-		const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2));
-		floorTransform = new Transform(glm::scale(translate, glm::vec3(TILE_SCALE)));
+		const glm::vec3 transAmount(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2);
+		const auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(TILE_SCALE));
+		floorTransform = new Transform(glm::translate(scale, transAmount));
 	}
 
 	// Floor tiles
