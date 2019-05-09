@@ -265,23 +265,23 @@ void ServerGame::receiveFromClients()
 						std::cout << "HAS JAIL" << std::endl;
 						if (!gameData->getAtlas()->isJailEmpty(loc))
 						{
+							JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
 							gameData->getPlayer(iter->first)->setOpenJail(true);
 							gameData->getPlayer(iter->first)->setStartJailTime();
 							
 							//update jail progress
-							gameData->getAtlas()->unlockJail(loc);
+							jailTile->unlockJail();
 
 							//check if jail progress == 5
-							if (gameData->getAtlas()->getJailProgress(loc) >= 5)
+							if (jailTile->getProgress() >= 5)
 							{
 								std::cout << "ANIMAL IS UNRELEASED" << std::endl;
-								JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
 								//update animal 
 								int animal = jailTile->getCapturedAnimal();
 								gameData->getPlayer(animal)->setIsCaught(false);
 
 								//update jail
-								gameData->getAtlas()->resetJail(loc);
+								jailTile->resetJail();
 							}
 						}
 					}
