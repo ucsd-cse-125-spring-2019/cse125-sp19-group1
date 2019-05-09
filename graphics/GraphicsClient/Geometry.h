@@ -19,8 +19,9 @@ public:
 	GLint shaderProgram;
 	Geometry(FBXObject * fbx, GLint shaderProgram);
 	//~Geometry();
-	void draw(glm::mat4 V, glm::mat4 P);
+	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);
 	void addChild(Node * child);
+	void removeAllChildren();
 	//void draw(glm::mat4 C, float alpha);
 };
 #endif

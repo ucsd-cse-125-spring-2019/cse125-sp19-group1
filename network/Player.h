@@ -9,7 +9,7 @@
 #include "Item.h"
 #include "Location.h"
 
-
+#define NUM_PLAYER_MODEL_TYPES (4)
 enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
 
 class Player
@@ -19,9 +19,11 @@ public:
 	Player();
 	Player(int anID);
 	Player(int anID, Location aLoc);
-	ItemName getInventory();
+	ItemName getInventory() const;
+	ItemName getInventory() ;
 	void setInventory(ItemName anItem);
-	Location getLocation();
+	Location getLocation() const;
+	Location getLocation() ;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
 	bool getHidden();
@@ -33,13 +35,26 @@ public:
 	bool getOpeningGate();
 	void setOpeningGate(bool status);
 	ModelType getModelType();
-	bool getIsChef();
-	bool getCaughtAnimal();
+	//bool getIsChef();
+	//bool getCaughtAnimal();
 	void setCaughtAnimal(bool caught);
-	bool getIsCaught();
+	//bool getIsCaught();
 	void setIsCaught(bool caught);
 	int getCaughtAnimalId();
 	void setCaughtAnimalId(int id);
+
+	bool getInteracting() const;
+	//void setInteracting();
+	bool getOpenJail() const;
+	//void setOpenJail();
+	bool getOpenGate() const;
+	//void setOpenGate();
+	ModelType getModelType() const;
+	bool getIsChef() const;
+	bool getCaughtAnimal() const;
+	//void setCaughtAnimal();
+	bool getIsCaught() const;
+	//void setIsCaught();
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
@@ -47,12 +62,19 @@ public:
 	void setStartJailTime();
 	double checkProgress(int opt);
 
-	std::string encodePlayerData();
+	std::string encodePlayerData(bool newPlayerInit);
+//	std::string encodePlayerData() const;
+
 	void decodePlayerData(std::string key, std::string value);
 
 	using decodeFunctionType =  void (Player::*)(std::string value);
-	//std::map<std::string, decodeFunctionType> encodingFunctions;
 	std::map<std::string, decodeFunctionType> decodingFunctions;
+
+	using encodeFunctionType = std::string (Player::*)();
+	std::map<std::string, encodeFunctionType> encodingFunctions;
+	//std::map<std::string, decodeFunctionType> encodingFunctions;
+
+	std::map < std::string, bool> dirtyVariablesMap;
 
 	void addDecodeFunctions();
 	void decodeLocation(std::string value);
@@ -61,6 +83,14 @@ public:
 	void decodeChefStatus(std::string value);
 	void decodeModelType(std::string value);
 	void decodeHidden(std::string value);
+
+	void addEncodeFunctions();
+	std::string encodeLocation();
+	std::string encodeInventory();
+	std::string encodeCakeStatus();
+	std::string encodeChefStatus();
+	std::string encodeModelType();
+	std::string encodeHidden();
 
 protected:
 	Location	location;

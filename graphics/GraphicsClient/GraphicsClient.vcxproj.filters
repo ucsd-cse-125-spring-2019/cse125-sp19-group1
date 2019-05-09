@@ -88,6 +88,14 @@
     <ClCompile Include="..\..\network\Walls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationChannel.cpp" />
+    <ClCompile Include="AnimationPlayer.cpp" />
+    <ClCompile Include="Keyframe.cpp" />
+    <ClCompile Include="FogGenerator.cpp" />
+    <ClCompile Include="UIObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -199,6 +207,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\RampTile.h">
+    <ClInclude Include="FogGenerator.h" />
+    <ClInclude Include="UIObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -210,6 +220,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="packages.config">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="ui_shader.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="ui_shader.vert">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

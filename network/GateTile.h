@@ -2,6 +2,7 @@
 #include "Tile.h"
 #include <vector>
 
+#define TOTAL_CONSTRUCT_TIME 60
 enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
 
 class GateTile : public Tile
@@ -10,13 +11,14 @@ public:
 	
 	// Default constructor
 	GateTile(std::vector<Key> aKeys = {}, int num = 0, int aWallLayout = 0, int aHeight = 0) :
-		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), validKeys(aKeys) {}
+		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0f), validKeys(aKeys) {}
 
 	// Getters
 	int			getGateNum() { return gateNum; }
 	int			getKeyProgress() { return keyProgress; }
+	float		getCurrentConstructTime() { return currentConstructTime; }
 	bool		hasAllKeys() { return keyProgress == 3; }
-	bool		isOpen() { return totalConstructTime >= finishTime; }
+	bool		isOpen() { return currentConstructTime >= TOTAL_CONSTRUCT_TIME; }
 
 	// Setters
 
@@ -29,7 +31,7 @@ public:
 		encodedData << Tile::encodeTileData() << " "
 			<< gateNum << " "
 			<< keyProgress << " "
-			<< totalConstructTime;
+			<< currentConstructTime;
 
 		return encodedData.str();
 	}
@@ -44,18 +46,18 @@ public:
 		std::stringstream valueStream(value);
 		std::string gateNum_str;
 		std::string keyProgress_str;
-		std::string totalConstructTime_str;
+		std::string currentConstructTime_str;
 
 		// Get values from the stream
 		valueStream
 			>> gateNum_str
 			>> keyProgress_str
-			>> totalConstructTime_str;
+			>> currentConstructTime_str;
 
 		// Update class variables
 		gateNum = std::stoi(gateNum_str);
 		keyProgress = std::stoi(keyProgress_str);
-		totalConstructTime = std::stof(totalConstructTime_str);
+		currentConstructTime = std::stof(currentConstructTime_str);
 	}
 
 	// Additional functions
@@ -72,13 +74,15 @@ public:
 		{
 			keyProgress++;
 			validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey));
+			setDirty();
 		}
 	}
 
 	// Adds construction time for building the exit once alls keys are deposited
 	void constructGate(double time)
 	{
-		totalConstructTime += time;
+		currentConstructTime += time;
+		setDirty();
 	}
 
 protected:
@@ -86,9 +90,8 @@ protected:
 	// Variable sent to client
 	int gateNum;
 	int keyProgress;
-	double totalConstructTime;
+	double currentConstructTime;
 
 	// Additional variables
-	double finishTime = 60.0;
 	std::vector<Key> validKeys;
 };

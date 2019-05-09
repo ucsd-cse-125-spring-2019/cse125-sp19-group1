@@ -6,8 +6,9 @@ class Node
 {
 public:
 	Node();
-	virtual void draw(glm::mat4 V, glm::mat4 P) = 0;
+	virtual void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model) = 0;
 	virtual void addChild(Node * child) = 0;
+	virtual void removeAllChildren() = 0;
 };
 
 #endif

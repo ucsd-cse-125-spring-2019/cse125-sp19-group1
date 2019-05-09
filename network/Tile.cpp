@@ -15,6 +15,13 @@ bool		Tile::isDirty()		{ return dirty; }
 void Tile::setItem(ItemName anItem) { itemName = anItem; setDirty(); }
 void Tile::setDirty() { dirty = true; }
 
+bool Tile::isDirty() const { return dirty; }
+//bool Tile::hasBox() const { return boxStatus; }
+int Tile::getWall() const { return wall; }
+ItemName Tile::getItem() const { return itemName; }
+TileType Tile::getTileType() const { return tileType; }
+int Tile::getHeight() const { return height; }
+
 // Encode function
 std::string Tile::encodeTileData()
 {

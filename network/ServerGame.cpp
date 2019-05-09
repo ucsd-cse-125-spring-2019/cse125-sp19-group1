@@ -13,6 +13,7 @@ bool animalWin = false;
 
 ServerGame::ServerGame(void)
 {
+	newPlayerInit = false;
     // id's to assign clients for our table
     client_id = 0;
  
@@ -85,6 +86,7 @@ void ServerGame::receiveFromClients()
 
 			switch (packet.packet_type) {
 			case INIT_CONNECTION:
+				newPlayerInit = true;
 				printf("server received init packet from client\n");
 				initNewClient();
 				sendInitPackets();
@@ -100,6 +102,7 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->getHidden()) { 
 					break; 
 				}
+
 				updateForwardEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
@@ -111,6 +114,7 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->getHidden()) {
 					break;
 				}
+
 				updateBackwardEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
@@ -122,6 +126,7 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->getHidden()) {
 					break;
 				}
+
 				updateLeftEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
@@ -133,6 +138,7 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->getHidden()) {
 					break;
 				}
+
 				updateRightEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
@@ -145,6 +151,7 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->getHidden()) {
 					break;
 				}
+
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 				//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 				if (gameData->getPlayer(iter->first)->getIsChef()) 
@@ -217,6 +224,7 @@ void ServerGame::receiveFromClients()
 						if (gateTile->isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
 						{
 							gateTile->updateKeyProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
+							gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
 						}
 						if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
 						{
@@ -455,7 +463,12 @@ void ServerGame::receiveFromClients()
 				if (!gateTile->isOpen())
 				{
 					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-					gateTile->constructGate(seconds);
+
+					if (gameData->getPlayer(iter->first)->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
+					{
+						std::cout << "GATE CONSTRUCTED" << std::endl;
+						gateTile->constructGate(seconds);
+					}
 				}
 			}
 		}
@@ -481,8 +494,8 @@ void ServerGame::sendInitPackets()
 void ServerGame::sendActionPackets()
 {
 	// gets an encoded game data string for all players and general game data
-	std::string msg_string = gameData->encodeGameData();
-	
+	std::string msg_string = gameData->encodeGameData(newPlayerInit);
+	newPlayerInit = false;
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 
