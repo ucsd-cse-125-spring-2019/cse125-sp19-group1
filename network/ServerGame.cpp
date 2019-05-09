@@ -178,6 +178,7 @@ void ServerGame::receiveFromClients()
 						if (gateTile->isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
 						{
 							gateTile->updateKeyProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
+							gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
 						}
 						if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
 						{
@@ -353,14 +354,19 @@ void ServerGame::receiveFromClients()
 				}
 			}
 
-			if (gameData->getAtlas()->hasGate(loc))// && !gameData->getGate().getIsOpen()) 
+			if (gameData->getAtlas()->hasGate(loc))
 			{
 				GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 
 				if (!gateTile->isOpen())
 				{
 					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-					gateTile->constructGate(seconds);
+
+					if (gameData->getPlayer(iter->first)->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
+					{
+						std::cout << "GATE CONSTRUCTED" << std::endl;
+						gateTile->constructGate(seconds);
+					}
 				}
 			}
 		}

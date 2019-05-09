@@ -86,7 +86,6 @@ Atlas::Atlas()
 			if (boxNum != "0")
 			{
 				type = TileType::BOX;
-				boxLocations.push_back(std::pair<int, int>(row, col));
 			}
 			else if (gateNum != "0")
 			{

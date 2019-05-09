@@ -49,8 +49,13 @@ public:
 	void decodePlayerData(std::string key, std::string value);
 
 	using decodeFunctionType =  void (Player::*)(std::string value);
-	//std::map<std::string, decodeFunctionType> encodingFunctions;
 	std::map<std::string, decodeFunctionType> decodingFunctions;
+
+	using encodeFunctionType = std::string (Player::*)();
+	std::map<std::string, encodeFunctionType> encodingFunctions;
+	//std::map<std::string, decodeFunctionType> encodingFunctions;
+
+	std::map < std::string, bool> dirtyVariablesMap;
 
 	void addDecodeFunctions();
 	void decodeLocation(std::string value);
@@ -58,6 +63,13 @@ public:
 	void decodeCakeStatus(std::string value);
 	void decodeChefStatus(std::string value);
 	void decodeModelType(std::string value);
+
+	void addEncodeFunctions();
+	std::string encodeLocation();
+	std::string encodeInventory();
+	std::string encodeCakeStatus();
+	std::string encodeChefStatus();
+	std::string encodeModelType();
 
 protected:
 	Location	location;
