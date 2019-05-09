@@ -262,7 +262,9 @@ void Init()
 
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	std::cerr << "objShader is = " << objShaderProgram << "\n";
 	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	std::cerr << "uiShader is = " << uiShaderProgram << "\n";
 	
 	light = new DirLight();
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
@@ -542,7 +544,7 @@ void DisplayCallback(GLFWwindow* window)
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	fog->draw(objShaderProgram, P * V * glm::vec4(playerPos, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
-	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
+	uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
