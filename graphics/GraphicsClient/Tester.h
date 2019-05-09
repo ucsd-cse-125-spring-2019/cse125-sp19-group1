@@ -66,7 +66,7 @@ void CleanUp();
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight);
 GLFWwindow* CreateWindowFrame(int width, int height);
 void SendPackets();
-void MovePlayer();
+void MovePlayers();
 void MoveCamera(const glm::vec3 &newPlayerPos);
 void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos);
 void IdleCallback();

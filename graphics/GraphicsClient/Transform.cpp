@@ -4,10 +4,14 @@ Transform::Transform(glm::mat4 mat) {
 	offset = mat;
 	this->type = type;
 }
+
 void Transform::addChild(Node * n) {
 	children.push_back(n);
 }
 
+void Transform::removeAllChildren() {
+	children.clear();
+}
 
 void Transform::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model)
 {

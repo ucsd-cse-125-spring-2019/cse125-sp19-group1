@@ -15,3 +15,7 @@ void Geometry::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model) {
 void Geometry::addChild(Node * child) {
 
 }
+
+void Geometry::removeAllChildren() {
+
+}

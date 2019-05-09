@@ -24,6 +24,7 @@ private:
 public:
 	Transform(glm::mat4 mat);
 	void addChild(Node * n);
+	void removeAllChildren();
 	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);
 	void setOffset(glm::mat4);
 };

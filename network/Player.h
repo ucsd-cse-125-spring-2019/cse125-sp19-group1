@@ -19,22 +19,22 @@ public:
 	Player();
 	Player(int anID);
 	Player(int anID, Location aLoc);
-	ItemName getInventory();
+	ItemName getInventory() const;
 	void setInventory(ItemName anItem);
-	Location getLocation();
+	Location getLocation() const;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
-	bool getInteracting();
+	bool getInteracting() const;
 	void setInteracting();
-	bool getOpenJail();
+	bool getOpenJail() const;
 	void setOpenJail();
-	bool getOpenGate();
+	bool getOpenGate() const;
 	void setOpenGate();
-	ModelType getModelType();
-	bool getIsChef();
-	bool getCaughtAnimal();
+	ModelType getModelType() const;
+	bool getIsChef() const;
+	bool getCaughtAnimal() const;
 	void setCaughtAnimal();
-	bool getIsCaught();
+	bool getIsCaught() const;
 	void setIsCaught();
 
 	bool inRange(Location & myLoc, Location & theirLoc);
@@ -43,7 +43,7 @@ public:
 	void setStartJailTime();
 	double checkProgress(int opt);
 
-	std::string encodePlayerData();
+	std::string encodePlayerData() const;
 	void decodePlayerData(std::string key, std::string value);
 
 	using decodeFunctionType =  void (Player::*)(std::string value);

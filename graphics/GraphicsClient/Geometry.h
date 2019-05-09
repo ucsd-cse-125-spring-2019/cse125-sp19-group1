@@ -21,6 +21,7 @@ public:
 	//~Geometry();
 	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);
 	void addChild(Node * child);
+	void removeAllChildren();
 	//void draw(glm::mat4 C, float alpha);
 };
 #endif
