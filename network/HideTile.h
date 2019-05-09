@@ -9,7 +9,7 @@ class HideTile : public Tile
 public:
 
 	// Default constructor
-	HideTile(): animalHiding(-1) {}
+	HideTile(int aWallLayout = 0, int aHeight = 0) : Tile(TileType::HIDE, aWallLayout, aHeight), animalHiding(-1) {}
 
 	// Getters
 	bool		checkHideTileEmpty() { return animalHiding == -1; }

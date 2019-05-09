@@ -6,7 +6,8 @@ class JailTile : public Tile
 public:
 	
 	//Deafult Constructor
-	JailTile() : capturedAnimal(-1), progress(0), empty(true), jailStatus(false) {}
+	JailTile(int aWallLayout = 0, int aHeight = 0) : Tile(TileType::JAIL, aWallLayout, aHeight), 
+		capturedAnimal(-1), progress(0), empty(true), jailStatus(false) {}
 
 	//Getter
 	bool hasJail() { return jailStatus; }
