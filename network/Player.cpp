@@ -122,7 +122,7 @@ double Player::checkProgress(int opt) {
 	return elapsed_seconds.count();
 }
 
-std::string Player::encodePlayerData()
+std::string Player::encodePlayerData(bool newPlayerInit)
 {
 	std::stringstream encodedData;
 	encodedData << "client: " << playerID << std::endl;
@@ -135,7 +135,7 @@ std::string Player::encodePlayerData()
 	{
 		std::string key = p.first;
 		bool dirty = p.second;
-		if (dirty)
+		if (dirty || newPlayerInit)
 		{
 			encodedData << (this->*encodingFunctions[key])();
 		}

@@ -563,7 +563,7 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 		}
 }
 
-std::string Atlas::encodeTileLayoutData()
+std::string Atlas::encodeTileLayoutData(bool newPlayerInit)
 {
 	std::stringstream encodedData;
 	for (int row = 0; row < tileLayout.size(); row++)
@@ -571,7 +571,7 @@ std::string Atlas::encodeTileLayoutData()
 		int tileCount = 0;
 		for (int col = 0; col < tileLayout[row].size(); col++)
 		{
-			if (tileLayout[row][col]->isDirty())
+			if (tileLayout[row][col]->isDirty() || newPlayerInit)
 			{
 				encodedData << "tile: " << row << " " << col << "|";
 				encodedData << "tileType: " << static_cast<int>(tileLayout[row][col]->getTileType()) << "|";

@@ -11,6 +11,7 @@ unsigned int SPEED = 2;
 
 ServerGame::ServerGame(void)
 {
+	newPlayerInit = false;
     // id's to assign clients for our table
     client_id = 0;
  
@@ -83,6 +84,7 @@ void ServerGame::receiveFromClients()
 
 			switch (packet.packet_type) {
 			case INIT_CONNECTION:
+				newPlayerInit = true;
 				printf("server received init packet from client\n");
 				initNewClient();
 				sendInitPackets();
@@ -392,8 +394,8 @@ void ServerGame::sendInitPackets()
 void ServerGame::sendActionPackets()
 {
 	// gets an encoded game data string for all players and general game data
-	std::string msg_string = gameData->encodeGameData();
-	
+	std::string msg_string = gameData->encodeGameData(newPlayerInit);
+	newPlayerInit = false;
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];
 

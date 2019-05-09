@@ -45,7 +45,7 @@ public:
 	void setStartJailTime();
 	double checkProgress(int opt);
 
-	std::string encodePlayerData();
+	std::string encodePlayerData(bool newPlayerInit);
 	void decodePlayerData(std::string key, std::string value);
 
 	using decodeFunctionType =  void (Player::*)(std::string value);
