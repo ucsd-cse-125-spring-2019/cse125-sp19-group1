@@ -112,7 +112,7 @@ Atlas::Atlas()
 				boxLocations.push_back(std::pair<int, int>(row, col));
 				break;
 			case TileType::JAIL: // change to JailTile
-				tileRow.push_back(new Tile(TileType::JAIL, wall, height));
+				tileRow.push_back(new JailTile(wall, height));
 				break;
 			case TileType::GATE: 
 				tileRow.push_back(new GateTile(std::vector<Key>({ Key::KEY1, Key::KEY2, Key::KEY3 }), 1, wall, height));
