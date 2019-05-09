@@ -21,6 +21,7 @@ public:
 	Player(int anID, Location aLoc);
 	ItemName getInventory() const;
 	void setInventory(ItemName anItem);
+	void setModelType(ModelType type);
 	Location getLocation() const;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);

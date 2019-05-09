@@ -38,7 +38,7 @@ ClientGame::ClientGame(void)
 
 	Packet packet;
 	packet.packet_type = INIT_CONNECTION;
-
+	packet.id = myID;
 	packet.serialize(packet_data);
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
@@ -53,6 +53,7 @@ void ClientGame::sendActionPackets()
 
 	Packet packet;
 	packet.packet_type = ACTION_EVENT;
+	packet.id = myID;
 
 	packet.serialize(packet_data);
 
@@ -67,6 +68,7 @@ void ClientGame::sendPackets(const int type)
 
 	Packet packet;
 	packet.packet_type = type;
+	packet.id = myID;
 
 	if (myID == -1) {
 		return;

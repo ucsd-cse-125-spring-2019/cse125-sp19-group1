@@ -21,6 +21,11 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 		modelType = ModelType::CHEF;
 	}
 }
+void Player::setModelType(ModelType type)
+{
+	modelType = type;
+	dirtyVariablesMap["model"] = true;
+}
 
 Location Player::getLocation() const { return location; }
 ItemName Player::getInventory() const { return inventory; }
