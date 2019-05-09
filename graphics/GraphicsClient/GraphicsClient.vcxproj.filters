@@ -200,6 +200,13 @@
     <ClInclude Include="..\..\network\Walls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\network\BoxTile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\GateTile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\RampTile.h">
     <ClInclude Include="FogGenerator.h" />
     <ClInclude Include="UIObject.h">
       <Filter>Header Files</Filter>

@@ -24,6 +24,21 @@ public:
 	Location getLocation() const;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
+/*	bool getInteracting();
+	void setInteracting(bool interact);
+	bool getOpenJail();
+	void setOpenJail(bool interact);
+	bool getOpeningGate();
+	void setOpeningGate(bool status);
+	ModelType getModelType();
+	bool getIsChef();
+	bool getCaughtAnimal();
+	void setCaughtAnimal(bool caught);
+	bool getIsCaught();
+	void setIsCaught(bool caught);
+	int getCaughtAnimalId();
+	void setCaughtAnimalId(int id);
+*/
 	bool getInteracting() const;
 	void setInteracting();
 	bool getOpenJail() const;
@@ -43,12 +58,19 @@ public:
 	void setStartJailTime();
 	double checkProgress(int opt);
 
-	std::string encodePlayerData() const;
+	std::string encodePlayerData(bool newPlayerInit) const;
+//	std::string encodePlayerData() const;
+
 	void decodePlayerData(std::string key, std::string value);
 
 	using decodeFunctionType =  void (Player::*)(std::string value);
-	//std::map<std::string, decodeFunctionType> encodingFunctions;
 	std::map<std::string, decodeFunctionType> decodingFunctions;
+
+	using encodeFunctionType = std::string (Player::*)();
+	std::map<std::string, encodeFunctionType> encodingFunctions;
+	//std::map<std::string, decodeFunctionType> encodingFunctions;
+
+	std::map < std::string, bool> dirtyVariablesMap;
 
 	void addDecodeFunctions();
 	void decodeLocation(std::string value);
@@ -56,6 +78,13 @@ public:
 	void decodeCakeStatus(std::string value);
 	void decodeChefStatus(std::string value);
 	void decodeModelType(std::string value);
+
+	void addEncodeFunctions();
+	std::string encodeLocation();
+	std::string encodeInventory();
+	std::string encodeCakeStatus();
+	std::string encodeChefStatus();
+	std::string encodeModelType();
 
 protected:
 	Location	location;
@@ -70,6 +99,7 @@ protected:
 	bool		caughtAnimal = false;
 	bool		isCaught = false;
 	int			radius = 10;
+	int			caughtAnimalId;
 	std::chrono::time_point<std::chrono::system_clock> start;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;

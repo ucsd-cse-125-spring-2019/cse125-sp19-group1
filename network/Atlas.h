@@ -7,10 +7,15 @@
 #include <bitset> 
 #include <string.h>
 #include "Tile.h"
+#include "BoxTile.h"
+#include "JailTile.h"
+#include "GateTile.h"
+#include "RampTile.h"
 #include <map>
 #include <ctime>
 
 #define TILE_SIZE 20
+#define TILE_HEIGHT 10
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
 #define MAX_ITEMS 9
@@ -31,26 +36,22 @@ public:
 	
 	bool hasJail(Location & loc);
 	bool isJailEmpty(Location & loc);
-	void placeInJail(Location & loc);
+	void placeInJail(Location & loc, int iter);
 	void removeFromJail(Location & loc);
 	void unlockJail(Location & loc);
 	int getJailProgress(Location & loc);
 	void resetJail(Location & loc);
 
 	void updateBoxLayout(Location & loc);
-	Tile & getTileAt(Location & loc);
+	Tile * getTileAt(Location & loc);
 
 	bool tileHasItem(Location & loc);
 	void updateTileItem(Location & loc, ItemName anItem);
 	void getAdjacentFreeTile(int currRow, int currCol, int & row, int & col);
 	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
 
-	std::string encodeTileLayoutData();
-	std::string encodeWallLayoutData();
-	std::string encodeClientKeyLayoutData();
-	std::string encodeGateLayoutData();
-	std::string encodeBoxLayoutData();
-	std::string encode2DVectorData(std::vector<std::vector<int>> layout);
+	std::string encodeTileLayoutData(bool newPlayerInit);
+	bool hasRamp(Location & loc);
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
@@ -72,61 +73,17 @@ public:
 		ItemName::KEY7,
 		ItemName::KEY8,
 		ItemName::KEY9
-
 	};
 
 protected:
-	std::vector<std::vector<int>> wallLayout =
-	{ {12,4,4,4,4,4,5},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {10,2,2,2,2,2,3} };
 
-	std::vector<std::vector<int>> keyLayout =
-	{ {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
-
-	std::vector<std::vector<int>> clientKeyLayout =
-	{ {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
-
-	std::vector<std::vector<int>> gateLayout =
-	{ {1,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
-
-	std::vector<std::vector<int>> boxLayout =
-	{ {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {1,1,1,1,1,1,1} };
-
-	std::vector<std::vector<Tile>> tileLayout;
+	std::vector<std::vector<int>> keyLocations;
+	std::vector<std::vector<Tile *>> tileLayout;
 
 	std::vector<std::vector<int>> jailLayout =
 	{ {0,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
-	  {1,0,0,0,0,0,0},
+	  {0,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},
 	  {1,0,0,0,0,0,0},

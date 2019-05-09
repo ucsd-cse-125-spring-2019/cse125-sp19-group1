@@ -1,10 +1,18 @@
 #include "Tile.h"
 
-Tile::Tile(int aWallLayout, TileType aType, bool aBoxStatus, int aHeight, ItemName anItem,  bool aDirty) :
-	wall(aWallLayout), tileType(aType), boxStatus(aBoxStatus), itemName(anItem), height(aHeight), dirty(aDirty) {}
+// Default constructor
+Tile::Tile(TileType aType, int aWallLayout, int aHeight, ItemName anItem) :
+	tileType(aType), wall(aWallLayout), height(aHeight), itemName(anItem), dirty(true) {}
 
+// Getters
+TileType	Tile::getTileType() { return tileType; }
+int			Tile::getWall()		{ return wall; }
+int			Tile::getHeight()	{ return height; }
+ItemName	Tile::getItem()		{ return itemName; }
+bool		Tile::isDirty()		{ return dirty; }
+
+// Setters
 void Tile::setItem(ItemName anItem) { itemName = anItem; setDirty(); }
-void Tile::setBoxStatus(bool aBoxStatus) { boxStatus = aBoxStatus; setDirty(); }
 void Tile::setDirty() { dirty = true; }
 
 bool Tile::isDirty() const { return dirty; }
@@ -14,29 +22,48 @@ ItemName Tile::getItem() const { return itemName; }
 TileType Tile::getTileType() const { return tileType; }
 int Tile::getHeight() const { return height; }
 
+// Encode function
 std::string Tile::encodeTileData()
 {
 	std::stringstream encodedData;
 
-	encodedData << wall << " "
-		<< height << " "
+	// Encode class variables into the stringstream
+	encodedData 
 		<< static_cast<int>(tileType) << " "
-		<< boxStatus << " "
+		<< wall << " "
+		<< height << " "
 		<< static_cast<int>(itemName);
 
+	// Update dirty status
 	dirty = false;
+
 	return encodedData.str();
 }
-void Tile::decodeTileData(std::string value)
+
+// Decode function
+void Tile::decodeTileData(std::string & value)
 {
 	std::stringstream valueStream(value);
-	std::string wallLayout_str, height_str, tileType_str, boxStatus_str, itemName_str;
+	std::string tileType_str;
+	std::string wallLayout_str;
+	std::string height_str;
+	std::string itemName_str;
 
-	valueStream >> wallLayout_str >> height_str >> tileType_str >> boxStatus_str >> itemName_str;
+	// Get values from the stream
+	valueStream
+		>> tileType_str
+		>> wallLayout_str 
+		>> height_str 
+		>> itemName_str;
 
-	int wallLayout = std::stoi(wallLayout_str);
-	int height = std::stoi(height_str);
-	TileType tileType = static_cast<TileType>(std::stoi(tileType_str));
-	bool boxStatus = boxStatus_str == "1";
-	ItemName itemName = static_cast<ItemName>(std::stoi(itemName_str));
+	// Update class variables
+	tileType = static_cast<TileType>(std::stoi(tileType_str));
+	wall = std::stoi(wallLayout_str);
+	height = std::stoi(height_str);
+	itemName = static_cast<ItemName>(std::stoi(itemName_str));
+
+	// Updates value string to hold the remaining unparsed values
+	std::getline(valueStream, value);
+	// Removes the extra whitespace at the beginning
+	value = value.erase(0, 1);
 }

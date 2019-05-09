@@ -4,6 +4,7 @@ Player::Player() : playerID(-1) { std::cout << "player default constructor calle
 Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
 	location = Location();
+	addEncodeFunctions();
 	addDecodeFunctions();
 	if (anID % 2 == 1) {
 		isChef = true;
@@ -13,6 +14,7 @@ Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(f
 
 Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
 {
+	addEncodeFunctions();
 	addDecodeFunctions();
 	if (anID % 2 == 1) {
 		isChef = true;
@@ -20,6 +22,12 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 	}
 }
 
+/*Location Player::getLocation() { return location; }
+ItemName Player::getInventory() { return inventory; }
+bool Player::getInteracting() { return interacting; }
+bool Player::getOpenJail() { return openingJail; }
+bool Player::getOpeningGate() { return openingGate; }
+*/
 Location Player::getLocation() const { return location; }
 ItemName Player::getInventory() const { return inventory; }
 bool Player::getInteracting() const { return interacting; }
@@ -29,29 +37,35 @@ bool Player::getOpenGate() const { return openingGate; }
 void Player::setLocation(float argX, float argY, float argZ)
 {
 	location.update(argX, argY, argZ);
+	dirtyVariablesMap["location"] = true;
+
 }
 
 void Player::setLocation(Location aLoc)
 {
 	location.update(aLoc.getX(), aLoc.getY(), aLoc.getZ());
+	dirtyVariablesMap["location"] = true;
 }
 
 void Player::setInventory(ItemName anItem)
 {
 	inventory = anItem;
+	dirtyVariablesMap["inventory"] = true;
+
 }
 
-void Player::setInteracting() {
-	interacting = !interacting;
+void Player::setInteracting(bool interact) {
+	interacting = interact;
 }
 
 
-void Player::setOpenJail() {
-	openingJail = !openingJail;
+void Player::setOpenJail(bool interact) {
+	openingJail = interact;
 }
 
-void Player::setOpenGate() {
-	openingGate = !openingGate;
+
+void Player::setOpeningGate(bool status) {
+	openingGate = status;
 }
 
 
@@ -63,18 +77,27 @@ bool Player::getIsChef() const {
 	return isChef;
 }
 
-void Player::setCaughtAnimal() {
-	caughtAnimal = !caughtAnimal;
+void Player::setCaughtAnimal(bool caught) {
+	caughtAnimal = caught;
 }
 
-void Player::setIsCaught() {
-	isCaught = !isCaught;
+void Player::setIsCaught(bool caught) {
+	isCaught = caught;
 }
 
 bool Player::getCaughtAnimal() const {
 	return caughtAnimal;
 }
 
+int Player::getCaughtAnimalId() {
+	return caughtAnimalId;
+}
+
+void Player::setCaughtAnimalId(int id) {
+	caughtAnimalId = id;
+}
+
+//bool Player::getIsCaught() {
 bool Player::getIsCaught() const {
 	return isCaught;
 }
@@ -107,15 +130,25 @@ double Player::checkProgress(int opt) {
 	return elapsed_seconds.count();
 }
 
-std::string Player::encodePlayerData() const
+std::string Player::encodePlayerData(bool newPlayerInit) const
+//std::string Player::encodePlayerData() const
 {
 	std::stringstream encodedData;
 	encodedData << "client: " << playerID << std::endl;
-	encodedData << "isChef: " << isChef << std::endl;
-	encodedData << "model: " << static_cast<int>(modelType) << std::endl;
-	encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
-	encodedData << "hasCake: " << hasCake << std::endl;
-	encodedData << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
+	//encodedData << "isChef: " << isChef << std::endl;
+	//encodedData << "model: " << static_cast<int>(modelType) << std::endl;
+	//encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
+	//encodedData << "hasCake: " << hasCake << std::endl;
+	//encodedData << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
+	for (auto p : dirtyVariablesMap)
+	{
+		std::string key = p.first;
+		bool dirty = p.second;
+		if (dirty || newPlayerInit)
+		{
+			encodedData << (this->*encodingFunctions[key])();
+		}
+	}
 
 	return encodedData.str();
 }
@@ -162,3 +195,56 @@ void Player::addDecodeFunctions()
 	decodingFunctions["hasCake"] = &Player::decodeCakeStatus;
 	decodingFunctions["inventory"] = &Player::decodeInventory;
 }
+
+void Player::addEncodeFunctions()
+{
+	encodingFunctions["location"] = &Player::encodeLocation;
+	encodingFunctions["isChef"] = &Player::encodeChefStatus;
+	encodingFunctions["model"] = &Player::encodeModelType;
+	encodingFunctions["hasCake"] = &Player::encodeCakeStatus;
+	encodingFunctions["inventory"] = &Player::encodeInventory;
+
+	dirtyVariablesMap["location"] = true;
+	dirtyVariablesMap["inventory"] = true;
+	dirtyVariablesMap["hasCake"] = true;
+	dirtyVariablesMap["isChef"] = true;
+	dirtyVariablesMap["model"] = true;
+
+}
+std::string Player::encodeLocation() {
+	std::stringstream encodedData;
+	encodedData << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
+	dirtyVariablesMap["location"] = false;
+
+	return encodedData.str();
+}
+std::string Player::encodeInventory() {
+	std::stringstream encodedData;
+	encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
+	dirtyVariablesMap["inventory"] = false;
+
+	return encodedData.str();
+}
+std::string Player::encodeCakeStatus() {
+	std::stringstream encodedData;
+	encodedData << "hasCake: " << hasCake << std::endl;
+	dirtyVariablesMap["hasCake"] = false;
+
+	return encodedData.str();
+}
+std::string Player::encodeChefStatus() {
+	std::stringstream encodedData;
+	encodedData << "isChef: " << isChef << std::endl;
+	dirtyVariablesMap["isChef"] = false;
+
+	return encodedData.str();
+}
+std::string Player::encodeModelType() {
+	std::stringstream encodedData;
+	encodedData << "model: " << static_cast<int>(modelType) << std::endl;
+	dirtyVariablesMap["model"] = false;
+
+	return encodedData.str();
+}
+
+

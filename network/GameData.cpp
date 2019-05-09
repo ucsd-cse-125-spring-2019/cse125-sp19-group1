@@ -12,22 +12,17 @@ GameData::GameData(int serverInit)
 	addDecodeFunctions();
 }
 
-std::string GameData::encodeGameData()
+std::string GameData::encodeGameData(bool newPlayerInit)
 {
 	std::stringstream encodedData;
 	encodedData.clear();
 
 	for (auto iter = players.begin(); iter != players.end(); iter++)
 	{
-		encodedData << iter->second->encodePlayerData();
+		encodedData << iter->second->encodePlayerData(newPlayerInit);
 	}
 	encodedData << "client: " << GENERALDATA_ID << std::endl;
-	encodedData << "wallLayout: " << atlas->encodeWallLayoutData();
-	encodedData << "keyLayout: " << atlas->encodeClientKeyLayoutData();
-	encodedData << "gateLayout: " << atlas->encodeGateLayoutData();
-	encodedData << "boxLayout: " << atlas->encodeBoxLayoutData();
-	encodedData << "tileLayout: " << atlas->encodeTileLayoutData();
-	encodedData << "gate: " << gate1.encodeGateData();
+	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 
 	return encodedData.str();
 }
@@ -44,10 +39,6 @@ void GameData::removeClient(int anID)
 
 void GameData::addDecodeFunctions()
 {
-	decodingFunctions["wallLayout"] = &GameData::decodeWallLayout;
-	decodingFunctions["keyLayout"] = &GameData::decodeKeyLayout;
-	decodingFunctions["gateLayout"] = &GameData::decodeGateLayout;
-	decodingFunctions["boxLayout"] = &GameData::decodeBoxLayout;
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 }
 void GameData::decodeTileLayout(std::string value)
@@ -62,7 +53,8 @@ void GameData::decodeTileLayout(std::string value)
 
 	int row = -1;
 	int col = -1;
-	std::vector<Tile> tileRow;
+	TileType type = TileType::DEFAULT;
+	std::vector<Tile *> tileRow;
 	for (auto p : tileDataPairs)
 	{
 		if (p.first == "tile")
@@ -73,28 +65,64 @@ void GameData::decodeTileLayout(std::string value)
 			tmpStream >> r >> c;
 			row = std::stoi(r);
 			col = std::stoi(c);
+			type = TileType::DEFAULT; // reset type to be default
+		}
+		else if (p.first == "tileType")
+		{
+			std::stringstream tmpStream(p.second);
+			std::string typeStr;
+
+			tmpStream >> typeStr;
+			type = static_cast<TileType>(std::stoi(typeStr));
 		}
 		else if (p.first == "tileData" && row != -1 && col != -1)
 		{
-			std::stringstream tileDataStream(p.second);
-			std::string wallLayout_str, height_str, tileType_str, boxStatus_str, itemName_str;
-
-			tileDataStream >> wallLayout_str >> height_str >> tileType_str >> boxStatus_str >> itemName_str;
-
-			int wallLayout = std::stoi(wallLayout_str);
-			int height = std::stoi(height_str);
-			TileType tileType = static_cast<TileType>(std::stoi(tileType_str));
-			bool boxStatus = boxStatus_str == "1";
-			ItemName itemName = static_cast<ItemName>(std::stoi(itemName_str));
-
-			Tile tmp(wallLayout, tileType, boxStatus, height, itemName);
 			if (init)
 			{
-				tileRow.push_back(tmp);
+				Tile * tmp = nullptr;// = new Tile();
+				
+				switch (type)
+				{
+				case TileType::BOX:
+					tmp = new BoxTile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				case TileType::JAIL: // change to JailTile
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				case TileType::GATE:
+					tmp = new GateTile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				case TileType::RAMP:
+					tmp = new RampTile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				case TileType::KEY_DROP: // change to KeyDropTile
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				case TileType::TABLE: // change to ObjectTile
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				case TileType::DEFAULT: default:
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
+					break;
+				}
 			}
 			else
 			{
-				clientTileLayout[row][col] = tmp;
+				clientTileLayout[row][col]->decodeTileData(p.second);
 			}
 		}
 		else if (p.first == "newRow")
@@ -117,27 +145,6 @@ void GameData::decodeTileLayout(std::string value)
 		std::cout << std::endl;
 	}*/
 }
-void GameData::decodeWallLayout(std::string value)
-{
-	std::replace(value.begin(), value.end(), '|', '\n');
-
-	clientWallLayout = StringParser::parse2DIntArrayString(value);
-}
-void GameData::decodeKeyLayout(std::string value)
-{
-	std::replace(value.begin(), value.end(), '|', '\n');
-	clientKeyLayout = StringParser::parse2DIntArrayString(value);
-}
-void GameData::decodeGateLayout(std::string value)
-{
-	std::replace(value.begin(), value.end(), '|', '\n');
-	clientGateLayout = StringParser::parse2DIntArrayString(value);
-}
-void GameData::decodeBoxLayout(std::string value)
-{
-	std::replace(value.begin(), value.end(), '|', '\n');
-	clientBoxLayout = StringParser::parse2DIntArrayString(value);
-}
 
 Player * GameData::getPlayer(int anID)
 {
@@ -149,13 +156,8 @@ Player * GameData::getPlayer(int anID)
 
 std::map < int, Player * > & GameData::getAllPlayers() { return players; }
 Atlas * GameData::getAtlas() { return atlas; }
-Gate & GameData::getGate() { return gate1; }
 
-std::vector<std::vector<int>> & GameData::getWallLayout() { return clientWallLayout; }
-std::vector<std::vector<int>> & GameData::getKeyLayout() { return clientKeyLayout; }
-std::vector<std::vector<int>> & GameData::getGateLayout() { return clientGateLayout; }
-std::vector<std::vector<int>> & GameData::getBoxLayout() { return clientBoxLayout; }
-
+std::vector<std::vector<Tile *>> GameData::getTileLayout() { return clientTileLayout; }
 void GameData::decodeGameData(const char * data)
 {
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;
