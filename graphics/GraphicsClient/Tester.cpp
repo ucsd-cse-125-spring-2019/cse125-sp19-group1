@@ -55,19 +55,21 @@ struct PlayerState {
 	float angle;                // angle it's currently facing (should be approaching targetAngle)
 	glm::vec3 position;         // position, important for faking targetAngle above
 	int id;                     // the player ID from the server
+	unsigned geometryIdx;       // index into playerGeometry
 
 	PlayerState() : position(0.f) {
 		angle = targetAngle = 0.f;
+		geometryIdx = 0;
 		transform = nullptr;
 	}
 
 #ifdef DUMMY_ID
 	// Warning: this constructor is only for debugging use
-	PlayerState(int newId, int geometryIdx) {
+	PlayerState(int newId, int geomIdx) {
 		id = newId;
+		geometryIdx = geomIdx;
 
-		transform = new Transform(glm::translate(glm::mat4(1.f), position));
-		transform->addChild(playerGeometry[geometryIdx]);
+		setGeometryIdx(geometryIdx);
 	}
 #endif
 
@@ -79,23 +81,66 @@ struct PlayerState {
 		position.y = location.getY();
 		position.z = location.getZ();
 
-		transform = new Transform(glm::translate(glm::mat4(1.f), position));
-
-		unsigned geomIdx = static_cast<unsigned>(p->getModelType());
-		transform->addChild(playerGeometry[geomIdx]);
+		setGeometryIdx(static_cast<unsigned>(p->getModelType()));
 	}
 
 	~PlayerState() {
-		if (transform) {
-			//delete transform;
+		if (transform && transform->decrementRefCount()) {
+			delete transform;
 		}
+	}
+
+	PlayerState(const PlayerState &other) {
+		transform = other.transform;
+		if (transform) {
+			transform->incrementRefCount();
+		}
+
+		targetAngle = other.targetAngle;
+		angle = other.angle;
+		position = other.position;
+		id = other.id;
+		geometryIdx = other.geometryIdx;
+	}
+
+	PlayerState &operator=(const PlayerState &other) {
+		if (transform && transform->decrementRefCount()) {
+			delete transform;
+		}
+
+		transform = other.transform;
+		if (transform) {
+			transform->incrementRefCount();
+		}
+
+		targetAngle = other.targetAngle;
+		angle = other.angle;
+		position = other.position;
+		id = other.id;
+		geometryIdx = other.geometryIdx;
+
+		return *this;
+	}
+
+	void setGeometryIdx(unsigned geomIdx) {
+		geometryIdx = geomIdx;
+
+		auto translate = glm::translate(glm::mat4(1.f), position);
+		auto transformMat = glm::rotate(translate, angle, glm::vec3(0.f, 1.f, 0.f));
+		if (transform) {
+			transform->setOffset(transformMat);
+			transform->removeAllChildren();
+		}
+		else {
+			transform = new Transform(transformMat);
+		}
+		transform->addChild(playerGeometry[geometryIdx]);
 	}
 };
 
 Transform * root = nullptr;
 Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
-size_t myIdx = 0;
 Transform * floorTransform = nullptr;
 
 // Default camera parameters
@@ -174,6 +219,19 @@ void PrintVersions()
 #endif
 }
 
+PlayerState *getMyState()
+{
+	// linear search is probably faster than binary/tree/whatever for <= 4 elements
+
+	int myId = client->getMyID();
+	for (PlayerState &state : players) {
+		if (state.id == myId)
+			return &state;
+	}
+
+	return nullptr;
+}
+
 void reloadPlayers()
 {
 	players.clear();
@@ -190,7 +248,6 @@ void reloadPlayers()
 	const auto &playersMap = client->getGameData()->players;
 	const int myId = client->getMyID();
 
-	size_t idx = 0;
 	for (const auto &pair : playersMap) {
 		const auto id = pair.first;
 		const Player *p = pair.second;
@@ -199,11 +256,6 @@ void reloadPlayers()
 
 		const auto state = &players[players.size() - 1];
 		allPlayersNode->addChild(state->transform);
-
-		if (id == myId)
-			myIdx = idx;
-
-		idx++;
 	}
 
 #ifdef DUMMY_ID
@@ -536,11 +588,12 @@ void SendPackets()
 void MovePlayers()
 {
 	// Sanity guard condition
-	if (players.size() <= 0 || players.size() <= myIdx) {
+	auto myState = getMyState();
+	if (players.size() <= 0 || myState == nullptr) {
 		return;
 	}
 
-	const auto myOldPos = players[myIdx].position;
+	const auto myOldPos = myState->position;
 
 	const int myID = client->getMyID();
 	const auto &playersMap = client->getGameData()->players;
@@ -555,7 +608,7 @@ void MovePlayers()
 		}
 #ifdef DUMMY_ID
 		else if (state.id == DUMMY_ID) {
-			state.position = players[myIdx].position;
+			state.position = myState->position;
 			if (floorArray.size()) {
 				state.position.x = floorArray[0].size() * 20.f - state.position.x;
 			}
@@ -604,7 +657,7 @@ void MovePlayers()
 		state.transform->setOffset(transformMat);
 	}
 
-	MoveCamera(players[myIdx].position, myOldPos);
+	MoveCamera(myState->position, myOldPos);
 	UpdateView();
 }
 
@@ -646,6 +699,19 @@ void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
 	UpdateView();
 }
 
+// Call glFlush(), but only if we haven't already called it this frame
+bool alreadyFlushed = false;
+void idempotentFlush()
+{
+	alreadyFlushed = true;
+	glFlush();
+}
+
+void resetIdempotentFlush()
+{
+	alreadyFlushed = false;
+}
+
 void IdleCallback()
 {
 	/* TODO: waiting for server implementation */
@@ -653,25 +719,43 @@ void IdleCallback()
 	if (clock() - elapsedTime > 1000.0 / 60)
 	{
 		elapsedTime = clock();
+		resetIdempotentFlush();
 		SendPackets();
 		client->update();
 		const auto gameData = client->getGameData();
 		if (gameData) {
 #ifdef DUMMY_ID
-			const bool playersChanged = (players.size() != gameData->players.size() + 1);
+			bool playersChanged = (players.size() != gameData->players.size() + 1);
 #else
-			const bool playersChanged = (players.size() != gameData->players.size());
+			bool playersChanged = (players.size() != gameData->players.size());
 #endif
 			const bool tilesChanged = (floorArray.size() != gameData->clientTileLayout.size());
 
-			if (tilesChanged || playersChanged) {
-				glFlush();
-			}
+			const auto &playersMap = client->getGameData()->players;
+			for (auto &state : players) {
+				if (playersMap.count(state.id) <= 0) {
+					playersChanged = true;
+					break;
+				}
 
-			if (tilesChanged)
+				const auto player = playersMap.at(state.id);
+				const unsigned geomIdx = static_cast<unsigned>(player->getModelType());
+				if (geomIdx != state.geometryIdx) {
+					// instead of setting playersChanged lets just change this one player
+					idempotentFlush();
+					state.setGeometryIdx(geomIdx);
+				}
+			}
+			
+			if (tilesChanged) {
+				idempotentFlush();
 				reloadMap();
-			if (playersChanged)
+			}
+				
+			if (playersChanged) {
+				idempotentFlush();
 				reloadPlayers();
+			}
 		}
 		MovePlayers();
 		//DummyMovePlayer();
@@ -696,8 +780,9 @@ void DisplayCallback(GLFWwindow* window)
 
 	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	if (myIdx < players.size()) {
-		fog->draw(objShaderProgram, P * V * glm::vec4(players[myIdx].position, 1.0f));
+	auto myState = getMyState();
+	if (myState) {
+		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
 	}
 	root->draw(V, P, glm::mat4(1.0));
 	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));

@@ -20,39 +20,24 @@ public:
 	Player(int anID);
 	Player(int anID, Location aLoc);
 	ItemName getInventory() const;
-	ItemName getInventory() ;
 	void setInventory(ItemName anItem);
 	Location getLocation() const;
-	Location getLocation() ;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
-	bool getInteracting();
-	void setInteracting(bool interact);
-	bool getOpenJail();
-	void setOpenJail(bool interact);
-	bool getOpeningGate();
-	void setOpeningGate(bool status);
-	ModelType getModelType();
-	//bool getIsChef();
-	//bool getCaughtAnimal();
-	void setCaughtAnimal(bool caught);
-	//bool getIsCaught();
-	void setIsCaught(bool caught);
-	int getCaughtAnimalId();
-	void setCaughtAnimalId(int id);
-
 	bool getInteracting() const;
-	//void setInteracting();
+	void setInteracting(bool interact);
 	bool getOpenJail() const;
-	//void setOpenJail();
-	bool getOpenGate() const;
-	//void setOpenGate();
+	void setOpenJail(bool interact);
+	bool getOpeningGate() const;
+	void setOpeningGate(bool status);
 	ModelType getModelType() const;
 	bool getIsChef() const;
 	bool getCaughtAnimal() const;
-	//void setCaughtAnimal();
+	void setCaughtAnimal(bool caught);
 	bool getIsCaught() const;
-	//void setIsCaught();
+	void setIsCaught(bool caught);
+	int getCaughtAnimalId() const;
+	void setCaughtAnimalId(int id);
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
