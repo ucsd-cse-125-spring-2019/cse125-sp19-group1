@@ -9,6 +9,8 @@ public:
 	virtual void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model) = 0;
 	virtual void addChild(Node * child) = 0;
 	virtual void removeAllChildren() = 0;
+	virtual bool decrementRefCount() = 0;
+	virtual void incrementRefCount() = 0;
 };
 
 #endif

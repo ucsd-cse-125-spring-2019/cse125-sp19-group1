@@ -27,8 +27,8 @@ public:
 	virtual std::string encodeTileData();
 	virtual void decodeTileData(std::string & value);
 
-  bool isDirty() const;
-	bool hasBox() const; 
+	bool isDirty() const;
+	//bool hasBox() const; 
 	int getWall() const;
 	int getHeight() const;
 	ItemName getItem() const;
