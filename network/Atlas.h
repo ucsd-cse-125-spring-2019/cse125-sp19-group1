@@ -50,9 +50,8 @@ public:
 	void getAdjacentFreeTile(int currRow, int currCol, int & row, int & col);
 	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
 
+	std::string encodeTileLayoutData(bool newPlayerInit);
 	bool hasRamp(Location & loc);
-
-	std::string encodeTileLayoutData();
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;

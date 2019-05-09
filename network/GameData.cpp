@@ -12,17 +12,17 @@ GameData::GameData(int serverInit)
 	addDecodeFunctions();
 }
 
-std::string GameData::encodeGameData()
+std::string GameData::encodeGameData(bool newPlayerInit)
 {
 	std::stringstream encodedData;
 	encodedData.clear();
 
 	for (auto iter = players.begin(); iter != players.end(); iter++)
 	{
-		encodedData << iter->second->encodePlayerData();
+		encodedData << iter->second->encodePlayerData(newPlayerInit);
 	}
 	encodedData << "client: " << GENERALDATA_ID << std::endl;
-	encodedData << "tileLayout: " << atlas->encodeTileLayoutData();
+	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 
 	return encodedData.str();
 }

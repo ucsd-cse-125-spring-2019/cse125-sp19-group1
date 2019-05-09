@@ -87,7 +87,6 @@ Atlas::Atlas()
 			if (boxNum != "0")
 			{
 				type = TileType::BOX;
-				boxLocations.push_back(std::pair<int, int>(row, col));
 			}
 			else if (gateNum != "0")
 			{
@@ -572,7 +571,7 @@ bool Atlas::hasRamp(Location & loc)
 	return tileLayout[row][col]->getTileType() == TileType::RAMP;
 }
 
-std::string Atlas::encodeTileLayoutData()
+std::string Atlas::encodeTileLayoutData(bool newPlayerInit)
 {
 	std::stringstream encodedData;
 	for (int row = 0; row < tileLayout.size(); row++)
@@ -580,7 +579,7 @@ std::string Atlas::encodeTileLayoutData()
 		int tileCount = 0;
 		for (int col = 0; col < tileLayout[row].size(); col++)
 		{
-			if (tileLayout[row][col]->isDirty())
+			if (tileLayout[row][col]->isDirty() || newPlayerInit)
 			{
 				encodedData << "tile: " << row << " " << col << "|";
 				encodedData << "tileType: " << static_cast<int>(tileLayout[row][col]->getTileType()) << "|";

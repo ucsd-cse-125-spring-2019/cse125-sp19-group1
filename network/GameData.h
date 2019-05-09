@@ -37,7 +37,7 @@ public:
 	using decodeFunctionType = void (GameData::*)(std::string value);
 	std::map<std::string, decodeFunctionType> decodingFunctions;
 
-	std::string encodeGameData();
+	std::string encodeGameData(bool newPlayerInit);
 	void decodeGameData(const char * data);
 	void addDecodeFunctions();
 
