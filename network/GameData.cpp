@@ -88,15 +88,30 @@ void GameData::decodeTileLayout(std::string value)
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;
-				case TileType::JAIL:
+				case TileType::JAIL: // change to JailTile
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
 					break;
 				case TileType::GATE:
+					tmp = new GateTile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
 					break;
 				case TileType::RAMP:
+					tmp = new RampTile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
 					break;
-				case TileType::KEY_DROP:
+				case TileType::KEY_DROP: // change to KeyDropTile
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
 					break;
-				case TileType::TABLE:
+				case TileType::TABLE: // change to ObjectTile
+					tmp = new Tile();
+					tmp->decodeTileData(p.second);
+					tileRow.push_back(tmp);
 					break;
 				case TileType::DEFAULT: default:
 					tmp = new Tile();
