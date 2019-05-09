@@ -26,6 +26,16 @@ public:
 	// Encode/Decode functions - overridden in subclasses
 	virtual std::string encodeTileData();
 	virtual void decodeTileData(std::string & value);
+
+  bool isDirty() const;
+	bool hasBox() const; 
+	int getWall() const;
+	int getHeight() const;
+	ItemName getItem() const;
+	TileType getTileType() const;
+
+//	std::string encodeTileData();
+//	void decodeTileData(std::string value);
 protected:
 
 	// Variables sent to client

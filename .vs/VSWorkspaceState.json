@@ -1,7 +1,7 @@
 {
   "ExpandedNodes": [
     "",
-    "\\graphics",
+    "\\graphics-starter",
     "\\graphics\\GraphicsClient",
     "\\network",
     "\\server",
@@ -9,6 +9,7 @@
     "\\server\\server\\server",
     "\\server\\server_vs"
   ],
+
   "SelectedNode": "\\graphics\\GraphicsClient\\GraphicsClient.sln",
   "PreviewInSolutionExplorer": false
 }

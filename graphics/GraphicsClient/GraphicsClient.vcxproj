@@ -153,6 +153,7 @@
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="FBXObject.h" />
     <ClInclude Include="Bone.h" />
+    <ClInclude Include="FogGenerator.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Keyframe.h" />
     <ClInclude Include="MeshEntry.h" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Tester.h" />
     <ClInclude Include="textureloader.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UIObject.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +186,7 @@
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="FBXObject.cpp" />
     <ClCompile Include="Bone.cpp" />
+    <ClCompile Include="FogGenerator.cpp" />
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="Keyframe.cpp" />
     <ClCompile Include="MeshEntry.cpp" />
@@ -194,12 +197,15 @@
     <ClCompile Include="Tester.cpp" />
     <ClCompile Include="textureloader.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag" />
     <None Include="obj_shader.vert" />
     <None Include="packages.config" />
+    <None Include="ui_shader.frag" />
+    <None Include="ui_shader.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

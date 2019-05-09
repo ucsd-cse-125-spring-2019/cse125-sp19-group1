@@ -22,11 +22,17 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 	}
 }
 
-Location Player::getLocation() { return location; }
+/*Location Player::getLocation() { return location; }
 ItemName Player::getInventory() { return inventory; }
 bool Player::getInteracting() { return interacting; }
 bool Player::getOpenJail() { return openingJail; }
 bool Player::getOpeningGate() { return openingGate; }
+*/
+Location Player::getLocation() const { return location; }
+ItemName Player::getInventory() const { return inventory; }
+bool Player::getInteracting() const { return interacting; }
+bool Player::getOpenJail() const { return openingJail; }
+bool Player::getOpenGate() const { return openingGate; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -63,11 +69,11 @@ void Player::setOpeningGate(bool status) {
 }
 
 
-ModelType Player::getModelType() {
+ModelType Player::getModelType() const {
 	return modelType;
 }
 
-bool Player::getIsChef() {
+bool Player::getIsChef() const {
 	return isChef;
 }
 
@@ -79,7 +85,7 @@ void Player::setIsCaught(bool caught) {
 	isCaught = caught;
 }
 
-bool Player::getCaughtAnimal() {
+bool Player::getCaughtAnimal() const {
 	return caughtAnimal;
 }
 
@@ -91,7 +97,8 @@ void Player::setCaughtAnimalId(int id) {
 	caughtAnimalId = id;
 }
 
-bool Player::getIsCaught() {
+//bool Player::getIsCaught() {
+bool Player::getIsCaught() const {
 	return isCaught;
 }
 
@@ -123,7 +130,8 @@ double Player::checkProgress(int opt) {
 	return elapsed_seconds.count();
 }
 
-std::string Player::encodePlayerData(bool newPlayerInit)
+std::string Player::encodePlayerData(bool newPlayerInit) const
+//std::string Player::encodePlayerData() const
 {
 	std::stringstream encodedData;
 	encodedData << "client: " << playerID << std::endl;

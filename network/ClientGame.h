@@ -48,9 +48,6 @@ public:
 	GameData * getGameData();
 	int getMyID();
 
-	std::vector<std::vector<uint8_t>> heights;
-	std::vector<std::vector<uint8_t>> ramps;
-	std::vector<std::vector<uint8_t>> walls;
 	//std::map < std::string, Player > allClients;
 	//std::string my_client_id;
 
