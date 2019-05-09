@@ -20,7 +20,11 @@ public:
 
 	void placeAnimalInJail(int iter) { capturedAnimal = iter; };
 	void unlockJail() { progress += 1; };
-	void resetJail() { capturedAnimal = -1; };
+	void resetJail() 
+	{ 
+		capturedAnimal = -1; 
+		progress = 0; 
+	};
 
 	//endcode function
 	virtual std::string encodeTileData()

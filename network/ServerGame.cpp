@@ -277,21 +277,11 @@ void ServerGame::receiveFromClients()
 							//check if jail progress == 5
 							if (gameData->getAtlas()->getJailProgress(loc) >= 5)
 							{
+								std::cout << "ANIMAL IS UNRELEASED" << std::endl;
+								JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
 								//update animal 
-								std::map<unsigned int, SOCKET>::iterator iter2;
-								for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
-								{
-									if (iter2 == iter)
-									{
-										continue;
-									}
-									Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-									std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-									if (loc == tLoc && gameData->getPlayer(iter2->first)->getIsCaught())
-									{
-										gameData->getPlayer(iter2->first)->setIsCaught(false);
-									}
-								}
+								int animal = jailTile->getCapturedAnimal();
+								gameData->getPlayer(animal)->setIsCaught(false);
 
 								//update jail
 								gameData->getAtlas()->resetJail(loc);
