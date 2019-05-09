@@ -7,102 +7,88 @@ enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE 
 class GateTile : public Tile
 {
 public:
-	GateTile(std::vector<Key> aKeys, int num = 0) : progress(0.0f), gateNum(num), validKeys(aKeys), openStatus(false) {}
+	
+	// Default constructor
+	GateTile(std::vector<Key> aKeys = {}, int num = 0, int aWallLayout = 0, int aHeight = 0) :
+		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), validKeys(aKeys) {}
 
-	float		getProgress() { return progress; }
+	// Getters
 	int			getGateNum() { return gateNum; }
-	bool		getHasKeys() { return hasAllKeys; }
-	void		setOpen() { openStatus = true; }
+	int			getKeyProgress() { return keyProgress; }
+	bool		hasAllKeys() { return keyProgress == 3; }
 	bool		isOpen() { return totalConstructTime >= finishTime; }
-	double		getTotalConstructTime() { return totalConstructTime; }
-	double		getFinishTime() { return finishTime; }
 
-	void setProgress(float aProgress) { progress = aProgress; }
+	// Setters
 
-	bool isValidKey(Key aKey) { return std::find(validKeys.begin(), validKeys.end(), aKey) != validKeys.end(); }
+	// Encode function
+	virtual std::string encodeTileData()
+	{
+		std::stringstream encodedData;
 
-	// Updates progress and removes the key so that duplicate keys cannot be used
-	void updateProgress(Key aKey) {
-		progress++;
-		validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey));
-		if (progress == 3)
-			hasAllKeys = true;
+		// Call base class encode function and encode member variables from this class to the stringstream
+		encodedData << Tile::encodeTileData() << " "
+			<< gateNum << " "
+			<< keyProgress << " "
+			<< totalConstructTime;
+
+		return encodedData.str();
 	}
 
+	// Decode function
+	virtual void decodeTileData(std::string & value)
+	{
+		// Call base class decode function
+		Tile::decodeTileData(value);
+
+		// Create a stream for the remaining values
+		std::stringstream valueStream(value);
+		std::string gateNum_str;
+		std::string keyProgress_str;
+		std::string totalConstructTime_str;
+
+		// Get values from the stream
+		valueStream
+			>> gateNum_str
+			>> keyProgress_str
+			>> totalConstructTime_str;
+
+		// Update class variables
+		gateNum = std::stoi(gateNum_str);
+		keyProgress = std::stoi(keyProgress_str);
+		totalConstructTime = std::stof(totalConstructTime_str);
+	}
+
+	// Additional functions
+
+	// Checks if the key is valid for this gate
+	bool isValidKey(Key aKey) 
+	{ 
+		return std::find(validKeys.begin(), validKeys.end(), aKey) != validKeys.end();
+	}
+
+	// Updates progress and removes the key so that duplicate keys cannot be used
+	void updateKeyProgress(Key aKey) {
+		if (isValidKey(aKey))
+		{
+			keyProgress++;
+			validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey));
+		}
+	}
+
+	// Adds construction time for building the exit once alls keys are deposited
 	void constructGate(double time)
 	{
 		totalConstructTime += time;
-
 	}
 
 protected:
 	
 	// Variable sent to client
 	int gateNum;
-	float progress;
-	bool openStatus;
+	int keyProgress;
 	double totalConstructTime;
 
 	// Additional variables
-	bool hasAllKeys;
 	double finishTime = 60.0;
 	std::vector<Key> validKeys;
-
-};
-
-#pragma once
-#include "Location.h"
-
-
-struct Gate
-{
-public:
-	Gate(std::vector<Key> aKeys = std::vector<Key>({ Key::KEY1, Key::KEY2, Key::KEY3 }), int num = 0) : location(Location()), progress(0.0f), gateNum(num), validKeys(aKeys), isOpen(false) {}
-	Gate(Location aLocation, int num = 0) : location(aLocation), progress(0.0f), gateNum(num), isOpen(false) {}
-
-	Location	getLocation() { return location; }
-	float		getProgress() { return progress; }
-	int			getGateNum() { return gateNum; }
-	bool		getHasKeys() { return hasAllKeys; }
-	void		setOpen() { isOpen = true; }
-	bool		getIsOpen() { return isOpen; }
-	double		getTotalConstructTime() { return totalConstructTime; }
-	double		getFinishTime() { return finishTime; }
-
-	void setProgress(float aProgress) { progress = aProgress; }
-
-	bool isValidKey(Key aKey) { return std::find(validKeys.begin(), validKeys.end(), aKey) != validKeys.end(); }
-
-	// Updates progress and removes the key so that duplicate keys cannot be used
-	void updateProgress(Key aKey) {
-		progress++;
-		validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey));
-		if (progress == 3)
-			hasAllKeys = true;
-	}
-
-	void constructGate(double time)
-	{
-		totalConstructTime += time;
-
-	}
-	std::string encodeGateData() {
-		std::stringstream encodedData;
-		encodedData << "num: " << gateNum << "|"
-			<< "progress: " << progress << "|"
-			<< "isOpen: " << isOpen << "|"
-			<< "location: " << location.getX() << " " << location.getY() << " " << location.getZ()
-			<< std::endl;
-		return encodedData.str();
-	}
-	std::vector<Key> validKeys;
-protected:
-	Location location;
-	float progress;
-	int gateNum;
-	std::vector<std::vector<int>> wallLayout;
-	bool hasAllKeys;
-	bool isOpen;
-	double totalConstructTime;
-	double finishTime = 60.0;
 };

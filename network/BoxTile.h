@@ -6,7 +6,7 @@ class BoxTile : public Tile
 public:
 	
 	// Default constructor
-	BoxTile(int aWallLayout = 0, int aHeight = 0, ItemName anItem = ItemName::EMPTY) : Tile(TileType::BOX, aWallLayout, aHeight, anItem), boxStatus(false) {}
+	BoxTile(int aWallLayout = 0, int aHeight = 0) : Tile(TileType::BOX, aWallLayout, aHeight), boxStatus(false) {}
 
 	// Getter
 	bool hasBox() { return boxStatus; }

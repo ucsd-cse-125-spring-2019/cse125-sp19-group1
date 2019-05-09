@@ -114,8 +114,8 @@ Atlas::Atlas()
 			case TileType::JAIL: // change to JailTile
 				tileRow.push_back(new Tile(TileType::JAIL, wall, height));
 				break;
-			case TileType::GATE: // change to GateTile
-				tileRow.push_back(new Tile(TileType::GATE, wall, height));
+			case TileType::GATE: 
+				tileRow.push_back(new GateTile(std::vector<Key>({ Key::KEY1, Key::KEY2, Key::KEY3 }), 1, wall, height));
 				break;
 			case TileType::RAMP: // change to RampTile
 				tileRow.push_back(new Tile(TileType::RAMP, wall, height));
@@ -562,42 +562,6 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 			destRow = -1;
 			destCol = -1;
 		}
-}
-
-std::string Atlas::encodeWallLayoutData()
-{
-	return encode2DVectorData(wallLayout);
-}
-
-std::string Atlas::encodeClientKeyLayoutData()
-{
-	return encode2DVectorData(clientKeyLayout);
-}
-std::string Atlas::encodeGateLayoutData()
-{
-	return encode2DVectorData(gateLayout);
-}
-std::string Atlas::encodeBoxLayoutData()
-{
-	return encode2DVectorData(boxLayout);
-}
-
-std::string Atlas::encode2DVectorData(std::vector<std::vector<int>> layout)
-{
-	std::stringstream encodedData;
-
-	for (int r = 0; r < layout.size(); r++) {
-		for (int c = 0; c < layout[r].size(); c++) {
-			encodedData << layout[r][c];
-
-			if (c < layout[r].size() - 1)
-				encodedData << " ";
-		}
-		if (r < layout.size() - 1)
-			encodedData << " | ";
-	}
-	encodedData << std::endl;
-	return encodedData.str();
 }
 
 std::string Atlas::encodeTileLayoutData()

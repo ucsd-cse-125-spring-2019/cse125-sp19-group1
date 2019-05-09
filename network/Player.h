@@ -28,8 +28,8 @@ public:
 	void setInteracting();
 	bool getOpenJail();
 	void setOpenJail();
-	bool getOpenGate();
-	void setOpenGate();
+	bool getOpeningGate();
+	void setOpeningGate(bool status);
 	ModelType getModelType();
 	bool getIsChef();
 	bool getCaughtAnimal();

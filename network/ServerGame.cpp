@@ -5,8 +5,6 @@
 #include <string>
 #include <cstring>
 #include <chrono>
-#include "Gate.h"
-
  
 unsigned int ServerGame::client_id; 
 unsigned int SPEED = 2;
@@ -176,13 +174,14 @@ void ServerGame::receiveFromClients()
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
-						if (gameData->getGate().isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
+						GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+						if (gateTile->isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
 						{
-							gameData->getGate().updateProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
+							gateTile->updateKeyProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
 						}
-						if (gameData->getGate().getHasKeys() && !gameData->getPlayer(iter->first)->getOpenGate())
+						if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
 						{
-							gameData->getPlayer(iter->first)->setOpenGate();
+							gameData->getPlayer(iter->first)->setOpeningGate(true);
 							gameData->getPlayer(iter->first)->setStartTime();
 						}
 					}
@@ -256,15 +255,20 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->setInteracting();
 				}
 
-				if (gameData->getPlayer(iter->first)->getOpenGate() &&
-					!gameData->getPlayer(iter->first)->getIsChef() &&
-					!gameData->getGate().getIsOpen()) {
-					std::cout << "RELEASED SPACE" << std::endl;
-					gameData->getPlayer(iter->first)->setOpenGate();
+				if (gameData->getPlayer(iter->first)->getOpeningGate() &&
+					!gameData->getPlayer(iter->first)->getIsChef() && gameData->getAtlas()->hasGate(loc))
+				{
+					GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 
-					//update progress of gate 
-					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-					gameData->getGate().constructGate(seconds);
+					if (!gateTile->isOpen())
+					{
+						std::cout << "RELEASED SPACE" << std::endl;
+						gameData->getPlayer(iter->first)->setOpeningGate(false);
+
+						//update progress of gate 
+						double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+						gateTile->constructGate(seconds);
+					}
 				}
 				break;
 			}
@@ -349,14 +353,14 @@ void ServerGame::receiveFromClients()
 				}
 			}
 
-			if (gameData->getAtlas()->hasGate(loc) && !gameData->getGate().getIsOpen()) 
+			if (gameData->getAtlas()->hasGate(loc))// && !gameData->getGate().getIsOpen()) 
 			{
-				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-				if (seconds + gameData->getGate().getTotalConstructTime() >
-					gameData->getGate().getFinishTime())
+				GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+
+				if (!gateTile->isOpen())
 				{
-					gameData->getGate().setOpen();
-					gameData->getGate().constructGate(seconds);
+					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+					gateTile->constructGate(seconds);
 				}
 			}
 		}

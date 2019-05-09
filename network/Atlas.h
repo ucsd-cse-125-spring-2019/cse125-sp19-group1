@@ -9,6 +9,7 @@
 #include "Tile.h"
 #include "BoxTile.h"
 #include "JailTile.h"
+#include "GateTile.h"
 #include <map>
 #include <ctime>
 
@@ -48,11 +49,6 @@ public:
 	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
 
 	std::string encodeTileLayoutData();
-	std::string encodeWallLayoutData();
-	std::string encodeClientKeyLayoutData();
-	std::string encodeGateLayoutData();
-	std::string encodeBoxLayoutData();
-	std::string encode2DVectorData(std::vector<std::vector<int>> layout);
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
@@ -74,57 +70,11 @@ public:
 		ItemName::KEY7,
 		ItemName::KEY8,
 		ItemName::KEY9
-
 	};
 
 protected:
-	std::vector<std::vector<int>> wallLayout =
-	{ {12,4,4,4,4,4,5},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {8,0,0,0,0,0,1},
-	  {10,2,2,2,2,2,3} };
 
 	std::vector<std::vector<int>> keyLocations;
-	
-	/*std::vector<std::vector<int>> keyLayout =
-	{ {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };*/
-
-	std::vector<std::vector<int>> clientKeyLayout =
-	{ {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
-
-	std::vector<std::vector<int>> gateLayout =
-	{ {1,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
-
-	std::vector<std::vector<int>> boxLayout =
-	{ {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {0,0,0,0,0,0,1},
-	  {1,1,1,1,1,1,1} };
-
 	std::vector<std::vector<Tile *>> tileLayout;
 
 	std::vector<std::vector<int>> jailLayout =

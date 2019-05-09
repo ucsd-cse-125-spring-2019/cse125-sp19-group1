@@ -24,7 +24,7 @@ Location Player::getLocation() { return location; }
 ItemName Player::getInventory() { return inventory; }
 bool Player::getInteracting() { return interacting; }
 bool Player::getOpenJail() { return openingJail; }
-bool Player::getOpenGate() { return openingGate; }
+bool Player::getOpeningGate() { return openingGate; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -50,8 +50,8 @@ void Player::setOpenJail() {
 	openingJail = !openingJail;
 }
 
-void Player::setOpenGate() {
-	openingGate = !openingGate;
+void Player::setOpeningGate(bool status) {
+	openingGate = status;
 }
 
 
