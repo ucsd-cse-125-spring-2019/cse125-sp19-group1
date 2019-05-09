@@ -9,7 +9,7 @@
 #include "Item.h"
 #include "Location.h"
 
-
+#define NUM_PLAYER_MODEL_TYPES (4)
 enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
 
 class Player

@@ -18,13 +18,16 @@ int windowWidth;
 int windowHeight;
 const char* window_title = "TESTER";
 
+#define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
+#define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
+#define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
+#define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
+
 glm::mat4 P; // P for projection
 glm::mat4 V; // V for view
 DirLight * light = nullptr;
-FBXObject * raccoonModel = nullptr;
-FBXObject * catModel = nullptr;
-FBXObject * dogModel = nullptr;
-FBXObject * chefModel = nullptr;
+FBXObject * playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
+Geometry * playerGeometry[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 FBXObject * tileModel = nullptr;
 FBXObject * wallModel = nullptr;
 GLuint objShaderProgram;
@@ -270,10 +273,15 @@ void Init()
 	//light->toggleNormalShading();
 	
 	// Load models
-	raccoonModel = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, false);
-	catModel = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
-	dogModel = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
-	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
+	playerModels[CHEF_IDX    ] = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
+	playerModels[RACCOON_IDX ] = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, false);
+	playerModels[CAT_IDX     ] = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
+	playerModels[DOG_IDX     ] = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
+
+	for (unsigned i = 0; i < NUM_PLAYER_MODEL_TYPES; i++) {
+		playerGeometry[i] = new Geometry(playerModels[i], objShaderProgram);
+	}
+
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
 
@@ -282,12 +290,12 @@ void Init()
 
 	root = new Transform(glm::mat4(1.0));
 	player = new Transform(glm::mat4(1.0));
-	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
+	Geometry * playerModel = new Geometry(playerModels[CHEF_IDX], objShaderProgram);
 	root->addChild(player);
 	player->addChild(playerModel);
 	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
 	Transform * player2Rotate = new Transform(glm::mat4(1.0));
-	Geometry * playerModel2 = new Geometry(chefModel, objShaderProgram);
+	Geometry * playerModel2 = new Geometry(playerModels[DOG_IDX], objShaderProgram);
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
@@ -315,10 +323,13 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
-	if (raccoonModel)     delete raccoonModel;
-	if (catModel)         delete catModel;
-	if (dogModel)         delete dogModel;
-	if (chefModel)        delete chefModel;
+	for (auto &model : playerModels) {
+		if (model) {
+			delete model;
+			model = nullptr;
+		}
+	}
+
 	if (tileModel)        delete tileModel;
 	if (wallModel)        delete wallModel;
 	if (tileGeometry)     delete tileGeometry;
@@ -535,7 +546,10 @@ void IdleCallback()
 		//DummyMovePlayer();
 		server->update();
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
-		raccoonModel->Update();
+		
+		for (auto model : playerModels) {
+			model->Update();
+		}
 	}
 
 }
@@ -571,7 +585,9 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 
 		if (key == GLFW_KEY_A) {
-			raccoonModel->ToNextKeyframe();
+			for (auto model : playerModels) {
+				model->ToNextKeyframe();
+			}
 		}
 
 		if (key == GLFW_KEY_UP) {
