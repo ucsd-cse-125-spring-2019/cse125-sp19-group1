@@ -5,8 +5,6 @@
 #include <string>
 #include <cstring>
 #include <chrono>
-#include "Gate.h"
-
  
 unsigned int ServerGame::client_id; 
 unsigned int SPEED = 2;
@@ -187,18 +185,19 @@ void ServerGame::receiveFromClients()
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
-						std::cout << "HAS GATE" << std::endl;
-						if (gameData->getGate().isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
+
+						GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+						if (gateTile->isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
 						{
-							std::cout << "UPDATING GATE PROGRESS" << std::endl;
-							gameData->getGate().updateProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
+							gateTile->updateKeyProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
 						}
-						if (gameData->getGate().getHasKeys() && !gameData->getPlayer(iter->first)->getOpenGate())
+						if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
 						{
-							gameData->getPlayer(iter->first)->setOpenGate(true);
+
+							gameData->getPlayer(iter->first)->setOpeningGate(true);
 							gameData->getPlayer(iter->first)->setStartTime();
 						}
-						if (gameData->getGate().getHasKeys() && gameData->getGate().getIsOpen())
+						if (gateTile->hasAllKeys() && gateTile->isOpen())
 						{
 							if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
 							{
@@ -277,15 +276,20 @@ void ServerGame::receiveFromClients()
 					gameData->getPlayer(iter->first)->setInteracting(false);
 				}
 
-				if (gameData->getPlayer(iter->first)->getOpenGate() &&
-					!gameData->getPlayer(iter->first)->getIsChef() &&
-					!gameData->getGate().getIsOpen()) {
-					std::cout << "RELEASED SPACE" << std::endl;
-					gameData->getPlayer(iter->first)->setOpenGate(false);
 
-					//update progress of gate 
-					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-					gameData->getGate().constructGate(seconds);
+				if (gameData->getPlayer(iter->first)->getOpeningGate() &&
+					!gameData->getPlayer(iter->first)->getIsChef() && gameData->getAtlas()->hasGate(loc))
+				{
+					GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+					if (!gateTile->isOpen())
+					{
+						std::cout << "RELEASED SPACE" << std::endl;
+						gameData->getPlayer(iter->first)->setOpeningGate(false);
+
+						//update progress of gate 
+						double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+						gateTile->constructGate(seconds);
+					}
 				}
 				break;
 			}
@@ -370,16 +374,16 @@ void ServerGame::receiveFromClients()
 				}
 			}
 
-			/*if (gameData->getAtlas()->hasGate(loc) && !gameData->getGate().getIsOpen()) 
+			if (gameData->getAtlas()->hasGate(loc))
 			{
-				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-				if (seconds + gameData->getGate().getTotalConstructTime() >
-					gameData->getGate().getFinishTime())
+				GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+
+				if (!gateTile->isOpen())
 				{
-					gameData->getGate().setOpen();
-					gameData->getGate().constructGate(seconds);
+					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+					gateTile->constructGate(seconds);
 				}
-			}*/
+			}
 		}
 	}
 }
@@ -455,25 +459,30 @@ void ServerGame::updateLeftEvent(int id)
 void ServerGame::updateHeight(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
+	if (!gameData->getAtlas()->hasRamp(loc)) { return; }
+
 	int x = loc.getX();
 	int y;
 	int z = loc.getZ();
-	if (gameData->getAtlas()->getRampDirection() == Orientation::North)
+
+	RampTile * rampTile = (RampTile *)(gameData->getAtlas()->getTileAt(loc));
+
+	if (rampTile->getRampDirection() == Orientation::NORTH)
 	{
 		y = (int) (TILE_SIZE - z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE) 
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight()/2 +1);
 	}
-	else if (gameData->getAtlas()->getRampDirection() == Orientation::South)
+	else if (rampTile->getRampDirection() == Orientation::SOUTH)
 	{
 		y = (int)(z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
-	else if (gameData->getAtlas()->getRampDirection() == Orientation::East)
+	else if (rampTile->getRampDirection() == Orientation::EAST)
 	{
 		y = (int)(TILE_SIZE - x % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
-	else if (gameData->getAtlas()->getRampDirection() == Orientation::West)
+	else if (rampTile->getRampDirection() == Orientation::WEST)
 	{
 		y = (int)(x % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);

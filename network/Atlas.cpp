@@ -115,16 +115,16 @@ Atlas::Atlas()
 			case TileType::JAIL: // change to JailTile
 				tileRow.push_back(new Tile(TileType::JAIL, wall, height));
 				break;
-			case TileType::GATE: // change to GateTile
-				tileRow.push_back(new Tile(TileType::GATE, wall, height));
+			case TileType::GATE: 
+				tileRow.push_back(new GateTile(std::vector<Key>({ Key::KEY1, Key::KEY2, Key::KEY3 }), 1, wall, height));
 				break;
-			case TileType::RAMP: // change to RampTile
-				tileRow.push_back(new Tile(TileType::RAMP, wall, height));
+			case TileType::RAMP:
+				tileRow.push_back(new RampTile(static_cast<Orientation>(std::stoi(rampNum)), wall, height));
 				break;
 			case TileType::KEY_DROP: // change to KeyDropTile
 				tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
 				break;
-			case TileType::TABLE:
+			case TileType::TABLE: // change to ObjectTile
 				tileRow.push_back(new Tile(TileType::TABLE, wall, height));
 				break;
 			case TileType::DEFAULT: default:
@@ -308,15 +308,10 @@ bool Atlas::hasJail(Location & loc)
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (row >= jailLayout.size() || col >= jailLayout[row].size())
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
 
-	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
-	{
-		return dynamic_cast<JailTile*>(tileLayout[row][col])->hasJail();
-	}
-
-	return false;
+	return tileLayout[row][col]->getTileType() == TileType::JAIL;
 }
 
 bool Atlas::isJailEmpty(Location & loc)
@@ -325,7 +320,7 @@ bool Atlas::isJailEmpty(Location & loc)
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (row >= jailEmptyLayout.size() || col >= jailEmptyLayout[row].size())
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
 
 	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
@@ -565,40 +560,16 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 		}
 }
 
-std::string Atlas::encodeWallLayoutData()
+bool Atlas::hasRamp(Location & loc)
 {
-	return encode2DVectorData(wallLayout);
-}
+	// find which tile player is in
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
-std::string Atlas::encodeClientKeyLayoutData()
-{
-	return encode2DVectorData(clientKeyLayout);
-}
-std::string Atlas::encodeGateLayoutData()
-{
-	return encode2DVectorData(gateLayout);
-}
-std::string Atlas::encodeBoxLayoutData()
-{
-	return encode2DVectorData(boxLayout);
-}
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
+		return false;
 
-std::string Atlas::encode2DVectorData(std::vector<std::vector<int>> layout)
-{
-	std::stringstream encodedData;
-
-	for (int r = 0; r < layout.size(); r++) {
-		for (int c = 0; c < layout[r].size(); c++) {
-			encodedData << layout[r][c];
-
-			if (c < layout[r].size() - 1)
-				encodedData << " ";
-		}
-		if (r < layout.size() - 1)
-			encodedData << " | ";
-	}
-	encodedData << std::endl;
-	return encodedData.str();
+	return tileLayout[row][col]->getTileType() == TileType::RAMP;
 }
 
 std::string Atlas::encodeTileLayoutData()

@@ -1,17 +1,18 @@
 #pragma once
 #include "Tile.h"
 
-class BoxTile : public Tile
+enum class Orientation { NORTH = 4, SOUTH = 2, EAST = 1, WEST = 8};
+
+class RampTile : public Tile
 {
 public:
-	
+
 	// Default constructor
-	BoxTile(int aWallLayout = 0, int aHeight = 0) : Tile(TileType::BOX, aWallLayout, aHeight), boxStatus(false) {}
+	RampTile(Orientation aRampDir = Orientation::NORTH, int aWallLayout = 0, int aHeight = 0) : Tile(TileType::RAMP, aWallLayout, aHeight), rampDirection(aRampDir) {}
 
 	// Getter
-	bool hasBox() { return boxStatus; }
+	Orientation getRampDirection() { return rampDirection; }
 	// Setter
-	void setBoxStatus(bool aBoxStatus) { boxStatus = aBoxStatus; setDirty(); }
 
 	// Encode function
 	virtual std::string encodeTileData()
@@ -20,7 +21,7 @@ public:
 
 		// Call base class encode function and encode member variables from this class to the stringstream
 		encodedData << Tile::encodeTileData() << " "
-			<< boxStatus;
+			<< static_cast<int>(rampDirection);
 
 		return encodedData.str();
 	}
@@ -33,16 +34,16 @@ public:
 
 		// Create a stream for the remaining values
 		std::stringstream valueStream(value);
-		std::string boxStatus_str;
+		std::string rampDirection_str;
 
 		// Get values from the stream
 		valueStream
-			>> boxStatus_str;
+			>> rampDirection_str;
 
 		// Update class variables
-		boxStatus = boxStatus_str == "1";
+		rampDirection = static_cast<Orientation>(rampDirection);
 	}
 
 protected:
-	bool boxStatus;
+	Orientation rampDirection;
 };
