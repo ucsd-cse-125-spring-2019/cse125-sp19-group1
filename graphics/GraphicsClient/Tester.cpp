@@ -41,8 +41,9 @@ Transform * floorTransform = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
-glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
-glm::vec3 cam_up(0.0f, 1.0f, 0.0f);      // up | What orientation "up" is
+glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);   // d  | This is where the camera looks at
+glm::vec3 cam_up(0.0f, 1.0f, 0.0f);        // up | What orientation "up" is
+glm::vec3 cam_angle(-15.f, 100.f, -45.f);  // camera's preferred offset from cam_look_at
 
 glm::vec3 playerPos = glm::vec3(0.f);
 float playerTargetAngle = 0.f;
@@ -482,17 +483,11 @@ void MovePlayer()
 }
 
 void MoveCamera(const glm::vec3 &newPlayerPos) {
-	if (true) {
-		cam_look_at.x = newPlayerPos.x;
-		cam_pos.x = newPlayerPos.x - 15.0f;
-	}
-	if (true) {
-		cam_look_at.z = newPlayerPos.z;
-		cam_pos.z = newPlayerPos.z - 45.0f;
-	}
-
+	cam_look_at.x = newPlayerPos.x;
+	cam_look_at.z = newPlayerPos.z;
 	cam_look_at.y = 0.f;
-	cam_pos.y = 100.f;
+	
+	cam_pos = cam_look_at + cam_angle;
 
 	UpdateView();
 }
@@ -515,7 +510,12 @@ void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
 	}
 	
 	cam_look_at.y = 0.f;
-	cam_pos.y = 100.f;
+
+	// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
+	if (directions && !mouseRotation) {
+		const auto desired = cam_look_at + cam_angle;
+		cam_pos += (desired - cam_pos) * 0.225f;
+	}
 
 	UpdateView();
 }
@@ -642,8 +642,8 @@ glm::vec3 TrackballMapping(double x, double y, int width, int height) {
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis) {
 	glm::vec3 newRotAxis = glm::vec4(rotationAxis, 1.0f) * V;
 	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotationAngle, newRotAxis);
-	glm::vec4 temp = rotationMatrix * glm::vec4(cam_pos, 1.0f);
-	cam_pos = glm::vec3(temp[0], temp[1], temp[2]);
+	glm::vec4 temp = rotationMatrix * glm::vec4(cam_pos - cam_look_at, 1.0f);
+	cam_pos = glm::vec3(temp[0], temp[1], temp[2]) + cam_look_at;
 	UpdateView();
 }
 
