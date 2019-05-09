@@ -611,7 +611,7 @@ void MovePlayers()
 void MoveCamera(const glm::vec3 &newPlayerPos) {
 	cam_look_at.x = newPlayerPos.x;
 	cam_look_at.z = newPlayerPos.z;
-	cam_look_at.y = 0.f;
+	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
 	
 	cam_pos = cam_look_at + cam_angle;
 
@@ -635,7 +635,7 @@ void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
 		cam_pos.z += offsetZ;
 	}
 	
-	cam_look_at.y = 0.f;
+	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
 
 	// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
 	if (directions && !mouseRotation) {
@@ -822,10 +822,10 @@ void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset) {
 	glm::vec3 new_cam_pos;
 	float distance;
 	if (yoffset < 0) {
-		new_cam_pos = cam_pos * scaleMouseWheel;
+		new_cam_pos = (cam_pos - cam_look_at) * scaleMouseWheel + cam_look_at;
 	}
 	else {
-		new_cam_pos = cam_pos / scaleMouseWheel;
+		new_cam_pos = (cam_pos - cam_look_at) / scaleMouseWheel + cam_look_at;
 	}
 	distance = glm::distance(new_cam_pos, glm::vec3(0.0f, 0.0f, 0.0f));
 	if (distance < 1400.0f && distance > 2.0f) {
