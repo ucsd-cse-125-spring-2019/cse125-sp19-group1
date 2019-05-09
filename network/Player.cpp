@@ -22,12 +22,12 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 	}
 }
 
-/*Location Player::getLocation() { return location; }
+Location Player::getLocation() { return location; }
 ItemName Player::getInventory() { return inventory; }
 bool Player::getInteracting() { return interacting; }
 bool Player::getOpenJail() { return openingJail; }
 bool Player::getOpeningGate() { return openingGate; }
-*/
+
 Location Player::getLocation() const { return location; }
 ItemName Player::getInventory() const { return inventory; }
 bool Player::getInteracting() const { return interacting; }
@@ -130,7 +130,7 @@ double Player::checkProgress(int opt) {
 	return elapsed_seconds.count();
 }
 
-std::string Player::encodePlayerData(bool newPlayerInit) const
+std::string Player::encodePlayerData(bool newPlayerInit)
 //std::string Player::encodePlayerData() const
 {
 	std::stringstream encodedData;

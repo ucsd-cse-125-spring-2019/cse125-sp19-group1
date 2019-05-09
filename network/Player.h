@@ -20,37 +20,39 @@ public:
 	Player(int anID);
 	Player(int anID, Location aLoc);
 	ItemName getInventory() const;
+	ItemName getInventory() ;
 	void setInventory(ItemName anItem);
 	Location getLocation() const;
+	Location getLocation() ;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
-/*	bool getInteracting();
+	bool getInteracting();
 	void setInteracting(bool interact);
 	bool getOpenJail();
 	void setOpenJail(bool interact);
 	bool getOpeningGate();
 	void setOpeningGate(bool status);
 	ModelType getModelType();
-	bool getIsChef();
-	bool getCaughtAnimal();
+	//bool getIsChef();
+	//bool getCaughtAnimal();
 	void setCaughtAnimal(bool caught);
-	bool getIsCaught();
+	//bool getIsCaught();
 	void setIsCaught(bool caught);
 	int getCaughtAnimalId();
 	void setCaughtAnimalId(int id);
-*/
+
 	bool getInteracting() const;
-	void setInteracting();
+	//void setInteracting();
 	bool getOpenJail() const;
-	void setOpenJail();
+	//void setOpenJail();
 	bool getOpenGate() const;
-	void setOpenGate();
+	//void setOpenGate();
 	ModelType getModelType() const;
 	bool getIsChef() const;
 	bool getCaughtAnimal() const;
-	void setCaughtAnimal();
+	//void setCaughtAnimal();
 	bool getIsCaught() const;
-	void setIsCaught();
+	//void setIsCaught();
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
@@ -58,7 +60,7 @@ public:
 	void setStartJailTime();
 	double checkProgress(int opt);
 
-	std::string encodePlayerData(bool newPlayerInit) const;
+	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;
 
 	void decodePlayerData(std::string key, std::string value);

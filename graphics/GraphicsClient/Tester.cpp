@@ -242,12 +242,12 @@ void reloadMap()
 
 		for (size_t x = 0; x < row.size(); x++) {
 
-			float y = tileLayout[z][x].getHeight() * 0.5f * TILE_LEVEL_OFFSET;
+			float y = tileLayout[z][x]->getHeight() * 0.5f * TILE_LEVEL_OFFSET;
 			auto skew = glm::mat4(1.0f);
 
 			//TODO: add ramp direction to the Tile class
 			// For now, randomize as a reminder
-			int rampDirection = tileLayout[z][x].getTileType() == TileType::RAMP ? (1 << (rand() % 4)) : 0;
+			int rampDirection = tileLayout[z][x]->getTileType() == TileType::RAMP ? (1 << (rand() % 4)) : 0;
 
 			switch (rampDirection) {
 			case DirectionBitmask::eastSide:
@@ -282,8 +282,8 @@ void reloadMap()
 		row.resize(floorArray[clippedZ].size());
 
 		for (size_t x = 0; x < row.size(); x++) {
-			if ((z > 0 && (tileLayout[z - 1][x].getWall() & DirectionBitmask::southSide)) ||
-				(z == clippedZ && (tileLayout[z][x].getWall() & DirectionBitmask::northSide)))
+			if ((z > 0 && (tileLayout[z - 1][x]->getWall() & DirectionBitmask::southSide)) ||
+				(z == clippedZ && (tileLayout[z][x]->getWall() & DirectionBitmask::northSide)))
 			{
 				// Calculate the altitude of the wall
 				int height = 1;
@@ -311,8 +311,8 @@ void reloadMap()
 		for (size_t x = 0; x < row.size(); x++) {
 			auto clippedX = (x < row.size() - 1) ? x : (row.size() - 2);
 
-			if ((x > 0 && (tileLayout[z][x - 1].getWall() & DirectionBitmask::eastSide)) ||
-				(x == clippedX && (tileLayout[z][x].getWall() & DirectionBitmask::westSide)))
+			if ((x > 0 && (tileLayout[z][x - 1]->getWall() & DirectionBitmask::eastSide)) ||
+				(x == clippedX && (tileLayout[z][x]->getWall() & DirectionBitmask::westSide)))
 			{
 				// Calculate the altitude of the wall
 				int height = 1;
