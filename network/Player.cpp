@@ -48,14 +48,15 @@ void Player::setInventory(ItemName anItem)
 
 }
 
-void Player::setInteracting() {
-	interacting = !interacting;
+void Player::setInteracting(bool interact) {
+	interacting = interact;
 }
 
 
-void Player::setOpenJail() {
-	openingJail = !openingJail;
+void Player::setOpenJail(bool interact) {
+	openingJail = interact;
 }
+
 
 void Player::setOpeningGate(bool status) {
 	openingGate = status;

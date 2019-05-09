@@ -1,4 +1,5 @@
 #include "Atlas.h"
+#include <string>
 
 //1000 = left = 8
 //0100 = up = 4
@@ -306,15 +307,10 @@ bool Atlas::hasJail(Location & loc)
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (row >= jailLayout.size() || col >= jailLayout[row].size())
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
 
-	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
-	{
-		return dynamic_cast<JailTile*>(tileLayout[row][col])->hasJail();
-	}
-
-	return false;
+	return tileLayout[row][col]->getTileType() == TileType::JAIL;
 }
 
 bool Atlas::isJailEmpty(Location & loc)
@@ -323,7 +319,7 @@ bool Atlas::isJailEmpty(Location & loc)
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	if (row >= jailEmptyLayout.size() || col >= jailEmptyLayout[row].size())
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
 		return false;
 
 	if (tileLayout[row][col]->getTileType() == TileType::JAIL)
@@ -561,6 +557,18 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 			destRow = -1;
 			destCol = -1;
 		}
+}
+
+bool Atlas::hasRamp(Location & loc)
+{
+	// find which tile player is in
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
+		return false;
+
+	return tileLayout[row][col]->getTileType() == TileType::RAMP;
 }
 
 std::string Atlas::encodeTileLayoutData(bool newPlayerInit)

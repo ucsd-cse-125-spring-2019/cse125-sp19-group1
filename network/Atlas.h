@@ -15,6 +15,7 @@
 #include <ctime>
 
 #define TILE_SIZE 20
+#define TILE_HEIGHT 10
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
 #define MAX_ITEMS 9
@@ -50,6 +51,7 @@ public:
 	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
 
 	std::string encodeTileLayoutData(bool newPlayerInit);
+	bool hasRamp(Location & loc);
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;

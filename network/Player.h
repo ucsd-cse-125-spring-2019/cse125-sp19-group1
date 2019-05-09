@@ -25,9 +25,9 @@ public:
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
 	bool getInteracting();
-	void setInteracting();
+	void setInteracting(bool interact);
 	bool getOpenJail();
-	void setOpenJail();
+	void setOpenJail(bool interact);
 	bool getOpeningGate();
 	void setOpeningGate(bool status);
 	ModelType getModelType();

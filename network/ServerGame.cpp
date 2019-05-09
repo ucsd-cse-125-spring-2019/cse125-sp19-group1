@@ -8,6 +8,8 @@
  
 unsigned int ServerGame::client_id; 
 unsigned int SPEED = 2;
+bool chefWin = false;
+bool animalWin = false;
 
 ServerGame::ServerGame(void)
 {
@@ -30,7 +32,7 @@ void ServerGame::update()
     {
         printf("client %d has been connected to the server\n",client_id); 
     }
-
+	if (chefWin || animalWin) { return; }
 	receiveFromClients();
 	//sendActionPackets();
 
@@ -98,24 +100,28 @@ void ServerGame::receiveFromClients()
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateForwardEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case BACKWARD_EVENT:
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateBackwardEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case LEFT_EVENT:
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateLeftEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case RIGHT_EVENT:
 				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
 				updateRightEvent(iter->first);
 				updateCollision(iter->first);
+				updateHeight(iter->first);
 				break;
 
 			case INTERACT_EVENT:
@@ -141,23 +147,35 @@ void ServerGame::receiveFromClients()
 						if (!gameData->getPlayer(iter->first)->getInteracting())
 						{
 							std::cout << "CAN SWING" << std::endl;
-							gameData->getPlayer(iter->first)->setInteracting();
+							gameData->getPlayer(iter->first)->setInteracting(true);
 							gameData->getPlayer(iter->first)->setStartTime();
+
+							chefWin = true;
 							std::map<unsigned int, SOCKET>::iterator iter2;
 							for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
 							{
 								if (iter2 == iter || gameData->getPlayer(iter2->first)->getIsChef())
 								{
+									if (!gameData->getPlayer(iter2->first)->getIsChef() &&
+										!gameData->getPlayer(iter2->first)->getIsCaught()) 
+									{
+										chefWin = false;
+									}
 									continue;
 								}
 								Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
 								//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-								if (gameData->getPlayer(iter->first)->inRange(loc, tLoc))
+								if (gameData->getPlayer(iter->first)->inRange(loc, tLoc) &&
+									!gameData->getPlayer(iter2->first)->getIsCaught())
 								{
 									gameData->getPlayer(iter->first)->setCaughtAnimal(true);
 									gameData->getPlayer(iter->first)->setCaughtAnimalId(iter2->first);
 									gameData->getPlayer(iter2->first)->setIsCaught(true);
-									break;
+								}
+
+								if (gameData->getPlayer(iter2->first)->getIsCaught())
+								{
+									chefWin = false;
 								}
 							}
 						}
@@ -176,6 +194,7 @@ void ServerGame::receiveFromClients()
 					}
 					else if (gameData->getAtlas()->hasGate(loc))
 					{
+
 						GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 						if (gateTile->isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
 						{
@@ -184,15 +203,24 @@ void ServerGame::receiveFromClients()
 						}
 						if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
 						{
+
 							gameData->getPlayer(iter->first)->setOpeningGate(true);
 							gameData->getPlayer(iter->first)->setStartTime();
+						}
+						if (gateTile->hasAllKeys() && gateTile->isOpen())
+						{
+							if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
+							{
+								animalWin = true;
+							}
 						}
 					}
 					else if (gameData->getAtlas()->hasJail(loc))
 					{
+						std::cout << "HAS JAIL" << std::endl;
 						if (!gameData->getAtlas()->isJailEmpty(loc))
 						{
-							gameData->getPlayer(iter->first)->setOpenJail();
+							gameData->getPlayer(iter->first)->setOpenJail(true);
 							gameData->getPlayer(iter->first)->setStartJailTime();
 							
 							//update jail progress
@@ -227,7 +255,7 @@ void ServerGame::receiveFromClients()
 						std::cout << "HAS BOX" << std::endl;
 						if (!gameData->getPlayer(iter->first)->getInteracting()) {
 							std::cout << "starting to interact!" << std::endl;
-							gameData->getPlayer(iter->first)->setInteracting();
+							gameData->getPlayer(iter->first)->setInteracting(true);
 							gameData->getPlayer(iter->first)->setStartTime();
 						}
 					}
@@ -248,21 +276,21 @@ void ServerGame::receiveFromClients()
 					if (seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
-						gameData->getPlayer(iter->first)->setInteracting();
+						gameData->getPlayer(iter->first)->setInteracting(false);
 					}
 				}
 
 				if (gameData->getPlayer(iter->first)->getInteracting() && 
 					!gameData->getPlayer(iter->first)->getIsChef()) {
 					std::cout << "RELEASED SPACE" << std::endl;
-					gameData->getPlayer(iter->first)->setInteracting();
+					gameData->getPlayer(iter->first)->setInteracting(false);
 				}
+
 
 				if (gameData->getPlayer(iter->first)->getOpeningGate() &&
 					!gameData->getPlayer(iter->first)->getIsChef() && gameData->getAtlas()->hasGate(loc))
 				{
 					GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-
 					if (!gateTile->isOpen())
 					{
 						std::cout << "RELEASED SPACE" << std::endl;
@@ -331,7 +359,7 @@ void ServerGame::receiveFromClients()
 				{
 					if (seconds > gameData->getChefSwingTime()) {
 						std::cout << "CAN SWING AGAIN" << std::endl;
-						gameData->getPlayer(iter->first)->setInteracting();
+						gameData->getPlayer(iter->first)->setInteracting(false);
 					}
 				}
 				else
@@ -339,7 +367,7 @@ void ServerGame::receiveFromClients()
 					if (seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
-						gameData->getPlayer(iter->first)->setInteracting();
+						gameData->getPlayer(iter->first)->setInteracting(false);
 					}
 				}
 			}
@@ -350,8 +378,7 @@ void ServerGame::receiveFromClients()
 				if (!gameData->getPlayer(iter->first)->getIsChef())
 				{
 					if (seconds > gameData->getOpenJailTime()) {
-						std::cout << "CAN OPEN AGAIN" << std::endl;
-						gameData->getPlayer(iter->first)->setOpenJail();
+						gameData->getPlayer(iter->first)->setOpenJail(false);
 					}
 				}
 			}
@@ -441,6 +468,47 @@ void ServerGame::updateLeftEvent(int id)
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
 	updatePlayerCollision(id, 3);
+}
+
+void ServerGame::updateHeight(int id)
+{
+	Location loc = gameData->getPlayer(id)->getLocation();
+	if (!gameData->getAtlas()->hasRamp(loc)) 
+	{ 
+		int y = gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 * TILE_HEIGHT;
+		gameData->getPlayer(id)->setLocation(loc.getX(), y, loc.getZ());
+		return; 
+	}
+
+	std::cout << "THERES A RAMP" << std::endl;
+
+	int x = loc.getX();
+	int y;
+	int z = loc.getZ();
+
+	RampTile * rampTile = (RampTile *)(gameData->getAtlas()->getTileAt(loc));
+
+	if (rampTile->getRampDirection() == Orientation::NORTH)
+	{
+		y = (int) (TILE_SIZE - z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE) 
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight()/2 +1);
+	}
+	else if (rampTile->getRampDirection() == Orientation::SOUTH)
+	{
+		y = (int)(z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
+	}
+	else if (rampTile->getRampDirection() == Orientation::EAST)
+	{
+		y = (int)(x % TILE_SIZE) * ((double)TILE_HEIGHT / TILE_SIZE)
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
+	}
+	else if (rampTile->getRampDirection() == Orientation::WEST)
+	{
+		y = (int)(TILE_SIZE - x % TILE_SIZE) * ((double)TILE_HEIGHT / TILE_SIZE)
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
+	}
+	gameData->getPlayer(id)->setLocation(x, y, z);
 }
 
 void ServerGame::updatePlayerCollision(int id, int dir) 
