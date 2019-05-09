@@ -302,6 +302,18 @@ bool Atlas::hasBox(Location & loc)
 	return false;
 }
 
+bool Atlas::hasHide(Location & loc)
+{
+	// find which tile player is in
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (row >= tileLayout.size() || col >= tileLayout[row].size())
+		return false;
+
+	return tileLayout[row][col]->getTileType() == TileType::HIDE;
+}
+
 bool Atlas::hasJail(Location & loc)
 {
 	// find which tile player is in

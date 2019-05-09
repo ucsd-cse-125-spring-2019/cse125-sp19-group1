@@ -95,28 +95,44 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case FORWARD_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught() ||
+					gameData->getPlayer(iter->first)->getHidden()) { 
+					break; 
+				}
 				updateForwardEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
 				break;
 
 			case BACKWARD_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught() ||
+					gameData->getPlayer(iter->first)->getHidden()) {
+					break;
+				}
 				updateBackwardEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
 				break;
 
 			case LEFT_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught() ||
+					gameData->getPlayer(iter->first)->getHidden()) {
+					break;
+				}
 				updateLeftEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
 				break;
 
 			case RIGHT_EVENT:
-				if (gameData->getPlayer(iter->first)->getInteracting()) { break; }
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught() ||
+					gameData->getPlayer(iter->first)->getHidden()) {
+					break;
+				}
 				updateRightEvent(iter->first);
 				updateCollision(iter->first);
 				updateHeight(iter->first);
@@ -124,7 +140,11 @@ void ServerGame::receiveFromClients()
 
 			case INTERACT_EVENT:
 			{
-
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught() ||
+					gameData->getPlayer(iter->first)->getHidden()) {
+					break;
+				}
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 				//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 				if (gameData->getPlayer(iter->first)->getIsChef()) 
@@ -262,7 +282,9 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
-				if (gameData->getPlayer(iter->first)->getIsCaught()) {
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught() ||
+					gameData->getPlayer(iter->first)->getHidden()) {
 					break;
 				}
 
@@ -302,6 +324,12 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught() ||
+					gameData->getPlayer(iter->first)->getHidden()) {
+					break;
+				}
+
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 
 				// PLayer cannot drop item if there is an item already on the current tile
@@ -328,6 +356,46 @@ void ServerGame::receiveFromClients()
 				}
 				break;
 			}
+			case HIDE_EVENT:
+			{
+				if (gameData->getPlayer(iter->first)->getInteracting() ||
+					gameData->getPlayer(iter->first)->getIsCaught()) {
+					break;
+				}
+
+				Location loc = gameData->getPlayer(iter->first)->getLocation();
+				if (!(gameData->getAtlas()->hasHide(loc))) { return; }
+
+				HideTile * hideTile = (HideTile *)(gameData->getAtlas()->getTileAt(loc));
+
+				if (gameData->getPlayer(iter->first)->getIsChef()) {
+					if (!hideTile->checkHideTileEmpty())
+					{
+						int animal = hideTile->getAnimalHiding();
+						gameData->getPlayer(animal)->setIsCaught(true);
+						gameData->getPlayer(iter->first)->setCaughtAnimalId(animal);
+						gameData->getPlayer(iter->first)->setCaughtAnimal(true);
+						gameData->getPlayer(iter->first)->setHidden(false);
+						hideTile->setAnimalHiding(-1);
+					}
+				}
+				else {
+					if (gameData->getPlayer(iter->first)->getHidden()) 
+					{
+						gameData->getPlayer(iter->first)->setHidden(false);
+						hideTile->setAnimalHiding(-1);
+					}
+					else if (hideTile->checkHideTileEmpty())
+					{
+						//set hideTile full
+						hideTile->setAnimalHiding(iter->first);
+						//set animal to hidden
+						gameData->getPlayer(iter->first)->setHidden(true);
+					}
+				}
+				break;
+			}
+
 			default:
 				printf("error in packet types\n");
 				break;

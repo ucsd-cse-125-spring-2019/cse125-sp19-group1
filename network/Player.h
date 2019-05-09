@@ -60,6 +60,7 @@ public:
 	void decodeCakeStatus(std::string value);
 	void decodeChefStatus(std::string value);
 	void decodeModelType(std::string value);
+	void decodeHidden(std::string value);
 
 protected:
 	Location	location;

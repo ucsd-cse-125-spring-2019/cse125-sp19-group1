@@ -169,6 +169,10 @@ void Player::decodeModelType(std::string value)
 {
 	modelType = static_cast<ModelType>(std::stoi(value));
 }
+void Player::decodeHidden(std::string value)
+{
+	hidden = std::stoi(value) == 1;
+}
 
 void Player::addDecodeFunctions()
 {
@@ -177,4 +181,5 @@ void Player::addDecodeFunctions()
 	decodingFunctions["model"] = &Player::decodeModelType;
 	decodingFunctions["hasCake"] = &Player::decodeCakeStatus;
 	decodingFunctions["inventory"] = &Player::decodeInventory;
+	decodingFunctions["hidden"] = &Player::decodeHidden;
 }

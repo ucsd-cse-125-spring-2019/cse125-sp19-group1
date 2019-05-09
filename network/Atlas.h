@@ -11,6 +11,7 @@
 #include "JailTile.h"
 #include "GateTile.h"
 #include "RampTile.h"
+#include "HideTile.h"
 #include <map>
 #include <ctime>
 
@@ -37,7 +38,6 @@ public:
 	bool hasJail(Location & loc);
 	bool isJailEmpty(Location & loc);
 	void placeInJail(Location & loc, int iter);
-	void removeFromJail(Location & loc);
 	void unlockJail(Location & loc);
 	int getJailProgress(Location & loc);
 	void resetJail(Location & loc);
@@ -51,6 +51,7 @@ public:
 	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
 
 	bool hasRamp(Location & loc);
+	bool hasHide(Location & loc);
 
 	std::string encodeTileLayoutData();
 
