@@ -275,7 +275,7 @@ void ServerGame::receiveFromClients()
 							//check if jail progress == 5
 							if (jailTile->getProgress() >= 5)
 							{
-								std::cout << "ANIMAL IS UNRELEASED" << std::endl;
+								std::cout << "ANIMAL IS RELEASED" << std::endl;
 								//update animal 
 								int animal = jailTile->getCapturedAnimal();
 								gameData->getPlayer(animal)->setIsCaught(false);
