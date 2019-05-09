@@ -117,13 +117,13 @@ Atlas::Atlas()
 			case TileType::GATE: 
 				tileRow.push_back(new GateTile(std::vector<Key>({ Key::KEY1, Key::KEY2, Key::KEY3 }), 1, wall, height));
 				break;
-			case TileType::RAMP: // change to RampTile
-				tileRow.push_back(new Tile(TileType::RAMP, wall, height));
+			case TileType::RAMP:
+				tileRow.push_back(new RampTile(static_cast<Orientation>(std::stoi(rampNum)), wall, height));
 				break;
 			case TileType::KEY_DROP: // change to KeyDropTile
 				tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
 				break;
-			case TileType::TABLE:
+			case TileType::TABLE: // change to ObjectTile
 				tileRow.push_back(new Tile(TileType::TABLE, wall, height));
 				break;
 			case TileType::DEFAULT: default:

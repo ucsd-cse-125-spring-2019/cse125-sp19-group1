@@ -10,6 +10,7 @@
 #include "BoxTile.h"
 #include "JailTile.h"
 #include "GateTile.h"
+#include "RampTile.h"
 #include <map>
 #include <ctime>
 
