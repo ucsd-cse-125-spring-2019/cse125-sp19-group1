@@ -213,6 +213,9 @@
     <ClInclude Include="..\..\network\Walls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\network\JailTile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag">
