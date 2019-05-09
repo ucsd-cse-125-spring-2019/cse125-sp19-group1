@@ -176,12 +176,22 @@ void ServerGame::receiveFromClients()
 				{
 					if (gameData->getPlayer(iter->first)->getCaughtAnimal())
 					{
+						std::cout << "CAUGHT ANIMAL" << std::endl;
+
 						//drop off animal
 						if (gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 						{
+							int animal = gameData->getPlayer(iter->first)->getCaughtAnimalId();
 							//update jail with animal
-							gameData->getAtlas()->placeInJail(loc, gameData->getPlayer(iter->first)->getCaughtAnimalId());
+							std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
+							gameData->getAtlas()->placeInJail(loc, animal);
 							gameData->getPlayer(iter->first)->setCaughtAnimal(false);
+
+							//update animal's location to jail
+							int x = (int)(loc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+							int y = loc.getY();
+							int z = (int)(loc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+							gameData->getPlayer(animal)->setLocation(x, y, z);
 						}
 					}
 					else
@@ -214,9 +224,12 @@ void ServerGame::receiveFromClients()
 									gameData->getPlayer(iter->first)->setCaughtAnimal(true);
 									gameData->getPlayer(iter->first)->setCaughtAnimalId(iter2->first);
 									gameData->getPlayer(iter2->first)->setIsCaught(true);
+
+									//update animal's location to somewhere off map
+									gameData->getPlayer(iter2->first)->setLocation(-100, -100, -100);
 								}
 
-								if (gameData->getPlayer(iter2->first)->getIsCaught())
+								if (!gameData->getPlayer(iter2->first)->getIsCaught())
 								{
 									chefWin = false;
 								}
@@ -263,33 +276,26 @@ void ServerGame::receiveFromClients()
 						std::cout << "HAS JAIL" << std::endl;
 						if (!gameData->getAtlas()->isJailEmpty(loc))
 						{
+							JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
 							gameData->getPlayer(iter->first)->setOpenJail(true);
 							gameData->getPlayer(iter->first)->setStartJailTime();
 							
-							//update jail progress
-							gameData->getAtlas()->unlockJail(loc);
+							//update jail progres
+							std::cout << "UNLOCKING JAIL" << std::endl;
+
+							jailTile->unlockJail();
+
 
 							//check if jail progress == 5
-							if (gameData->getAtlas()->getJailProgress(loc) >= 5)
+							if (jailTile->getProgress() >= 5)
 							{
+							std::cout << "ANIMAL IS RELEASED" << std::endl;
 								//update animal 
-								std::map<unsigned int, SOCKET>::iterator iter2;
-								for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
-								{
-									if (iter2 == iter)
-									{
-										continue;
-									}
-									Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-									std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-									if (loc == tLoc && gameData->getPlayer(iter2->first)->getIsCaught())
-									{
-										gameData->getPlayer(iter2->first)->setIsCaught(false);
-									}
-								}
+								int animal = jailTile->getCapturedAnimal();
+								gameData->getPlayer(animal)->setIsCaught(false);
 
 								//update jail
-								gameData->getAtlas()->resetJail(loc);
+								jailTile->resetJail();
 							}
 						}
 					}
