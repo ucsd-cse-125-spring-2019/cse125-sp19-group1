@@ -12,7 +12,6 @@
 #define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
 
 int elapsedTime = 0;
-
 GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
@@ -24,13 +23,22 @@ const char* window_title = "TESTER";
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
 
 glm::mat4 P; // P for projection
+glm::mat4 orthoP; // P for 2d elements;
 glm::mat4 V; // V for view
 DirLight * light = nullptr;
+FogGenerator * fog = nullptr;
+
 FBXObject * playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 Geometry * playerGeometry[NUM_PLAYER_MODEL_TYPES] = { nullptr };
+
 FBXObject * tileModel = nullptr;
 FBXObject * wallModel = nullptr;
+
+FBXObject * uiCanvas = nullptr;
 GLuint objShaderProgram;
+GLuint uiShaderProgram;
+
+GLuint uiTexture;
 
 Geometry * tileGeometry;
 Geometry * wallGeometry;
@@ -269,7 +277,10 @@ void Init()
 
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	
 	light = new DirLight();
+	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
 	
 	// Load models
@@ -284,6 +295,9 @@ void Init()
 
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
+	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
+	uiCanvas->SetDepthTest(false);
+
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
@@ -299,6 +313,8 @@ void Init()
 	root->addChild(player2Translate);
 	player2Translate->addChild(player2Rotate);
 	player2Rotate->addChild(playerModel2);
+    //raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+	UpdateView();
 
 	//raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
 
@@ -358,6 +374,8 @@ void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 	if (windowHeight > 0)
 	{
 		P = glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4000.0f);
+		//orthoP = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, -1.0f, 1.0f);
+		orthoP = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	}
 }
@@ -472,25 +490,9 @@ void MovePlayer()
 		player->setOffset(playerRotation);
 		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
 		MoveCamera(playerPos, oldPos);
-
 		UpdateView();
 	}
-	//if (!client->clients2.empty()) {
-	//	/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
-	//		client->clients2["client_0"][1] * 0.1f,
-	//		client->clients2["client_0"][2] * 0.1f);
-	//	*/
-	//	glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
-	//		client->allClients["client_0"].getLocation().getY() * 0.1f,
-	//		client->allClients["client_0"].getLocation().getZ() * 0.1f);
-	//	
-	//	/*glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
-	//		p->getLocation().getY() * 0.1f,
-	//		p->getLocation().getZ() * 0.1f);*/
 
-	//	cam_pos = location;
-	//	UpdateView();
-	//}
 }
 
 void MoveCamera(const glm::vec3 &newPlayerPos) {
@@ -558,12 +560,18 @@ void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, windowWidth, windowHeight);
-	glDepthMask(GL_TRUE);
+	//glDepthMask(GL_TRUE);
 
-	glUseProgram(objShaderProgram);
+	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	root->draw(V, P);
+	fog->draw(objShaderProgram, P * V * glm::vec4(playerPos, 1.0f));
+	root->draw(V, P, glm::mat4(1.0));
+	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
+
+
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers

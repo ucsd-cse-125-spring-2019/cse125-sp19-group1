@@ -7,7 +7,9 @@
 
 #include "Core.h"
 #include "DirLight.h"
+#include "FogGenerator.h"
 #include "FBXObject.h"
+#include "UIObject.h"
 #include "Node.h"
 #include "Transform.h"
 #include "Geometry.h"
@@ -18,6 +20,9 @@
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
+
+#define UI_VERT_SHADER_PATH "./ui_shader.vert"
+#define UI_FRAG_SHADER_PATH "./ui_shader.frag"
 
 #define ANIMATIONS_PATH  "../Animations/"
 #define MODELS_PATH      "../Models/"
@@ -40,8 +45,13 @@
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.ppm")
 
+#define CHEF_FOG_DISTANCE 85.0f
+#define RACCOON_FOG_DISTANCE 160
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
+
+#define CANVAS_MDL_PATH     (MODELS_PATH "canvas.fbx")
+#define CANVAS_TEX_PATH		(TEXTURES_PATH "canvas.ppm");
 
 // function declarations
 glm::vec3 directionBitmaskToVector(int bitmask);

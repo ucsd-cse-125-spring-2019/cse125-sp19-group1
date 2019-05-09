@@ -8,9 +8,8 @@ Geometry::Geometry(FBXObject * fbx, GLint shaderProgram) {
 	t = glm::mat4(1.0f);
 }
 
-void Geometry::draw(glm::mat4 V, glm::mat4 P) {
-	glUseProgram(shaderProgram);
-	fbx->Draw(shaderProgram, &(t*V), &P);
+void Geometry::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model) {
+	fbx->Draw(shaderProgram, &(V), &P, (model * t));
 }
 
 void Geometry::addChild(Node * child) {
