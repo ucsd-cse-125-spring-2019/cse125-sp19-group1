@@ -9,6 +9,12 @@ struct Light {
   vec3 cam_look_at;
 };
 
+struct Fog {
+  vec3 player_pos;
+  float fog_distance;
+};
+
+uniform Fog fog;
 uniform Light light;
 uniform bool shadowsOn = false;
 uniform sampler2D renderedTexture;
@@ -19,6 +25,8 @@ in float transparency;
 in float test;
 in vec3 fragNormal;
 in vec3 fragPos;
+in vec3 vecPos;
+in vec3 viewPos;
 in mat4 originalModel;
 in vec3 diffuse;
 in vec3 ambient;
@@ -55,7 +63,7 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
 	intensity = dot(normalize(-light.light_dir),normalize(normal));
 	float viewAngle = dot(normalize(viewDir), normalize(normal));
 
-	if(abs(viewAngle) < 0.2f) { //outline
+	if(abs(viewAngle) < 0.5f) { //outline
 		toonColor = vec3(0,0,0);
 	}
 	else if (intensity > 0.95){//otherwise, intensities
@@ -77,6 +85,27 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
   //return tempColor.xyz + amb;
   //return amb + diff + spec;
   return toonColor;
+  
+}
+
+vec3 CalcFogOfWar(vec3 inputColor) {
+	//hide items beyound certain threshold of playerposition
+   vec3 distanceFromPlayer = vecPos - fog.player_pos;
+   float distance = length(distanceFromPlayer);
+   if(abs(distance) > fog.fog_distance) {
+      inputColor = inputColor * 0.1;
+   }
+   else if(abs(distance) > fog.fog_distance - 20) {
+	  inputColor = inputColor * 0.45;
+   }
+   return inputColor;
+}
+
+vec3 OverrideUI(vec3 inputColor) {
+   if(viewPos.x > 20) {
+      return vec3(1,0,0);
+   }
+   return inputColor;
 }
 
 void main()
@@ -85,11 +114,11 @@ void main()
   vec3 normal, res, viewDir;
   float visibility = 1.0;
   float bias = 0.005;
-  if (shadowsOn) {
+  /**if (shadowsOn) {
     if ( texture( renderedTexture, ShadowCoord.xy ).x  <  ShadowCoord.z-bias) {
       visibility = 0.5;
     }
-  }
+  }**/
   normal = normalize((mat3(transpose(inverse(mat3(originalModel))))) * fragNormal);
   viewDir = normalize(light.cam_look_at - light.cam_pos);
   if (light.normal_shading) {
@@ -97,8 +126,15 @@ void main()
   } else {
     res = CalcDirLight(normal, viewDir);
   }
+  res = CalcFogOfWar(res);
+  //res = OverrideUI(res);
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
+  if(fract(fragPos.x / 20)  < 0.1 && fract(fragPos.z / 20) < 0.1) {
+    color = vec4(0.0,1.0,0.0,1.0);
+  }
+  else {
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);
+  }
   //color = texColor;
 }
