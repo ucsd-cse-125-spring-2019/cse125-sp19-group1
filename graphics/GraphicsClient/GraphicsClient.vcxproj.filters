@@ -31,6 +31,9 @@
     <ClCompile Include="FBXObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FogGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\network\GameData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -82,18 +85,13 @@
     <ClCompile Include="Transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UIObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\network\Walls.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Animation.cpp" />
-    <ClCompile Include="AnimationChannel.cpp" />
-    <ClCompile Include="AnimationPlayer.cpp" />
-    <ClCompile Include="Keyframe.cpp" />
-    <ClCompile Include="FogGenerator.cpp" />
-    <ClCompile Include="UIObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -111,6 +109,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\Atlas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\BoxTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Bone.h">
@@ -131,10 +132,16 @@
     <ClInclude Include="FBXObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="FogGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\network\GameData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\Gate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\GateTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Geometry.h">
@@ -167,6 +174,9 @@
     <ClInclude Include="..\..\network\Player.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\network\RampTile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\network\ServerGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -194,21 +204,13 @@
     <ClInclude Include="Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="UIObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\Walls.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\BoxTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\GateTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\RampTile.h">
-    <ClInclude Include="FogGenerator.h" />
-    <ClInclude Include="UIObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -231,13 +233,10 @@
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{5aaa1faf-8e5d-48fc-b7fa-09b982f736a1}</UniqueIdentifier>
+      <UniqueIdentifier>{13915da2-125a-4e66-8db1-9eae4d4187eb}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{ba9d01ad-c425-47cb-ad01-34841766dcf4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{730a19a7-5a57-4ade-b49e-0d260ce8f7e1}</UniqueIdentifier>
+      <UniqueIdentifier>{910f5ab9-9595-4144-a970-51cd56b09671}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
