@@ -143,7 +143,13 @@ std::string Player::encodePlayerData(bool newPlayerInit)
 		bool dirty = p.second;
 		if (dirty || newPlayerInit)
 		{
-			encodedData << (this->*encodingFunctions.at(key))();
+			if (encodingFunctions.count(key) > 0)
+			{
+				encodedData << (this->*encodingFunctions.at(key))();
+
+			}
+			else
+				std::cout << "Missing encoding function for key " << key << std::endl;
 		}
 	}
 
