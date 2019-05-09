@@ -11,6 +11,9 @@
 #define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
 #define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
 
+// Uncomment to render an additional dummy Chef that mirrors the player's movements
+#define DUMMY_ID -4000
+
 int elapsedTime = 0;
 GLFWwindow * window = nullptr;
 int windowWidth;
@@ -58,6 +61,16 @@ struct PlayerState {
 		transform = nullptr;
 	}
 
+#ifdef DUMMY_ID
+	// Warning: this constructor is only for debugging use
+	PlayerState(int newId, int geometryIdx) {
+		id = newId;
+
+		transform = new Transform(glm::translate(glm::mat4(1.f), position));
+		transform->addChild(playerGeometry[geometryIdx]);
+	}
+#endif
+
 	PlayerState(int newId, const Player *p) : PlayerState() {
 		id = newId;
 
@@ -74,8 +87,7 @@ struct PlayerState {
 
 	~PlayerState() {
 		if (transform) {
-
-			delete transform;
+			//delete transform;
 		}
 	}
 };
@@ -83,7 +95,7 @@ struct PlayerState {
 Transform * root = nullptr;
 Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
-PlayerState * myState = nullptr;
+size_t myIdx = 0;
 Transform * floorTransform = nullptr;
 
 // Default camera parameters
@@ -178,19 +190,28 @@ void reloadPlayers()
 	const auto &playersMap = client->getGameData()->players;
 	const int myId = client->getMyID();
 
+	size_t idx = 0;
 	for (const auto &pair : playersMap) {
 		const auto id = pair.first;
 		const Player *p = pair.second;
 
 		players.emplace_back(id, p);
 
-		const auto &state = &players[players.size() - 1];
-
+		const auto state = &players[players.size() - 1];
 		allPlayersNode->addChild(state->transform);
 
 		if (id == myId)
-			myState = state;
+			myIdx = idx;
+
+		idx++;
 	}
+
+#ifdef DUMMY_ID
+	// add a dummy player
+	players.emplace_back(DUMMY_ID, CHEF_IDX);
+	const auto &state = players[players.size() - 1];
+	allPlayersNode->addChild(state.transform);
+#endif
 }
 
 void reloadMap()
@@ -391,7 +412,6 @@ void CleanUp() {
 	}
 
 	players.clear();
-	myState = nullptr;
 
 	for (auto &model : playerModels) {
 		if (model) {
@@ -516,28 +536,40 @@ void SendPackets()
 void MovePlayers()
 {
 	// Sanity guard condition
-	if (!myState || players.size() <= 0) {
+	if (players.size() <= 0 || players.size() <= myIdx) {
 		return;
 	}
 
-	const auto myOldPos = myState->position;
+	const auto myOldPos = players[myIdx].position;
 
 	const int myID = client->getMyID();
 	const auto &playersMap = client->getGameData()->players;
 	for (auto &state : players) {
-		const Player * p = playersMap.at(state.id);
-		const auto loc = p->getLocation();
-
 		const auto oldPos = state.position;
-		state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
+
+		if (playersMap.count(state.id) > 0) {
+			const Player * p = playersMap.at(state.id);
+			const auto loc = p->getLocation();
+
+			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
+		}
+#ifdef DUMMY_ID
+		else if (state.id == DUMMY_ID) {
+			state.position = players[myIdx].position;
+			if (floorArray.size()) {
+				state.position.x = floorArray[0].size() * 20.f - state.position.x;
+			}
+		}
+#endif
+
 		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
 
 		// Set targetAngle based on keyboard for me, based on movement for others
 		bool changedTargetAngle = false;
 		if (state.id != myID) {
 			const auto delta = state.position - oldPos;
-			if (abs(delta.x) > 0.001 && abs(delta.z) > 0.001) {
-				state.targetAngle = glm::atan(-delta.x, delta.z);
+			if (abs(delta.x) > 0.0001 || abs(delta.z) > 0.0001) {
+				state.targetAngle = glm::atan(delta.x, delta.z);
 				changedTargetAngle = true;
 			}
 		}
@@ -572,7 +604,7 @@ void MovePlayers()
 		state.transform->setOffset(transformMat);
 	}
 
-	MoveCamera(myState->position, myOldPos);
+	MoveCamera(players[myIdx].position, myOldPos);
 	UpdateView();
 }
 
@@ -625,9 +657,20 @@ void IdleCallback()
 		client->update();
 		const auto gameData = client->getGameData();
 		if (gameData) {
-			if (floorArray.size() != gameData->clientTileLayout.size())
+#ifdef DUMMY_ID
+			const bool playersChanged = (players.size() != gameData->players.size() + 1);
+#else
+			const bool playersChanged = (players.size() != gameData->players.size());
+#endif
+			const bool tilesChanged = (floorArray.size() != gameData->clientTileLayout.size());
+
+			if (tilesChanged || playersChanged) {
+				glFlush();
+			}
+
+			if (tilesChanged)
 				reloadMap();
-			if (players.size() != gameData->players.size())
+			if (playersChanged)
 				reloadPlayers();
 		}
 		MovePlayers();
@@ -653,8 +696,8 @@ void DisplayCallback(GLFWwindow* window)
 
 	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	if (myState) {
-		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
+	if (myIdx < players.size()) {
+		fog->draw(objShaderProgram, P * V * glm::vec4(players[myIdx].position, 1.0f));
 	}
 	root->draw(V, P, glm::mat4(1.0));
 	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
