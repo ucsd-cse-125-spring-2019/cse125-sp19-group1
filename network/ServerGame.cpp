@@ -214,9 +214,11 @@ void ServerGame::receiveFromClients()
 									gameData->getPlayer(iter->first)->setCaughtAnimal(true);
 									gameData->getPlayer(iter->first)->setCaughtAnimalId(iter2->first);
 									gameData->getPlayer(iter2->first)->setIsCaught(true);
+									JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
+									jailTile->setJailStatus(true);
 								}
 
-								if (gameData->getPlayer(iter2->first)->getIsCaught())
+								if (!gameData->getPlayer(iter2->first)->getIsCaught())
 								{
 									chefWin = false;
 								}
