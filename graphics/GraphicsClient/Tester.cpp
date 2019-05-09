@@ -262,9 +262,7 @@ void Init()
 
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
-	std::cerr << "objShader is = " << objShaderProgram << "\n";
 	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
-	std::cerr << "uiShader is = " << uiShaderProgram << "\n";
 	
 	light = new DirLight();
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
@@ -277,7 +275,7 @@ void Init()
 	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
-	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
+	uiCanvas = new FBXObject(CANVAS_MDL_PATH, CANVAS_TEX_PATH, false);
 	uiCanvas->SetDepthTest(false);
 
 
@@ -544,6 +542,8 @@ void DisplayCallback(GLFWwindow* window)
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	fog->draw(objShaderProgram, P * V * glm::vec4(playerPos, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
 
 
