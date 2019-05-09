@@ -21,6 +21,7 @@ public:
 	Player(int anID, Location aLoc);
 	ItemName getInventory() const;
 	void setInventory(ItemName anItem);
+	void setModelType(ModelType type);
 	Location getLocation() const;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
@@ -31,7 +32,7 @@ public:
 	bool getOpeningGate() const;
 	void setOpeningGate(bool status);
 	ModelType getModelType() const;
-	bool getIsChef() const;
+	bool isChef() const;
 	bool getCaughtAnimal() const;
 	void setCaughtAnimal(bool caught);
 	bool getIsCaught() const;
@@ -63,14 +64,12 @@ public:
 	void decodeLocation(std::string value);
 	void decodeInventory(std::string value);
 	void decodeCakeStatus(std::string value);
-	void decodeChefStatus(std::string value);
 	void decodeModelType(std::string value);
 
 	void addEncodeFunctions();
 	std::string encodeLocation();
 	std::string encodeInventory();
 	std::string encodeCakeStatus();
-	std::string encodeChefStatus();
 	std::string encodeModelType();
 
 protected:
@@ -78,7 +77,6 @@ protected:
 	int			playerID;
 	ItemName	inventory;
 	bool		hasCake;
-	bool		isChef;
 	ModelType	modelType;
 	bool		interacting;
 	bool		openingJail;

@@ -1,25 +1,28 @@
 #include "Player.h"
 
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
-Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
+Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), modelType(ModelType::RACOON)
 {
 	location = Location();
 	addEncodeFunctions();
 	addDecodeFunctions();
 	if (anID % 2 == 1) {
-		isChef = true;
 		modelType = ModelType::CHEF;
 	}
 }
 
-Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), isChef(false), modelType(ModelType::RACOON)
+Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), modelType(ModelType::RACOON)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
 	if (anID % 2 == 1) {
-		isChef = true;
 		modelType = ModelType::CHEF;
 	}
+}
+void Player::setModelType(ModelType type)
+{
+	modelType = type;
+	dirtyVariablesMap["model"] = true;
 }
 
 Location Player::getLocation() const { return location; }
@@ -67,8 +70,8 @@ ModelType Player::getModelType() const {
 	return modelType;
 }
 
-bool Player::getIsChef() const {
-	return isChef;
+bool Player::isChef() const {
+	return modelType == ModelType::CHEF;
 }
 
 void Player::setCaughtAnimal(bool caught) {
@@ -172,10 +175,7 @@ void Player::decodeCakeStatus(std::string value)
 {
 	hasCake = std::stoi(value) == 1;
 }
-void Player::decodeChefStatus(std::string value)
-{
-	isChef = std::stoi(value) == 1;
-}
+
 void Player::decodeModelType(std::string value)
 {
 	modelType = static_cast<ModelType>(std::stoi(value));
@@ -184,7 +184,6 @@ void Player::decodeModelType(std::string value)
 void Player::addDecodeFunctions()
 {
 	decodingFunctions["location"] = &Player::decodeLocation;
-	decodingFunctions["isChef"] = &Player::decodeChefStatus;
 	decodingFunctions["model"] = &Player::decodeModelType;
 	decodingFunctions["hasCake"] = &Player::decodeCakeStatus;
 	decodingFunctions["inventory"] = &Player::decodeInventory;
@@ -193,7 +192,6 @@ void Player::addDecodeFunctions()
 void Player::addEncodeFunctions()
 {
 	encodingFunctions["location"] = &Player::encodeLocation;
-	encodingFunctions["isChef"] = &Player::encodeChefStatus;
 	encodingFunctions["model"] = &Player::encodeModelType;
 	encodingFunctions["hasCake"] = &Player::encodeCakeStatus;
 	encodingFunctions["inventory"] = &Player::encodeInventory;
@@ -201,7 +199,6 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["location"] = true;
 	dirtyVariablesMap["inventory"] = true;
 	dirtyVariablesMap["hasCake"] = true;
-	dirtyVariablesMap["isChef"] = true;
 	dirtyVariablesMap["model"] = true;
 
 }
@@ -226,13 +223,7 @@ std::string Player::encodeCakeStatus() {
 
 	return encodedData.str();
 }
-std::string Player::encodeChefStatus() {
-	std::stringstream encodedData;
-	encodedData << "isChef: " << isChef << std::endl;
-	dirtyVariablesMap["isChef"] = false;
 
-	return encodedData.str();
-}
 std::string Player::encodeModelType() {
 	std::stringstream encodedData;
 	encodedData << "model: " << static_cast<int>(modelType) << std::endl;

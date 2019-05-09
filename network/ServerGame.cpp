@@ -80,7 +80,7 @@ void ServerGame::receiveFromClients()
 			packet.deserialize(&(network_data[i]));
 			i += sizeof(Packet);
 
-			if (packet.packet_type != INIT_CONNECTION && packet.id == "") {
+			if (packet.packet_type != INIT_CONNECTION && packet.id == -1) {
 				continue;
 			}
 
@@ -95,7 +95,25 @@ void ServerGame::receiveFromClients()
 			case ACTION_EVENT:
 				printf("server received action event packet from client\n");
 				break;
-
+			case SELECT0_EVENT:
+				printf("server received SELECT0 event packet from client\n");
+				break;
+			case SELECT1_EVENT:
+				printf("server received SELECT1 event packet from client\n");
+				gameData->getPlayer(iter->first)->setModelType(ModelType::CHEF);
+				break;
+			case SELECT2_EVENT:
+				printf("server received SELECT2 event packet from client\n");
+				gameData->getPlayer(iter->first)->setModelType(ModelType::RACOON);
+				break;
+			case SELECT3_EVENT:
+				printf("server received SELECT3 event packet from client\n");
+				gameData->getPlayer(iter->first)->setModelType(ModelType::CAT);
+				break;
+			case SELECT4_EVENT:
+				printf("server received SELECT4 event packet from client\n");
+				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
+				break;
 			case FORWARD_EVENT:
 				if (gameData->getPlayer(iter->first)->getInteracting() || 
 					gameData->getPlayer(iter->first)->getIsCaught()) { break; }
@@ -134,7 +152,7 @@ void ServerGame::receiveFromClients()
 
 				Location loc = gameData->getPlayer(iter->first)->getLocation();
 				//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-				if (gameData->getPlayer(iter->first)->getIsChef()) 
+				if (gameData->getPlayer(iter->first)->isChef()) 
 				{
 					if (gameData->getPlayer(iter->first)->getCaughtAnimal())
 					{
@@ -159,9 +177,9 @@ void ServerGame::receiveFromClients()
 							std::map<unsigned int, SOCKET>::iterator iter2;
 							for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
 							{
-								if (iter2 == iter || gameData->getPlayer(iter2->first)->getIsChef())
+								if (iter2 == iter || gameData->getPlayer(iter2->first)->isChef())
 								{
-									if (!gameData->getPlayer(iter2->first)->getIsChef() &&
+									if (!gameData->getPlayer(iter2->first)->isChef() &&
 										!gameData->getPlayer(iter2->first)->getIsCaught()) 
 									{
 										chefWin = false;
@@ -286,14 +304,14 @@ void ServerGame::receiveFromClients()
 				}
 
 				if (gameData->getPlayer(iter->first)->getInteracting() && 
-					!gameData->getPlayer(iter->first)->getIsChef()) {
+					!gameData->getPlayer(iter->first)->isChef()) {
 					std::cout << "RELEASED SPACE" << std::endl;
 					gameData->getPlayer(iter->first)->setInteracting(false);
 				}
 
 
 				if (gameData->getPlayer(iter->first)->getOpeningGate() &&
-					!gameData->getPlayer(iter->first)->getIsChef() && gameData->getAtlas()->hasGate(loc))
+					!gameData->getPlayer(iter->first)->isChef() && gameData->getAtlas()->hasGate(loc))
 				{
 					GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 					if (!gateTile->isOpen())
@@ -362,7 +380,7 @@ void ServerGame::receiveFromClients()
 			if (gameData->getPlayer(iter->first)->getInteracting())
 			{
 				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-				if (gameData->getPlayer(iter->first)->getIsChef())
+				if (gameData->getPlayer(iter->first)->isChef())
 				{
 					if (seconds > gameData->getChefSwingTime()) {
 						std::cout << "CAN SWING AGAIN" << std::endl;
@@ -382,7 +400,7 @@ void ServerGame::receiveFromClients()
 			if (gameData->getPlayer(iter->first)->getOpenJail()) 
 			{
 				double seconds = gameData->getPlayer(iter->first)->checkProgress(1);
-				if (!gameData->getPlayer(iter->first)->getIsChef())
+				if (!gameData->getPlayer(iter->first)->isChef())
 				{
 					if (seconds > gameData->getOpenJailTime()) {
 						gameData->getPlayer(iter->first)->setOpenJail(false);
