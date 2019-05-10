@@ -243,6 +243,10 @@ void ServerGame::receiveFromClients()
 									chefWin = false;
 								}
 							}
+							if (chefWin) 
+							{
+								std::cout << "CHEF WIN" << std::endl;
+							}
 						}
 					}
 				}
@@ -277,6 +281,7 @@ void ServerGame::receiveFromClients()
 							if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
 							{
 								animalWin = true;
+								std::cout << "ANIMAL WIN" << std::endl;
 							}
 						}
 					}
@@ -703,7 +708,8 @@ void ServerGame::resetGame()
 	std::map<unsigned int, SOCKET>::iterator iter;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
-		gameData->getPlayer(iter->first)->setLocation(gameData->initLocs[count]);
+		Location loc = gameData->initLocs[count];
+		gameData->getPlayer(iter->first)->setLocation(loc.getX(), loc.getY(), loc.getZ());
 		count++;
 	}
 	std::cout << "GAME RESET" << std::endl;
