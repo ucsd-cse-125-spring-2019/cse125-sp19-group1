@@ -32,7 +32,6 @@ glm::mat4 Bone::GetTransform() {
 void Bone::SetOffset(glm::mat4 newOffset) {
 	try {
 		offset = glm::mat4(newOffset);
-
 	}
 	catch (exception e) {
 		std::cerr << "Bone's inverse binding matrix could not be set" << std::endl;
@@ -68,6 +67,7 @@ void Bone::Update(glm::mat4 globalInverseT, glm::mat4 parentT) {
 		if (isBone) {
 			// updating the transform matrix, which the vertices will access when updating skin
 			transform = globalInverseT * globalT * offset;
+			//transform = globalT * offset;
 		}
 	}
 	else {

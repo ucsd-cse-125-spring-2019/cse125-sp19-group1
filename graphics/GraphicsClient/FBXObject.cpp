@@ -1,10 +1,10 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel) {
+FBXObject::FBXObject(const char * obj_path, const char * texPath, bool attachSkel) {
 	// initialize variables
 	Init(attachSkel);
 	// read in the model and its texture from the given files
-	Parse(path, texPath);
+	Parse(obj_path, texPath);
 	// initialize rendering variables
 	RenderingSetup();
 }
@@ -285,4 +285,8 @@ void FBXObject::ToNextKeyframe() {
 		glm::mat4 identity = glm::mat4(1.0f);
 		UpdateSkin();
 	}
+}
+
+void FBXObject::LoadMatrices(const char * path) {
+
 }

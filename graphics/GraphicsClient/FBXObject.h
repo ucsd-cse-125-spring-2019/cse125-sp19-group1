@@ -69,6 +69,7 @@ public:
 	void SetBuffers();
 
 	void ToNextKeyframe();
+	void LoadMatrices(const char * path);
 };
 
 #endif

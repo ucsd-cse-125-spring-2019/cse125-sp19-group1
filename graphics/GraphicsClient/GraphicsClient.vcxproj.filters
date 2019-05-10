@@ -73,6 +73,10 @@
     <ClCompile Include="..\..\network\Walls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationChannel.cpp" />
+    <ClCompile Include="AnimationPlayer.cpp" />
+    <ClCompile Include="Keyframe.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="animloader.h">
