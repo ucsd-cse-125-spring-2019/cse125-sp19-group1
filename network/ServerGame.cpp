@@ -114,7 +114,7 @@ void ServerGame::receiveFromClients()
 				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
 				break;
 			case FORWARD_EVENT:
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
@@ -128,7 +128,7 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case BACKWARD_EVENT:
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
@@ -142,7 +142,7 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case LEFT_EVENT:
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
@@ -156,7 +156,7 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case RIGHT_EVENT:
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
@@ -171,7 +171,7 @@ void ServerGame::receiveFromClients()
 
 			case INTERACT_EVENT:
 			{
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
@@ -328,7 +328,7 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
@@ -372,7 +372,7 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
@@ -408,7 +408,7 @@ void ServerGame::receiveFromClients()
 			}
 			case HIDE_EVENT:
 			{
-				if (chefWin || animalWin) { return; }
+				if (chefWin || animalWin) { break; }
 
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught()) {
