@@ -56,7 +56,11 @@ public:
 	int timeToSwingNet = 1;
 	double timeToOpenJail = 1.5;
 
+	void startCountdown();
+	bool countdownDone();
+	bool countdownStarted();
 protected:
-
+	bool beginCountdown;
+	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;
 private:
 };

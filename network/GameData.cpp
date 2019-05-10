@@ -10,6 +10,7 @@ GameData::GameData(int serverInit)
 {
 	atlas = new Atlas();
 	addDecodeFunctions();
+	beginCountdown = false;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -22,11 +23,42 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 		encodedData << iter->second->encodePlayerData(newPlayerInit);
 	}
 	encodedData << "client: " << GENERALDATA_ID << std::endl;
+
+	if (beginCountdown)
+	{
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - countdownStartTime;
+		encodedData << "count down: " << 5.0 - elapsed_seconds.count() << std::endl;
+	}
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 
 	return encodedData.str();
 }
 
+void GameData::startCountdown()
+{
+	countdownStartTime = std::chrono::system_clock::now();
+	beginCountdown = true;
+}
+bool GameData::countdownStarted()
+{
+	return beginCountdown;
+}
+bool GameData::countdownDone()
+{
+	if (beginCountdown)
+	{
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - countdownStartTime;
+
+		if (5.0 - elapsed_seconds.count() < 0)
+		{
+			beginCountdown = false;
+			return true;
+		}
+	}
+	return false;
+}
 void GameData::addNewClient(int anID, Location aLoc)
 {
 	players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);

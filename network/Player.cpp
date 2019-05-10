@@ -25,6 +25,15 @@ void Player::setModelType(ModelType type)
 	dirtyVariablesMap["model"] = true;
 }
 
+bool Player::isSelecting() const
+{
+	return selecting;
+}
+
+void Player::toggleSelecting()
+{
+	selecting = !selecting;
+}
 Location Player::getLocation() const { return location; }
 ItemName Player::getInventory() const { return inventory; }
 bool Player::getInteracting() const { return interacting; }

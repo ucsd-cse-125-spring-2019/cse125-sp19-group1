@@ -40,4 +40,7 @@ private:
 	char network_data[MAX_PACKET_SIZE];
 	
 	bool newPlayerInit;
+	bool gameStarted;
+	bool allPlayersReady;
+
 };

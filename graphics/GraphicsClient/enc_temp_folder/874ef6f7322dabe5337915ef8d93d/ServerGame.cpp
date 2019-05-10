@@ -417,11 +417,6 @@ void ServerGame::receiveFromClients()
 	{
 		sendActionPackets();
 	}
-
-	if (gameData->countdownDone())
-	{
-		gameStarted = true;
-	}
 	allPlayersReady = true;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{

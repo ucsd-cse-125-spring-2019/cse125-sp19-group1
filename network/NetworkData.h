@@ -17,6 +17,9 @@ enum PacketTypes {
 	INTERACT_EVENT = 6,
 	RELEASE_EVENT = 7,
 	DROP_EVENT = 8,
+	SELECT_EVENT,
+	READY_EVENT,
+	START_EVENT,
 	SELECT0_EVENT,
 	SELECT1_EVENT,
 	SELECT2_EVENT,
@@ -33,7 +36,7 @@ struct Packet {
 	//std::string packet_id;
 
 	int id;
-
+	int selectionNum;
 
 	void serialize(char * data) {
 		memcpy(data, this, sizeof(Packet));
