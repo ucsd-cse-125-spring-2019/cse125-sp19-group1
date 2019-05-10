@@ -709,10 +709,7 @@ void ServerGame::resetGame()
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		Location loc = gameData->initLocs[count];
-		std::cout << loc.getX() << std::endl;
-		std::cout << loc.getY() << std::endl;
-		std::cout << loc.getZ() << std::endl;
-		gameData->getPlayer(iter->first)->setLocation(loc.getX(), loc.getY(), loc.getZ());
+		gameData->addNewClient(iter->first, loc);
 		count++;
 	}
 	std::cout << "GAME RESET" << std::endl;
