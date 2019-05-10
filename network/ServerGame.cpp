@@ -444,9 +444,12 @@ void ServerGame::receiveFromClients()
 			}
 			case RESET_EVENT:
 			{
+				std::cout << "RESET_EVENT" << std::endl;
 				if (chefWin || animalWin) { 
+					std::cout << "CALLING RESET" << std::endl;
 					chefWin = false;
 					animalWin = false;
+					resetGame();
 				}
 				break;
 			}
