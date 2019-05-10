@@ -5,6 +5,7 @@
 #include <sstream>
 #include <string>
 #include "Atlas.h"
+#include <chrono>
 #include <vector>
 #include <algorithm>
 //#include "Gate.h"
@@ -52,9 +53,17 @@ public:
 	int	getBoxTime() { return timeToOpenBox; }
 	int getChefSwingTime() { return timeToSwingNet; }
 	double getOpenJailTime() { return timeToOpenJail; }
+
 	int timeToOpenBox = 2; //in seconds
 	int timeToSwingNet = 1;
 	double timeToOpenJail = 1.5;
+
+	int	chefAnger = 0;
+	void incrementChefAnger() { chefAnger++; }
+
+	std::chrono::time_point<std::chrono::system_clock> gameClock;
+	void startGameClock();
+	int getGameClock();
 
 protected:
 

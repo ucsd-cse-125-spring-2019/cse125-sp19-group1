@@ -526,6 +526,12 @@ void ServerGame::receiveFromClients()
 					}
 				}
 			}
+
+			if (gameData->getGameClock() % 5 == 0) 
+			{
+				std::cout << "incrementing chef anger" << std::endl;
+				gameData->incrementChefAnger();
+			}
 		}
 	}
 }

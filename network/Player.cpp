@@ -134,6 +134,7 @@ double Player::checkProgress(int opt) {
 	return elapsed_seconds.count();
 }
 
+
 std::string Player::encodePlayerData(bool newPlayerInit)
 //std::string Player::encodePlayerData() const
 {
