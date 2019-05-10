@@ -692,6 +692,7 @@ void ServerGame::updateCollision(int id)
 
 void ServerGame::resetGame() 
 {
+	std::cout << "CALLING RESET GAME" << std::endl;
 	gameData = new GameData(SERVER_GAMEDATA);
 
 	//reset players
@@ -702,4 +703,6 @@ void ServerGame::resetGame()
 		gameData->getPlayer(iter->first)->setLocation(gameData->initLocs[count]);
 		count++;
 	}
+	std::cout << "GAME RESET" << std::endl;
+
 }
