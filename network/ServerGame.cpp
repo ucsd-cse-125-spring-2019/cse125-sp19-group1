@@ -526,11 +526,6 @@ void ServerGame::receiveFromClients()
 					}
 				}
 			}
-
-			if (gameData->getGameClock() % 10 == 0) 
-			{
-				gameData->incrementChefAnger();
-			}
 		}
 	}
 }
