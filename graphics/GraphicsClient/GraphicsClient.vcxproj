@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h" />
     <ClInclude Include="..\..\network\BoxTile.h" />
+    <ClInclude Include="..\..\network\Chef.h" />
     <ClInclude Include="..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\network\ClientNetwork.h" />
     <ClInclude Include="..\..\network\GameData.h" />
@@ -139,6 +140,7 @@
     <ClInclude Include="..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\network\NetworkServices.h" />
     <ClInclude Include="..\..\network\Player.h" />
+    <ClInclude Include="..\..\network\Player2.h" />
     <ClInclude Include="..\..\network\RampTile.h" />
     <ClInclude Include="..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\network\ServerNetwork.h" />

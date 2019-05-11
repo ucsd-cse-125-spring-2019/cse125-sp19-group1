@@ -11,6 +11,7 @@ GameData::GameData(int serverInit)
 	atlas = new Atlas();
 	addDecodeFunctions();
 	beginCountdown = false;
+	countdownCompleted = false;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -54,10 +55,11 @@ bool GameData::countdownDone()
 		if (5.0 - elapsed_seconds.count() < 0)
 		{
 			beginCountdown = false;
+			countdownCompleted = true;
 			return true;
 		}
 	}
-	return false;
+	return countdownCompleted;
 }
 void GameData::addNewClient(int anID, Location aLoc)
 {

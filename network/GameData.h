@@ -62,5 +62,6 @@ public:
 protected:
 	bool beginCountdown;
 	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;
+	bool countdownCompleted;
 private:
 };

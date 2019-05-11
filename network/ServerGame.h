@@ -42,5 +42,5 @@ private:
 	bool newPlayerInit;
 	bool gameStarted;
 	bool allPlayersReady;
-
+	bool initCharacters;
 };

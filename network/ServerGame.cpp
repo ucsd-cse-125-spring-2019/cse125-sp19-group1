@@ -13,6 +13,7 @@ bool animalWin = false;
 
 ServerGame::ServerGame(void)
 {
+	initCharacters = false;
 	gameStarted = false;
 	newPlayerInit = false;
 	allPlayersReady = false;
@@ -100,12 +101,16 @@ void ServerGame::receiveFromClients()
 				break;
 			case READY_EVENT:
 				printf("server received ENTER event packet from client\n");
-				gameData->getPlayer(iter->first)->toggleSelecting();
+				if(!gameStarted)
+					gameData->getPlayer(iter->first)->toggleSelecting();
 				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
-				if(allPlayersReady)
+				if (!gameStarted && allPlayersReady)
+				{
+					initCharacters = true;
 					gameData->startCountdown();
+				}
 				break;
 			case SELECT_EVENT:
 				printf("server received SELECT event packet from client\n");
@@ -421,6 +426,11 @@ void ServerGame::receiveFromClients()
 	if (gameData->countdownDone())
 	{
 		gameStarted = true;
+	}
+
+	if (initCharacters)
+	{
+		initCharacters = false;
 	}
 	allPlayersReady = true;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
