@@ -6,4 +6,6 @@ class Chef : public Player
 public:
 
 protected:
+	int			caughtAnimalId;
+
 };

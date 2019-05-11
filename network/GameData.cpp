@@ -61,13 +61,29 @@ bool GameData::countdownDone()
 	}
 	return countdownCompleted;
 }
-void GameData::addNewClient(int anID, Location aLoc)
+void GameData::addNewPlayer(int anID, Location aLoc, ClientType type)
 {
+	if (type == ClientType::SERVER_SIDE)
+	{
+		
+	}
+	else if (type == ClientType::CLIENT_SIDE)
+	{
+
+	}
 	players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 }
 
-void GameData::removeClient(int anID)
+void GameData::removePlayer(int anID, ClientType type)
 {
+	if (type == ClientType::SERVER_SIDE)
+	{
+
+	}
+	else if (type == ClientType::CLIENT_SIDE)
+	{
+
+	}
 	players.erase(anID);
 }
 
@@ -208,7 +224,7 @@ void GameData::decodeGameData(const char * data)
 			playerID = std::stoi(value);
 			if (players.count(playerID) == 0 && playerID != GENERALDATA_ID)
 			{
-				addNewClient(playerID, Location());
+				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
 		}
 		else

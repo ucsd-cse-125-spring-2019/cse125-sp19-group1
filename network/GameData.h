@@ -12,6 +12,8 @@
 #define GENERALDATA_ID -999
 #define SERVER_GAMEDATA 123
 
+enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
+
 class GameData
 {
 public:
@@ -31,8 +33,8 @@ public:
 	Atlas * atlas;
 
 	std::vector<std::vector<Tile *>> clientTileLayout;
-	void addNewClient(int anID, Location aLoc);
-	void removeClient(int anID);
+	void addNewPlayer(int anID, Location aLoc, ClientType type);
+	void removePlayer(int anID, ClientType type);
 
 	using decodeFunctionType = void (GameData::*)(std::string value);
 	std::map<std::string, decodeFunctionType> decodingFunctions;

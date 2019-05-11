@@ -67,7 +67,7 @@ void ServerGame::receiveFromClients()
 			{
 				printf("Client disconnected\n");
 				closesocket(iter->second);
-				gameData->removeClient(iter->first);
+				gameData->removePlayer(iter->first, ClientType::SERVER_SIDE);
 				network->sessions.erase(iter++);
 			}
 			else
@@ -535,7 +535,7 @@ void ServerGame::initNewClient()
 	//updating current data structure to hold onto client
 	//std::vector<int> loc{ 10, 0, 10 };
 
-	gameData->addNewClient(client_id, Location(30, 0, 30));
+	gameData->addNewPlayer(client_id, Location(30, 0, 30), ClientType::SERVER_SIDE);
 }
 
 void ServerGame::updateRightEvent(int id)

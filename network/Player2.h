@@ -88,7 +88,6 @@ protected:
 	bool		caughtAnimal = false;
 	bool		isCaught = false;
 	int			radius = 10;
-	int			caughtAnimalId;
 	std::chrono::time_point<std::chrono::system_clock> start;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;
