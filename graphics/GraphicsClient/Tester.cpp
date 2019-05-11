@@ -298,8 +298,6 @@ void reloadMap()
 			float y = tile->getHeight() * 0.5f * TILE_LEVEL_OFFSET;
 			auto skew = glm::mat4(1.0f);
 
-			//TODO: add ramp direction to the Tile class
-			// For now, randomize as a reminder
 			int rampDirection = 0;
 			if (tile->getTileType() == TileType::RAMP) {
 				const RampTile *rampTile = (RampTile *)tile;
