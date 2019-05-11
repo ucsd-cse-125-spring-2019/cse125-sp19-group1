@@ -41,7 +41,7 @@ public:
 			>> rampDirection_str;
 
 		// Update class variables
-		rampDirection = static_cast<Orientation>(rampDirection);
+		rampDirection = static_cast<Orientation>(stoi(rampDirection_str));
 	}
 
 protected:
