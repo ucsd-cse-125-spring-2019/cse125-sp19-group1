@@ -703,8 +703,10 @@ void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
 bool alreadyFlushed = false;
 void idempotentFlush()
 {
-	alreadyFlushed = true;
-	glFlush();
+	if (!alreadyFlushed) {
+		alreadyFlushed = true;
+		glFlush();
+	}
 }
 
 void resetIdempotentFlush()
@@ -1008,5 +1010,5 @@ int main(void)
 	// Terminate GLFW
 	glfwTerminate();
 
-	exit(EXIT_SUCCESS);
+	return EXIT_SUCCESS;
 }
