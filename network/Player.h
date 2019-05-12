@@ -47,7 +47,7 @@ public:
 	void setCaughtAnimal(bool caught);
 	void setIsCaught(bool caught);
 	void setCaughtAnimalId(int id);
-	void setStartTime();
+	void setActionStartTime();
 	void setStartJailTime();
 
 	void toggleSelecting();
@@ -89,7 +89,7 @@ protected:
 	bool		isCaught = false;
 	int			radius = 10;
 	int			caughtAnimalId;
-	std::chrono::time_point<std::chrono::system_clock> start;
+	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;
 

@@ -216,7 +216,7 @@ void ServerGame::receiveFromClients()
 							{
 								std::cout << "CAN SWING" << std::endl;
 								gameData->getPlayer(iter->first)->setInteracting(true);
-								gameData->getPlayer(iter->first)->setStartTime();
+								gameData->getPlayer(iter->first)->setActionStartTime();
 
 								chefWin = true;
 								std::map<unsigned int, SOCKET>::iterator iter2;
@@ -273,7 +273,7 @@ void ServerGame::receiveFromClients()
 							{
 
 								gameData->getPlayer(iter->first)->setOpeningGate(true);
-								gameData->getPlayer(iter->first)->setStartTime();
+								gameData->getPlayer(iter->first)->setActionStartTime();
 							}
 							if (gateTile->hasAllKeys() && gateTile->isOpen())
 							{
@@ -286,7 +286,7 @@ void ServerGame::receiveFromClients()
 						else if (gameData->getAtlas()->hasJail(loc))
 						{
 							std::cout << "HAS JAIL" << std::endl;
-							if (!gameData->getAtlas()->isJailEmpty(loc))
+							if (!gameData->getAtlas()->isJailEmpty(loc) && !gameData->getPlayer(iter->first)->getOpenJail())
 							{
 								gameData->getPlayer(iter->first)->setOpenJail(true);
 								gameData->getPlayer(iter->first)->setStartJailTime();
@@ -324,7 +324,7 @@ void ServerGame::receiveFromClients()
 							if (!gameData->getPlayer(iter->first)->getInteracting()) {
 								std::cout << "starting to interact!" << std::endl;
 								gameData->getPlayer(iter->first)->setInteracting(true);
-								gameData->getPlayer(iter->first)->setStartTime();
+								gameData->getPlayer(iter->first)->setActionStartTime();
 							}
 						}
 					}

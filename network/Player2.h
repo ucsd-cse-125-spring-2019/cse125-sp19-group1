@@ -12,6 +12,8 @@
 #define NUM_PLAYER_MODEL_TYPES (4)
 enum class ModelType { DEFAULT = -1, CHEF = 0, RACOON, CAT, DOG };
 
+enum class Action { OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET};
+
 class Player
 {
 public:
@@ -44,10 +46,8 @@ public:
 	void setInteracting(bool interact);
 	void setOpenJail(bool interact);
 	void setOpeningGate(bool status);
-	void setCaughtAnimal(bool caught);
 	void setIsCaught(bool caught);
-	void setCaughtAnimalId(int id);
-	void setStartTime();
+	void setActionStartTime();
 	void setStartJailTime();
 
 	void toggleSelecting();
@@ -85,10 +85,8 @@ protected:
 	bool		interacting;
 	bool		openingJail;
 	bool		openingGate;
-	bool		caughtAnimal = false;
 	bool		isCaught = false;
-	int			radius = 10;
-	std::chrono::time_point<std::chrono::system_clock> start;
+	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;
 

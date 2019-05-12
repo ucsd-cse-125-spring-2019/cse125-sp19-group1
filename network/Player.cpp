@@ -118,8 +118,8 @@ bool Player::inRange(Location & myLoc, Location & theirLoc) {
 	return false;
 }
 
-void Player::setStartTime() {
-	start = std::chrono::system_clock::now();
+void Player::setActionStartTime() {
+	actionStartTime = std::chrono::system_clock::now();
 }
 
 void Player::setStartJailTime() {
@@ -128,7 +128,7 @@ void Player::setStartJailTime() {
 
 double Player::checkProgress(int opt) {
 	auto now = std::chrono::system_clock::now();
-	std::chrono::duration<double> elapsed_seconds = now - start;
+	std::chrono::duration<double> elapsed_seconds = now - actionStartTime;
 	if (opt == 1) 
 	{
 		elapsed_seconds = now - startJail;
