@@ -126,7 +126,7 @@ void Player::setStartJailTime() {
 	startJail = std::chrono::system_clock::now();
 }
 
-double Player::checkProgress(int opt) {
+double Player::getInteractingTime(int opt) {
 	auto now = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = now - actionStartTime;
 	if (opt == 1) 

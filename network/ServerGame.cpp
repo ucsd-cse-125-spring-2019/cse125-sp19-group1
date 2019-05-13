@@ -343,7 +343,7 @@ void ServerGame::receiveFromClients()
 					Location loc = gameData->getPlayer(iter->first)->getLocation();
 
 					if (gameData->getPlayer(iter->first)->getInteracting()) {
-						double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+						double seconds = gameData->getPlayer(iter->first)->getInteractingTime(0);
 						if (seconds > gameData->getBoxTime()) {
 							std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 							gameData->getAtlas()->updateBoxLayout(loc);
@@ -368,7 +368,7 @@ void ServerGame::receiveFromClients()
 							gameData->getPlayer(iter->first)->setOpeningGate(false);
 
 							//update progress of gate 
-							double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+							double seconds = gameData->getPlayer(iter->first)->getInteractingTime(0);
 							gateTile->constructGate(seconds);
 						}
 					}
@@ -450,7 +450,7 @@ void ServerGame::receiveFromClients()
 
 			if (gameData->getPlayer(iter->first)->getInteracting())
 			{
-				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+				double seconds = gameData->getPlayer(iter->first)->getInteractingTime(0);
 				if (gameData->getPlayer(iter->first)->isChef())
 				{
 					if (seconds > gameData->getChefSwingTime()) {
@@ -470,7 +470,7 @@ void ServerGame::receiveFromClients()
 
 			if (gameData->getPlayer(iter->first)->getOpenJail()) 
 			{
-				double seconds = gameData->getPlayer(iter->first)->checkProgress(1);
+				double seconds = gameData->getPlayer(iter->first)->getInteractingTime(1);
 				if (!gameData->getPlayer(iter->first)->isChef())
 				{
 					if (seconds > gameData->getOpenJailTime()) {
@@ -485,7 +485,7 @@ void ServerGame::receiveFromClients()
 
 				if (!gateTile->isOpen())
 				{
-					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+					double seconds = gameData->getPlayer(iter->first)->getInteractingTime(0);
 
 					if (gameData->getPlayer(iter->first)->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
 					{

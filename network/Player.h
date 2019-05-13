@@ -56,7 +56,7 @@ public:
 	bool inRange(Location & myLoc, Location & theirLoc);
 
 	
-	double checkProgress(int opt);
+	double getInteractingTime(int opt);
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;
