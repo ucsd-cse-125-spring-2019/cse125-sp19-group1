@@ -19,15 +19,11 @@ void main()
 
 
     color =  texture(tex, vec2(uv.x * 3, uv.y * 3));
-	vec4 upPixels = texture(tex, vec2(uv.x * 3, uv.y * 3 + 0.0001));
-	vec4 downPixels = texture(tex, vec2(uv.x * 3, uv.y * 3 - 0.0001));
-	vec4 leftPixels = texture(tex, vec2(uv.x * 3 + 0.0001, uv.y * 3));
-	vec4 rightPixels = texture(tex, vec2(uv.x * 3 - 0.0001, uv.y * 3));
+
 	
-	if(blackToTrans(upPixels) || blackToTrans(downPixels) ||
-	   blackToTrans(leftPixels) || blackToTrans(rightPixels)) {
+	if(blackToTrans(color)){
 		color = vec4(0,0,0,0); 
-	  }
+	}
 
 
 }  
