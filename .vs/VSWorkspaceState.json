@@ -6,7 +6,8 @@
     "\\network",
     "\\server",
     "\\server\\server",
-    "\\server\\server\\server"
+    "\\server\\server\\server",
+    "\\server\\server_vs"
   ],
   "SelectedNode": "\\graphics\\GraphicsClient\\GraphicsClient.sln",
   "PreviewInSolutionExplorer": false

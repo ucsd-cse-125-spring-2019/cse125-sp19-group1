@@ -32,7 +32,6 @@ void ServerGame::update()
     {
         printf("client %d has been connected to the server\n",client_id); 
     }
-	if (chefWin || animalWin) { return; }
 	receiveFromClients();
 	//sendActionPackets();
 
@@ -115,6 +114,8 @@ void ServerGame::receiveFromClients()
 				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
 				break;
 			case FORWARD_EVENT:
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
 					gameData->getPlayer(iter->first)->getHidden()) { 
@@ -127,6 +128,8 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case BACKWARD_EVENT:
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
 					gameData->getPlayer(iter->first)->getHidden()) {
@@ -139,6 +142,8 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case LEFT_EVENT:
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
 					gameData->getPlayer(iter->first)->getHidden()) {
@@ -151,6 +156,8 @@ void ServerGame::receiveFromClients()
 				break;
 
 			case RIGHT_EVENT:
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
 					gameData->getPlayer(iter->first)->getHidden()) {
@@ -164,6 +171,8 @@ void ServerGame::receiveFromClients()
 
 			case INTERACT_EVENT:
 			{
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
 					gameData->getPlayer(iter->first)->getHidden()) {
@@ -234,6 +243,10 @@ void ServerGame::receiveFromClients()
 									chefWin = false;
 								}
 							}
+							if (chefWin) 
+							{
+								std::cout << "CHEF WIN" << std::endl;
+							}
 						}
 					}
 				}
@@ -268,6 +281,7 @@ void ServerGame::receiveFromClients()
 							if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
 							{
 								animalWin = true;
+								std::cout << "ANIMAL WIN" << std::endl;
 							}
 						}
 					}
@@ -314,6 +328,8 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
 					gameData->getPlayer(iter->first)->getHidden()) {
@@ -356,6 +372,8 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught() ||
 					gameData->getPlayer(iter->first)->getHidden()) {
@@ -390,6 +408,8 @@ void ServerGame::receiveFromClients()
 			}
 			case HIDE_EVENT:
 			{
+				if (chefWin || animalWin) { break; }
+
 				if (gameData->getPlayer(iter->first)->getInteracting() ||
 					gameData->getPlayer(iter->first)->getIsCaught()) {
 					break;
@@ -424,6 +444,17 @@ void ServerGame::receiveFromClients()
 						//set animal to hidden
 						gameData->getPlayer(iter->first)->setHidden(true);
 					}
+				}
+				break;
+			}
+			case RESET_EVENT:
+			{
+				std::cout << "RESET_EVENT" << std::endl;
+				if (chefWin || animalWin) { 
+					std::cout << "CALLING RESET" << std::endl;
+					chefWin = false;
+					animalWin = false;
+					resetGame();
 				}
 				break;
 			}
@@ -665,4 +696,22 @@ void ServerGame::updateCollision(int id)
 	gameData->getAtlas()->detectCollision(loc);
 	//gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 	gameData->getPlayer(id)->setLocation(loc);
+}
+
+void ServerGame::resetGame() 
+{
+	std::cout << "CALLING RESET GAME" << std::endl;
+	gameData = new GameData(SERVER_GAMEDATA);
+
+	//reset players
+	int count = 0;
+	std::map<unsigned int, SOCKET>::iterator iter;
+	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
+	{
+		Location loc = gameData->initLocs[count];
+		gameData->addNewClient(iter->first, loc);
+		count++;
+	}
+	std::cout << "GAME RESET" << std::endl;
+
 }

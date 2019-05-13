@@ -861,6 +861,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_4) {
 			client->sendPackets(SELECT4_EVENT);
 		}
+		if (key == GLFW_KEY_P) {
+			client->sendPackets(RESET_EVENT);
+		}
+
 	}
 	else if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_UP) {

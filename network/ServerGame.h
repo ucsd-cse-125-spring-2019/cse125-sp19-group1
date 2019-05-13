@@ -24,6 +24,7 @@ public:
 	void updateHeight(int id);
 	void updateCollision(int id);
 	void updatePlayerCollision(int id, int dir);
+	void resetGame();
 
 	GameData * gameData;
 private:

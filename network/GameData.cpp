@@ -197,3 +197,16 @@ void GameData::decodeGameData(const char * data)
 		}
 	}
 }
+
+int GameData::getGameClock()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - gameClock;
+	return (int)elapsed_seconds.count();
+}
+
+
+void GameData::startGameClock()
+{
+	gameClock = std::chrono::system_clock::now();
+}
