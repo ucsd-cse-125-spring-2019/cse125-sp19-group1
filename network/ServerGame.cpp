@@ -102,7 +102,7 @@ void ServerGame::receiveFromClients()
 			case READY_EVENT:
 				printf("server received ENTER event packet from client\n");
 				if(!gameStarted)
-					gameData->getPlayer(iter->first)->toggleSelecting();
+					gameData->getPlayer(iter->first)->toggleReady();
 				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
@@ -436,7 +436,7 @@ void ServerGame::receiveFromClients()
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		if (Player * player = gameData->getPlayer(iter->first)) {
-			if (player->isSelecting())
+			if (player->isReady())
 			{
 				allPlayersReady = false;
 			}

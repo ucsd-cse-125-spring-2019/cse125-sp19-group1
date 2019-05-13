@@ -33,7 +33,7 @@ public:
 	bool		getIsCaught() const;
 	int			getCaughtAnimalId() const;
 
-	bool		isSelecting() const;
+	bool		isReady() const;
 
 
 	// Setters
@@ -50,7 +50,7 @@ public:
 	void setActionStartTime();
 	void setStartJailTime();
 
-	void toggleSelecting();
+	void toggleReady();
 	
 
 	bool inRange(Location & myLoc, Location & theirLoc);

@@ -25,12 +25,12 @@ void Player::setModelType(ModelType type)
 	dirtyVariablesMap["model"] = true;
 }
 
-bool Player::isSelecting() const
+bool Player::isReady() const
 {
 	return selecting;
 }
 
-void Player::toggleSelecting()
+void Player::toggleReady()
 {
 	selecting = !selecting;
 }
