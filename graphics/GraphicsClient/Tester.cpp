@@ -29,7 +29,7 @@ FBXObject * chefModel = nullptr;
 FBXObject * tileModel = nullptr;
 FBXObject * wallModel = nullptr;
 
-FBXObject * uiCanvas = nullptr;
+UICanvas * uiCanvas = nullptr;
 GLuint objShaderProgram;
 GLuint uiShaderProgram;
 
@@ -275,8 +275,7 @@ void Init()
 	chefModel = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
-	uiCanvas = new FBXObject(CANVAS_MDL_PATH, CANVAS_TEX_PATH, false);
-	uiCanvas->SetDepthTest(false);
+	uiCanvas = new UICanvas(uiShaderProgram);
 
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
@@ -544,7 +543,7 @@ void DisplayCallback(GLFWwindow* window)
 	root->draw(V, P, glm::mat4(1.0));
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-	uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
+	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);

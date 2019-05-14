@@ -96,6 +96,9 @@
     <ClCompile Include="UIObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UICanvas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -202,6 +205,9 @@
     </ClInclude>
     <ClInclude Include="FogGenerator.h" />
     <ClInclude Include="UIObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UICanvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

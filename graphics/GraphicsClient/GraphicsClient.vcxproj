@@ -161,6 +161,7 @@
     <ClInclude Include="Tester.h" />
     <ClInclude Include="textureloader.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="UICanvas.h" />
     <ClInclude Include="UIObject.h" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
@@ -194,6 +195,7 @@
     <ClCompile Include="Tester.cpp" />
     <ClCompile Include="textureloader.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UICanvas.cpp" />
     <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="Vertex.cpp" />
   </ItemGroup>
