@@ -10,12 +10,14 @@
 #include "Location.h"
 
 #define NUM_PLAYER_MODEL_TYPES (4)
-enum class ModelType { DEFAULT = -1, CHEF = 0, RACOON, CAT, DOG};
+enum class ModelType { DEFAULT = -1, CHEF = 0, RACOON, CAT, DOG };
+
+enum class Action { OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET};
 
 class Player
 {
 public:
-	
+
 	// Constructors
 	Player();
 	Player(int anID);
@@ -41,29 +43,23 @@ public:
 	void setModelType(ModelType type);
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
-	bool getHidden();
-	void setHidden(bool hide);
-	bool getInteracting();
-
 	void setInteracting(bool interact);
 	void setOpenJail(bool interact);
 	void setOpeningGate(bool status);
-	void setCaughtAnimal(bool caught);
 	void setIsCaught(bool caught);
-	void setCaughtAnimalId(int id);
 	void setActionStartTime();
 	void setStartJailTime();
 
 	void toggleReady();
-	
+
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
-	
+
 	double getInteractingTime(int opt);
 
 	std::string encodePlayerData(bool newPlayerInit);
-//	std::string encodePlayerData() const;
+	//	std::string encodePlayerData() const;
 	void decodePlayerData(std::string key, std::string value);
 
 	// Decode functions
@@ -72,7 +68,6 @@ public:
 	void decodeInventory(std::string value);
 	void decodeCakeStatus(std::string value);
 	void decodeModelType(std::string value);
-	void decodeHidden(std::string value);
 
 	// Encode functions
 	void addEncodeFunctions();
@@ -80,7 +75,6 @@ public:
 	std::string encodeInventory();
 	std::string encodeCakeStatus();
 	std::string encodeModelType();
-	std::string encodeHidden();
 
 protected:
 	Location	location;
@@ -91,12 +85,7 @@ protected:
 	bool		interacting;
 	bool		openingJail;
 	bool		openingGate;
-	bool		caughtAnimal = false;
 	bool		isCaught = false;
-	int			radius = 10;
-	int			caughtAnimalId;
-	bool		hidden = false;
-
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;

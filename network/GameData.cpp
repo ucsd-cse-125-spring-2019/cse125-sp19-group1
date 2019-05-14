@@ -10,6 +10,8 @@ GameData::GameData(int serverInit)
 {
 	atlas = new Atlas();
 	addDecodeFunctions();
+	beginCountdown = false;
+	countdownCompleted = false;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -22,18 +24,66 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 		encodedData << iter->second->encodePlayerData(newPlayerInit);
 	}
 	encodedData << "client: " << GENERALDATA_ID << std::endl;
+
+	if (beginCountdown)
+	{
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - countdownStartTime;
+		encodedData << "count down: " << 5.0 - elapsed_seconds.count() << std::endl;
+	}
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 
 	return encodedData.str();
 }
 
-void GameData::addNewClient(int anID, Location aLoc)
+void GameData::startCountdown()
 {
+	countdownStartTime = std::chrono::system_clock::now();
+	beginCountdown = true;
+}
+bool GameData::countdownStarted()
+{
+	return beginCountdown;
+}
+bool GameData::countdownDone()
+{
+	if (beginCountdown)
+	{
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - countdownStartTime;
+
+		if (5.0 - elapsed_seconds.count() < 0)
+		{
+			beginCountdown = false;
+			countdownCompleted = true;
+			return true;
+		}
+	}
+	return countdownCompleted;
+}
+void GameData::addNewPlayer(int anID, Location aLoc, ClientType type)
+{
+	if (type == ClientType::SERVER_SIDE)
+	{
+		
+	}
+	else if (type == ClientType::CLIENT_SIDE)
+	{
+
+	}
 	players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 }
 
-void GameData::removeClient(int anID)
+void GameData::removePlayer(int anID, ClientType type)
 {
+	if (type == ClientType::SERVER_SIDE)
+	{
+
+	}
+	else if (type == ClientType::CLIENT_SIDE)
+	{
+
+	}
 	players.erase(anID);
 }
 
@@ -174,7 +224,7 @@ void GameData::decodeGameData(const char * data)
 			playerID = std::stoi(value);
 			if (players.count(playerID) == 0 && playerID != GENERALDATA_ID)
 			{
-				addNewClient(playerID, Location());
+				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
 		}
 		else

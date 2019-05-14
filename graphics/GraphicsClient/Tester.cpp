@@ -834,6 +834,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			// interact key press
 			client->sendPackets(INTERACT_EVENT);
 		}
+
+		if (key == GLFW_KEY_ENTER) {
+			// interact key press
+			client->sendPackets(READY_EVENT);
+		}
+		if (key == GLFW_KEY_O) {
+			// interact key press
+			client->sendPackets(START_EVENT);
+		}
 		if (key == GLFW_KEY_D) {
 			client->sendPackets(DROP_EVENT);
 		}
