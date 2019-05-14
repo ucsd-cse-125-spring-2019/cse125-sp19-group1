@@ -30,6 +30,8 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	// Load the corresponding model texture
 	texNum = loadTexture(texFilepath);
+	if (animPlayer != NULL)
+		LoadMatrices(filepath);
 }
 
 FBXObject::~FBXObject()
@@ -60,11 +62,11 @@ void FBXObject::PrintSkeleton() {
 void FBXObject::Update() {
 	// This function will handle anything that must continuously occur.
 	// right now trying to handle updating the animation through this function.
-	/*if (animPlayer != NULL) {
+	if (false) { //animPlayer != NULL) {
 		animPlayer->play();
 		skel->Update(animPlayer->GetGlobalInverseT());
 		UpdateSkin();
-	}*/
+	}
 }
 
 void FBXObject::UpdateSkin() {
@@ -296,6 +298,43 @@ void FBXObject::ToNextKeyframe() {
 	if (animPlayer != NULL) {
 		animPlayer->ToNextKeyframe();
 		skel->Update(animPlayer->GetGlobalInverseT());
-		// TODO: UpdateSkin(); -> NaN error makes the model disappear
+		glm::mat4 identity = glm::mat4(1.0f);
+		UpdateSkin();
 	}
+}
+
+void FBXObject::LoadMatrices(const char * path) {
+	int bufsize = 128;
+	Tokenizer * token = new Tokenizer();
+	token->Open(path);
+	if (token->FindToken("<library_animations>")) {
+		while (token->FindToken("<animation id=\"")) {
+			char * out = new char[bufsize];
+			token->GetToken(out);
+			string boneName = "";
+			// extracting the bone name
+			for (int index = 0; out[index] != '-' && index < bufsize; index++)
+				boneName = boneName + out[index];
+			Bone * currBone = skel->GetBone(boneName);
+			if (currBone != NULL) {
+				string param = string("id=\"") + boneName + string("-Matrix-animation-output-transform-array\" count=\"");
+				if (token->FindToken(param.c_str())) {
+					int numValues = token->GetInt();
+					// skipping to the end of the line to start reading floats
+					if (token->FindToken("\">")) {
+						float * values = new float[numValues];
+						for (int i = 0; i < numValues; i++)
+							values[i] = token->GetFloat();
+						currBone->SetChannelMatrices(values, numValues);
+					}
+					else
+						std::cout << "ERROR READING FLOATS FOR " << boneName << std::endl;
+				}
+			}
+		}
+	}
+	else
+		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
+
+	token->Close();
 }
