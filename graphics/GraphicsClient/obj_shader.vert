@@ -9,6 +9,7 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 vertexUV;
+layout (location = 3) in int vertexId;
 
 // Uniform variables can be updated by fetching their location and passing values to that location
 uniform mat4 projection;
@@ -19,6 +20,8 @@ uniform vec3 ambColor;
 uniform vec3 specColor;
 uniform float shineAmt;
 uniform mat4 depthBiasMVP;
+uniform int isAnimated;
+uniform mat4 [] bones;
 
 // Outputs of the vertex shader are the inputs of the same name of the fragment shader.
 // The default output, gl_Position, should be assigned something. You can define as many

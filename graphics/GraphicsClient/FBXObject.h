@@ -15,17 +15,19 @@ private:
 	float shininess;
 
 	// These variables are needed for the shader program
-	GLuint VAO, VBO_V, VBO_N, VBO_UV, EBO;
+	GLuint VAO, VBO_V, VBO_N, VBO_UV, VBO_WI, VBO_WV, EBO;
 	GLuint uProjection, uModelview, uView;
 	GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
 	GLuint texNum;
+	GLuint uIsAnimated;
+	GLuint uBones;
 
 	glm::mat4 toWorld;
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
-
+	
 	Skeleton * skel;
 	AnimationPlayer * animPlayer;
 	bool hasSkel;
@@ -36,6 +38,8 @@ private:
 	glm::vec3 default_diff = glm::vec3(0.12164f, 0.10648f, 0.034648f);
 	glm::vec3 default_spec = glm::vec3(0.118281f, 0.085802f, 0.066065f);
 	float default_shininess =  0.5f;
+
+	int printcount;
 
 public:
 	// creating. destroying, and debugging

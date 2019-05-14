@@ -37,11 +37,11 @@ void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertice
 	std::vector<Vertex *> * skelVertices = skel->GetVertices();
 	populateSkelVertices(mesh, vertices, normals, skelVertices);
 	// creating actual Bone objects and populating the Skeleton
-	traverseSkeleton(root, skel);
+	traverseSkeleton(root, 0, skel);
 	assignOffsetMatrices(mesh, skel);
 }
 
-void traverseSkeleton(aiNode * currNode, Skeleton * skel)
+void traverseSkeleton(aiNode * currNode, unsigned int currID, Skeleton * skel)
 {
 	// get the name of the current node
 	string name = currNode->mName.C_Str();
@@ -54,13 +54,13 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 	}
 
 	// create a Bone for the node and adding it to the Skeleton
-	Bone * bone = new Bone(name, aiMatTOglm(currNode->mTransformation), parent);
+	Bone * bone = new Bone(name, currID, aiMatTOglm(currNode->mTransformation), parent);
 	skel->AddNode(name, bone);
 
 	// recurse through the tree to add the children to the Skeleton
 	for (int i = 0; i < currNode->mNumChildren; i++) {
 		aiNode * child = currNode->mChildren[i];
-		traverseSkeleton(child, skel);
+		traverseSkeleton(child, currID++, skel);
 		// after we've returned from the recursive call, the bone for the child node
 		// should now exist, so we can add it to the current bone's list of children
 		bone->AddChild(skel->GetBone(child->mName.C_Str()));
@@ -105,6 +105,9 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 				std::cout << "Error loading the bones of the skeleton!" << std::endl;
 		}
 	}
+
+	for (int k = 0; k < skelVertices->size(); k++)\
+		(*skelVertices)[k]->NormalizeWeights();
 }
 
 // convert aiMatrix4x4 to glm::mat4

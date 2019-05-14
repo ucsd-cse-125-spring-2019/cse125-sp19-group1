@@ -20,7 +20,7 @@
 bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
 	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs, Skeleton * skel, AnimationPlayer ** animPlayer);
 void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel);
-void traverseSkeleton(aiNode * currRoot, Skeleton * skel);
+void traverseSkeleton(aiNode * currRoot, unsigned int currID, Skeleton * skel);
 void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel);
 void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, std::vector<Vertex *> * skelVertices);
 glm::mat4 aiMatTOglm(aiMatrix4x4 mat);

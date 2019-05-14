@@ -28,14 +28,6 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	}
 
 	aiMatrix4x4 globalT = scene->mRootNode->mTransformation;
-	std::cout << "At root " << scene->mRootNode->mName.C_Str() << std::endl;
-	std::cout << "Global T" << std::endl;
-	for (int i = 0; i < 4; i++)
-	{
-		for (int j = 0; j < 4; j++)
-			std::cout << globalT[i][j] << " ";
-		std::cout << std::endl;
-	}
 	glm::mat4 globalInverseT = aiMatTOglm_ANIM(globalT.Inverse());
 
 	Animation * newAnimation = new Animation(0, (float)anim->mDuration, globalInverseT);
