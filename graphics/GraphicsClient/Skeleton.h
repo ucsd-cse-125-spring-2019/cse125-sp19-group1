@@ -25,6 +25,7 @@ public:
 	void PrintBoneStructure();
 	void PrintVertex(unsigned int id);
 	void Update(glm::mat4 globalInverseT);
+	void ResetBones();
 private:
 	Bone * root;
 	std::map<string, Bone *> bones;

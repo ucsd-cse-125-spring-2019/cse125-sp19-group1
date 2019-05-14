@@ -54,8 +54,9 @@ void Bone::SetChannel(AnimationChannel * newChannel) {
 void Bone::Print(string spaces) {
 	std::cout << spaces << name << std::endl;
 	for (int i = 0; i < children.size(); i++) {
-		if (children[i])
+		if (children[i]) {
 			children[i]->Print(spaces + " ");
+		}
 	}
 }
 

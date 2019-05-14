@@ -25,6 +25,8 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 		loadAnimation((aiScene*)scene, skel, animPlayer);
 		std::cerr << "Trying to get animPlayer pointer:" << *animPlayer << "\n";
 	}
+	skel->ResetBones();
+	skel->PrintBoneStructure();
 
 	// the scene will be destroyed automatically when we return
 	return true;

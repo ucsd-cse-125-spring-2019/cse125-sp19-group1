@@ -39,3 +39,7 @@ void Skeleton::Update(glm::mat4 globalInverseT) {
 	glm::mat4 identity = glm::mat4(1.0);
 	root->Update(globalInverseT, identity);
 }
+
+void Skeleton::ResetBones() {
+	root = bones["QuickRigCharacter_Reference"];
+}
