@@ -21,6 +21,8 @@ ventexit_screw.mp3:
 chef_win.mp3:
 	Male_Laugh.mp3 from YouTube Audio Library
 
+All raccoon sounds are frm Hung's own mouth.
+
 ----- Unused ----
 Suction_Cup_Pull.mp3 from YouTube Audio Library
 Wind_Chimes.mp3 from YouTube Audio Library
