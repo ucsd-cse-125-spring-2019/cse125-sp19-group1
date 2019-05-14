@@ -12,5 +12,9 @@ public:
 	FMOD::System *m_pSystem;
 	SoundSystem();
 	~SoundSystem();
+
+	void createSound(Sound *pSound, const char* pFile);
+	void playSound(Sound pSound, bool bLoop = false);
+	void releaseSound(Sound pSound);
 };
 
