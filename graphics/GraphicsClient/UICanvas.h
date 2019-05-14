@@ -1,9 +1,10 @@
-#ifndef UICANVAS_H
-#define UICANVAS_H
+
 #include "UIObject.h"
+
 #define NUM_ITEMS 20
 #define CANVAS_PATH    "../Canvas/"
-#define CANVAS_MDL_PATH     (CANVAS_PATH "canvas.fbx")
+
+#define CANVAS_MDL_PATH		(CANVAS_PATH "canvas.fbx")
 #define UI_BASE_TEX (CANVAS_PATH "base.ppm")
 #define RACCOON_HAPPY_TEX (CANVAS_PATH "raccoonHappy.ppm")
 #define CAT_HAPPY_TEX (CANVAS_PATH "catHappy.ppm")
@@ -25,6 +26,8 @@
 #define GREEN_SCREWDRIVER_ITEM_TEX (CANVAS_PATH "greenScrewdriverItem.ppm")
 #define YELLOW_SCREWDRIVER_ITEM_TEX (CANVAS_PATH "yellowScrewdriverItem.ppm")
 
+#ifndef UICANVAS_H
+#define UICANVAS_H
 class UICanvas {
 public:
 	enum UIType {
@@ -54,7 +57,7 @@ public:
 	~UICanvas();
 private:
 	bool visibleItems[NUM_ITEMS];
-	UIObject * uiItems[NUM_ITEMS];
+	class UIObject *uiItems[NUM_ITEMS];
 	GLuint shaderProgram;
 };
 
