@@ -162,6 +162,7 @@
     <ClInclude Include="objloader.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="Skeleton.h" />
+    <ClInclude Include="SoundEffect.h" />
     <ClInclude Include="Tester.h" />
     <ClInclude Include="textureloader.h" />
     <ClInclude Include="Tokenizer.h" />
@@ -196,6 +197,7 @@
     <ClCompile Include="objloader.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="Skeleton.cpp" />
+    <ClCompile Include="SoundEffect.cpp" />
     <ClCompile Include="Tester.cpp" />
     <ClCompile Include="textureloader.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
