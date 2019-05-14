@@ -52,6 +52,7 @@ UICanvas::~UICanvas() {
 }
 
 void UICanvas::draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model) {
+	glDisable(GL_DEPTH_TEST);
 	for (int i = 0; i < NUM_ITEMS; i++) {
 		if (visibleItems[i]) {
 			uiItems[i]->draw(shaderProgram, V, P, model);

@@ -3,6 +3,7 @@
 
 UIObject::UIObject(const char * texPath) {
 	altCanvas = new FBXObject(CANVAS_MDL_PATH, texPath, false);
+	altCanvas->SetDepthTest(false);
 }
 
 UIObject::~UIObject() {
