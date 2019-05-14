@@ -241,17 +241,7 @@ void ServerGame::receiveFromClients()
 								int y = loc.getY();
 								int z = (int)(loc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
 								gameData->getPlayer(animal)->setLocation(x, y, z);
-								/*
-														if (gameData->getPlayer(iter->first)->getCaughtAnimal())
-														{
-															//drop off animal
-															if (gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
-															{
-																//update jail with animal
-																gameData->getAtlas()->placeInJail(loc, gameData->getPlayer(iter->first)->getCaughtAnimalId());
-																gameData->getPlayer(iter->first)->setCaughtAnimal(false);
-															}
-															*/
+								
 							}
 							else
 							{
@@ -327,25 +317,24 @@ void ServerGame::receiveFromClients()
 								GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 								if (gateTile->isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
 								{
-									animalWin = true;
-									std::cout << "ANIMAL WIN" << std::endl;
-									/*
-																	gateTile->updateKeyProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
-																	gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
-																}
-																if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
-																{
+							
+									gateTile->updateKeyProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
+									gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+								}
+								if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
+								{
 
-																	gameData->getPlayer(iter->first)->setOpeningGate(true);
-																	gameData->getPlayer(iter->first)->setActionStartTime();
-																}
-																if (gateTile->hasAllKeys() && gateTile->isOpen())
-																{
-																	if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
-																	{
-																		animalWin = true;
-																	}
-									>>>>>>> rd */
+									gameData->getPlayer(iter->first)->setOpeningGate(true);
+									gameData->getPlayer(iter->first)->setActionStartTime();
+								}
+								if (gateTile->hasAllKeys() && gateTile->isOpen())
+								{
+									if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
+									{
+										animalWin = true;
+										std::cout << "ANIMAL WIN" << std::endl;
+									}
+								
 								}
 							}
 							else if (gameData->getAtlas()->hasJail(loc))
@@ -370,39 +359,7 @@ void ServerGame::receiveFromClients()
 
 									//update jail
 									jailTile->resetJail();
-									/*=======
-																std::cout << "HAS JAIL" << std::endl;
-																if (!gameData->getAtlas()->isJailEmpty(loc) && !gameData->getPlayer(iter->first)->getOpenJail())
-																{
-																	gameData->getPlayer(iter->first)->setOpenJail(true);
-																	gameData->getPlayer(iter->first)->setStartJailTime();
-
-																	//update jail progress
-																	gameData->getAtlas()->unlockJail(loc);
-
-																	//check if jail progress == 5
-																	if (gameData->getAtlas()->getJailProgress(loc) >= 5)
-																	{
-																		//update animal
-																		std::map<unsigned int, SOCKET>::iterator iter2;
-																		for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
-																		{
-																			if (iter2 == iter)
-																			{
-																				continue;
-																			}
-																			Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-																			std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-																			if (loc == tLoc && gameData->getPlayer(iter2->first)->getIsCaught())
-																			{
-																				gameData->getPlayer(iter2->first)->setIsCaught(false);
-																			}
-																		}
-
-																		//update jail
-																		gameData->getAtlas()->resetJail(loc);
-																	}
-									rd*/
+									
 								}
 							}
 							else if (gameData->getAtlas()->hasBox(loc))
@@ -491,19 +448,7 @@ void ServerGame::receiveFromClients()
 						gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
 
 						gameData->getAtlas()->updateDroppedItem(itemName, loc);
-						/*Item temp;
-						gameData->getAtlas()->getItem(itemName, temp);
-						if (temp.getName() != ItemName::EMPTY)
-						{
-							temp.setHoldStatus(false);
-							int row, col;
-							Atlas::getMapCoords(loc, row, col);
-							if (temp.hasBeenMoved(row, col))
-							{
-								temp.setDropped(true);
-								temp.setDroppedTime(clock());
-							}
-						}*/
+						
 					}
 				}
 				break;
