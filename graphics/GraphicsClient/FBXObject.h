@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "objloader.h"
 #include "textureloader.h"
+#include "Tokenizer.h"
 
 class FBXObject
 {
@@ -28,6 +29,7 @@ private:
 	Skeleton * skel;
 	AnimationPlayer * animPlayer;
 	bool hasSkel;
+	bool depthTest;
 
 	// Luma values
 	glm::vec3 default_amb = glm::vec3(0.08725f, 0.0795f, 0.0245f);
@@ -63,10 +65,12 @@ public:
 	void SetSpecular(glm::vec3 newSpec);
 	void SetShine(float newShine);
 	// rendering
-	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P);
+	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
 	void RenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();
+
+	void SetDepthTest(bool depthTestEnabled);
 
 	void ToNextKeyframe();
 	void LoadMatrices(const char * path);

@@ -92,3 +92,21 @@ void Bone::PrintMatrix(glm::mat4 * matrix) {
 void Bone::SetIsBone(bool input) {
 	isBone = input;
 }
+
+bool Bone::CheckIsBone() {
+	return isBone;
+}
+
+void Bone::SetChannelMatrices(float * values, int numValues) {
+	int count = 0;
+	while (count < numValues) {
+		glm::mat4 currMat = glm::mat4(1.0f);
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				currMat[j][i] = values[count];
+				count++;
+			}
+		}
+		channelMatrices.push_back(currMat);
+	}
+}

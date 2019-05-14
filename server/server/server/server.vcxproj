@@ -124,20 +124,30 @@
     <ClCompile Include="..\..\..\network\ServerGame.cpp" />
     <ClCompile Include="..\..\..\network\ServerNetwork.cpp" />
     <ClCompile Include="..\..\..\network\StringParser.cpp" />
+    <ClCompile Include="..\..\..\network\Tile.cpp" />
     <ClCompile Include="..\..\..\network\Walls.cpp" />
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\network\BoxTile.h" />
     <ClInclude Include="..\..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\..\network\ClientNetwork.h" />
     <ClInclude Include="..\..\..\network\GameData.h" />
     <ClInclude Include="..\..\..\network\Atlas.h" />
+    <ClInclude Include="..\..\..\network\Gate.h" />
+    <ClInclude Include="..\..\..\network\GateTile.h" />
+    <ClInclude Include="..\..\..\network\HideTile.h" />
+    <ClInclude Include="..\..\..\network\Item.h" />
+    <ClInclude Include="..\..\..\network\JailTile.h" />
+    <ClInclude Include="..\..\..\network\Location.h" />
     <ClInclude Include="..\..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\..\network\NetworkServices.h" />
     <ClInclude Include="..\..\..\network\Player.h" />
+    <ClInclude Include="..\..\..\network\RampTile.h" />
     <ClInclude Include="..\..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\..\network\ServerNetwork.h" />
     <ClInclude Include="..\..\..\network\StringParser.h" />
+    <ClInclude Include="..\..\..\network\Tile.h" />
     <ClInclude Include="..\..\..\network\Walls.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

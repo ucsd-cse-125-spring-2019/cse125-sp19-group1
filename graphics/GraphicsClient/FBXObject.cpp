@@ -15,6 +15,7 @@ void FBXObject::Init(bool attachSkel) {
 	this->diffuse = default_diff;
 	this->specular = default_spec;
 	this->shininess = default_shininess;
+	this->depthTest = true;
 	skel = NULL;
 	animPlayer = NULL;
 	if (attachSkel)
@@ -29,6 +30,8 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	// Load the corresponding model texture
 	texNum = loadTexture(texFilepath);
+	if (animPlayer != NULL)
+		LoadMatrices(filepath);
 }
 
 FBXObject::~FBXObject()
@@ -59,11 +62,11 @@ void FBXObject::PrintSkeleton() {
 void FBXObject::Update() {
 	// This function will handle anything that must continuously occur.
 	// right now trying to handle updating the animation through this function.
-	/*if (animPlayer != NULL) {
+	if (false) { //animPlayer != NULL) {
 		animPlayer->play();
 		skel->Update(animPlayer->GetGlobalInverseT());
 		UpdateSkin();
-	}*/
+	}
 }
 
 void FBXObject::UpdateSkin() {
@@ -156,11 +159,24 @@ void FBXObject::SetShine(float newShine) {
 	shininess = newShine;
 }
 
+void FBXObject::SetDepthTest(bool depthTestEnabled) {
+	depthTest = depthTestEnabled;
+}
 
-void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
+
+void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model)
 {
+	glUseProgram(shaderProgram);
+	if (depthTest) {
+		glEnable(GL_DEPTH_TEST);
+		// Related to shaders and z value comparisons for the depth buffer
+		glDepthFunc(GL_LEQUAL);
+	}
+	else {
+		glDisable(GL_DEPTH_TEST);
+	}
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = (*V) * toWorld;
+	glm::mat4 modelview = (*V) * model;
 
 	glBindTexture(GL_TEXTURE_2D, texNum);
 
@@ -181,7 +197,7 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 	glUniform3f(uMaterialS, (this->specular)[0], (this->specular)[1], (this->specular)[2]);
 	glUniform1f(uShine, (this->shininess));
 	// Sending the model without the view:
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &toWorld[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 	// Now draw the object. We simply need to bind the VAO associated with it.
 	glBindVertexArray(this->VAO);
 	// Tell OpenGL to draw with triangles, the number of triangles, the type of the indices, and the offset to start from
@@ -288,5 +304,37 @@ void FBXObject::ToNextKeyframe() {
 }
 
 void FBXObject::LoadMatrices(const char * path) {
+	int bufsize = 128;
+	Tokenizer * token = new Tokenizer();
+	token->Open(path);
+	if (token->FindToken("<library_animations>")) {
+		while (token->FindToken("<animation id=\"")) {
+			char * out = new char[bufsize];
+			token->GetToken(out);
+			string boneName = "";
+			// extracting the bone name
+			for (int index = 0; out[index] != '-' && index < bufsize; index++)
+				boneName = boneName + out[index];
+			Bone * currBone = skel->GetBone(boneName);
+			if (currBone != NULL) {
+				string param = string("id=\"") + boneName + string("-Matrix-animation-output-transform-array\" count=\"");
+				if (token->FindToken(param.c_str())) {
+					int numValues = token->GetInt();
+					// skipping to the end of the line to start reading floats
+					if (token->FindToken("\">")) {
+						float * values = new float[numValues];
+						for (int i = 0; i < numValues; i++)
+							values[i] = token->GetFloat();
+						currBone->SetChannelMatrices(values, numValues);
+					}
+					else
+						std::cout << "ERROR READING FLOATS FOR " << boneName << std::endl;
+				}
+			}
+		}
+	}
+	else
+		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
 
+	token->Close();
 }

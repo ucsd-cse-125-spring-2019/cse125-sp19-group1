@@ -79,3 +79,7 @@ void AnimationChannel::PrintMatrix(glm::mat4 * matrix) {
 	}
 	std::cerr << std::endl;
 }
+
+int AnimationChannel::GetCurrKeyframe() {
+	return currKeyframe;
+}

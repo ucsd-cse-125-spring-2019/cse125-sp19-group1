@@ -1,5 +1,17 @@
 #include "ClientNetwork.h"
 
+#include <windows.h>
+#pragma comment (lib, "User32.lib")
+
+#include <vector>
+
+#define ShowErrorPopup(...) {\
+	size_t len = snprintf(NULL, 0, __VA_ARGS__ ) + 1;\
+	std::vector<char> msg(len, 0);\
+	snprintf(&msg[0], len, __VA_ARGS__ );\
+	MessageBox(NULL, &msg[0], "ERROR", MB_APPLMODAL | MB_ICONERROR);\
+}
+
 ClientNetwork::ClientNetwork(void) 
 {
 	// create WSADATA object
@@ -18,7 +30,7 @@ ClientNetwork::ClientNetwork(void)
 
 	if (iResult != 0) 
     {
-		printf("WSAStartup failed with error: %d\n", iResult);
+		ShowErrorPopup("WSAStartup failed with error: %d\n", iResult);
 		exit(1);
 	}
 
@@ -28,12 +40,13 @@ ClientNetwork::ClientNetwork(void)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_protocol = IPPROTO_TCP;  //TCP connection!!!
 	//resolve server address and port 
-	//iResult = getaddrinfo("128.54.70.28", DEFAULT_PORT, &hints, &result);
-	iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
+	//iResult = getaddrinfo("128.54.70.16", DEFAULT_PORT, &hints, &result);
+	//iResult = getaddrinfo("127.0.0.1", DEFAULT_PORT, &hints, &result);
+	iResult = getaddrinfo(SERVER_IP_ADDRESS, DEFAULT_PORT, &hints, &result);
 
 	if (iResult != 0)
 	{
-		printf("getaddrinfo failed with error: %d\n", iResult);
+		ShowErrorPopup("getaddrinfo failed with error: %d\n", iResult);
 		WSACleanup();
 		exit(1);
 	}
@@ -48,7 +61,7 @@ ClientNetwork::ClientNetwork(void)
 
 		if (ConnectSocket == INVALID_SOCKET) 
         {
-			printf("socket failed with error: %ld\n", WSAGetLastError());
+			ShowErrorPopup("socket failed with error: %ld\n", WSAGetLastError());
 			WSACleanup();
 			exit(1);
 		}
@@ -60,7 +73,7 @@ ClientNetwork::ClientNetwork(void)
 		{
 			closesocket(ConnectSocket);
 			ConnectSocket = INVALID_SOCKET;
-			printf("The server is down... did not connect");
+			ShowErrorPopup("The server is down... did not connect");
 		}
 	}
 
@@ -70,7 +83,7 @@ ClientNetwork::ClientNetwork(void)
 	// if connection failed
 	if (ConnectSocket == INVALID_SOCKET)
 	{
-		printf("Unable to connect to server!\n");
+		ShowErrorPopup("Unable to connect to server!\n");
 		WSACleanup();
 		exit(1);
 	}
@@ -81,7 +94,7 @@ ClientNetwork::ClientNetwork(void)
 	iResult = ioctlsocket(ConnectSocket, FIONBIO, &iMode);
 	if (iResult == SOCKET_ERROR)
 	{
-		printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
+		ShowErrorPopup("ioctlsocket failed with error: %d\n", WSAGetLastError());
 		closesocket(ConnectSocket);
 		WSACleanup();
 		exit(1);
@@ -99,7 +112,7 @@ int ClientNetwork::receivePackets(char * recvbuf)
 
 	if (iResult == 0)
 	{
-		printf("Connection closed\n");
+		ShowErrorPopup("Connection closed\n");
 		closesocket(ConnectSocket);
 		WSACleanup();
 		exit(1);

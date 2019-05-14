@@ -1,0 +1,29 @@
+catching_animal.mp3: 
+	Pop.mp3 from YouTube Audio Library
+search_item.mp3: 
+	Opening_Plastic_Storage_Container.mp3 from YouTube Audio Library
+found_item.mp3:
+	Coins_Shuffling.mp3 from YouTube Audio Library
+	need only a couple seconds from clip
+bathroom_toilet.mp3:
+	Toilet_Flush_Very_Close.mp3 from YouTube Audio Library
+	need only the first half
+bathroom_window.mp3: 
+	Open_and_Close_Window.mp3 from YouTube Audio Library
+frontexit_unlock.mp3:
+	Key_In_Lock.mp3 from YouTube Audio Library
+	need only first half
+frontexit_door.mp3:
+	Door_Open_Close.mp3 from YouTube Audio Library
+	need only a few seconds
+ventexit_screw.mp3:
+	18V_Cordless_Drill_High_Pitch.mp3 from YouTube Audio Library
+chef_win.mp3:
+	Male_Laugh.mp3 from YouTube Audio Library
+
+All raccoon sounds are frm Hung's own mouth.
+
+----- Unused ----
+Suction_Cup_Pull.mp3 from YouTube Audio Library
+Wind_Chimes.mp3 from YouTube Audio Library
+Water_Running_By.mp3 from YouTube Audio Library

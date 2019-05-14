@@ -4,32 +4,150 @@
 
 #include "Tester.h"
 #include <ctime>
-int elapsedTime = 0;
+#include <algorithm>
 
+#define TILE_HEIGHT_ADJUST -2.f
+#define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
+#define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
+#define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
+
+// Uncomment to render an additional dummy Chef that mirrors the player's movements
+// #define DUMMY_ID -4000
+
+int elapsedTime = 0;
 GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
 const char* window_title = "TESTER";
 
+#define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
+#define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
+#define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
+#define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
+
 glm::mat4 P; // P for projection
+glm::mat4 orthoP; // P for 2d elements;
 glm::mat4 V; // V for view
 DirLight * light = nullptr;
-FBXObject * raccoonModel = nullptr;
-FBXObject * catModel = nullptr;
-FBXObject * dogModel = nullptr;
-FBXObject * chefModel = nullptr;
+FogGenerator * fog = nullptr;
+
+FBXObject * playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
+Geometry * playerGeometry[NUM_PLAYER_MODEL_TYPES] = { nullptr };
+
 FBXObject * tileModel = nullptr;
+FBXObject * wallModel = nullptr;
+
+FBXObject * uiCanvas = nullptr;
 GLuint objShaderProgram;
+GLuint uiShaderProgram;
+
+GLuint uiTexture;
+
+Geometry * tileGeometry;
+Geometry * wallGeometry;
+std::vector<std::vector<Transform *>> floorArray;
+std::vector<std::vector<Transform *>> northWalls;
+std::vector<std::vector<Transform *>> westWalls;
+
+struct PlayerState {
+	Transform *transform;       // for position and rotation
+	float targetAngle;          // the angle it's trying to animate to
+	float angle;                // angle it's currently facing (should be approaching targetAngle)
+	glm::vec3 position;         // position, important for faking targetAngle above
+	int id;                     // the player ID from the server
+	unsigned geometryIdx;       // index into playerGeometry
+
+	PlayerState() : position(0.f) {
+		angle = targetAngle = 0.f;
+		geometryIdx = 0;
+		transform = nullptr;
+	}
+
+#ifdef DUMMY_ID
+	// Warning: this constructor is only for debugging use
+	PlayerState(int newId, int geomIdx) {
+		id = newId;
+		geometryIdx = geomIdx;
+
+		setGeometryIdx(geometryIdx);
+	}
+#endif
+
+	PlayerState(int newId, const Player *p) : PlayerState() {
+		id = newId;
+
+		const auto location = p->getLocation();
+		position.x = location.getX();
+		position.y = location.getY();
+		position.z = location.getZ();
+
+		setGeometryIdx(static_cast<unsigned>(p->getModelType()));
+	}
+
+	~PlayerState() {
+		if (transform && transform->decrementRefCount()) {
+			delete transform;
+		}
+	}
+
+	PlayerState(const PlayerState &other) {
+		transform = other.transform;
+		if (transform) {
+			transform->incrementRefCount();
+		}
+
+		targetAngle = other.targetAngle;
+		angle = other.angle;
+		position = other.position;
+		id = other.id;
+		geometryIdx = other.geometryIdx;
+	}
+
+	PlayerState &operator=(const PlayerState &other) {
+		if (transform && transform->decrementRefCount()) {
+			delete transform;
+		}
+
+		transform = other.transform;
+		if (transform) {
+			transform->incrementRefCount();
+		}
+
+		targetAngle = other.targetAngle;
+		angle = other.angle;
+		position = other.position;
+		id = other.id;
+		geometryIdx = other.geometryIdx;
+
+		return *this;
+	}
+
+	void setGeometryIdx(unsigned geomIdx) {
+		geometryIdx = geomIdx;
+
+		auto translate = glm::translate(glm::mat4(1.f), position);
+		auto transformMat = glm::rotate(translate, angle, glm::vec3(0.f, 1.f, 0.f));
+		if (transform) {
+			transform->setOffset(transformMat);
+			transform->removeAllChildren();
+		}
+		else {
+			transform = new Transform(transformMat);
+		}
+		transform->addChild(playerGeometry[geometryIdx]);
+	}
+};
 
 Transform * root = nullptr;
-Transform * player;
+Transform * allPlayersNode = nullptr;
+std::vector<PlayerState> players;
+Transform * floorTransform = nullptr;
 
 // Default camera parameters
-glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);    // e  | Position of camera
-glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);  // d  | This is where the camera looks at
-glm::vec3 cam_up(0.0f, 1.0f, 0.0f);      // up | What orientation "up" is
-
-glm::vec3 playerPos;
+glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
+glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camera looks at
+glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
+const glm::vec3 cam_angle(-15.f, 100.f, -45.f);  // camera's preferred offset from cam_look_at
 
 bool mouseRotation = false;
 glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
@@ -37,10 +155,10 @@ float scaleDownMouseOps = 30.0f;
 float scaleUpAngle = 4.0f;
 float scaleMouseWheel = 1.05f;
 
-ServerGame * server;
-ClientGame * client;
+ServerGame * server = nullptr;
+ClientGame * client = nullptr;
 
-bool directions[4] = { false, false, false, false };
+int directions = 0;   // use DirectionBitmask
 
 void ErrorCallback(int error, const char* description)
 {
@@ -101,37 +219,238 @@ void PrintVersions()
 #endif
 }
 
+PlayerState *getMyState()
+{
+	// linear search is probably faster than binary/tree/whatever for <= 4 elements
+
+	int myId = client->getMyID();
+	for (PlayerState &state : players) {
+		if (state.id == myId)
+			return &state;
+	}
+
+	return nullptr;
+}
+
+void reloadPlayers()
+{
+	players.clear();
+
+	cout << "[Re]loading players\n";
+
+	if (!client || !client->getGameData() || client->getGameData()->players.size() <= 0) {
+		cout << "WARNING: gameData players map is empty\n";
+		return;
+	}
+
+	allPlayersNode->removeAllChildren();
+
+	const auto &playersMap = client->getGameData()->players;
+	const int myId = client->getMyID();
+
+	for (const auto &pair : playersMap) {
+		const auto id = pair.first;
+		const Player *p = pair.second;
+
+		players.emplace_back(id, p);
+
+		const auto state = &players[players.size() - 1];
+		allPlayersNode->addChild(state->transform);
+	}
+
+#ifdef DUMMY_ID
+	// add a dummy player
+	players.emplace_back(DUMMY_ID, CHEF_IDX);
+	const auto &state = players[players.size() - 1];
+	allPlayersNode->addChild(state.transform);
+#endif
+}
+
+void reloadMap()
+{
+	deallocFloor();
+
+	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	
+	if (!tileLayout.size()) {
+		cerr << "reloadMap(): map is empty\n";
+		return;
+	}
+
+	cout << "[Re]loading map\n";
+	
+	if (floorTransform == nullptr) {
+		const glm::vec3 transAmount(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2);
+		const auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(TILE_SCALE));
+		floorTransform = new Transform(glm::translate(scale, transAmount));
+	}
+
+	// Floor tiles
+	floorArray.resize(tileLayout.size());
+	for (size_t z = 0; z < floorArray.size(); z++) {
+		auto &row = floorArray[z];
+
+		row.resize(tileLayout[z].size());
+
+		for (size_t x = 0; x < row.size(); x++) {
+			const auto &tile = tileLayout[z][x];
+
+			float y = tile->getHeight() * 0.5f * TILE_LEVEL_OFFSET;
+			auto skew = glm::mat4(1.0f);
+
+			int rampDirection = 0;
+			if (tile->getTileType() == TileType::RAMP) {
+				const RampTile *rampTile = (RampTile *)tile;
+				rampDirection = static_cast<int>(rampTile->getRampDirection());
+			}
+
+			switch (rampDirection) {
+			case DirectionBitmask::eastSide:
+				skew[0][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::westSide:
+				skew[0][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::northSide:
+				skew[2][1] = -TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			case DirectionBitmask::southSide:
+				skew[2][1] = TILE_LEVEL_OFFSET / TILE_STRIDE;
+				break;
+			default:
+				break;
+			}
+			const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, z * TILE_STRIDE));
+
+			row[x] = new Transform(translate * skew);
+			row[x]->addChild(tileGeometry);
+			floorTransform->addChild(row[x]);
+		}
+	}
+
+	// North walls
+	northWalls.resize(floorArray.size() + 1);
+	for (size_t z = 0; z < northWalls.size(); z++) {
+		auto &row = northWalls[z];
+
+		auto clippedZ = (z < floorArray.size()) ? z : (floorArray.size() - 1);
+		row.resize(floorArray[clippedZ].size());
+
+		for (size_t x = 0; x < row.size(); x++) {
+			if ((z > 0 && (tileLayout[z - 1][x]->getWall() & DirectionBitmask::southSide)) ||
+				(z == clippedZ && (tileLayout[z][x]->getWall() & DirectionBitmask::northSide)))
+			{
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (z == 0 || z != clippedZ) {
+					height = client->heights[clippedZ][x];
+				} else {
+					height = (client->heights[z - 1][x] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+				
+				// translate to the edge between tiles
+				row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)));
+				row[x]->addChild(wallGeometry);
+				floorTransform->addChild(row[x]);
+			}
+		}
+	}
+
+	westWalls.resize(floorArray.size());
+	for (size_t z = 0; z < westWalls.size(); z++) {
+		auto &row = westWalls[z];
+
+		row.resize(floorArray[z].size() + 1);
+
+		for (size_t x = 0; x < row.size(); x++) {
+			auto clippedX = (x < row.size() - 1) ? x : (row.size() - 2);
+
+			if ((x > 0 && (tileLayout[z][x - 1]->getWall() & DirectionBitmask::eastSide)) ||
+				(x == clippedX && (tileLayout[z][x]->getWall() & DirectionBitmask::westSide)))
+			{
+				// Calculate the altitude of the wall
+				int height = 1;
+				/*if (x == 0 || x != clippedX) {
+					height = client->heights[z][clippedX];
+				}
+				else {
+					height = (client->heights[z][x - 1] + client->heights[z][x]) / 2;
+				}*/
+				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
+
+				// translate to the edge between tiles
+				const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3((x - 0.5f) * TILE_STRIDE, y, z * TILE_STRIDE));
+				// 90 degree rotation
+				const auto rotate = glm::rotate(translate, glm::half_pi<float>(), glm::vec3(0.f, 1.f, 0.f));
+				row[x] = new Transform(rotate);
+				row[x]->addChild(wallGeometry);
+				floorTransform->addChild(row[x]);
+			}
+		}
+	}
+
+	root->addChild(floorTransform);
+}
+
+void deallocFloor()
+{
+	if (floorTransform) {
+		delete floorTransform;
+		floorTransform = nullptr;
+	}
+
+	for (size_t z = 0; z < floorArray.size(); z++) {
+		auto &row = floorArray[z];
+
+		for (size_t x = 0; x < row.size(); x++) {
+			delete row[x];
+		}
+
+		row.resize(0);
+	}
+}
+
 void Init()
 {
 	server = new ServerGame();
 	client = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
 
-	// load the map
-	// TODO: wait to get it from the server instead, display a loading screen
-#define MAP_PATH "../../maps/tinytinymap/"
-	loadMapArray(client->heights, MAP_PATH "heights.txt");
-	loadMapArray(client->ramps, MAP_PATH "ramps.txt");
-	
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	
 	light = new DirLight();
+	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
+	
 	// Load models
-	raccoonModel = new FBXObject(CAT_DAE_PATH, CAT_TEX_PATH, true);
+
+	playerModels[CHEF_IDX    ] = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
+	playerModels[RACCOON_IDX ] = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	playerModels[CAT_IDX     ] = new FBXObject(CAT_DAE_PATH, CAT_TEX_PATH, true);
+	playerModels[DOG_IDX     ] = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
+
+	for (unsigned i = 0; i < NUM_PLAYER_MODEL_TYPES; i++) {
+		playerGeometry[i] = new Geometry(playerModels[i], objShaderProgram);
+	}
+
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
+	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
+	uiCanvas->SetDepthTest(false);
+
+
+	tileGeometry = new Geometry(tileModel, objShaderProgram);
+	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
 	root = new Transform(glm::mat4(1.0));
-	player = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel = new Geometry(raccoonModel, objShaderProgram);
-	root->addChild(player);
-	player->addChild(playerModel);
-	Transform * player2Translate = new Transform(glm::translate(glm::mat4(1.0), glm::vec3(20.0f, 0, 0)));
-	Transform * player2Rotate = new Transform(glm::rotate(glm::mat4(1.0), glm::pi<float>(), glm::vec3(0, 1, 0)));
-	Geometry * playerModel2 = new Geometry(raccoonModel, objShaderProgram);
-	root->addChild(player2Translate);
-	player2Translate->addChild(player2Rotate);
-	player2Rotate->addChild(playerModel2);
-    
-	raccoonModel->Rotate(glm::pi<float>(), 0.0f, 1.0f, 0.0f);
+	allPlayersNode = new Transform(glm::mat4(1.0));
+	root->addChild(allPlayersNode);
+
+	UpdateView();
+	MoveCamera(glm::vec3(0.f));
 }
 
 void serverLoop(void * args) {
@@ -142,12 +461,39 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
-	if (raccoonModel)     delete(raccoonModel);
-	if (catModel)         delete(catModel);
-	if (dogModel)         delete(dogModel);
-	if (chefModel)        delete(chefModel);
-	if (tileModel)        delete(tileModel);
-	if (light)            delete(light);
+	if (allPlayersNode) {
+		allPlayersNode->removeAllChildren();
+		delete allPlayersNode;
+		allPlayersNode = nullptr;
+	}
+
+	players.clear();
+
+	for (auto &model : playerModels) {
+		if (model) {
+			delete model;
+			model = nullptr;
+		}
+	}
+
+	for (auto &geom : playerGeometry) {
+		if (geom) {
+			delete geom;
+
+		}
+	}
+
+	if (tileModel)        delete tileModel;
+	if (wallModel)        delete wallModel;
+	if (tileGeometry)     delete tileGeometry;
+	if (wallGeometry)     delete wallGeometry;
+	if (light)            delete light;
+
+	deallocFloor();
+
+	if (floorTransform)   delete floorTransform;
+	if (root)             delete root;
+
 	glDeleteProgram(objShaderProgram);
 }
 
@@ -164,6 +510,8 @@ void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 	if (windowHeight > 0)
 	{
 		P = glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4000.0f);
+		//orthoP = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, -1.0f, 1.0f);
+		orthoP = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 	}
 }
@@ -215,71 +563,159 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 	return window;
 }
 
+glm::vec3 directionBitmaskToVector(int bitmask) {
+	int dirX = ((directions & DirectionBitmask::eastSide) != 0) - ((directions & DirectionBitmask::westSide) != 0);
+	int dirZ = ((directions & DirectionBitmask::northSide) != 0) - ((directions & DirectionBitmask::southSide) != 0);
+
+	return glm::vec3((float)dirX, 0.f, (float)dirZ);
+}
+
 void SendPackets() 
 {
-	if (directions[0]) {
+	auto dir = directionBitmaskToVector(directions);
+
+	if (dir.z > 0) {
 		client->sendPackets(FORWARD_EVENT);
 	}
-	if (directions[1]) {
+	else if (dir.z < 0) {
 		client->sendPackets(BACKWARD_EVENT);
 	}
-	if (directions[2]) {
+
+	if (dir.x > 0) {
 		client->sendPackets(LEFT_EVENT);
-	}
-	if (directions[3]) {
+	} 
+	else if (dir.x < 0) {
 		client->sendPackets(RIGHT_EVENT);
 	}
 }
 
-void MovePlayer()
+void MovePlayers()
 {
-	Player * p = client->getGameData()->getPlayer(client->getMyID());
-	if (p)
-	{
-		glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.5f,
-			p->getLocation().getY() * 0.5f,
-			p->getLocation().getZ() * 0.5f);
-
-	//if (!client->clients2.empty() && (directions[0] || directions[1] || directions[2] || directions[3])) {
-		//glm::vec3 prevPos = raccoonModel->GetPosition();
-		glm::vec3 newPos = location;
-		glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), newPos);
-		player->setOffset(newOffset);
-		//raccoonModel->MoveTo(newPos[0], newPos[1], newPos[2]);
-		MoveCamera(&newPos);
-
-		UpdateView();
+	// Sanity guard condition
+	auto myState = getMyState();
+	if (players.size() <= 0 || myState == nullptr) {
+		return;
 	}
-	//if (!client->clients2.empty()) {
-	//	/*glm::vec3 location = glm::vec3(client->clients2["client_0"][0] * 0.1f,
-	//		client->clients2["client_0"][1] * 0.1f,
-	//		client->clients2["client_0"][2] * 0.1f);
-	//	*/
-	//	glm::vec3 location = glm::vec3(client->allClients["client_0"].getLocation().getX() * 0.1f,
-	//		client->allClients["client_0"].getLocation().getY() * 0.1f,
-	//		client->allClients["client_0"].getLocation().getZ() * 0.1f);
-	//	
-	//	/*glm::vec3 location = glm::vec3(p->getLocation().getX() * 0.1f,
-	//		p->getLocation().getY() * 0.1f,
-	//		p->getLocation().getZ() * 0.1f);*/
 
-	//	cam_pos = location;
-	//	UpdateView();
-	//}
+	const auto myOldPos = myState->position;
+
+	const int myID = client->getMyID();
+	const auto &playersMap = client->getGameData()->players;
+	for (auto &state : players) {
+		const auto oldPos = state.position;
+
+		if (playersMap.count(state.id) > 0) {
+			const Player * p = playersMap.at(state.id);
+			const auto loc = p->getLocation();
+
+			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
+		}
+#ifdef DUMMY_ID
+		else if (state.id == DUMMY_ID) {
+			state.position = myState->position;
+			if (floorArray.size()) {
+				state.position.x = floorArray[0].size() * 20.f - state.position.x;
+			}
+		}
+#endif
+
+		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
+
+		// Set targetAngle based on keyboard for me, based on movement for others
+		bool changedTargetAngle = false;
+		if (state.id != myID) {
+			const auto delta = state.position - oldPos;
+			if (abs(delta.x) > 0.0001 || abs(delta.z) > 0.0001) {
+				state.targetAngle = glm::atan(delta.x, delta.z);
+				changedTargetAngle = true;
+			}
+		}
+		else {
+			auto dir = directionBitmaskToVector(directions);
+			if (dir.x != 0.f || dir.z != 0.f) {
+				state.targetAngle = glm::atan(-dir.x, dir.z);
+				changedTargetAngle = true;
+			}
+		}
+
+		// Try to find an equivalent (+/- 2pi) target that is closer
+		if (changedTargetAngle) {
+			float alternateTarget = state.targetAngle - glm::two_pi<float>();
+			if (abs(state.targetAngle - state.angle) > abs(alternateTarget - state.angle)) {
+				state.targetAngle = alternateTarget;
+			}
+			alternateTarget = state.targetAngle + glm::two_pi<float>();
+			if (abs(state.targetAngle - state.angle) > abs(alternateTarget - state.angle)) {
+				state.targetAngle = alternateTarget;
+			}
+		}
+
+		// Animate state.angle towards state.targetAngle
+		state.angle += (state.targetAngle - state.angle) * 0.375f;
+		if (abs(state.targetAngle - state.angle) < 0.01) {
+			// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
+			state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
+		}
+
+		auto transformMat = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
+		state.transform->setOffset(transformMat);
+	}
+
+	MoveCamera(myState->position, myOldPos);
+	UpdateView();
 }
 
-void MoveCamera(glm::vec3 * newPlayerPos) {
-	float playerX = newPlayerPos->x;
-	float playerZ = newPlayerPos->z;
-	if (playerX < 20.0f && playerX > -20.0f) {
-		cam_look_at[0] = (*newPlayerPos)[0];
-		cam_pos[0] = (*newPlayerPos)[0] + 45.0f;
-	}
-	if(playerZ <20.0f && playerZ > -20.0f){
-		cam_look_at[2] = (*newPlayerPos)[2];
-		cam_pos[2] = (*newPlayerPos)[2] + 45.0f;
-	}
+void MoveCamera(const glm::vec3 &newPlayerPos) {
+	cam_look_at.x = newPlayerPos.x;
+	cam_look_at.z = newPlayerPos.z;
+	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
+	
+	cam_pos = cam_look_at + cam_angle;
+
 	UpdateView();
+}
+
+void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+	auto screenPos = glm::project(newPlayerPos, glm::mat4(1.f), P * V, glm::vec4(0.f, 0.f, 1.f, 1.f));
+	
+	// Make the coordinates range from -1 to 1
+	screenPos = (screenPos - glm::vec3(0.5f, 0.5f, 0.f)) * 2.f;
+
+	// If the player is outside a circle of radius 0.3, then move camera
+	if (screenPos.x * screenPos.x + screenPos.y * screenPos.y > 0.3f * 0.3f) {
+		const auto offsetX = newPlayerPos.x - oldPlayerPos.x;
+		cam_look_at.x += offsetX;
+		cam_pos.x += offsetX;
+
+		const auto offsetZ = newPlayerPos.z - oldPlayerPos.z;
+		cam_look_at.z += offsetZ;
+		cam_pos.z += offsetZ;
+	}
+	
+	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
+
+	// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
+	if (directions && !mouseRotation) {
+		const auto desired = cam_look_at + cam_angle;
+		cam_pos += (desired - cam_pos) * 0.225f;
+	}
+
+	UpdateView();
+}
+
+// Call glFlush(), but only if we haven't already called it this frame
+bool alreadyFlushed = false;
+void idempotentFlush()
+{
+	if (!alreadyFlushed) {
+		alreadyFlushed = true;
+		glFlush();
+	}
+}
+
+void resetIdempotentFlush()
+{
+	alreadyFlushed = false;
 }
 
 void IdleCallback()
@@ -289,13 +725,52 @@ void IdleCallback()
 	if (clock() - elapsedTime > 1000.0 / 60)
 	{
 		elapsedTime = clock();
+		resetIdempotentFlush();
 		SendPackets();
 		client->update();
-		MovePlayer();
+		const auto gameData = client->getGameData();
+		if (gameData) {
+#ifdef DUMMY_ID
+			bool playersChanged = (players.size() != gameData->players.size() + 1);
+#else
+			bool playersChanged = (players.size() != gameData->players.size());
+#endif
+			const bool tilesChanged = (floorArray.size() != gameData->clientTileLayout.size());
+
+			const auto &playersMap = client->getGameData()->players;
+			for (auto &state : players) {
+				if (playersMap.count(state.id) <= 0) {
+					playersChanged = true;
+					break;
+				}
+
+				const auto player = playersMap.at(state.id);
+				const unsigned geomIdx = static_cast<unsigned>(player->getModelType());
+				if (geomIdx != state.geometryIdx) {
+					// instead of setting playersChanged lets just change this one player
+					idempotentFlush();
+					state.setGeometryIdx(geomIdx);
+				}
+			}
+			
+			if (tilesChanged) {
+				idempotentFlush();
+				reloadMap();
+			}
+				
+			if (playersChanged) {
+				idempotentFlush();
+				reloadPlayers();
+			}
+		}
+		MovePlayers();
 		//DummyMovePlayer();
 		server->update();
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
-		raccoonModel->Update();
+		
+		for (auto model : playerModels) {
+			model->Update();
+		}
 	}
 
 }
@@ -304,13 +779,22 @@ void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, windowWidth, windowHeight);
-	glDepthMask(GL_TRUE);
+	//glDepthMask(GL_TRUE);
 
-	glUseProgram(objShaderProgram);
+	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	//root->draw(V, P);
-	raccoonModel->Draw(objShaderProgram, &V, &P);
+	auto myState = getMyState();
+	if (myState) {
+		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
+	}
+	root->draw(V, P, glm::mat4(1.0));
+	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
+
+
+	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
 	// Swap buffers
 	glfwSwapBuffers(window);
@@ -331,23 +815,25 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		}
 
 		if (key == GLFW_KEY_A) {
-			raccoonModel->ToNextKeyframe();
+			for (auto model : playerModels) {
+				model->ToNextKeyframe();
+			}
 		}
 
 		if (key == GLFW_KEY_UP) {
-			directions[0] = true;
+			directions |= DirectionBitmask::northSide;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-			directions[1] = true;
+			directions |= DirectionBitmask::southSide;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-			directions[2] = true;
+			directions |= DirectionBitmask::westSide;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-			directions[3] = true;
+			directions |= DirectionBitmask::eastSide;
 		}
 
 		if (key == GLFW_KEY_SPACE) {
@@ -355,25 +841,47 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			client->sendPackets(INTERACT_EVENT);
 		}
 		if (key == GLFW_KEY_D) {
-			// interact key press
 			client->sendPackets(DROP_EVENT);
 		}
+		if (key == GLFW_KEY_H) {
+			// interact key press
+			client->sendPackets(HIDE_EVENT);
+		}
+		if (key == GLFW_KEY_0) {
+			client->sendPackets(SELECT0_EVENT);
+		}
+		if (key == GLFW_KEY_1) {
+			client->sendPackets(SELECT1_EVENT);
+		}
+		if (key == GLFW_KEY_2) {
+			client->sendPackets(SELECT2_EVENT);
+		}
+		if (key == GLFW_KEY_3) {
+			client->sendPackets(SELECT3_EVENT);
+		}
+		if (key == GLFW_KEY_4) {
+			client->sendPackets(SELECT4_EVENT);
+		}
+		if (key == GLFW_KEY_P) {
+			client->sendPackets(RESET_EVENT);
+		}
+
 	}
 	else if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_UP) {
-			directions[0] = false;
+			directions &= ~ DirectionBitmask::northSide;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
-			directions[1] = false;
+			directions &= ~DirectionBitmask::southSide;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
-			directions[2] = false;
+			directions &= ~DirectionBitmask::westSide;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
-			directions[3] = false;
+			directions &= ~DirectionBitmask::eastSide;
 		}
 
 		if (key == GLFW_KEY_SPACE) {
@@ -402,8 +910,8 @@ glm::vec3 TrackballMapping(double x, double y, int width, int height) {
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis) {
 	glm::vec3 newRotAxis = glm::vec4(rotationAxis, 1.0f) * V;
 	glm::mat4 rotationMatrix = glm::rotate(glm::mat4(1.0f), rotationAngle, newRotAxis);
-	glm::vec4 temp = rotationMatrix * glm::vec4(cam_pos, 1.0f);
-	cam_pos = glm::vec3(temp[0], temp[1], temp[2]);
+	glm::vec4 temp = rotationMatrix * glm::vec4(cam_pos - cam_look_at, 1.0f);
+	cam_pos = glm::vec3(temp[0], temp[1], temp[2]) + cam_look_at;
 	UpdateView();
 }
 
@@ -427,10 +935,10 @@ void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset) {
 	glm::vec3 new_cam_pos;
 	float distance;
 	if (yoffset < 0) {
-		new_cam_pos = cam_pos * scaleMouseWheel;
+		new_cam_pos = (cam_pos - cam_look_at) * scaleMouseWheel + cam_look_at;
 	}
 	else {
-		new_cam_pos = cam_pos / scaleMouseWheel;
+		new_cam_pos = (cam_pos - cam_look_at) / scaleMouseWheel + cam_look_at;
 	}
 	distance = glm::distance(new_cam_pos, glm::vec3(0.0f, 0.0f, 0.0f));
 	if (distance < 1400.0f && distance > 2.0f) {
@@ -510,5 +1018,5 @@ int main(void)
 	// Terminate GLFW
 	glfwTerminate();
 
-	exit(EXIT_SUCCESS);
+	return EXIT_SUCCESS;
 }
