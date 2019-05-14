@@ -3,8 +3,10 @@
 Bone::Bone(string newName, glm::mat4 * nodeMat, Bone * newParent) {
 	name = string(newName);
 	transform = glm::mat4(1.0f);
-	nodeTransform = glm::mat4(*nodeMat);
+	offset = glm::mat4(1.0f);
+	nodeTransform = glm::mat4((*nodeMat));
 	parent = newParent;
+	isBone = false;
 }
 
 Bone::~Bone() {
@@ -61,18 +63,15 @@ void Bone::Update(glm::mat4 * globalInverseT, glm::mat4 * parentT) {
 	glm::mat4 globalT;
 
 	if (channel != NULL) {
-		// TODO: globalInverseT and offset are fine, but globalT introduces NaN issues
-		// --> parentT yields inf matrices by the time we reach the arm!
-		// --> channel->GetTransform() yields NaN matrices for several bones
-		globalT = (*parentT) * (*(channel->GetTransform()));
-		// updating the transform matrix, which the vertices will access when updating skin
-		transform = (*globalInverseT) * globalT * offset;
-		std::cout << "CHANNEL IS __NOT__ NULL FOR " << name << std::endl;
-		PrintMatrix(&transform);
+		//globalT = parentT * (channel->GetTransform());
+		globalT = (*parentT) * channelMatrices[channel->GetCurrKeyframe()];
+		if (isBone) {
+			// updating the transform matrix, which the vertices will access when updating skin
+			transform = (*globalInverseT) * globalT * offset;
+		}
 	}
 	else {
 		globalT = (*parentT) * nodeTransform;
-		std::cout << "CHANNEL IS NULL FOR " << name << std::endl;
 	}
 
 	for (int i = 0; i < children.size(); i++) {
@@ -88,4 +87,26 @@ void Bone::PrintMatrix(glm::mat4 * matrix) {
 		std::cerr << std::endl;
 	}
 	std::cerr << std::endl;
+}
+
+void Bone::SetIsBone(bool input) {
+	isBone = input;
+}
+
+bool Bone::CheckIsBone() {
+	return isBone;
+}
+
+void Bone::SetChannelMatrices(float * values, int numValues) {
+	int count = 0;
+	while (count < numValues) {
+		glm::mat4 currMat = glm::mat4(1.0f);
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				currMat[j][i] = values[count];
+				count++;
+			}
+		}
+		channelMatrices.push_back(currMat);
+	}
 }

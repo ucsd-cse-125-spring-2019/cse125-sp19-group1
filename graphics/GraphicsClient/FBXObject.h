@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "objloader.h"
 #include "textureloader.h"
+#include "Tokenizer.h"
 
 class FBXObject
 {
@@ -72,6 +73,7 @@ public:
 	void SetDepthTest(bool depthTestEnabled);
 
 	void ToNextKeyframe();
+	void LoadMatrices(const char * path);
 };
 
 #endif

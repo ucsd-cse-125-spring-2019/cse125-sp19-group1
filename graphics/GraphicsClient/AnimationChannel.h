@@ -1,6 +1,7 @@
 #ifndef AnimationChannel_h
 #define AnimationChannel_h
 #include "Keyframe.h"
+#include <glm/gtc/quaternion.hpp>
 #include <string>
 class AnimationChannel
 {
@@ -25,6 +26,8 @@ public:
 	glm::mat4 * GetTransform();
 
 	void ToNextKeyframe();
+	void PrintMatrix(glm::mat4 * matrix);
+	int GetCurrKeyframe();
 };
 
 #endif

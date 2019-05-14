@@ -19,6 +19,9 @@ public:
 	void Update(glm::mat4 * globalInverseT, glm::mat4 * parentT);
 
 	void PrintMatrix(glm::mat4 * matrix);
+	void SetIsBone(bool input);
+	bool CheckIsBone();
+	void SetChannelMatrices(float * values, int numValues);
 private:
 	Bone * parent;
 	std::vector<Bone *> children;
@@ -28,6 +31,8 @@ private:
 	glm::mat4 transform;
 	glm::mat4 nodeTransform;
 	unsigned int childCount;
+	bool isBone;
+	std::vector<glm::mat4> channelMatrices;
 };
 
 #endif

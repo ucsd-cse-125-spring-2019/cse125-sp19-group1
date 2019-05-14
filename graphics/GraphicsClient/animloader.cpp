@@ -12,13 +12,13 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	}
 
 	/* TODO */
+	std::cerr << "Number of animations: " << scene->mNumAnimations << std::endl;
 	// be sure to check if animations are there
 	// must also determine if we will have multiple animations in a file, but for now, assume 0-1
-	if (scene->mNumAnimations <= 1) {
+	if (scene->mNumAnimations < 1) {
 		return false;
 	}
-	aiAnimation * anim = scene->mAnimations[1];
-	std::cerr << "Number of animations: " << scene->mNumAnimations << std::endl;
+	aiAnimation * anim = scene->mAnimations[0];
 	if (anim == nullptr || anim->mNumChannels == 0) {
 		return false;
 	}
