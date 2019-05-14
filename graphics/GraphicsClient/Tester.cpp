@@ -428,7 +428,7 @@ void Init()
 	// Load models
 	playerModels[CHEF_IDX    ] = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
 	playerModels[RACCOON_IDX ] = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
-	playerModels[CAT_IDX     ] = new FBXObject(CAT_MDL_PATH, CAT_TEX_PATH, false);
+	playerModels[CAT_IDX     ] = new FBXObject(CAT_DAE_PATH, CAT_TEX_PATH, true);
 	playerModels[DOG_IDX     ] = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
 
 	for (unsigned i = 0; i < NUM_PLAYER_MODEL_TYPES; i++) {

@@ -18,7 +18,11 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	if (scene->mNumAnimations < 1) {
 		return false;
 	}
+
 	aiAnimation * anim = scene->mAnimations[0];
+	if (scene->mNumAnimations > 1)
+		anim = scene->mAnimations[1];
+
 	if (anim == nullptr || anim->mNumChannels == 0) {
 		return false;
 	}
