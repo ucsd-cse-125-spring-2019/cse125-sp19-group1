@@ -28,12 +28,12 @@ void Player::setModelType(ModelType type)
  Location Player::getLocation() const { return location; }
 bool Player::isReady() const
 {
-	return selecting;
+	return ready;
 }
 
 void Player::toggleReady()
 {
-	selecting = !selecting;
+	ready = !ready;
 }
 ItemName Player::getInventory() const { return inventory; }
 bool Player::getInteracting() { return interacting; }

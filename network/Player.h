@@ -109,5 +109,5 @@ protected:
 	std::map<std::string, encodeFunctionType> encodingFunctions;
 
 
-	bool selecting = true;
+	bool ready = false;
 };

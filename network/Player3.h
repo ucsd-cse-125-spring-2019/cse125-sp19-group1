@@ -96,7 +96,7 @@ protected:
 	ModelType	modelType;
 	Location	location;
 
-	bool		selecting = true;
+	bool		ready = true;
 	bool		interacting;
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 

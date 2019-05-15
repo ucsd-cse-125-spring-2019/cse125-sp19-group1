@@ -14,7 +14,7 @@ bool animalWin = false;
 ServerGame::ServerGame(void)
 {
 	initCharacters = false;
-	gameStarted = false;
+	gameStarted = true;
 	newPlayerInit = false;
 	allPlayersReady = false;
     // id's to assign clients for our table
@@ -548,7 +548,7 @@ void ServerGame::receiveFromClients()
 	{
 		if (Player * player = gameData->getPlayer(iter->first))
 		{
-			if (player->isReady())
+			if (!player->isReady())
 			{
 				allPlayersReady = false;
 			}
