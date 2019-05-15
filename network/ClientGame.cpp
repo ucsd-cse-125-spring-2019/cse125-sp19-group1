@@ -97,7 +97,7 @@ void ClientGame::update()
 #ifdef CENSOR_LARGE_MSG
 	const auto len = strlen(network_data);
 	if (len > CENSOR_LARGE_MSG)
-		std::cout << "data received on client: (censored because its " << len << " bytes)" << std::endl;
+		std::cout << "data received on client: (censored because it's " << len << " bytes)" << std::endl;
 	else
 #endif
 		std::cout << "data received on client:\n" << network_data << std::endl;
