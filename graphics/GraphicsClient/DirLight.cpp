@@ -15,6 +15,8 @@ void DirLight::toggleNormalShading() {
 }
 
 void DirLight::draw(GLuint program, glm::vec3 * cam_pos, glm::vec3 cam_look_at ) {
+	glUseProgram(program);
+
 	GLuint normal_shading, light_color, light_dir, light_pos, light_cam_pos, light_cam_look_at;
   
   normal_shading = glGetUniformLocation(program, "light.normal_shading");

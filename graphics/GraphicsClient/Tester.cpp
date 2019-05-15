@@ -127,7 +127,7 @@ Geometry * playerGeometry[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 FBXObject * tileModel = nullptr;
 FBXObject * wallModel = nullptr;
 
-FBXObject * uiCanvas = nullptr;
+UICanvas * uiCanvas = nullptr;
 GLuint objShaderProgram;
 GLuint uiShaderProgram;
 
@@ -537,11 +537,12 @@ void Init()
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
-	
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);	
 	for (unsigned i = 0; i < NUM_PLAYER_MODEL_TYPES; i++) {
 		playerGeometry[i] = new Geometry(playerModels[i], objShaderProgram);
 	}
+
+	uiCanvas = new UICanvas(uiShaderProgram);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
@@ -927,7 +928,9 @@ void DisplayCallback(GLFWwindow* window)
 		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
 	}
 	root->draw(V, P, glm::mat4(1.0));
-	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
