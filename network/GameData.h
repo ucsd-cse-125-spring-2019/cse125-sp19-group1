@@ -70,6 +70,13 @@ public:
 	void startCountdown();
 	bool countdownDone();
 	bool countdownStarted();
+
+	// tile getters
+	Tile * getTile(Location loc);
+	GateTile * getGateTile(Location loc);
+	BoxTile * getBoxTile(Location loc);
+	RampTile * getRampTile(Location loc);
+	JailTile * getJailTile(Location loc);
 protected:
 	bool beginCountdown;
 	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;

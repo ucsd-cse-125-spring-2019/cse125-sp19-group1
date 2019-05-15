@@ -260,3 +260,54 @@ void GameData::startGameClock()
 {
 	gameClock = std::chrono::system_clock::now();
 }
+
+// tile getters
+Tile * GameData::getTile(Location loc)
+{
+	if (atlas)
+	{
+		return atlas->getTileAt(loc);
+	}
+	else
+	{
+		int row, col;
+		Atlas::getMapCoords(loc, row, col);
+		return clientTileLayout[row][col];
+	}
+}
+GateTile * GameData::getGateTile(Location loc)
+{
+	Tile * tile = getTile(loc);
+	
+	if (tile->getTileType() == TileType::GATE)
+		return dynamic_cast<GateTile*>(tile);
+	else
+		return nullptr;
+}
+BoxTile * GameData::getBoxTile(Location loc)
+{
+	Tile * tile = getTile(loc);
+
+	if (tile->getTileType() == TileType::BOX)
+		return dynamic_cast<BoxTile*>(tile);
+	else
+		return nullptr;
+}
+RampTile * GameData::getRampTile(Location loc)
+{
+	Tile * tile = getTile(loc);
+
+	if (tile->getTileType() == TileType::RAMP)
+		return dynamic_cast<RampTile*>(tile);
+	else
+		return nullptr;
+}
+JailTile * GameData::getJailTile(Location loc)
+{
+	Tile * tile = getTile(loc);
+
+	if (tile->getTileType() == TileType::JAIL)
+		return dynamic_cast<JailTile*>(tile);
+	else
+		return nullptr;
+}

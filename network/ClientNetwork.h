@@ -9,7 +9,7 @@
 // server address info (modify desktop ip as needed)
 #define DESKTOP_IP "128.54.70.19"
 #define LOCAL_HOST "127.0.0.1"
-#define SERVER_IP_ADDRESS DESKTOP_IP
+#define SERVER_IP_ADDRESS LOCAL_HOST
 
 // size of our buffer
 #define DEFAULT_BUFLEN 512
