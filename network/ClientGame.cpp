@@ -2,6 +2,9 @@
 
 #include <fstream>
 
+// Comment this out to print all messages to stdout, even messages larger than 128 chars
+#define CENSOR_LARGE_MSG 128
+
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
 
@@ -91,7 +94,14 @@ void ClientGame::update()
 		return;
 	}
 
-	std::cout << "data received on client:\n" << network_data << std::endl;
+#ifdef CENSOR_LARGE_MSG
+	const auto len = strlen(network_data);
+	if (len > CENSOR_LARGE_MSG)
+		std::cout << "data received on client: (censored because its " << len << " bytes)" << std::endl;
+	else
+#endif
+		std::cout << "data received on client:\n" << network_data << std::endl;
+		
 
 	if (myID == -1)
 	{
