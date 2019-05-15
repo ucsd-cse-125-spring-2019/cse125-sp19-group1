@@ -13,6 +13,8 @@
 #define GENERALDATA_ID -999
 #define SERVER_GAMEDATA 123
 
+enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
+
 class GameData
 {
 public:
@@ -32,8 +34,8 @@ public:
 	Atlas * atlas;
 
 	std::vector<std::vector<Tile *>> clientTileLayout;
-	void addNewClient(int anID, Location aLoc);
-	void removeClient(int anID);
+	void addNewPlayer(int anID, Location aLoc, ClientType type);
+	void removePlayer(int anID, ClientType type);
 
 	using decodeFunctionType = void (GameData::*)(std::string value);
 	std::map<std::string, decodeFunctionType> decodingFunctions;
@@ -65,7 +67,19 @@ public:
 	void startGameClock();
 	int getGameClock();
 
-protected:
+	void startCountdown();
+	bool countdownDone();
+	bool countdownStarted();
 
+	// tile getters
+	Tile * getTile(Location loc);
+	GateTile * getGateTile(Location loc);
+	BoxTile * getBoxTile(Location loc);
+	RampTile * getRampTile(Location loc);
+	JailTile * getJailTile(Location loc);
+protected:
+	bool beginCountdown;
+	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;
+	bool countdownCompleted;
 private:
 };

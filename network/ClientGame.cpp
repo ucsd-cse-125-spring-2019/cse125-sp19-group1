@@ -60,7 +60,7 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-void ClientGame::sendPackets(const int type)
+void ClientGame::sendPackets(const int type, const int selectionNum)
 {
 	// send action packet
 	const unsigned int packet_size = sizeof(Packet);
@@ -69,6 +69,7 @@ void ClientGame::sendPackets(const int type)
 	Packet packet;
 	packet.packet_type = type;
 	packet.id = myID;
+	packet.selectionNum = selectionNum;
 
 	if (myID == -1) {
 		return;
