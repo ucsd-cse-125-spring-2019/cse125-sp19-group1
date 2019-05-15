@@ -3,6 +3,8 @@
 ////////////////////////////////////////
 
 #include "Tester.h"
+#include "ItemModelType.h"
+
 #include <ctime>
 #include <algorithm>
 
@@ -24,44 +26,6 @@ const char* window_title = "TESTER";
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
-
-enum class ItemModelType {
-	apple,
-	bananaGreen,
-	bananaPerfect,
-	bananaVeryRipe,
-	box,
-	cake,
-	canvas,
-	cookingPot,
-	door,
-	fork,
-	garbageBag,
-	jail,
-	key1,
-	key2,
-	key3,
-	keyDrop,
-	keyDropBathroom,
-	keyDropFrontExit,
-	keyDropVent,
-	knife,
-	orange,
-	painting,
-	pear,
-	plate,
-	plunger,
-	restaurantChair,
-	rope,
-	screwdriver1,
-	screwdriver2,
-	screwdriver3,
-	stove,
-	toilet,
-	toiletPaper,
-	vent,
-	window,
-};
 
 static const struct {
 	const char *modelPath;
