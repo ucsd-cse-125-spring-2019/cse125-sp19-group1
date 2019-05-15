@@ -25,6 +25,96 @@ const char* window_title = "TESTER";
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
 
+enum class ItemModelType {
+	apple,
+	bananaGreen,
+	bananaPerfect,
+	bananaVeryRipe,
+	box,
+	cake,
+	canvas,
+	cookingPot,
+	door,
+	fork,
+	garbageBag,
+	jail,
+	key1,
+	key2,
+	key3,
+	keyDrop,
+	keyDropBathroom,
+	keyDropFrontExit,
+	keyDropVent,
+	knife,
+	orange,
+	painting,
+	pear,
+	plate,
+	plunger,
+	restaurantChair,
+	rope,
+	screwdriver1,
+	screwdriver2,
+	screwdriver3,
+	stove,
+	toilet,
+	toiletPaper,
+	vent,
+	window,
+};
+
+static const struct {
+	const char *modelPath;
+	const char *texturePath;
+	const char *name;
+	ItemModelType id;
+} itemModelSettings[] = {
+	{ MODELS_PATH "apple.fbx", TEXTURES_PATH "apple.ppm", "apple", ItemModelType::apple },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananagreen.ppm", "green banana", ItemModelType::bananaGreen },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaperfect.ppm", "perfect banana", ItemModelType::bananaPerfect },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe },
+	{ MODELS_PATH "box.fbx", TEXTURES_PATH "box.ppm", "box", ItemModelType::box },
+	{ MODELS_PATH "cake.fbx", TEXTURES_PATH "cake.ppm", "cake", ItemModelType::cake },
+	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas },
+	{ MODELS_PATH "cookingpot.fbx", TEXTURES_PATH "cookingpot.ppm", "cooking pot", ItemModelType::cookingPot },
+	{ MODELS_PATH "door.fbx", TEXTURES_PATH "door.ppm", "door", ItemModelType::door },
+	{ MODELS_PATH "fork.fbx", TEXTURES_PATH "fork.ppm", "fork", ItemModelType::fork },
+	{ MODELS_PATH "garbagebag.fbx", TEXTURES_PATH "garbagebag.ppm", "garbage bag", ItemModelType::garbageBag },
+	{ MODELS_PATH "jail.fbx", TEXTURES_PATH "jail.ppm", "jail", ItemModelType::jail },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key1.ppm", "key #1", ItemModelType::key1 },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key2.ppm", "key #2", ItemModelType::key2 },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key3.ppm", "key #3", ItemModelType::key3 },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop.ppm", "key drop", ItemModelType::keyDrop },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_bathroom.ppm", "bathroom key drop", ItemModelType::keyDropBathroom },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_frontexit.ppm", "front exit key drop", ItemModelType::keyDropFrontExit },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_vent.ppm", "vent key drop", ItemModelType::keyDropVent },
+	{ MODELS_PATH "knife.fbx", TEXTURES_PATH "knife.ppm", "knife", ItemModelType::knife },
+	{ MODELS_PATH "orange.fbx", TEXTURES_PATH "orange.ppm", "orange fruit", ItemModelType::orange },
+	{ MODELS_PATH "painting.fbx", TEXTURES_PATH "painting.ppm", "wall painting", ItemModelType::painting },
+	{ MODELS_PATH "pear.fbx", TEXTURES_PATH "pear.ppm", "pear", ItemModelType::pear },
+	{ MODELS_PATH "plate.fbx", TEXTURES_PATH "plate.ppm", "plate", ItemModelType::plate },
+	{ MODELS_PATH "plunger.fbx", TEXTURES_PATH "plunger.ppm", "plunger", ItemModelType::plunger },
+	{ MODELS_PATH "restaurantchair.fbx", TEXTURES_PATH "restaurantchair.ppm", "restaurant chair", ItemModelType::restaurantChair },
+	{ MODELS_PATH "rope.fbx", TEXTURES_PATH "rope.ppm", "rope", ItemModelType::rope },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver1.ppm", "screwdriver #1", ItemModelType::screwdriver1 },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver2.ppm", "screwdriver #2", ItemModelType::screwdriver2 },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver3.ppm", "screwdriver #3", ItemModelType::screwdriver3 },
+	{ MODELS_PATH "stove.fbx", TEXTURES_PATH "stove.ppm", "stove", ItemModelType::stove },
+	{ MODELS_PATH "toilet.fbx", TEXTURES_PATH "toilet.ppm", "toilet", ItemModelType::toilet },
+	{ MODELS_PATH "toiletpaper.fbx", TEXTURES_PATH "toiletpaper.ppm", "toilet paper", ItemModelType::toiletPaper },
+	{ MODELS_PATH "vent.fbx", TEXTURES_PATH "vent.ppm", "vent", ItemModelType::vent },
+	{ MODELS_PATH "window.fbx", TEXTURES_PATH "window.ppm", "window", ItemModelType::window },
+};
+
+struct ItemModel {
+	ItemModelType id;
+	const char *name;
+	FBXObject *object;
+	Geometry *geometry;
+};
+
+vector<ItemModel> itemModels;
+
 glm::mat4 P; // P for projection
 glm::mat4 orthoP; // P for 2d elements;
 glm::mat4 V; // V for view
@@ -426,23 +516,63 @@ void Init()
 	//light->toggleNormalShading();
 	
 	// Load models
+	cout << "Loading models..." << endl;
+
+	using namespace std::chrono;
+	auto modelLoadingStart = high_resolution_clock::now();
+	
+	cout << "\tloading " << "chef" << endl;
 	playerModels[CHEF_IDX    ] = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
+	
+	cout << "\tloading " << "raccoon" << endl;
 	playerModels[RACCOON_IDX ] = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	
+	cout << "\tloading " << "cat" << endl;
 	playerModels[CAT_IDX     ] = new FBXObject(CAT_DAE_PATH, CAT_TEX_PATH, true);
+	
+	cout << "\tloading " << "dog" << endl;
 	playerModels[DOG_IDX     ] = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
 
+	cout << "\tloading " << "tile" << endl;
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
+	
+	cout << "\tloading " << "wall" << endl;
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
+	
 	for (unsigned i = 0; i < NUM_PLAYER_MODEL_TYPES; i++) {
 		playerGeometry[i] = new Geometry(playerModels[i], objShaderProgram);
 	}
 
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
-	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
-	uiCanvas->SetDepthTest(false);
-
-
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
+	size_t largestIdx = 0;
+	for (auto &setting : itemModelSettings) {
+		size_t idx = static_cast<size_t>(setting.id);
+		if (largestIdx < idx) {
+			largestIdx = idx;
+		}
+	}
+
+	itemModels.resize(largestIdx + 1);
+
+	for (auto &setting : itemModelSettings) {
+
+		cout << "\tloading " << setting.name << endl;
+
+		auto &m = itemModels[static_cast<size_t>(setting.id)];
+		m.id = setting.id;
+		m.name = setting.name;
+		m.object = new FBXObject(setting.modelPath, setting.texturePath, false);
+		m.geometry = new Geometry(m.object, objShaderProgram);
+	}
+
+	auto modelLoadingEnd = high_resolution_clock::now();
+	std::chrono::duration<float> modelLoadingDuration = modelLoadingEnd - modelLoadingStart;
+	cout << "\tfinished loading models in " << modelLoadingDuration.count() << " seconds\n";
+
+	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
+	uiCanvas->SetDepthTest(false);
 
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
@@ -467,6 +597,13 @@ void CleanUp() {
 	}
 
 	players.clear();
+
+	for (auto &model : itemModels) {
+		if (model.object) delete model.object;
+		if (model.geometry) delete model.geometry;
+	}
+
+	itemModels.clear();
 
 	for (auto &model : playerModels) {
 		if (model) {
