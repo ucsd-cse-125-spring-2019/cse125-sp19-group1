@@ -6,7 +6,7 @@
 
 class Bone {
 public:
-	Bone(string newName, unsigned int newID, glm::mat4 nodeMat, Bone * newParent);
+	Bone(string newName, glm::mat4 nodeMat, Bone * newParent);
 	~Bone();
 	void AddChild(Bone * child);
 	string GetName();
@@ -37,7 +37,7 @@ private:
 	unsigned int childCount;
 	bool isBone;
 	std::vector<glm::mat4> channelMatrices;
-	unsigned int id;
+	int id;
 };
 
 #endif

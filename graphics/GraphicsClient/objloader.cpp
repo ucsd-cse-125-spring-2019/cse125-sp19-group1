@@ -33,15 +33,16 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 // load a skeleton
 void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel)
 {
-	// extracting information about how bones affect vertices through weights
-	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	populateSkelVertices(mesh, vertices, normals, skelVertices);
 	// creating actual Bone objects and populating the Skeleton
-	traverseSkeleton(root, 0, skel);
+	traverseSkeleton(root, skel);
+	assignIDs(skel);
 	assignOffsetMatrices(mesh, skel);
+	// extracting information about how bones affect vertices through weights
+	populateSkelVertices(mesh, vertices, normals, skel);
+	
 }
 
-void traverseSkeleton(aiNode * currNode, unsigned int currID, Skeleton * skel)
+void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 {
 	// get the name of the current node
 	string name = currNode->mName.C_Str();
@@ -54,16 +55,25 @@ void traverseSkeleton(aiNode * currNode, unsigned int currID, Skeleton * skel)
 	}
 
 	// create a Bone for the node and adding it to the Skeleton
-	Bone * bone = new Bone(name, currID, aiMatTOglm(currNode->mTransformation), parent);
+	Bone * bone = new Bone(name, aiMatTOglm(currNode->mTransformation), parent);
 	skel->AddNode(name, bone);
 
 	// recurse through the tree to add the children to the Skeleton
 	for (int i = 0; i < currNode->mNumChildren; i++) {
 		aiNode * child = currNode->mChildren[i];
-		traverseSkeleton(child, currID++, skel);
+		traverseSkeleton(child, skel);
 		// after we've returned from the recursive call, the bone for the child node
 		// should now exist, so we can add it to the current bone's list of children
 		bone->AddChild(skel->GetBone(child->mName.C_Str()));
+	}
+}
+
+void assignIDs(Skeleton * skel) {
+	std::map<string, Bone *> * bones = skel->GetBones();
+	unsigned int currID = 0;
+	for (map<string, Bone *>::iterator it = bones->begin(); it != bones->end(); it++) {
+		it->second->SetID(currID);
+		currID++;
 	}
 }
 
@@ -84,8 +94,9 @@ void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 	}
 }
 
-void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, std::vector<Vertex *> * skelVertices)
+void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel)
 {
+	std::vector<Vertex *> * skelVertices = skel->GetVertices();
 	// first, populate the skel Vertex array
 	skelVertices->reserve(vertices->size());
 	for (int i = 0; i < vertices->size(); i++) {
@@ -98,15 +109,16 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 		for (unsigned int j = 0; j < bone->mNumWeights; j++) {
 			aiVertexWeight weight = bone->mWeights[j];
 			int vertexID = weight.mVertexId;
+			Bone * skelBone = skel->GetBone(bone->mName.C_Str());
 			// add the weight to the Vertex that it is supposed to influence
-			if (vertexID < skelVertices->size())
-				(*skelVertices)[vertexID]->AddWeight(bone->mName.C_Str(), weight.mWeight);
+			if (vertexID < skelVertices->size() && skelBone != NULL)
+				(*skelVertices)[vertexID]->AddWeight(skelBone->GetID(), weight.mWeight);
 			else
-				std::cout << "Error loading the bones of the skeleton!" << std::endl;
+				std::cout << "Error loading the skeleton!" << std::endl;
 		}
 	}
 
-	for (int k = 0; k < skelVertices->size(); k++)\
+	for (int k = 0; k < skelVertices->size(); k++)
 		(*skelVertices)[k]->NormalizeWeights();
 }
 

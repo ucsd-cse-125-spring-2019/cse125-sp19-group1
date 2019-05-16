@@ -32,13 +32,7 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 	texNum = loadTexture(texFilepath);
 	if (animPlayer != NULL) {
 		LoadMatrices(filepath);
-		// assigning bone ids
-		std::map<string, Bone *> * skelBones = skel->GetBones();
-		int id = 0;
-		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
-			it->second->SetID(id);
-			id++;
-		}
+		skel->Update(animPlayer->GetGlobalInverseT());
 	}
 }
 
@@ -192,7 +186,7 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 		for (std::map<string, Bone*>::iterator it = skelBones->begin(); it != skelBones->end(); it++)
 			boneTransforms.push_back(it->second->GetTransform());
 		glUniform1i(uIsAnimated, 1);
-		glUniformMatrix4fv(uBones, skel->GetBones()->size(), GL_FALSE, &((boneTransforms[0])[0][0]));
+		glUniformMatrix4fv(uBones, boneTransforms.size(), GL_FALSE, &((boneTransforms[0])[0][0]));
 	}
 	else
 		glUniform1i(uIsAnimated, 0);
@@ -289,15 +283,15 @@ void FBXObject::SetBuffers() {
 		std::vector<glm::vec4> weightValues;
 		std::vector<Vertex *> * skelVertices = skel->GetVertices();
 		for (int i = 0; i < skelVertices->size(); i++) {
-			std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
+			std::vector<std::pair<int, float>> * currWeights = (*skelVertices)[i]->GetWeights();
 			glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
 			glm::vec4 currValues = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 			// number of weights is restricted to a maximum of four
-			for (int j = 0; j < currWeights->size(); j++) {
-				Bone * currBone = skel->GetBone((*currWeights)[j].first);
-				if (currBone != NULL) {
-					currIndices[j] = currBone->GetID();
-					currValues[j] = (*currWeights)[j].second;
+			for (int j = 0; j < currWeights->size() && j < 4; j++) {
+				std::pair<int, float> currWeight = (*currWeights)[j];
+				if (currWeight.first != -1) {
+					currIndices[j] = currWeight.first;
+					currValues[j] = currWeight.second;
 				}
 			}
 			weightIndices.push_back(currIndices);
@@ -306,15 +300,15 @@ void FBXObject::SetBuffers() {
 
 		/* send data about vertex weight indices */
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WI);
-		glBufferData(GL_ARRAY_BUFFER, weightIndices.size() * (4 * sizeof(unsigned int)), weightIndices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, weightIndices.size() * (4 * sizeof(GLuint)), weightIndices.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_UNSIGNED_INT, GL_FALSE, 4 * sizeof(unsigned int), (GLvoid *)0);
+		glVertexAttribPointer(3, 4, GL_UNSIGNED_INT, GL_FALSE, 4 * sizeof(GLuint), (GLvoid *)0);
 
 		/* send data about vertex weight values */
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WV);
-		glBufferData(GL_ARRAY_BUFFER, weightValues.size() * (4 * sizeof(float)), weightValues.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, weightValues.size() * (4 * sizeof(GLfloat)), weightValues.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid *)0);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *)0);
 
 	}
 

@@ -1,7 +1,7 @@
 #include "Bone.h"
 
-Bone::Bone(string newName, unsigned int newID, glm::mat4 nodeMat, Bone * newParent) {
-	id = newID;
+Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
+	id = -1; // default ID; should be updated later (if all goes correctly)
 	name = string(newName);
 	transform = glm::mat4(1.0f);
 	offset = glm::mat4(1.0f);

@@ -11,9 +11,9 @@ class Vertex {
 public:
 	Vertex(unsigned int newID, glm::vec3 * newPos, glm::vec3 * newNorm);
 	~Vertex();
-	void AddWeight(string boneName, float boneWeight);
+	void AddWeight(int boneID, float boneWeight);
 	void NormalizeWeights();
-	std::vector<std::pair<string, float>> * GetWeights();
+	std::vector<std::pair<int, float>> * GetWeights();
 	glm::vec3 GetPos();
 	glm::vec3 GetNorm();
 	unsigned int GetID();
@@ -22,8 +22,8 @@ private:
 	unsigned int id;
 	glm::vec3 position;
 	glm::vec3 normal;
-	// string == name of bone, float == weight of bone
-	std::vector<std::pair<string, float>> weights;
+	// int == id of bone, float == weight of bone
+	std::vector<std::pair<int, float>> weights;
 };
 
 #endif
