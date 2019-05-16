@@ -3,6 +3,7 @@ in vec2 uv;
 out vec4 color;
 
 uniform sampler2D tex;
+uniform float ratioAngry;
 
 
 bool blackToTrans(vec4 color) {
@@ -24,6 +25,8 @@ void main()
 	if(blackToTrans(color)){
 		color = vec4(0,0,0,0); 
 	}
-
+	if(uv.y * 3 > (2.3024 + ((2.836875 - 2.3024) * (1 - ratioAngry))) && uv.y * 3 < 2.836875 && uv.x * 3 > 0.87038 && uv.x * 3 < 0.917875) {
+		color = vec4(0.7176,0.3725,0.3725,1);
+	}
 
 }  

@@ -572,9 +572,6 @@ void Init()
 	std::chrono::duration<float> modelLoadingDuration = modelLoadingEnd - modelLoadingStart;
 	cout << "\tfinished loading models in " << modelLoadingDuration.count() << " seconds\n";
 
-	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
-	uiCanvas->SetDepthTest(false);
-
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
 	root->addChild(allPlayersNode);
@@ -928,8 +925,7 @@ void DisplayCallback(GLFWwindow* window)
 		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
 	}
 	root->draw(V, P, glm::mat4(1.0));
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
+
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
 
@@ -952,6 +948,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			// Close the window. This causes the program to also terminate.
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
+
+		if (key == GLFW_KEY_M) {
+			uiCanvas->setAngerRatio(1.0f);
+			uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
+			uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
+		}
+
 
 		if (key == GLFW_KEY_A) {
 			for (auto model : playerModels) {

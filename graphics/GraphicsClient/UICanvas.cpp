@@ -1,6 +1,7 @@
 #include "UICanvas.h"
 
 UICanvas::UICanvas(GLuint shaderProgram) {
+	angerRatio = 0.25f;
 	this->shaderProgram = shaderProgram;
 	uiItems[UI_BASE] = new UIObject(UI_BASE_TEX);
 	visibleItems[UI_BASE] = true;
@@ -51,8 +52,19 @@ UICanvas::~UICanvas() {
 	}
 }
 
+void UICanvas::setAngerRatio(float newAngerRatio) {
+	this->angerRatio = newAngerRatio;
+}
+
+void UICanvas::setVisible(UIType item, bool visible) {
+	visibleItems[item] = visible;
+}
+
 void UICanvas::draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model) {
 	glDisable(GL_DEPTH_TEST);
+	glUseProgram(shaderProgram);
+	GLuint uAngryRatio = glGetUniformLocation(shaderProgram, "ratioAngry");
+	glUniform1f(uAngryRatio, (this->angerRatio));
 	for (int i = 0; i < NUM_ITEMS; i++) {
 		if (visibleItems[i]) {
 			uiItems[i]->draw(shaderProgram, V, P, model);

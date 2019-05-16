@@ -53,12 +53,15 @@ public:
 		YELLOW_SCREWDRIVER_ITEM = 19,
 	};
 	void draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
+	void setAngerRatio(float newAngerRatio);
+	void setVisible(UIType item, bool visible);
 	UICanvas(GLuint shaderProgram);
 	~UICanvas();
 private:
 	bool visibleItems[NUM_ITEMS];
 	class UIObject *uiItems[NUM_ITEMS];
 	GLuint shaderProgram;
+	float angerRatio;
 };
 
 #endif

@@ -51,9 +51,6 @@
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
 
-#define CANVAS_MDL_PATH     (MODELS_PATH "canvas.fbx")
-#define CANVAS_TEX_PATH		(TEXTURES_PATH "canvas.ppm")
-
 // function declarations
 glm::vec3 directionBitmaskToVector(int bitmask);
 void ErrorCallback(int error, const char* description);
