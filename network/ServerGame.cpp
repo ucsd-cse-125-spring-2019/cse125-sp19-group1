@@ -77,6 +77,7 @@ void ServerGame::receiveFromClients()
 
 			continue;
 		}
+		moveForward = moveBackward = moveLeft = moveRight = false;
 
 		unsigned int i = 0;
 		while (i < (unsigned int)data_length)
@@ -524,6 +525,47 @@ void ServerGame::receiveFromClients()
 				break;
 			}
 		}
+		if (Player * player = gameData->getPlayer(iter->first))
+		{
+			int sum = 0;
+			if (moveForward)
+			{
+				sum += 5;
+			}
+			if (moveBackward)
+			{
+				sum -= 5;
+			}
+			if (moveRight)
+			{
+				sum += 1;
+			}
+			if (moveLeft)
+			{
+				sum -= 1;
+			}
+			
+			switch (sum)
+			{
+			case 5: // forward
+				break;
+			case -5: //backward
+				break;
+			case 1://right
+				break;
+			case -1://left
+				break;
+			case 6://forwardright
+				break;
+			case 4://backward left
+				break;
+			case -4://back right 
+				break;
+			case -6:// back left
+				break;
+			}
+			player->setFacingDir(sum);
+		}
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
 	}
@@ -652,35 +694,39 @@ void ServerGame::initNewClient()
 
 void ServerGame::updateRightEvent(int id)
 {
+	moveRight = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
-	gameData->getPlayer(id)->setFacingDir(2);
+	//gameData->getPlayer(id)->setFacingDir(2);
 
 	updatePlayerCollision(id, 0);
 }
 
 void ServerGame::updateBackwardEvent(int id)
 {
+	moveBackward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
-	gameData->getPlayer(id)->setFacingDir(3);
+	//gameData->getPlayer(id)->setFacingDir(3);
 
 	updatePlayerCollision(id, 1);
 }
 
 void ServerGame::updateForwardEvent(int id)
 {
+	moveForward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
-	gameData->getPlayer(id)->setFacingDir(1);
+	//gameData->getPlayer(id)->setFacingDir(1);
 	updatePlayerCollision(id, 2);
 }
 
 void ServerGame::updateLeftEvent(int id)
 {
+	moveLeft = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
-	gameData->getPlayer(id)->setFacingDir(4);
+	//gameData->getPlayer(id)->setFacingDir(4);
 
 	updatePlayerCollision(id, 3);
 }

@@ -44,4 +44,6 @@ private:
 	bool gameStarted;
 	bool allPlayersReady;
 	bool initCharacters;
+
+	bool moveForward, moveBackward, moveLeft, moveRight;
 };
