@@ -32,7 +32,7 @@ void SoundSystem::createSound(Sound *pSound, const char* pFile)
 	m_pSystem->createSound(pFile, FMOD_DEFAULT, 0, pSound);
 }
 
-void SoundSystem::playSound(Sound pSound, bool bLoop = false)
+void SoundSystem::playSound(Sound pSound, bool bLoop)
 {
 	if (!bLoop) {
 		pSound->setMode(FMOD_LOOP_OFF);

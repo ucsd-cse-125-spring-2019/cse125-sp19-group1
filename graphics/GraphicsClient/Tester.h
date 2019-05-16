@@ -13,6 +13,7 @@
 #include "Node.h"
 #include "Transform.h"
 #include "Geometry.h"
+#include "SoundSystem.h"
 //#include "./server/ServerGame.h"
 //#include "./server/ClientGame.h"
 #include "../../network/ServerGame.h"
@@ -53,6 +54,11 @@
 
 #define CANVAS_MDL_PATH     (MODELS_PATH "canvas.fbx")
 #define CANVAS_TEX_PATH		(TEXTURES_PATH "canvas.ppm");
+
+// Paths for sounds
+#define SOUNDS_PATH			"../../sounds/"
+#define SOUNDS_TOILET		(SOUNDS_PATH "bathroom_toilet.mp3")
+#define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
 
 // function declarations
 glm::vec3 directionBitmaskToVector(int bitmask);
