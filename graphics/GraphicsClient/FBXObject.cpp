@@ -7,7 +7,6 @@ FBXObject::FBXObject(const char * obj_path, const char * texPath, bool attachSke
 	Parse(obj_path, texPath);
 	// initialize rendering variables
 	RenderingSetup();
-	printcount = 0;
 }
 
 void FBXObject::Init(bool attachSkel) {
@@ -31,8 +30,16 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	// Load the corresponding model texture
 	texNum = loadTexture(texFilepath);
-	if (animPlayer != NULL)
+	if (animPlayer != NULL) {
 		LoadMatrices(filepath);
+		// assigning bone ids
+		std::map<string, Bone *> * skelBones = skel->GetBones();
+		int id = 0;
+		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
+			it->second->SetID(id);
+			id++;
+		}
+	}
 }
 
 FBXObject::~FBXObject()
@@ -43,6 +50,9 @@ FBXObject::~FBXObject()
 	glDeleteBuffers(1, &(this->VBO_V));
 	glDeleteBuffers(1, &(this->VBO_N));
 	glDeleteBuffers(1, &(this->EBO));
+	glDeleteBuffers(1, &(this->VBO_UV));
+	glDeleteBuffers(1, &(this->VBO_WI));
+	glDeleteBuffers(1, &(this->VBO_WV));
 }
 
 void FBXObject::PrintMatrix(glm::mat4 * matrix) {
@@ -66,30 +76,7 @@ void FBXObject::Update() {
 	/*if (animPlayer != NULL) {
 		animPlayer->play();
 		skel->Update(animPlayer->GetGlobalInverseT());
-		UpdateSkin();
 	}*/
-}
-
-void FBXObject::UpdateSkin() {
-	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	for (int i = 0; i < skelVertices->size(); i++)
-		DeformVertex((*skelVertices)[i]);
-	// after changing all the vertices and normals, we should update the buffers
-	UpdateBuffers();
-}
-
-void FBXObject::DeformVertex(Vertex * vertex) {
-	std::vector<std::pair<string, float>> * weights = vertex->GetWeights();
-	glm::mat4 M = glm::mat4(1.0f);
-	for (int i = 0; i < weights->size(); i++) {
-		std::pair<string, float> currWeight = (*weights)[i];
-		Bone * currBone = skel->GetBone(currWeight.first);
-		if (currBone != NULL)
-			M = M + currWeight.second * currBone->GetTransform();
-	}
-	/* TODO: fix malformed matrices (here and in Bone class) */
-	vertices[vertex->GetID()] = M * glm::vec4(((vertex->GetPos())), 1.0f);
-	normals[vertex->GetID()] = M * glm::vec4(((vertex->GetNorm())), 0.0f);
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -200,16 +187,10 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 	glUniform1f(uShine, (this->shininess));
 
 	if (skel != NULL || animPlayer != NULL) {
-		std::cout << "HI";
 		std::vector<glm::mat4> boneTransforms;
 		std::map<string, Bone *> * skelBones = skel->GetBones();
-		for (std::map<string, Bone*>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
+		for (std::map<string, Bone*>::iterator it = skelBones->begin(); it != skelBones->end(); it++)
 			boneTransforms.push_back(it->second->GetTransform());
-			if (printcount < 5) {
-				std::cout << "ID: " << it->second->GetID() << std::endl;
-			}
-		}
-		printcount++;
 		glUniform1i(uIsAnimated, 1);
 		glUniformMatrix4fv(uBones, skel->GetBones()->size(), GL_FALSE, &((boneTransforms[0])[0][0]));
 	}
@@ -309,8 +290,9 @@ void FBXObject::SetBuffers() {
 		std::vector<Vertex *> * skelVertices = skel->GetVertices();
 		for (int i = 0; i < skelVertices->size(); i++) {
 			std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
-			glm::vec4 currIndices = glm::vec4(1);
-			glm::vec4 currValues = glm::vec4(1.0f);
+			glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
+			glm::vec4 currValues = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			// number of weights is restricted to a maximum of four
 			for (int j = 0; j < currWeights->size(); j++) {
 				Bone * currBone = skel->GetBone((*currWeights)[j].first);
 				if (currBone != NULL) {
@@ -330,9 +312,9 @@ void FBXObject::SetBuffers() {
 
 		/* send data about vertex weight values */
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WV);
-		glBufferData(GL_ARRAY_BUFFER, weightValues.size() * (4 * sizeof(float)), weightIndices.data(), GL_STATIC_DRAW);
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_UNSIGNED_INT, GL_FALSE, 4 * sizeof(float), (GLvoid *)0);
+		glBufferData(GL_ARRAY_BUFFER, weightValues.size() * (4 * sizeof(float)), weightValues.data(), GL_STATIC_DRAW);
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid *)0);
 
 	}
 
@@ -350,10 +332,9 @@ void FBXObject::SetBuffers() {
 
 void FBXObject::ToNextKeyframe() {
 	if (animPlayer != NULL) {
+		std::cout << "TO NEXT KEYFRAME" << std::endl;
 		animPlayer->ToNextKeyframe();
 		skel->Update(animPlayer->GetGlobalInverseT());
-		glm::mat4 identity = glm::mat4(1.0f);
-		UpdateSkin();
 	}
 }
 

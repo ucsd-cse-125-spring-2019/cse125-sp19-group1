@@ -23,6 +23,7 @@ public:
 
 	bool CheckIsBone();
 	void SetChannelMatrices(float * values, int numValues);
+	void SetID(unsigned int newID);
 	unsigned int GetID();
 
 private:

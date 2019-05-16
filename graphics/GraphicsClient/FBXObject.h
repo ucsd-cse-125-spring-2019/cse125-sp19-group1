@@ -39,8 +39,6 @@ private:
 	glm::vec3 default_spec = glm::vec3(0.118281f, 0.085802f, 0.066065f);
 	float default_shininess =  0.5f;
 
-	int printcount;
-
 public:
 	// creating. destroying, and debugging
 	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel);
@@ -51,8 +49,6 @@ public:
 	void PrintSkeleton();
 	// manipulation
 	void Update();
-	void UpdateSkin();
-	void DeformVertex(Vertex * vertex);
 	void MoveTo(float x, float y, float z);
 	void Translate(float x, float y, float z);
 	void Rotate(float angle, float x, float y, float z);

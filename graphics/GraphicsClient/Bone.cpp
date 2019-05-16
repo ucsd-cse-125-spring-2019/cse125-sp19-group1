@@ -112,6 +112,10 @@ void Bone::SetChannelMatrices(float * values, int numValues) {
 	}
 }
 
+void Bone::SetID(unsigned int newID) {
+	id = newID;
+}
+
 unsigned int Bone::GetID() {
 	return id;
 }
