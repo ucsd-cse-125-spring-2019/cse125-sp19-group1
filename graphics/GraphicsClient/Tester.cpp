@@ -20,7 +20,7 @@ int elapsedTime = 0;
 GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
-const char* window_title = "TESTER";
+const char* window_title = GAME_NAME_SHORT;
 
 #define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
