@@ -36,6 +36,8 @@ Atlas::Atlas()
 	std::string keyDepositLine;
 	std::string objectLine;
 
+	std::pair<int, int> tableLoc;
+
 	//printf("INITIALIZING WALLS!\n");
 
 	std::getline(wallFile, wallLine); // removes first line from file
@@ -135,6 +137,10 @@ Atlas::Atlas()
 				break;
 			case TileType::OBJECT: // change to ObjectTile
 				tileRow.push_back(new ObjectTile(static_cast<ObjectType>(std::stoi(objectNum)), wall, height));
+				if (objectNum == "1")
+				{
+					tableLoc = std::pair<int, int>(row, col);
+				}
 				break;
 			case TileType::DEFAULT: default:
 				tileRow.push_back(new Tile(TileType::DEFAULT, wall, height));
@@ -185,6 +191,8 @@ Atlas::Atlas()
 		itemList.erase(std::find(itemList.begin(), itemList.end(), randItem));
 	}
 
+	itemsMap.emplace(ItemName::CAKE, Item(ItemName::CAKE, tableLoc.first, tableLoc.second)); // adds cake to table location
+	tileLayout[tableLoc.first][tableLoc.second]->setItem(ItemName::CAKE);
 	std::cout << "keys" << std::endl;
 	// Debug print key layout
 	for (auto v : keyLocations)
@@ -299,7 +307,7 @@ void Atlas::detectObjectCollision(Location & loc) {
 	{
 		if (tileLayout[row + 1][col]->getTileType() == TileType::OBJECT)
 		{
-			int down_bound = row * TILE_SIZE + TILE_SIZE-1;
+			int down_bound = row * TILE_SIZE + TILE_SIZE-1;// need -1 so that it does not go into the next tile
 			if (loc.getZ() + PLAYER_RADIUS >= down_bound) {
 				printf("collided with down obj\n");
 				loc.setZ(down_bound - PLAYER_RADIUS);
@@ -325,7 +333,7 @@ void Atlas::detectObjectCollision(Location & loc) {
 	{
 		if (tileLayout[row][col + 1]->getTileType() == TileType::OBJECT)
 		{
-			int right_bound = col * TILE_SIZE + TILE_SIZE-1;
+			int right_bound = col * TILE_SIZE + TILE_SIZE-1; // need -1 so that it does not go into the next tile
 			if (loc.getX() + PLAYER_RADIUS >= right_bound) {
 				printf("collided with right obj\n");
 				loc.setX(right_bound - PLAYER_RADIUS);
@@ -514,7 +522,10 @@ Tile * Atlas::getTileAt(Location & loc)
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	return tileLayout[row][col];
+	if (row >= 0 && row < tileLayout.size() && col >= 0 && col < tileLayout[row].size())
+		return tileLayout[row][col];
+	else
+		return nullptr;
 }
 bool Atlas::tileHasItem(Location & loc)
 {

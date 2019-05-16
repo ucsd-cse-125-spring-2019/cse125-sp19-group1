@@ -307,11 +307,24 @@ void ServerGame::receiveFromClients()
 								Location loc = player->getLocation();
 								ItemName item = gameData->getAtlas()->getTileItem(loc);
 
-								if (item != ItemName::EMPTY && player->getInventory() == ItemName::EMPTY)
+								if (player->getInventory() == ItemName::EMPTY)
 								{
-									player->setInventory(item);
-									gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
+									Direction dir = player->getFacingDirection();
+									
+									ObjectTile * objectTile = gameData->getAdjacentObjectTile(loc, dir);
 
+									if (objectTile && objectTile->getItem() == ItemName::CAKE)
+									{
+										std::cout << "table has cake!" << std::endl;
+										player->setInventory(objectTile->getItem());
+										objectTile->setItem(ItemName::EMPTY);
+
+									}
+									else if (item != ItemName::EMPTY)
+									{
+										player->setInventory(item);
+										gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
+									}
 								}
 								//else if (gameData->getAtlas()->hasGate(loc))
 								else if (GateTile * gateTile = gameData->getGateTile(loc))

@@ -8,7 +8,7 @@ class ObjectTile : public Tile
 public:
 
 	// Default constructor
-	ObjectTile(ObjectType anObj = ObjectType::TABLE, int aWallLayout = 0, int aHeight = 0) : Tile(TileType::OBJECT, aWallLayout, aHeight, ItemName::CAKE), objectType(anObj) {}
+	ObjectTile(ObjectType anObj = ObjectType::TABLE, int aWallLayout = 0, int aHeight = 0) : Tile(TileType::OBJECT, aWallLayout, aHeight), objectType(anObj) {}
 
 	// Getter
 	ObjectType getObjectType() { return objectType; }

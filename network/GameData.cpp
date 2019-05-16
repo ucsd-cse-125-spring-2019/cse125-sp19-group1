@@ -272,42 +272,103 @@ Tile * GameData::getTile(Location loc)
 	{
 		int row, col;
 		Atlas::getMapCoords(loc, row, col);
-		return clientTileLayout[row][col];
+		if (row >= 0 && row < clientTileLayout.size() && col >= 0 && col < clientTileLayout[row].size())
+			return clientTileLayout[row][col];
+		else
+			return nullptr;
 	}
 }
 GateTile * GameData::getGateTile(Location loc)
 {
-	Tile * tile = getTile(loc);
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::GATE)
+			return dynamic_cast<GateTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
 	
-	if (tile->getTileType() == TileType::GATE)
-		return dynamic_cast<GateTile*>(tile);
-	else
-		return nullptr;
 }
 BoxTile * GameData::getBoxTile(Location loc)
 {
-	Tile * tile = getTile(loc);
-
-	if (tile->getTileType() == TileType::BOX)
-		return dynamic_cast<BoxTile*>(tile);
-	else
-		return nullptr;
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::BOX)
+			return dynamic_cast<BoxTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
 }
 RampTile * GameData::getRampTile(Location loc)
 {
-	Tile * tile = getTile(loc);
-
-	if (tile->getTileType() == TileType::RAMP)
-		return dynamic_cast<RampTile*>(tile);
-	else
-		return nullptr;
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::RAMP)
+			return dynamic_cast<RampTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
 }
 JailTile * GameData::getJailTile(Location loc)
 {
+
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::JAIL)
+			return dynamic_cast<JailTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+}
+ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
+{
+	float increment = TILE_SIZE / 2;
+	switch (dir)
+	{
+	case Direction::NORTH:
+		loc = Location(loc.getX(), loc.getY(), loc.getZ() + increment);
+		break;
+	case Direction::SOUTH:
+		loc = Location(loc.getX(), loc.getY(), loc.getZ() - increment);
+
+		break;
+	case Direction::EAST:
+		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ());
+
+		break;
+	case Direction::WEST:
+		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ());
+
+		break;
+	case Direction::NORTHEAST:
+		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ()+increment);
+
+		break;
+	case Direction::NORTHWEST:
+		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ()+increment);
+
+		break;
+	case Direction::SOUTHEAST:
+		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ()-increment);
+
+		break;
+	case Direction::SOUTHWEST:
+		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ()-increment);
+
+		break;
+	}
+
 	Tile * tile = getTile(loc);
 
-	if (tile->getTileType() == TileType::JAIL)
-		return dynamic_cast<JailTile*>(tile);
+	if (tile->getTileType() == TileType::OBJECT)
+	{
+		return dynamic_cast<ObjectTile *>(tile);
+	}
 	else
 		return nullptr;
 }
+
