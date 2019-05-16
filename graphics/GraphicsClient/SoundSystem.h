@@ -1,15 +1,14 @@
 #pragma once
 #include "fmod.hpp"
+#include "fmod.h"
+//#include <windows.h>
 
-// Referenced https://cuboidzone.wordpress.com/2013/07/26/tutorial-implementing-fmod/ 
-// in setting up this class
-
-typedef FMOD::Sound* Sound; // SoundClass in tutorial
+typedef FMOD::Sound* Sound;
 
 class SoundSystem
 {
 public:
-	FMOD::System *m_pSystem;
+	FMOD::System *system;
 	SoundSystem();
 	~SoundSystem();
 
