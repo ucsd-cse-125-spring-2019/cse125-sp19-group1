@@ -446,7 +446,7 @@ void ServerGame::receiveFromClients()
 							break;
 						}
 
-
+						std::cout << "facing:" << player->getFacingDir() << std::endl;
 						Location loc = player->getLocation();
 
 						// PLayer cannot drop item if there is an item already on the current tile
@@ -654,6 +654,8 @@ void ServerGame::updateRightEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+	gameData->getPlayer(id)->setFacingDir(2);
+
 	updatePlayerCollision(id, 0);
 }
 
@@ -661,6 +663,8 @@ void ServerGame::updateBackwardEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+	gameData->getPlayer(id)->setFacingDir(3);
+
 	updatePlayerCollision(id, 1);
 }
 
@@ -668,6 +672,7 @@ void ServerGame::updateForwardEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+	gameData->getPlayer(id)->setFacingDir(1);
 	updatePlayerCollision(id, 2);
 }
 
@@ -675,6 +680,8 @@ void ServerGame::updateLeftEvent(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+	gameData->getPlayer(id)->setFacingDir(4);
+
 	updatePlayerCollision(id, 3);
 }
 
@@ -773,7 +780,7 @@ void ServerGame::updateCollision(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-	gameData->getAtlas()->detectCollision(loc);
+	gameData->getAtlas()->detectWallCollision(loc);
 	//gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 	gameData->getPlayer(id)->setLocation(loc);
 }

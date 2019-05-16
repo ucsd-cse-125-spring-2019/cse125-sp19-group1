@@ -25,6 +25,7 @@ Atlas::Atlas()
 	std::ifstream jailFile("../../maps/tinytinymap/player_trap.txt");
 	std::ifstream rampFile("../../maps/tinytinymap/ramps.txt");
 	std::ifstream keyDepositFile("../../maps/tinytinymap/key_deposit.txt");
+	std::ifstream objectFile("../../maps/tinytinymap/table.txt");
 
 	std::string wallLine;
 	std::string boxLine;
@@ -33,6 +34,7 @@ Atlas::Atlas()
 	std::string jailLine;
 	std::string rampLine;
 	std::string keyDepositLine;
+	std::string objectLine;
 
 	//printf("INITIALIZING WALLS!\n");
 
@@ -43,6 +45,7 @@ Atlas::Atlas()
 	std::getline(jailFile, jailLine); // removes first line from file
 	std::getline(rampFile, rampLine); // removes first line from file
 	std::getline(keyDepositFile, keyDepositLine); // removes first line from file
+	std::getline(objectFile, objectLine); // removes first line from file
 	int row = 0;
 	while (std::getline(wallFile, wallLine))
 	{
@@ -53,6 +56,7 @@ Atlas::Atlas()
 		std::getline(jailFile, jailLine);
 		std::getline(rampFile, rampLine);
 		std::getline(keyDepositFile, keyDepositLine);
+		std::getline(objectFile, objectLine);
 		std::stringstream wallStream(wallLine);
 		std::stringstream boxStream(boxLine);
 		std::stringstream gateStream(gateLine);
@@ -60,6 +64,7 @@ Atlas::Atlas()
 		std::stringstream jailStream(jailLine);
 		std::stringstream rampStream(rampLine);
 		std::stringstream keyDepositStream(keyDepositLine);
+		std::stringstream objectStream(objectLine);
 		std::string wallNum;
 		std::string boxNum;
 		std::string gateNum;
@@ -67,6 +72,7 @@ Atlas::Atlas()
 		std::string jailNum;
 		std::string rampNum;
 		std::string keyDepositNum;
+		std::string objectNum;
 		std::vector<Tile *> tileRow;
 		std::vector<int> keyLocationsRow;
 		while (wallStream >> wallNum)
@@ -78,6 +84,7 @@ Atlas::Atlas()
 			jailStream >> jailNum;
 			rampStream >> rampNum;
 			keyDepositStream >> keyDepositNum;
+			objectStream >> objectNum;
 
 			// Initialize default variables for a tile
 			TileType type(TileType::DEFAULT);
@@ -104,14 +111,17 @@ Atlas::Atlas()
 			{
 				type = TileType::KEY_DROP;
 			}
-
+			else if (objectNum != "0")
+			{
+				type = TileType::OBJECT;
+			}
 			switch (type)
 			{
 			case TileType::BOX:
 				tileRow.push_back(new BoxTile(wall, height));
 				boxLocations.push_back(std::pair<int, int>(row, col));
 				break;
-			case TileType::JAIL: // change to JailTile
+			case TileType::JAIL:
 				tileRow.push_back(new JailTile(wall, height));
 				break;
 			case TileType::GATE: 
@@ -123,8 +133,8 @@ Atlas::Atlas()
 			case TileType::KEY_DROP: // change to KeyDropTile
 				tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
 				break;
-			case TileType::TABLE: // change to ObjectTile
-				tileRow.push_back(new Tile(TileType::TABLE, wall, height));
+			case TileType::OBJECT: // change to ObjectTile
+				tileRow.push_back(new ObjectTile(static_cast<ObjectType>(std::stoi(objectNum)), wall, height));
 				break;
 			case TileType::DEFAULT: default:
 				tileRow.push_back(new Tile(TileType::DEFAULT, wall, height));
@@ -188,7 +198,7 @@ Atlas::Atlas()
 	std::cout << "end atlas constructor\n";
 }
 
-void Atlas::detectCollision(Location & loc) {
+void Atlas::detectWallCollision(Location & loc) {
 	// find which tile player is in
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);

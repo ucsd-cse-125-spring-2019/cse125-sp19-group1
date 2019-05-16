@@ -35,6 +35,7 @@ public:
 
 	bool		isReady() const;
 
+	int getFacingDir() const;
 
 	// Setters
 	void setInventory(ItemName anItem);
@@ -56,6 +57,7 @@ public:
 
 	void toggleReady();
 	
+	void setFacingDir(int dir);
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
@@ -110,4 +112,6 @@ protected:
 
 
 	bool ready = false;
+
+	int facingdir = 1;
 };

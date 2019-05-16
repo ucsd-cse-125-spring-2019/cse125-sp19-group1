@@ -217,8 +217,8 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\JailTile.h">
-	  <Filter>Header Files</Filter>
-	</ClInclude>
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\network\Chef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -229,6 +229,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tokenizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\network\ObjectTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

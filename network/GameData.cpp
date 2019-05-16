@@ -158,8 +158,8 @@ void GameData::decodeTileLayout(std::string value)
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;
-				case TileType::TABLE: // change to ObjectTile
-					tmp = new Tile();
+				case TileType::OBJECT: // change to ObjectTile
+					tmp = new ObjectTile();
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;

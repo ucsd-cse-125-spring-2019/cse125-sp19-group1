@@ -140,6 +140,7 @@
     <ClInclude Include="..\..\network\Location.h" />
     <ClInclude Include="..\..\network\NetworkData.h" />
     <ClInclude Include="..\..\network\NetworkServices.h" />
+    <ClInclude Include="..\..\network\ObjectTile.h" />
     <ClInclude Include="..\..\network\Player.h" />
     <ClInclude Include="..\..\network\Player2.h" />
     <ClInclude Include="..\..\network\Player3.h" />

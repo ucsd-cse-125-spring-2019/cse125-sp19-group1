@@ -41,6 +41,8 @@ bool Player::getOpenJail() const { return openingJail; }
 bool Player::getOpeningGate() const { return openingGate; }
 bool Player::getHidden() { return hidden; }
 
+int Player::getFacingDir() const { return facingdir; }
+void Player::setFacingDir(int dir) { facingdir = dir; std::cout << "updatefacing\n"; }
 
 void Player::setLocation(float argX, float argY, float argZ)
 {
