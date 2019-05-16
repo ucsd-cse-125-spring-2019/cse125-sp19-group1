@@ -86,12 +86,7 @@ void SoundSystem::playSound(Sound pSound, bool bLoop)
 	result = system->playSound(pSound, NULL, false, 0);
 
 	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_INVALID_PARAM) {
-			fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
-		}
-		else {
-			fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
-		}
+		fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
 	}
 }
 

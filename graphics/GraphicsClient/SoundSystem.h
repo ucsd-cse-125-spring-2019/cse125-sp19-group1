@@ -9,11 +9,13 @@ class SoundSystem
 {
 public:
 	FMOD::System *system;
+	bool hasAudioDriver;
 	SoundSystem();
 	~SoundSystem();
 
-	void createSound(Sound *pSound, const char* pFile);
+	void createSound(Sound pSound, const char* pFile);
 	void playSound(Sound pSound, bool bLoop = false);
 	void releaseSound(Sound pSound);
+	bool shouldIgnoreSound();
 };
 
