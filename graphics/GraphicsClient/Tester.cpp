@@ -3,6 +3,8 @@
 ////////////////////////////////////////
 
 #include "Tester.h"
+#include "ItemModelType.h"
+
 #include <ctime>
 #include <algorithm>
 
@@ -18,50 +20,12 @@ int elapsedTime = 0;
 GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
-const char* window_title = "TESTER";
+const char* window_title = GAME_NAME_SHORT;
 
 #define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
-
-enum class ItemModelType {
-	apple,
-	bananaGreen,
-	bananaPerfect,
-	bananaVeryRipe,
-	box,
-	cake,
-	canvas,
-	cookingPot,
-	door,
-	fork,
-	garbageBag,
-	jail,
-	key1,
-	key2,
-	key3,
-	keyDrop,
-	keyDropBathroom,
-	keyDropFrontExit,
-	keyDropVent,
-	knife,
-	orange,
-	painting,
-	pear,
-	plate,
-	plunger,
-	restaurantChair,
-	rope,
-	screwdriver1,
-	screwdriver2,
-	screwdriver3,
-	stove,
-	toilet,
-	toiletPaper,
-	vent,
-	window,
-};
 
 static const struct {
 	const char *modelPath;
@@ -72,7 +36,7 @@ static const struct {
 	{ MODELS_PATH "apple.fbx", TEXTURES_PATH "apple.ppm", "apple", ItemModelType::apple },
 	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananagreen.ppm", "green banana", ItemModelType::bananaGreen },
 	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaperfect.ppm", "perfect banana", ItemModelType::bananaPerfect },
-	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe },
 	{ MODELS_PATH "box.fbx", TEXTURES_PATH "box.ppm", "box", ItemModelType::box },
 	{ MODELS_PATH "cake.fbx", TEXTURES_PATH "cake.ppm", "cake", ItemModelType::cake },
 	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas },
