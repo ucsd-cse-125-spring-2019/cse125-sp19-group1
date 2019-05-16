@@ -32,6 +32,7 @@ public:
 	static void getMapCoords(Location & loc, int & row, int & col);
 
 	void detectWallCollision(Location & loc);
+	void detectObjectCollision(Location & loc);
 	ItemName getTileItem(Location & loc);
 	bool hasGate(Location & loc);
 	bool hasBox(Location & loc);

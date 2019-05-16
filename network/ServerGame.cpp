@@ -447,7 +447,7 @@ void ServerGame::receiveFromClients()
 							break;
 						}
 
-						std::cout << "facing:" << player->getFacingDir() << std::endl;
+						std::cout << "facing:" << static_cast<int>(player->getFacingDirection()) << std::endl;
 						Location loc = player->getLocation();
 
 						// PLayer cannot drop item if there is an item already on the current tile
@@ -545,26 +545,8 @@ void ServerGame::receiveFromClients()
 				sum -= 1;
 			}
 			
-			switch (sum)
-			{
-			case 5: // forward
-				break;
-			case -5: //backward
-				break;
-			case 1://right
-				break;
-			case -1://left
-				break;
-			case 6://forwardright
-				break;
-			case 4://backward left
-				break;
-			case -4://back right 
-				break;
-			case -6:// back left
-				break;
-			}
-			player->setFacingDir(sum);
+			Direction facingDirection = static_cast<Direction>(sum);
+			player->setFacingDirection(facingDirection);
 		}
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
@@ -829,6 +811,10 @@ void ServerGame::updateCollision(int id)
 	gameData->getAtlas()->detectWallCollision(loc);
 	//gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 	gameData->getPlayer(id)->setLocation(loc);
+	gameData->getAtlas()->detectObjectCollision(loc);
+	gameData->getPlayer(id)->setLocation(loc);
+
+
 }
 
 void ServerGame::resetGame() 

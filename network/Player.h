@@ -11,6 +11,16 @@
 
 #define NUM_PLAYER_MODEL_TYPES (4)
 enum class ModelType { DEFAULT = -1, CHEF = 0, RACOON, CAT, DOG};
+enum class Direction {
+	NORTH = 5,
+	SOUTH = -5,
+	EAST = -1,
+	WEST = 1,
+	NORTHEAST = NORTH + EAST,
+	NORTHWEST = NORTH + WEST,
+	SOUTHEAST = SOUTH + EAST,
+	SOUTHWEST = SOUTH + WEST
+};
 
 class Player
 {
@@ -35,7 +45,7 @@ public:
 
 	bool		isReady() const;
 
-	int getFacingDir() const;
+	Direction getFacingDirection() const;
 
 	// Setters
 	void setInventory(ItemName anItem);
@@ -57,7 +67,7 @@ public:
 
 	void toggleReady();
 	
-	void setFacingDir(int dir);
+	void setFacingDirection(Direction dir);
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
@@ -113,5 +123,5 @@ protected:
 
 	bool ready = false;
 
-	int facingdir = 1;
+	Direction facingDirection;
 };

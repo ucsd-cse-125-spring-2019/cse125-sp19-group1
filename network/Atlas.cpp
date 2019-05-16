@@ -261,7 +261,79 @@ void Atlas::detectWallCollision(Location & loc) {
 		}
 	}
 }
+void Atlas::detectObjectCollision(Location & loc) {
+	// find which tile player is in
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
 
+	if (row >= tileLayout.size())
+		row = tileLayout.size() - 1;
+
+	else if (row < 0)
+		row = 0;
+
+	if (col >= tileLayout[row].size())
+	{
+		col = tileLayout[row].size() - 1;
+	}
+	else if (col < 0)
+		col = 0;
+
+
+	std::vector<Tile *> adjacentObjTiles;
+
+	if (row - 1 >= 0)
+	{
+		if (tileLayout[row - 1][col]->getTileType() == TileType::OBJECT)
+		{
+			int up_bound = row * TILE_SIZE;
+			if (loc.getZ() - PLAYER_RADIUS <= up_bound) {
+				printf("collided with up obj\n");
+				loc.setZ(up_bound + PLAYER_RADIUS);
+			}
+		}
+	}
+
+	if (row + 1 < tileLayout.size())
+
+	{
+		if (tileLayout[row + 1][col]->getTileType() == TileType::OBJECT)
+		{
+			int down_bound = row * TILE_SIZE + TILE_SIZE-1;
+			if (loc.getZ() + PLAYER_RADIUS >= down_bound) {
+				printf("collided with down obj\n");
+				loc.setZ(down_bound - PLAYER_RADIUS);
+			}
+		}
+	}
+	
+	if (col - 1 >= 0)
+	{
+		if (tileLayout[row][col - 1]->getTileType() == TileType::OBJECT)
+		{
+			int left_bound = col * TILE_SIZE;
+			if (loc.getX() - PLAYER_RADIUS <= left_bound) {
+				printf("collided with left obj\n");
+				loc.setX(left_bound + PLAYER_RADIUS);
+			}
+		}
+			
+		
+	}
+
+	if (col + 1 < tileLayout.size())
+	{
+		if (tileLayout[row][col + 1]->getTileType() == TileType::OBJECT)
+		{
+			int right_bound = col * TILE_SIZE + TILE_SIZE-1;
+			if (loc.getX() + PLAYER_RADIUS >= right_bound) {
+				printf("collided with right obj\n");
+				loc.setX(right_bound - PLAYER_RADIUS);
+			}
+		}
+	}
+
+}
 ItemName Atlas::getTileItem(Location & loc)
 {
 	// find which tile player is in
