@@ -15,6 +15,7 @@ void FBXObject::Init(bool attachSkel) {
 	this->diffuse = default_diff;
 	this->specular = default_spec;
 	this->shininess = default_shininess;
+	this->depthTest = true;
 	skel = NULL;
 	animPlayer = NULL;
 	if (attachSkel)
@@ -29,6 +30,10 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	// Load the corresponding model texture
 	texNum = loadTexture(texFilepath);
+	if (animPlayer != NULL) {
+		LoadMatrices(filepath);
+		skel->Update(animPlayer->GetGlobalInverseT());
+	}
 }
 
 FBXObject::~FBXObject()
@@ -39,6 +44,9 @@ FBXObject::~FBXObject()
 	glDeleteBuffers(1, &(this->VBO_V));
 	glDeleteBuffers(1, &(this->VBO_N));
 	glDeleteBuffers(1, &(this->EBO));
+	glDeleteBuffers(1, &(this->VBO_UV));
+	glDeleteBuffers(1, &(this->VBO_WI));
+	glDeleteBuffers(1, &(this->VBO_WV));
 }
 
 void FBXObject::PrintMatrix(glm::mat4 * matrix) {
@@ -62,31 +70,7 @@ void FBXObject::Update() {
 	/*if (animPlayer != NULL) {
 		animPlayer->play();
 		skel->Update(animPlayer->GetGlobalInverseT());
-		UpdateSkin();
 	}*/
-}
-
-void FBXObject::UpdateSkin() {
-	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	for (int i = 0; i < skelVertices->size(); i++)
-		DeformVertex((*skelVertices)[i]);
-	// after changing all the vertices and normals, we should update the buffers
-	UpdateBuffers();
-}
-
-void FBXObject::DeformVertex(Vertex * vertex) {
-	std::vector<std::pair<string, float>> * weights = vertex->GetWeights();
-	glm::mat4 M = glm::mat4(1.0f);
-	for (int i = 0; i < weights->size(); i++) {
-		std::pair<string, float> currWeight = (*weights)[i];
-		// --> M = W*(B^(-1))
-		M = M + currWeight.second * (((skel->GetBone(currWeight.first))->GetTransform()));
-	}
-	/* TODO: fix malformed matrices (here and in Bone class) */
-	vertices[vertex->GetID()] = M * glm::vec4(((vertex->GetPos())), 1.0f);
-	normals[vertex->GetID()] = M * glm::vec4(((vertex->GetNorm())), 0.0f);
-	/* TODO: a simple test demonstrating that we can modify vertices this way: */
-	//vertices[vertex->GetID()] += glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -156,11 +140,24 @@ void FBXObject::SetShine(float newShine) {
 	shininess = newShine;
 }
 
+void FBXObject::SetDepthTest(bool depthTestEnabled) {
+	depthTest = depthTestEnabled;
+}
 
-void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
+
+void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model)
 {
+	glUseProgram(shaderProgram);
+	if (depthTest) {
+		glEnable(GL_DEPTH_TEST);
+		// Related to shaders and z value comparisons for the depth buffer
+		glDepthFunc(GL_LEQUAL);
+	}
+	else {
+		glDisable(GL_DEPTH_TEST);
+	}
 	// Calculate the combination of the model and view (camera inverse) matrices
-	glm::mat4 modelview = (*V) * toWorld;
+	glm::mat4 modelview = (*V) * model;
 
 	glBindTexture(GL_TEXTURE_2D, texNum);
 
@@ -173,6 +170,8 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 	uMaterialA = glGetUniformLocation(shaderProgram, "ambColor");
 	uMaterialS = glGetUniformLocation(shaderProgram, "specColor");
 	uShine = glGetUniformLocation(shaderProgram, "shineAmt");
+	uIsAnimated = glGetUniformLocation(shaderProgram, "isAnimated");
+	uBones = glGetUniformLocation(shaderProgram, "bones");
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &((*P)[0][0]));
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
@@ -180,8 +179,20 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P)
 	glUniform3f(uMaterialA, (this->ambient)[0], (this->ambient)[1], (this->ambient)[2]);
 	glUniform3f(uMaterialS, (this->specular)[0], (this->specular)[1], (this->specular)[2]);
 	glUniform1f(uShine, (this->shininess));
+
+	if (skel != NULL || animPlayer != NULL) {
+		std::vector<glm::mat4> boneTransforms;
+		std::map<string, Bone *> * skelBones = skel->GetBones();
+		for (std::map<string, Bone*>::iterator it = skelBones->begin(); it != skelBones->end(); it++)
+			boneTransforms.push_back(it->second->GetTransform());
+		glUniform1i(uIsAnimated, 1);
+		glUniformMatrix4fv(uBones, boneTransforms.size(), GL_FALSE, &((boneTransforms[0])[0][0]));
+	}
+	else
+		glUniform1i(uIsAnimated, 0);
+
 	// Sending the model without the view:
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &toWorld[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
 	// Now draw the object. We simply need to bind the VAO associated with it.
 	glBindVertexArray(this->VAO);
 	// Tell OpenGL to draw with triangles, the number of triangles, the type of the indices, and the offset to start from
@@ -200,6 +211,8 @@ void FBXObject::RenderingSetup() {
 	glGenBuffers(1, &(this->VBO_N));
 	glGenBuffers(1, &(this->EBO));
 	glGenBuffers(1, &(this->VBO_UV));
+	glGenBuffers(1, &(this->VBO_WI));
+	glGenBuffers(1, &(this->VBO_WV));
 
 	SetBuffers();
 }
@@ -243,10 +256,9 @@ void FBXObject::SetBuffers() {
 	// Consider the VAO as a container for all your buffers.
 	glBindVertexArray(this->VAO);
 
+	/* send data about vertices */
 	// GL_ARRAY_BUFFER is an array containing data relevant to what you want to draw (vertices, normals, colors, etc)
 	glBindBuffer(GL_ARRAY_BUFFER, (this->VBO_V));
-	
-	/* send data about vertices */
 	// populating most recently bound buffer with data starting at the 3rd arg and ending after the 2nd arg number of indices
 	glBufferData(GL_ARRAY_BUFFER, ((this->vertices).size() * (3 * sizeof(GLfloat))), (this->vertices).data(), GL_STATIC_DRAW);
 	// enable usage of layout location 0 (check vertex shader to see which location you need)
@@ -266,6 +278,40 @@ void FBXObject::SetBuffers() {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
+	if (animPlayer != NULL) {
+		std::vector<glm::vec4> weightIndices;
+		std::vector<glm::vec4> weightValues;
+		std::vector<Vertex *> * skelVertices = skel->GetVertices();
+		for (int i = 0; i < skelVertices->size(); i++) {
+			std::vector<std::pair<int, float>> * currWeights = (*skelVertices)[i]->GetWeights();
+			glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
+			glm::vec4 currValues = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+			// number of weights is restricted to a maximum of four
+			for (int j = 0; j < currWeights->size() && j < 4; j++) {
+				std::pair<int, float> currWeight = (*currWeights)[j];
+				if (currWeight.first != -1) {
+					currIndices[j] = currWeight.first;
+					currValues[j] = currWeight.second;
+				}
+			}
+			weightIndices.push_back(currIndices);
+			weightValues.push_back(currValues);
+		}
+
+		/* send data about vertex weight indices */
+		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WI);
+		glBufferData(GL_ARRAY_BUFFER, weightIndices.size() * (4 * sizeof(GLuint)), weightIndices.data(), GL_STATIC_DRAW);
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_UNSIGNED_INT, GL_FALSE, 4 * sizeof(GLuint), (GLvoid *)0);
+
+		/* send data about vertex weight values */
+		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WV);
+		glBufferData(GL_ARRAY_BUFFER, weightValues.size() * (4 * sizeof(GLfloat)), weightValues.data(), GL_STATIC_DRAW);
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *)0);
+
+	}
+
 	// tell the shader in what order it should draw the vertices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (this->EBO));
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((this->indices).size() * sizeof(GLuint)), &((this->indices)[0]), GL_STATIC_DRAW);
@@ -280,13 +326,44 @@ void FBXObject::SetBuffers() {
 
 void FBXObject::ToNextKeyframe() {
 	if (animPlayer != NULL) {
+		std::cout << "TO NEXT KEYFRAME" << std::endl;
 		animPlayer->ToNextKeyframe();
 		skel->Update(animPlayer->GetGlobalInverseT());
-		glm::mat4 identity = glm::mat4(1.0f);
-		UpdateSkin();
 	}
 }
 
 void FBXObject::LoadMatrices(const char * path) {
+	int bufsize = 128;
+	Tokenizer * token = new Tokenizer();
+	token->Open(path);
+	if (token->FindToken("<library_animations>")) {
+		while (token->FindToken("<animation id=\"")) {
+			char * out = new char[bufsize];
+			token->GetToken(out);
+			string boneName = "";
+			// extracting the bone name
+			for (int index = 0; out[index] != '-' && index < bufsize; index++)
+				boneName = boneName + out[index];
+			Bone * currBone = skel->GetBone(boneName);
+			if (currBone != NULL) {
+				string param = string("id=\"") + boneName + string("-Matrix-animation-output-transform-array\" count=\"");
+				if (token->FindToken(param.c_str())) {
+					int numValues = token->GetInt();
+					// skipping to the end of the line to start reading floats
+					if (token->FindToken("\">")) {
+						float * values = new float[numValues];
+						for (int i = 0; i < numValues; i++)
+							values[i] = token->GetFloat();
+						currBone->SetChannelMatrices(values, numValues);
+					}
+					else
+						std::cout << "ERROR READING FLOATS FOR " << boneName << std::endl;
+				}
+			}
+		}
+	}
+	else
+		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
 
+	token->Close();
 }

@@ -27,6 +27,8 @@ public:
 
 	void ToNextKeyframe();
 	void PrintMatrix(glm::mat4 * matrix);
+
+	int GetCurrKeyframe();
 };
 
 #endif

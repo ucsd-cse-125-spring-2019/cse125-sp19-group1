@@ -16,7 +16,9 @@ void Skeleton::AddNode(string name, Bone * newNode) {
 }
 
 Bone * Skeleton::GetBone(string name) {
-	return bones[name];
+	if (bones.find(name) != bones.end())
+		return bones[name];
+	return NULL;
 }
 
 std::map<string, Bone *> * Skeleton::GetBones() {
@@ -38,8 +40,4 @@ void Skeleton::PrintVertex(unsigned int id) {
 void Skeleton::Update(glm::mat4 globalInverseT) {
 	glm::mat4 identity = glm::mat4(1.0);
 	root->Update(globalInverseT, identity);
-}
-
-void Skeleton::ResetBones() {
-	root = bones["QuickRigCharacter_Reference"];
 }

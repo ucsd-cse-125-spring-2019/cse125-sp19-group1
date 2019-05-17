@@ -25,8 +25,6 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 		loadAnimation((aiScene*)scene, skel, animPlayer);
 		std::cerr << "Trying to get animPlayer pointer:" << *animPlayer << "\n";
 	}
-	skel->ResetBones();
-	skel->PrintBoneStructure();
 
 	// the scene will be destroyed automatically when we return
 	return true;
@@ -35,12 +33,13 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 // load a skeleton
 void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel)
 {
-	// extracting information about how bones affect vertices through weights
-	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	populateSkelVertices(mesh, vertices, normals, skelVertices);
 	// creating actual Bone objects and populating the Skeleton
 	traverseSkeleton(root, skel);
+	assignIDs(skel);
 	assignOffsetMatrices(mesh, skel);
+	// extracting information about how bones affect vertices through weights
+	populateSkelVertices(mesh, vertices, normals, skel);
+	
 }
 
 void traverseSkeleton(aiNode * currNode, Skeleton * skel)
@@ -69,6 +68,15 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 	}
 }
 
+void assignIDs(Skeleton * skel) {
+	std::map<string, Bone *> * bones = skel->GetBones();
+	unsigned int currID = 0;
+	for (map<string, Bone *>::iterator it = bones->begin(); it != bones->end(); it++) {
+		it->second->SetID(currID);
+		currID++;
+	}
+}
+
 void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 	aiBone * currAIBone = NULL;
 	Bone * currBone = NULL;
@@ -86,8 +94,9 @@ void assignOffsetMatrices(aiMesh * mesh, Skeleton * skel) {
 	}
 }
 
-void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, std::vector<Vertex *> * skelVertices)
+void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel)
 {
+	std::vector<Vertex *> * skelVertices = skel->GetVertices();
 	// first, populate the skel Vertex array
 	skelVertices->reserve(vertices->size());
 	for (int i = 0; i < vertices->size(); i++) {
@@ -100,13 +109,17 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 		for (unsigned int j = 0; j < bone->mNumWeights; j++) {
 			aiVertexWeight weight = bone->mWeights[j];
 			int vertexID = weight.mVertexId;
+			Bone * skelBone = skel->GetBone(bone->mName.C_Str());
 			// add the weight to the Vertex that it is supposed to influence
-			if (vertexID < skelVertices->size())
-				(*skelVertices)[vertexID]->AddWeight(bone->mName.C_Str(), weight.mWeight);
+			if (vertexID < skelVertices->size() && skelBone != NULL)
+				(*skelVertices)[vertexID]->AddWeight(skelBone->GetID(), weight.mWeight);
 			else
-				std::cout << "Error loading the bones of the skeleton!" << std::endl;
+				std::cout << "Error loading the skeleton!" << std::endl;
 		}
 	}
+
+	for (int k = 0; k < skelVertices->size(); k++)
+		(*skelVertices)[k]->NormalizeWeights();
 }
 
 // convert aiMatrix4x4 to glm::mat4

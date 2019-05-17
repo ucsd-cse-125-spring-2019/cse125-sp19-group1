@@ -6,37 +6,11 @@
 #include <map>
 #include <chrono>
 #include <ctime>
+#include "Item.h"
+#include "Location.h"
 
-enum class ItemName { EMPTY = 0, KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
-
+#define NUM_PLAYER_MODEL_TYPES (4)
 enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
-
-struct Location
-{
-public:
-	Location(float argX = 10.0f, float argY = 0.0f, float argZ = 10.0f) : x(argX), y(argY), z(argZ) {}
-	//Location(Location & aCopy) : x(aCopy.getX()), y(aCopy.getY()), z(aCopy.getZ()) {}
-
-	float getX() { return x; }
-	float getY() { return y; }
-	float getZ() { return z; }
-
-	float setX(float argX) { x = argX; }
-	float setY(float argY) { y = argY; }
-	float setZ(float argZ) { z = argZ; }
-
-	void update(float argX, float argY, float argZ)
-	{
-		x = argX;
-		y = argY;
-		z = argZ;
-	}
-
-protected:
-	float x;
-	float y;
-	float z;
-};
 
 class Player
 {
@@ -45,37 +19,78 @@ public:
 	Player();
 	Player(int anID);
 	Player(int anID, Location aLoc);
-	ItemName getInventory();
+	ItemName getInventory() const;
 	void setInventory(ItemName anItem);
-	Location getLocation();
+	void setModelType(ModelType type);
+	Location getLocation() const;
 	void setLocation(float argX, float argY, float argZ);
+	void setLocation(Location aLoc);
+	bool getHidden();
+	void setHidden(bool hide);
 	bool getInteracting();
-	void setInteracting();
+	void setInteracting(bool interact);
+	bool getOpenJail() const;
+	void setOpenJail(bool interact);
+	bool getOpeningGate() const;
+	void setOpeningGate(bool status);
+	ModelType getModelType() const;
+	bool isChef() const;
+	bool getCaughtAnimal() const;
+	void setCaughtAnimal(bool caught);
+	bool getIsCaught() const;
+	void setIsCaught(bool caught);
+	int getCaughtAnimalId() const;
+	void setCaughtAnimalId(int id);
+
+	bool inRange(Location & myLoc, Location & theirLoc);
 
 	void setStartTime();
-	double checkBoxProgress();
+	void setStartJailTime();
+	double checkProgress(int opt);
 
-	std::string encodePlayerData();
+	std::string encodePlayerData(bool newPlayerInit);
+//	std::string encodePlayerData() const;
+
 	void decodePlayerData(std::string key, std::string value);
 
 	using decodeFunctionType =  void (Player::*)(std::string value);
-	//std::map<std::string, decodeFunctionType> encodingFunctions;
 	std::map<std::string, decodeFunctionType> decodingFunctions;
+
+	using encodeFunctionType = std::string (Player::*)();
+	std::map<std::string, encodeFunctionType> encodingFunctions;
+	//std::map<std::string, decodeFunctionType> encodingFunctions;
+
+	std::map < std::string, bool> dirtyVariablesMap;
 
 	void addDecodeFunctions();
 	void decodeLocation(std::string value);
 	void decodeInventory(std::string value);
 	void decodeCakeStatus(std::string value);
-	void decodeChefStatus(std::string value);
 	void decodeModelType(std::string value);
+	void decodeHidden(std::string value);
+
+	void addEncodeFunctions();
+	std::string encodeLocation();
+	std::string encodeInventory();
+	std::string encodeCakeStatus();
+	std::string encodeModelType();
+	std::string encodeHidden();
 
 protected:
 	Location	location;
 	int			playerID;
-	ItemName		inventory;
+	ItemName	inventory;
 	bool		hasCake;
-	bool		isChef;
 	ModelType	modelType;
 	bool		interacting;
+	bool		openingJail;
+	bool		openingGate;
+	bool		caughtAnimal = false;
+	bool		isCaught = false;
+	int			radius = 10;
+	int			caughtAnimalId;
+	bool		hidden = false;
 	std::chrono::time_point<std::chrono::system_clock> start;
+	std::chrono::time_point<std::chrono::system_clock> startJail;
+	std::chrono::time_point<std::chrono::system_clock> startGate;
 };
