@@ -153,6 +153,7 @@
     <ClInclude Include="AnimationChannel.h" />
     <ClInclude Include="AnimationPlayer.h" />
     <ClInclude Include="animloader.h" />
+    <ClInclude Include="BoneInfo.h" />
     <ClInclude Include="Core.h" />
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="FBXObject.h" />
@@ -189,6 +190,7 @@
     <ClCompile Include="AnimationChannel.cpp" />
     <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="animloader.cpp" />
+    <ClCompile Include="BoneInfo.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="FBXObject.cpp" />
     <ClCompile Include="Bone.cpp" />

@@ -1,12 +1,28 @@
 #include "objloader.h"
 
+
+inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
+{
+	glm::mat4 to;
+
+
+	to[0][0] = (GLfloat)from->a1; to[0][1] = (GLfloat)from->b1;  to[0][2] = (GLfloat)from->c1; to[0][3] = (GLfloat)from->d1;
+	to[1][0] = (GLfloat)from->a2; to[1][1] = (GLfloat)from->b2;  to[1][2] = (GLfloat)from->c2; to[1][3] = (GLfloat)from->d2;
+	to[2][0] = (GLfloat)from->a3; to[2][1] = (GLfloat)from->b3;  to[2][2] = (GLfloat)from->c3; to[2][3] = (GLfloat)from->d3;
+	to[3][0] = (GLfloat)from->a4; to[3][1] = (GLfloat)from->b4;  to[3][2] = (GLfloat)from->c4; to[3][3] = (GLfloat)from->d4;
+
+	return to;
+}
+
+
 // load a model (and possibly a Skeleton, if the model is expected to have one)
 bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
-	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs, Skeleton * skel, AnimationPlayer ** animPlayer) 
+	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs, std::vector<VertexBoneData> bones, 
+	Skeleton * skel, AnimationPlayer ** animPlayer) 
 {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+	aiScene* scene = (aiScene *)importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
 
 	// exit if the scene fails to load properly
 	if (!scene) {
@@ -19,8 +35,16 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 	aiMesh * mesh = scene->mMeshes[0];
 	populateMesh(mesh, vertices, normals, indices, uvs);
 
+
 	// if the Skeleton pointer is not null, it means we want a Skeleton, so we must load the proper data
 	if (skel) {
+		skel->boneInfo->m_pScene = scene;
+		aiMatrix4x4 globalT = scene->mRootNode->mTransformation;
+		//setup inverse transform.
+		glm::mat4 globalInverseT = glm::inverse(aiMatrix4x4ToGlm(&(scene->mRootNode->mTransformation)));
+		skel->boneInfo->m_GlobalInverseTransform = globalInverseT;
+		bones.resize(vertices->size());
+		loadBones(mesh, bones, skel);
 		loadSkeleton(mesh, scene->mRootNode, vertices, normals, skel);
 		loadAnimation((aiScene*)scene, skel, animPlayer);
 		std::cerr << "Trying to get animPlayer pointer:" << *animPlayer << "\n";
@@ -29,6 +53,48 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 	// the scene will be destroyed automatically when we return
 	return true;
 }
+
+void loadBones(const aiMesh* pMesh, std::vector<VertexBoneData>& Bones, Skeleton * skel) {
+	for (GLuint i = 0; i < pMesh->mNumBones; i++) {
+		GLuint BoneIndex = 0;
+		string BoneName(pMesh->mBones[i]->mName.data);
+
+		if (skel->boneInfo->nameIds.find(BoneName) == skel->boneInfo->nameIds.end()) {
+			BoneIndex = skel->boneInfo->numBones;
+			skel->boneInfo->numBones++;
+		}
+		else {
+			BoneIndex =skel->boneInfo->nameIds[BoneName];
+		}
+
+		skel->boneInfo->nameIds[BoneName] = BoneIndex;
+		skel->boneInfo->offsetMatrices[BoneIndex] = aiMatrix4x4ToGlm(&pMesh->mBones[i]->mOffsetMatrix);
+
+		for (GLuint j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
+			GLuint VertexID = pMesh->mBones[i]->mWeights[j].mVertexId;
+			float Weight = pMesh->mBones[i]->mWeights[j].mWeight;
+			Bones[VertexID].AddBoneData(BoneIndex, Weight);
+		}
+	}
+}
+
+void VertexBoneData::AddBoneData(GLuint BoneID, float Weight)
+{
+	for (GLuint i = 0; i < 4; i++) {
+		if (Weights[i] == 0.0) {
+			IDs[i] = BoneID;
+			Weights[i] = Weight;
+			return;
+		}
+	}
+
+	// should never get here - more bones than we have space for
+	//assert(0);
+	//std::cerr << "Extra bones" << "\n";
+	return;
+}
+
+
 
 // load a skeleton
 void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel)

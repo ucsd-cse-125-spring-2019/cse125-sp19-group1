@@ -2,6 +2,7 @@
 
 Skeleton::Skeleton() {
 	worldMtx = glm::mat4(1.0f);
+	boneInfo = new BoneInfo();
 }
 
 Skeleton::~Skeleton() {

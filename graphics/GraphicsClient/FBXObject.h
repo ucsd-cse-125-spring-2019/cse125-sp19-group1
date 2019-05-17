@@ -1,5 +1,10 @@
-#ifndef FBXOBJECT_H
-#define FBXOBJECT_H
+
+
+
+
+
+
+
 
 #include "Core.h"
 #include "Skeleton.h"
@@ -7,6 +12,11 @@
 #include "objloader.h"
 #include "textureloader.h"
 #include "Tokenizer.h"
+#include "AnimationPlayer.h"
+
+#ifndef FBXOBJECT_H
+#define FBXOBJECT_H
+
 
 class FBXObject
 {
@@ -15,7 +25,7 @@ private:
 	float shininess;
 
 	// These variables are needed for the shader program
-	GLuint VAO, VBO_V, VBO_N, VBO_UV, EBO;
+	GLuint VAO, VBO_V, VBO_N, VBO_UV, EBO, BONE_IDS, BONE_WEIGHTS;
 	GLuint uProjection, uModelview, uView;
 	GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
 	GLuint texNum;
@@ -25,6 +35,8 @@ private:
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
+	std::vector<VertexBoneData> bones;
+	std::vector<glm::mat4>boneOffsets;
 
 	Skeleton * skel;
 	AnimationPlayer * animPlayer;

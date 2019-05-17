@@ -1,5 +1,18 @@
 #include "animloader.h"
 
+inline glm::mat4 aiMatrix4x4ToGlm(const aiMatrix4x4* from)
+{
+	glm::mat4 to;
+
+
+	to[0][0] = (GLfloat)from->a1; to[0][1] = (GLfloat)from->b1;  to[0][2] = (GLfloat)from->c1; to[0][3] = (GLfloat)from->d1;
+	to[1][0] = (GLfloat)from->a2; to[1][1] = (GLfloat)from->b2;  to[1][2] = (GLfloat)from->c2; to[1][3] = (GLfloat)from->d2;
+	to[2][0] = (GLfloat)from->a3; to[2][1] = (GLfloat)from->b3;  to[2][2] = (GLfloat)from->c3; to[2][3] = (GLfloat)from->d3;
+	to[3][0] = (GLfloat)from->a4; to[3][1] = (GLfloat)from->b4;  to[3][2] = (GLfloat)from->c4; to[3][3] = (GLfloat)from->d4;
+
+	return to;
+}
+
 bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer) {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
@@ -28,8 +41,8 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	}
 
 	aiMatrix4x4 globalT = scene->mRootNode->mTransformation;
-	glm::mat4 globalInverseT = glm::mat4(*aiMatTOglm_ANIM(globalT.Inverse()));
-
+	//setup inverse transform.
+	glm::mat4 globalInverseT = glm::inverse(aiMatrix4x4ToGlm(&(scene->mRootNode->mTransformation)));
 	Animation * newAnimation = new Animation(0, (float)anim->mDuration, globalInverseT);
 	std::vector<AnimationChannel*> * channels = newAnimation->GetChannels();
 
@@ -75,6 +88,7 @@ void convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * chann
 }
 
 // convert aiMatrix4x4 to glm::mat4
+/**
 glm::mat4 * aiMatTOglm_ANIM(aiMatrix4x4 mat)
 {
 	glm::mat4 newMat = glm::mat4(1.0);
@@ -85,4 +99,4 @@ glm::mat4 * aiMatTOglm_ANIM(aiMatrix4x4 mat)
 	}
 
 	return &newMat;
-}
+}**/

@@ -1,5 +1,6 @@
 #include "FBXObject.h"
 
+
 FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel) {
 	// initialize variables
 	Init(attachSkel);
@@ -18,6 +19,7 @@ void FBXObject::Init(bool attachSkel) {
 	this->depthTest = true;
 	skel = NULL;
 	animPlayer = NULL;
+	bones = std::vector<VertexBoneData>();
 	if (attachSkel)
 		skel = new Skeleton();
 }
@@ -26,7 +28,12 @@ void FBXObject::Parse(const char *filepath, const char *texFilepath)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data,
 	// and potentially load in a Skeleton (if expecting a Skeleton)
-	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer);
+	load(filepath, &vertices, &normals, &indices, &uvs, bones, skel, &animPlayer);
+	if (skel != NULL) {
+		skel->boneInfo->boneTransform(0, boneOffsets);
+		skel->boneInfo->SetMatrixToArray();
+
+	}
 	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	// Load the corresponding model texture
 	texNum = loadTexture(texFilepath);
@@ -42,6 +49,9 @@ FBXObject::~FBXObject()
 	glDeleteBuffers(1, &(this->VBO_V));
 	glDeleteBuffers(1, &(this->VBO_N));
 	glDeleteBuffers(1, &(this->EBO));
+	glDeleteBuffers(1, &(this->BONE_IDS));
+	glDeleteBuffers(1, &(this->BONE_WEIGHTS));
+
 }
 
 void FBXObject::PrintMatrix(glm::mat4 * matrix) {
@@ -189,6 +199,9 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 	uMaterialA = glGetUniformLocation(shaderProgram, "ambColor");
 	uMaterialS = glGetUniformLocation(shaderProgram, "specColor");
 	uShine = glGetUniformLocation(shaderProgram, "shineAmt");
+	GLuint uBones = glGetUniformLocation(shaderProgram, "gBones");
+	GLuint uModel = glGetUniformLocation(shaderProgram, "model");
+	GLuint uHasSkel = glGetUniformLocation(shaderProgram, "hasSkel");
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &((*P)[0][0]));
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
@@ -197,7 +210,14 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 	glUniform3f(uMaterialS, (this->specular)[0], (this->specular)[1], (this->specular)[2]);
 	glUniform1f(uShine, (this->shininess));
 	// Sending the model without the view:
-	glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, &model[0][0]);
+	glUniformMatrix4fv(uModel, 1, GL_FALSE, &model[0][0]);
+	if (skel != NULL) {
+		glUniformMatrix4fv(uBones, 100, GL_FALSE, (GLfloat*)boneOffsets.data());
+		glUniform1i(uHasSkel, 1);
+	}
+	else {
+		glUniform1i(uHasSkel, 0);
+	}
 	// Now draw the object. We simply need to bind the VAO associated with it.
 	glBindVertexArray(this->VAO);
 	// Tell OpenGL to draw with triangles, the number of triangles, the type of the indices, and the offset to start from
@@ -216,6 +236,10 @@ void FBXObject::RenderingSetup() {
 	glGenBuffers(1, &(this->VBO_N));
 	glGenBuffers(1, &(this->EBO));
 	glGenBuffers(1, &(this->VBO_UV));
+	glGenBuffers(1, &(this->BONE_IDS));
+	glGenBuffers(1, &(this->BONE_WEIGHTS));
+
+
 
 	SetBuffers();
 }
@@ -279,12 +303,25 @@ void FBXObject::SetBuffers() {
 	/* send data about uvs */
 	glBindBuffer(GL_ARRAY_BUFFER, this->VBO_UV);
 	glBufferData(GL_ARRAY_BUFFER, ((this->uvs).size() * (2 * sizeof(GLfloat))), (this->uvs).data(), GL_STATIC_DRAW);
+
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
 	// tell the shader in what order it should draw the vertices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, (this->EBO));
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ((this->indices).size() * sizeof(GLuint)), &((this->indices)[0]), GL_STATIC_DRAW);
+
+
+	//bone data, ids first, then weights.
+	glEnableVertexAttribArray(3);
+	glVertexAttribIPointer(3, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, this->BONE_IDS);
+	glBufferData(GL_ARRAY_BUFFER, ((this->bones).size() * sizeof(GLuint)), &((this->bones)[0]), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(4);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
+	glBindBuffer(GL_ARRAY_BUFFER, this->BONE_IDS);
+	glBufferData(GL_ARRAY_BUFFER, ((this->bones).size() * sizeof(GLfloat)), &((this->bones)[0]), GL_STATIC_DRAW);
 
 	// Unbind the currently bound buffer so that we don't accidentally make unwanted changes to it.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);

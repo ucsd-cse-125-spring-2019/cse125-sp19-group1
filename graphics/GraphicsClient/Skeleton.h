@@ -4,6 +4,7 @@
 #include "Core.h"
 #include <map>
 #include "Bone.h"
+#include "BoneInfo.h"
 #include "Vertex.h"
 
 /* Current Plan:
@@ -25,6 +26,7 @@ public:
 	void PrintBoneStructure();
 	void PrintVertex(unsigned int id);
 	void Update(glm::mat4 * globalInverseT);
+	BoneInfo * boneInfo;
 private:
 	Bone * root;
 	std::map<string, Bone *> bones;
