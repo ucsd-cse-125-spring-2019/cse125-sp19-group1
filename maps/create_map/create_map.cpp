@@ -26,51 +26,18 @@ using namespace std;
 #define MARGIN_BOTTOM 1
 
 enum MapColorCode {
-	wall              = 0x334e64,  //This is a Wall - R: 51 G : 78 B : 100 (#334e64)
-	itemSpawn         = 0xe2a9e6,  //Can Spawn Item - R : 226 G : 169 B : 230 (#e2a9e6)
-	playerSpawn       = 0xeb2f71,  //Player Spawn - R : 235 G : 47 B : 113 (#eb2f71)
-	playerTrap        = 0xdeff00,  //This is a Trap - R : 222 G : 255 B : 0 (#deff00)
-	playerExit        = 0x824959,  //This is an Exit - R : 130 G : 73 B : 89 (#824959)
-	keyDeposit        = 0xb605bd,  //This is a Deposit for Keys - R : 182 G : 5 B : 189 (#b605bd)
-	bathroomDeposit   = 0x5e3ba5,  //This is a Deposit for Bathroom - R : 94 G : 59 B : 165 (#5e3ba5)
-	ventDeposit       = 0x7e6e9e,  //This is a Deposit for Vent - R : 126 G : 110 B : 158 (#7e6e9e)
-	table             = 0x875315,  //This is a Table - R : 135 G : 83 B : 21 (#875315)
-	northRamp         = 0xd8d8d8,  //Ramp going higher UP - R : 216 G : 216 B : 216 (#d8d8d8)
-	westRamp          = 0xadadad,  //Ramp going higher LEFT - R : 173 G : 173 B : 173 (#adadad)
-	eastRamp          = 0x737373,  //Ramp going higher RIGHT - R : 115 G : 115 B : 115 (#737373)
-	southRamp         = 0x3f3f3f,  //Ramp going higher DOWN - R : 63 G : 63 B : 63 (#3f3f3f)
-	secondLevel       = 0xb3dcff,  //2nd level - R : 179 G : 220 B : 255 (#b3dcff)
-	bathroomExit      = 0x831a53,  //bathroom window exit - R : 131 G : 26 B : 83 (#831a53)
-	frontExit         = 0x9f788d,  //front exit - R : 159 G : 120 B : 141 (#9f788d)
-	ventExit          = 0xae457e,  //vent exit - R : 174 G : 69 B : 126 (#ae457e)
-	stove             = 0xe3b25d,  //stove(takes ~2 tiles, item) - R : 227 G : 178 B : 93 (#e3b25d)
-	toilet            = 0xca8c1f,  //toilet(takes 1 tile, item) - R : 202 G : 140 B : 31 (#ca8c1f)
-	chair             = 0x8d7c5d,  //chair(takes 1 tile, item) - R : 141 G : 124 B : 93 (#8d7c5d)
-	wallWithPainting  = 0x193044,  //wall with painting(in wall spot) - R : 25 G : 48 B : 68 (#193044)
-};
-
-MapColorCode allColorCodes[] = {
-	wall,
-	itemSpawn,
-	playerSpawn,
-	playerTrap,
-	playerExit,
-	keyDeposit,
-	bathroomDeposit,
-	ventDeposit,
-	table,
-	northRamp,
-	westRamp,
-	eastRamp,
-	southRamp,
-	secondLevel,
-	bathroomExit,
-	frontExit,
-	ventExit,
-	stove,
-	toilet,
-	chair,
-	wallWithPainting,
+	wall        = 0x334e65,  //This is a Wall - R: 51 G : 78 B : 101 (#334e65)
+	itemSpawn   = 0xe2a9e6,  //Can Spawn Item - R : 226 G : 169 B : 230 (#e2a9e6)
+	playerSpawn = 0xeb2f71,  //Player Spawn - R : 235 G : 47 B : 113 (#eb2f71)
+	playerTrap  = 0xdeff00,  //This is a Trap - R : 222 G : 255 B : 0 (#deff00)
+	playerExit  = 0x824959,  //This is an Exit - R : 130 G : 73 B : 89 (#824959)
+	keyDeposit  = 0xb605bd,  //This is a Deposit for Keys - R : 182 G : 5 B : 189 (#b605bd)
+	table       = 0x875315,  //This is a Table - R : 135 G : 83 B : 21 (#875315)
+	northRamp   = 0xd8d8d8,  //Ramp going higher UP - R : 216 G : 216 B : 216 (#d8d8d8)
+	westRamp    = 0xadadad,  //Ramp going higher LEFT - R : 173 G : 173 B : 173 (#adadad)
+	eastRamp    = 0x737373,  //Ramp going higher RIGHT - R : 115 G : 115 B : 115 (#737373)
+	southRamp   = 0x3f3f3f,  //Ramp going higher DOWN - R : 63 G : 63 B : 63 (#3f3f3f)
+	secondLevel = 0xb3dcff   //2nd level - R : 179 G : 220 B : 255 (#b3dcff)
 };
 
 enum DirectionBitmask {
@@ -87,35 +54,37 @@ static const struct {
 	DirectionBitmask mask;    // mask to set for this wall
 	const char *name;         // name of this wall for error messages
 } wallProperties[] = {
-	{  0, -1, DirectionBitmask::northSide, "north" },
-	{  1,  0, DirectionBitmask::eastSide , "east"  },
-	{  0,  1, DirectionBitmask::southSide, "south" },
-	{ -1,  0, DirectionBitmask::westSide , "west"  },
+	{ 0, -1, DirectionBitmask::northSide, "north" },
+	{ 1, 0, DirectionBitmask::eastSide, "east" },
+	{ 0, 1, DirectionBitmask::southSide, "south" },
+	{ -1, 0, DirectionBitmask::westSide, "west" },
 };
-
-int linearDistance(unsigned color1, unsigned color2) {
-	int redDist   = ((color1 >> 16) & 0xFF) - ((color2 >> 16) & 0xFF);
-	int greenDist = ((color1 >> 8 ) & 0xFF) - ((color2 >> 8 ) & 0xFF);
-	int blueDist  = ((color1      ) & 0xFF) - ((color2      ) & 0xFF);
-
-	return abs(redDist) + abs(greenDist) + abs(blueDist);
-}
 
 bool decodePixel(MapColorCode &colorCode, const unsigned char *pixelBytes) {
 	unsigned pixel = ((unsigned)pixelBytes[0] << 16) | ((unsigned)pixelBytes[1] << 8) | pixelBytes[2];
 
-	for (auto color : allColorCodes) {
-		if (linearDistance(color, pixel) <= 1) {
-			colorCode = color;
-			return true;
-		}
+	switch ((MapColorCode)pixel) {
+	case wall:
+	case itemSpawn:
+	case playerSpawn:
+	case playerTrap:
+	case playerExit:
+	case keyDeposit:
+	case table:
+	case northRamp:
+	case westRamp:
+	case eastRamp:
+	case southRamp:
+	case secondLevel:
+		colorCode = (MapColorCode)pixel;
+		return true;
+	default:
+		return false;
 	}
-
-	return false;
 }
 
 // filename must be preceeded by a path separator character
-static int writeFile(string &folderName, const char *filename, vector<uint8_t> &map, unsigned mapWidth, unsigned mapHeight) {
+static void writeFile(string &folderName, const char *filename, vector<uint8_t> &map, unsigned mapWidth, unsigned mapHeight) {
 	FILE *file = nullptr;
 	string fullpath = folderName + filename;
 	if (fopen_s(&file, fullpath.c_str(), "w")) {
@@ -137,7 +106,9 @@ static int writeFile(string &folderName, const char *filename, vector<uint8_t> &
 	for (auto elem : map) {
 		count += (elem != 0);
 	}
-	return count;
+	if (count <= 0) {
+		cout << "WARNING: " << (filename + 1) << " is all zeros" << endl;
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -148,9 +119,6 @@ int main(int argc, char *argv[]) {
 
 	const char *pngFilename = argv[1];
 	string folderName = argv[2];
-
-	cout << "Opening PNG: " << pngFilename << endl;
-	cout << "Writing to folder: " << folderName << endl;
 
 	vector<unsigned char> image; //the raw pixels
 	unsigned width, height;
@@ -300,28 +268,7 @@ int main(int argc, char *argv[]) {
 	writeFile(folderName, "/ramps.txt", rampDirections, mapWidth, mapHeight);
 
 	for (auto &boolMap : booleanMaps) {
-		int count = writeFile(folderName, boolMap.filename, boolMap.map, mapWidth, mapHeight);
-		if (count <= 0) {
-			cout << "WARNING: " << (boolMap.filename + 1) << " is all zeros" << endl;
-
-			unsigned needle[3] = { (boolMap.colorCode >> 16) & 0xFF, (boolMap.colorCode >> 8) & 0xFF , boolMap.colorCode & 0xFF };
-			int pixCount = 0;
-			for (size_t i = 0; i < image.size(); i += 4) {
-				unsigned haystack[3] = {image[i], image[i+1], image[i+2]};
-
-				int diff = 0;
-				for (int x = 0; x < 3; x++) {
-					diff += (needle[x] - haystack[x]) * (needle[x] - haystack[x]);
-				}
-				
-				if (sqrt(diff) < 3) {
-					++pixCount;
-					printf("\t%02X%02X%02X\n", haystack[0], haystack[1], haystack[2]);
-				}
-			}
-			cout << "\tFound " << pixCount << " pixels\n";
-		}
-
+		writeFile(folderName, boolMap.filename, boolMap.map, mapWidth, mapHeight);
 	}
 
 	return EXIT_SUCCESS;

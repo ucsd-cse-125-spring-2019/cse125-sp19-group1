@@ -17,9 +17,7 @@ void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath
 		v.resize(width);
 
 		for (auto &elim : v) {
-			unsigned x;
-			inf >> x;
-			elim = x;
+			inf >> elim;
 		}
 	}
 
@@ -38,7 +36,7 @@ ClientGame::ClientGame(void)
 
 	Packet packet;
 	packet.packet_type = INIT_CONNECTION;
-	packet.id = myID;
+
 	packet.serialize(packet_data);
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
@@ -53,7 +51,6 @@ void ClientGame::sendActionPackets()
 
 	Packet packet;
 	packet.packet_type = ACTION_EVENT;
-	packet.id = myID;
 
 	packet.serialize(packet_data);
 
@@ -68,7 +65,6 @@ void ClientGame::sendPackets(const int type)
 
 	Packet packet;
 	packet.packet_type = type;
-	packet.id = myID;
 
 	if (myID == -1) {
 		return;
@@ -102,10 +98,10 @@ void ClientGame::update()
 		if (key == "init")
 			myID = std::stoi(value);
 	}
-	//else
-	//{
+	else
+	{
 		gameData->decodeGameData(network_data);
-	//}
+	}
 
 	// empties the buffer after parsing
 	memset(network_data, 0, sizeof(network_data)); 

@@ -6,7 +6,6 @@
 #include "shader.h"
 #include "objloader.h"
 #include "textureloader.h"
-#include "Tokenizer.h"
 
 class FBXObject
 {
@@ -15,23 +14,20 @@ private:
 	float shininess;
 
 	// These variables are needed for the shader program
-	GLuint VAO, VBO_V, VBO_N, VBO_UV, VBO_WI, VBO_WV, EBO;
+	GLuint VAO, VBO_V, VBO_N, VBO_UV, EBO;
 	GLuint uProjection, uModelview, uView;
 	GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
 	GLuint texNum;
-	GLuint uIsAnimated;
-	GLuint uBones;
 
 	glm::mat4 toWorld;
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
-	
+
 	Skeleton * skel;
 	AnimationPlayer * animPlayer;
 	bool hasSkel;
-	bool depthTest;
 
 	// Luma values
 	glm::vec3 default_amb = glm::vec3(0.08725f, 0.0795f, 0.0245f);
@@ -49,6 +45,8 @@ public:
 	void PrintSkeleton();
 	// manipulation
 	void Update();
+	void UpdateSkin();
+	void DeformVertex(Vertex * vertex);
 	void MoveTo(float x, float y, float z);
 	void Translate(float x, float y, float z);
 	void Rotate(float angle, float x, float y, float z);
@@ -65,12 +63,10 @@ public:
 	void SetSpecular(glm::vec3 newSpec);
 	void SetShine(float newShine);
 	// rendering
-	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
+	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P);
 	void RenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();
-
-	void SetDepthTest(bool depthTestEnabled);
 
 	void ToNextKeyframe();
 	void LoadMatrices(const char * path);

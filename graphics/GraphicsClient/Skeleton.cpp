@@ -16,9 +16,7 @@ void Skeleton::AddNode(string name, Bone * newNode) {
 }
 
 Bone * Skeleton::GetBone(string name) {
-	if (bones.find(name) != bones.end())
-		return bones[name];
-	return NULL;
+	return bones[name];
 }
 
 std::map<string, Bone *> * Skeleton::GetBones() {

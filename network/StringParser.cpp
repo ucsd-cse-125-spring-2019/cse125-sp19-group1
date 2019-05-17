@@ -5,7 +5,7 @@ std::vector<std::pair<std::string, std::string>> StringParser::parseKeyValueStri
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;
 	std::string dataIn(data);
 	std::stringstream strStream(dataIn);
-	std::istream & dataStream(strStream);
+	std::istream &dataStream(strStream);
 
 	std::string key_str = "";
 	std::string value_str = "";
