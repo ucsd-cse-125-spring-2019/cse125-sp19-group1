@@ -466,14 +466,20 @@ void reloadMap()
 			if (objIdx == 0) objIdx = 1;
 			else if (++objIdx >= itemModels.size()) objIdx = 1;
 #else
+			const auto &tile = tileLayout[z][x];
+			
 			uint8_t objIdx = envObjsMap[z][x];
+			if (tile->getTileType() == TileType::JAIL) {
+				objIdx = static_cast<uint8_t>(ItemModelType::jail);
+			}
+
 			if (objIdx == 0) {
 				row[x] = nullptr;
 				continue;
 		}
 #endif
 			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
-			const auto &tile = tileLayout[z][x];
+			
 
 			// Try to turn the object away from the wall
 			float angle = 0.f;
