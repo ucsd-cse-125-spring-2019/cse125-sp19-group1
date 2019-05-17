@@ -243,7 +243,8 @@ int main(int argc, char *argv[]) {
 				if (sum < 0xFF * 3 - 8) {
 					if (!decodePixel(colorCode, &image[offset]) || colorCode != MapColorCode::wall) {
 						cout << "WARNING: pixel in " << prop.name
-							<< " wall position is not wall colored at ("
+							<< " wall position is not wall colored (#" << hex 
+							<< colorCode << dec << ") at ("
 							<< pixelX << ", " << pixelY << ")" << endl;
 					}
 
