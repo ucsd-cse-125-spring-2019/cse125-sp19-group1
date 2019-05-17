@@ -29,52 +29,53 @@ const char* window_title = GAME_NAME_SHORT;
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
 
-static const struct {
+static const struct ItemModelSettings {
 	const char *modelPath;
 	const char *texturePath;
 	const char *name;
 	ItemModelType id;
+	float scale;
+	glm::vec3 translate;
 } itemModelSettings[] = {
-	{ MODELS_PATH "apple.fbx", TEXTURES_PATH "apple.ppm", "apple", ItemModelType::apple },
-	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananagreen.ppm", "green banana", ItemModelType::bananaGreen },
-	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaperfect.ppm", "perfect banana", ItemModelType::bananaPerfect },
-	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe },
-	{ MODELS_PATH "box.fbx", TEXTURES_PATH "box.ppm", "box", ItemModelType::box },
-	{ MODELS_PATH "cake.fbx", TEXTURES_PATH "cake.ppm", "cake", ItemModelType::cake },
-	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas },
-	{ MODELS_PATH "cookingpot.fbx", TEXTURES_PATH "cookingpot.ppm", "cooking pot", ItemModelType::cookingPot },
-	{ MODELS_PATH "door.fbx", TEXTURES_PATH "door.ppm", "door", ItemModelType::door },
-	{ MODELS_PATH "fork.fbx", TEXTURES_PATH "fork.ppm", "fork", ItemModelType::fork },
-	{ MODELS_PATH "garbagebag.fbx", TEXTURES_PATH "garbagebag.ppm", "garbage bag", ItemModelType::garbageBag },
-	{ MODELS_PATH "jail.fbx", TEXTURES_PATH "jail.ppm", "jail", ItemModelType::jail },
-	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key1.ppm", "key #1", ItemModelType::key1 },
-	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key2.ppm", "key #2", ItemModelType::key2 },
-	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key3.ppm", "key #3", ItemModelType::key3 },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop.ppm", "key drop", ItemModelType::keyDrop },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_bathroom.ppm", "bathroom key drop", ItemModelType::keyDropBathroom },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_frontexit.ppm", "front exit key drop", ItemModelType::keyDropFrontExit },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_vent.ppm", "vent key drop", ItemModelType::keyDropVent },
-	{ MODELS_PATH "knife.fbx", TEXTURES_PATH "knife.ppm", "knife", ItemModelType::knife },
-	{ MODELS_PATH "orange.fbx", TEXTURES_PATH "orange.ppm", "orange fruit", ItemModelType::orange },
-	{ MODELS_PATH "painting.fbx", TEXTURES_PATH "painting.ppm", "wall painting", ItemModelType::painting },
-	{ MODELS_PATH "pear.fbx", TEXTURES_PATH "pear.ppm", "pear", ItemModelType::pear },
-	{ MODELS_PATH "plate.fbx", TEXTURES_PATH "plate.ppm", "plate", ItemModelType::plate },
-	{ MODELS_PATH "plunger.fbx", TEXTURES_PATH "plunger.ppm", "plunger", ItemModelType::plunger },
-	{ MODELS_PATH "restaurantchair.fbx", TEXTURES_PATH "restaurantchair.ppm", "restaurant chair", ItemModelType::restaurantChair },
-	{ MODELS_PATH "rope.fbx", TEXTURES_PATH "rope.ppm", "rope", ItemModelType::rope },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver1.ppm", "screwdriver #1", ItemModelType::screwdriver1 },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver2.ppm", "screwdriver #2", ItemModelType::screwdriver2 },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver3.ppm", "screwdriver #3", ItemModelType::screwdriver3 },
-	{ MODELS_PATH "stove.fbx", TEXTURES_PATH "stove.ppm", "stove", ItemModelType::stove },
-	{ MODELS_PATH "toilet.fbx", TEXTURES_PATH "toilet.ppm", "toilet", ItemModelType::toilet },
-	{ MODELS_PATH "toiletpaper.fbx", TEXTURES_PATH "toiletpaper.ppm", "toilet paper", ItemModelType::toiletPaper },
-	{ MODELS_PATH "vent.fbx", TEXTURES_PATH "vent.ppm", "vent", ItemModelType::vent },
-	{ MODELS_PATH "window.fbx", TEXTURES_PATH "window.ppm", "window", ItemModelType::window },
+	{ MODELS_PATH "apple.fbx", TEXTURES_PATH "apple.ppm", "apple", ItemModelType::apple, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananagreen.ppm", "green banana", ItemModelType::bananaGreen, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaperfect.ppm", "perfect banana", ItemModelType::bananaPerfect, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "box.fbx", TEXTURES_PATH "box.ppm", "box", ItemModelType::box, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "cake.fbx", TEXTURES_PATH "cake.ppm", "cake", ItemModelType::cake, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "cookingpot.fbx", TEXTURES_PATH "cookingpot.ppm", "cooking pot", ItemModelType::cookingPot, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "door.fbx", TEXTURES_PATH "door.ppm", "door", ItemModelType::door, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "fork.fbx", TEXTURES_PATH "fork.ppm", "fork", ItemModelType::fork, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "garbagebag.fbx", TEXTURES_PATH "garbagebag.ppm", "garbage bag", ItemModelType::garbageBag, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "jail.fbx", TEXTURES_PATH "jail.ppm", "jail", ItemModelType::jail, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key1.ppm", "key #1", ItemModelType::key1, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key2.ppm", "key #2", ItemModelType::key2, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key3.ppm", "key #3", ItemModelType::key3, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop.ppm", "key drop", ItemModelType::keyDrop, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_bathroom.ppm", "bathroom key drop", ItemModelType::keyDropBathroom, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_frontexit.ppm", "front exit key drop", ItemModelType::keyDropFrontExit, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_vent.ppm", "vent key drop", ItemModelType::keyDropVent, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "knife.fbx", TEXTURES_PATH "knife.ppm", "knife", ItemModelType::knife, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "orange.fbx", TEXTURES_PATH "orange.ppm", "orange fruit", ItemModelType::orange, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "painting.fbx", TEXTURES_PATH "painting.ppm", "wall painting", ItemModelType::painting, 3.f, glm::vec3(0.f, 0.5f, -0.40f) },
+	{ MODELS_PATH "pear.fbx", TEXTURES_PATH "pear.ppm", "pear", ItemModelType::pear, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "plate.fbx", TEXTURES_PATH "plate.ppm", "plate", ItemModelType::plate, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "plunger.fbx", TEXTURES_PATH "plunger.ppm", "plunger", ItemModelType::plunger, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "restaurantchair.fbx", TEXTURES_PATH "restaurantchair.ppm", "restaurant chair", ItemModelType::restaurantChair, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "rope.fbx", TEXTURES_PATH "rope.ppm", "rope", ItemModelType::rope, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver1.ppm", "screwdriver #1", ItemModelType::screwdriver1, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver2.ppm", "screwdriver #2", ItemModelType::screwdriver2, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver3.ppm", "screwdriver #3", ItemModelType::screwdriver3, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "stove.fbx", TEXTURES_PATH "stove.ppm", "stove", ItemModelType::stove, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "toilet.fbx", TEXTURES_PATH "toilet.ppm", "toilet", ItemModelType::toilet, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "toiletpaper.fbx", TEXTURES_PATH "toiletpaper.ppm", "toilet paper", ItemModelType::toiletPaper, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "vent.fbx", TEXTURES_PATH "vent.ppm", "vent", ItemModelType::vent, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "window.fbx", TEXTURES_PATH "window.ppm", "window", ItemModelType::window, 1.f, glm::vec3(0.f) },
 };
 
 struct ItemModel {
-	ItemModelType id;
-	const char *name;
+	const ItemModelSettings *settings;
 	FBXObject *object;
 	Geometry *geometry;
 };
@@ -476,8 +477,9 @@ void reloadMap()
 			if (objIdx == 0) {
 				row[x] = nullptr;
 				continue;
-		}
+			}
 #endif
+
 			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
 			
 
@@ -494,12 +496,17 @@ void reloadMap()
 				angle = -glm::half_pi<float>();
 			}
 
-			glm::vec3 translate;
-			translate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
-			translate.y = tile->getHeight() * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
-			translate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
-			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), translate), angle, glm::vec3(0.f, 1.f, 0.f));
-			row[x] = new Transform(rotate);
+			const auto &settings = *(itemModels[objIdx].settings);
+			glm::vec3 tileTranslate;
+			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
+			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
+			glm::vec3 modelTranslate = settings.translate;
+			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
 			row[x]->addChild(itemModels[objIdx].geometry);
 			envObjsTransform->addChild(row[x]);
 		}
@@ -587,8 +594,7 @@ void Init()
 		cout << "\tloading " << setting.name << endl;
 
 		auto &m = itemModels[static_cast<size_t>(setting.id)];
-		m.id = setting.id;
-		m.name = setting.name;
+		m.settings = &setting;
 		m.object = new FBXObject(setting.modelPath, setting.texturePath, false);
 		m.geometry = new Geometry(m.object, objShaderProgram);
 	}
