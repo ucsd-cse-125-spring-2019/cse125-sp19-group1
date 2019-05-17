@@ -50,8 +50,8 @@ std::vector<std::vector<Transform *>> northWalls;
 std::vector<std::vector<Transform *>> westWalls;
 
 SoundSystem * soundSystem;
-Sound sound_toilet;
-Sound sound_search_item;
+Sound * sound_toilet;
+Sound * sound_search_item;
 
 struct PlayerState {
 	Transform *transform;       // for position and rotation
@@ -425,8 +425,10 @@ void Init()
 
 	// If no audio device is plugged in, sound system will refuse to create sounds
 	if (!(soundSystem->shouldIgnoreSound())) {
-		soundSystem->createSound(sound_toilet, SOUNDS_TOILET);
-		soundSystem->createSound(sound_search_item, SOUNDS_SEARCH_ITEM);
+		fprintf(stdout, "createSound before: sound_toilet=%d\n", sound_toilet);
+		soundSystem->createSound(&sound_toilet, SOUNDS_TOILET);
+		fprintf(stdout, "createSound after: sound_toilet=%d\n", sound_toilet);
+		soundSystem->createSound(&sound_search_item, SOUNDS_SEARCH_ITEM);
 	}
 
 	// load the shader program
@@ -818,8 +820,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	// Check for a key press
 	if (action == GLFW_PRESS)
 	{
-		if (!(soundSystem->shouldIgnoreSound()))
+		if (!(soundSystem->shouldIgnoreSound())) {
+			fprintf(stdout, "before playSound: %d\n", sound_toilet);
 			soundSystem->playSound(sound_toilet);
+		}
 
 		// Check if escape was pressed
 		if (key == GLFW_KEY_ESCAPE)
