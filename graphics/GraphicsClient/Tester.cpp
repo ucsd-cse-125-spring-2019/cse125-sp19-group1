@@ -8,6 +8,8 @@
 #include <ctime>
 #include <algorithm>
 
+//#define ENV_OBJS_DEMO
+
 #define TILE_HEIGHT_ADJUST -2.f
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
 #define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
@@ -99,9 +101,12 @@ GLuint uiTexture;
 
 Geometry * tileGeometry;
 Geometry * wallGeometry;
-std::vector<std::vector<Transform *>> floorArray;
-std::vector<std::vector<Transform *>> northWalls;
-std::vector<std::vector<Transform *>> westWalls;
+vector<vector<Transform *>> floorArray;
+vector<vector<Transform *>> northWalls;
+vector<vector<Transform *>> westWalls;
+vector<vector<Transform *>> envObjs;
+
+vector<vector<uint8_t>> envObjsMap;
 
 struct PlayerState {
 	Transform *transform;       // for position and rotation
@@ -196,6 +201,7 @@ Transform * root = nullptr;
 Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
 Transform * floorTransform = nullptr;
+Transform * envObjsTransform = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
@@ -337,6 +343,12 @@ void reloadMap()
 		const glm::vec3 transAmount(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2);
 		const auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(TILE_SCALE));
 		floorTransform = new Transform(glm::translate(scale, transAmount));
+		root->addChild(floorTransform);
+	}
+
+	if (envObjsTransform == nullptr) {
+		envObjsTransform = new Transform(glm::mat4(1.f));
+		root->addChild(envObjsTransform);
 	}
 
 	// Floor tiles
@@ -444,7 +456,48 @@ void reloadMap()
 		}
 	}
 
-	root->addChild(floorTransform);
+	uint8_t objIdx = 0;
+	envObjs.resize(floorArray.size());
+	for (size_t z = 0; z < envObjs.size(); z++) {
+		auto &row = envObjs[z];
+		row.resize(floorArray[z].size());
+		for (size_t x = 0; x < row.size(); x++) {
+#ifdef ENV_OBJS_DEMO
+			if (objIdx == 0) objIdx = 1;
+			else if (++objIdx >= itemModels.size()) objIdx = 1;
+#else
+			uint8_t objIdx = envObjsMap[z][x];
+			if (objIdx == 0) {
+				row[x] = nullptr;
+				continue;
+		}
+#endif
+			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
+			const auto &tile = tileLayout[z][x];
+
+			// Try to turn the object away from the wall
+			float angle = 0.f;
+			auto wall = tile->getWall();
+			if (wall & DirectionBitmask::southSide) {
+				angle = glm::pi<float>();
+			}
+			else if (wall & DirectionBitmask::westSide) {
+				angle = glm::half_pi<float>();
+			}
+			else if (wall & DirectionBitmask::eastSide) {
+				angle = -glm::half_pi<float>();
+			}
+
+			glm::vec3 translate;
+			translate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			translate.y = tile->getHeight() * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
+			translate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), translate), angle, glm::vec3(0.f, 1.f, 0.f));
+			row[x] = new Transform(rotate);
+			row[x]->addChild(itemModels[objIdx].geometry);
+			envObjsTransform->addChild(row[x]);
+		}
+	}
 }
 
 void deallocFloor()
@@ -479,6 +532,8 @@ void Init()
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
 	
+	loadMapArray(envObjsMap, "../../maps/tinytinymap/env_objs.txt");
+
 	// Load models
 	cout << "Loading models..." << endl;
 
