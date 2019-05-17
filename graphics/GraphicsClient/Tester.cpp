@@ -8,6 +8,8 @@
 #include <ctime>
 #include <algorithm>
 
+// Uncomment to render a repeating pattern of all environment objects
+// This is good for debugging scale/positioning/rendering
 //#define ENV_OBJS_DEMO
 
 #define TILE_HEIGHT_ADJUST -2.f
@@ -43,12 +45,12 @@ static const struct ItemModelSettings {
 	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe, 1.f, glm::vec3(0.f) },
 	{ MODELS_PATH "box.fbx", TEXTURES_PATH "box.ppm", "box", ItemModelType::box, 1.f, glm::vec3(0.f) },
 	{ MODELS_PATH "cake.fbx", TEXTURES_PATH "cake.ppm", "cake", ItemModelType::cake, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas, 3.f, glm::vec3(0.f) },
 	{ MODELS_PATH "cookingpot.fbx", TEXTURES_PATH "cookingpot.ppm", "cooking pot", ItemModelType::cookingPot, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "door.fbx", TEXTURES_PATH "door.ppm", "door", ItemModelType::door, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "door.fbx", TEXTURES_PATH "door.ppm", "door", ItemModelType::door, 1.f, glm::vec3(0.f, 0.0f, -0.45f) },
 	{ MODELS_PATH "fork.fbx", TEXTURES_PATH "fork.ppm", "fork", ItemModelType::fork, 1.f, glm::vec3(0.f) },
 	{ MODELS_PATH "garbagebag.fbx", TEXTURES_PATH "garbagebag.ppm", "garbage bag", ItemModelType::garbageBag, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "jail.fbx", TEXTURES_PATH "jail.ppm", "jail", ItemModelType::jail, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "jail.fbx", TEXTURES_PATH "jail.ppm", "jail", ItemModelType::jail, 0.5f, glm::vec3(0.f) },
 	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key1.ppm", "key #1", ItemModelType::key1, 1.f, glm::vec3(0.f) },
 	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key2.ppm", "key #2", ItemModelType::key2, 1.f, glm::vec3(0.f) },
 	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key3.ppm", "key #3", ItemModelType::key3, 1.f, glm::vec3(0.f) },
@@ -64,14 +66,14 @@ static const struct ItemModelSettings {
 	{ MODELS_PATH "plunger.fbx", TEXTURES_PATH "plunger.ppm", "plunger", ItemModelType::plunger, 1.f, glm::vec3(0.f) },
 	{ MODELS_PATH "restaurantchair.fbx", TEXTURES_PATH "restaurantchair.ppm", "restaurant chair", ItemModelType::restaurantChair, 1.f, glm::vec3(0.f) },
 	{ MODELS_PATH "rope.fbx", TEXTURES_PATH "rope.ppm", "rope", ItemModelType::rope, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver1.ppm", "screwdriver #1", ItemModelType::screwdriver1, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver2.ppm", "screwdriver #2", ItemModelType::screwdriver2, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver3.ppm", "screwdriver #3", ItemModelType::screwdriver3, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver1.ppm", "screwdriver #1", ItemModelType::screwdriver1, 0.225f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver2.ppm", "screwdriver #2", ItemModelType::screwdriver2, 0.225f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver3.ppm", "screwdriver #3", ItemModelType::screwdriver3, 0.225f, glm::vec3(0.f) },
 	{ MODELS_PATH "stove.fbx", TEXTURES_PATH "stove.ppm", "stove", ItemModelType::stove, 1.45f, glm::vec3(0.f, 0.f, -0.225f) },
-	{ MODELS_PATH "toilet.fbx", TEXTURES_PATH "toilet.ppm", "toilet", ItemModelType::toilet, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "toiletpaper.fbx", TEXTURES_PATH "toiletpaper.ppm", "toilet paper", ItemModelType::toiletPaper, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "vent.fbx", TEXTURES_PATH "vent.ppm", "vent", ItemModelType::vent, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "window.fbx", TEXTURES_PATH "window.ppm", "window", ItemModelType::window, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "toilet.fbx", TEXTURES_PATH "toilet.ppm", "toilet", ItemModelType::toilet, 0.65f, glm::vec3(0.f) },
+	{ MODELS_PATH "toiletpaper.fbx", TEXTURES_PATH "toiletpaper.ppm", "toilet paper", ItemModelType::toiletPaper, 0.9f, glm::vec3(0.f) },
+	{ MODELS_PATH "vent.fbx", TEXTURES_PATH "vent.ppm", "vent", ItemModelType::vent, 3.f, glm::vec3(0.f, 0.5f, -0.47f) },
+	{ MODELS_PATH "window.fbx", TEXTURES_PATH "window.ppm", "window", ItemModelType::window, 1.75f, glm::vec3(0.f, 0.5f, -0.4f) },
 };
 
 struct ItemModel {
@@ -125,7 +127,7 @@ struct PlayerState {
 
 #ifdef DUMMY_ID
 	// Warning: this constructor is only for debugging use
-	PlayerState(int newId, int geomIdx) {
+	PlayerState(int newId, int geomIdx) : PlayerState() {
 		id = newId;
 		geometryIdx = geomIdx;
 
@@ -322,8 +324,8 @@ void reloadPlayers()
 #ifdef DUMMY_ID
 	// add a dummy player
 	players.emplace_back(DUMMY_ID, CHEF_IDX);
-	const auto &state = players[players.size() - 1];
-	allPlayersNode->addChild(state.transform);
+	const auto state = &players[players.size() - 1];
+	allPlayersNode->addChild(state->transform);
 #endif
 }
 
@@ -463,13 +465,13 @@ void reloadMap()
 		auto &row = envObjs[z];
 		row.resize(floorArray[z].size());
 		for (size_t x = 0; x < row.size(); x++) {
+			const auto &tile = tileLayout[z][x];
+
 #ifdef ENV_OBJS_DEMO
 			if (objIdx == 0) objIdx = 1;
 			else if (++objIdx >= itemModels.size()) objIdx = 1;
 #else
-			const auto &tile = tileLayout[z][x];
-			
-			uint8_t objIdx = envObjsMap[z][x];
+			objIdx = envObjsMap[z][x];
 			if (tile->getTileType() == TileType::JAIL) {
 				objIdx = static_cast<uint8_t>(ItemModelType::jail);
 			}
@@ -904,6 +906,12 @@ void IdleCallback()
 
 			const auto &playersMap = client->getGameData()->players;
 			for (auto &state : players) {
+#ifdef DUMMY_ID
+				if (state.id == DUMMY_ID) {
+					continue;
+				}
+#endif
+
 				if (playersMap.count(state.id) <= 0) {
 					playersChanged = true;
 					break;
