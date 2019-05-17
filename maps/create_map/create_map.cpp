@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include "lodepng/lodepng.h"
+#include "../../graphics/GraphicsClient/ItemModelType.h"
 
 // For mkdir()
 #ifdef _WIN32
@@ -31,7 +32,7 @@ enum MapColorCode {
 	playerSpawn       = 0xeb2f71,  //Player Spawn - R : 235 G : 47 B : 113 (#eb2f71)
 	playerTrap        = 0xdeff00,  //This is a Trap - R : 222 G : 255 B : 0 (#deff00)
 	playerExit        = 0x824959,  //This is an Exit - R : 130 G : 73 B : 89 (#824959)
-	keyDeposit        = 0xb605bd,  //This is a Deposit for Keys - R : 182 G : 5 B : 189 (#b605bd)
+	frontDeposit      = 0xb605bd,  //This is a Deposit for Keys - R : 182 G : 5 B : 189 (#b605bd)
 	bathroomDeposit   = 0x5e3ba5,  //This is a Deposit for Bathroom - R : 94 G : 59 B : 165 (#5e3ba5)
 	ventDeposit       = 0x7e6e9e,  //This is a Deposit for Vent - R : 126 G : 110 B : 158 (#7e6e9e)
 	table             = 0x875315,  //This is a Table - R : 135 G : 83 B : 21 (#875315)
@@ -55,7 +56,7 @@ MapColorCode allColorCodes[] = {
 	playerSpawn,
 	playerTrap,
 	playerExit,
-	keyDeposit,
+	frontDeposit,
 	bathroomDeposit,
 	ventDeposit,
 	table,
@@ -79,6 +80,19 @@ enum DirectionBitmask {
 	southSide = (0x1u << 1),  //0010 = down = 2
 	eastSide  = (0x1u << 0),  //0001 = right = 1
 	noSide    = 0,            //0000 = no wall = 0 
+};
+
+static const struct {
+	ItemModelType modelType;
+	MapColorCode colorCode;
+} modelTypes[] = {
+	{ItemModelType::keyDropFrontExit, frontDeposit},
+	{ItemModelType::keyDropBathroom, bathroomDeposit},
+	{ItemModelType::keyDropVent, ventDeposit},
+	{ItemModelType::stove, stove},
+	{ItemModelType::toilet, toilet},
+	{ItemModelType::restaurantChair, chair},
+	{ItemModelType::painting, wallWithPainting},
 };
 
 static const struct {
@@ -188,22 +202,24 @@ int main(int argc, char *argv[]) {
 	vector<uint8_t> walls;
 	vector<uint8_t> heights;
 	vector<uint8_t> rampDirections;
+	vector<uint8_t> envObjects;
 	
 	walls.resize(mapWidth * mapHeight);
 	heights.resize(mapWidth * mapHeight);
 	rampDirections.resize(mapWidth * mapHeight);
+	envObjects.resize(mapWidth * mapHeight);
 
 	static struct {
 		MapColorCode colorCode;
 		vector<uint8_t> map;
 		const char *filename;
 	} booleanMaps[] = {
-		{ itemSpawn,   vector<uint8_t>(mapWidth * mapHeight, 0), "/item_spawn.txt" },
-		{ playerSpawn, vector<uint8_t>(mapWidth * mapHeight, 0), "/player_spawn.txt" },
-		{ playerTrap,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_trap.txt" },
-		{ playerExit,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_exit.txt" },
-		{ keyDeposit,  vector<uint8_t>(mapWidth * mapHeight, 0), "/key_deposit.txt" },
-		{ table,       vector<uint8_t>(mapWidth * mapHeight, 0), "/table.txt" },
+		{ itemSpawn,    vector<uint8_t>(mapWidth * mapHeight, 0), "/item_spawn.txt" },
+		{ playerSpawn,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_spawn.txt" },
+		{ playerTrap,   vector<uint8_t>(mapWidth * mapHeight, 0), "/player_trap.txt" },
+		{ playerExit,   vector<uint8_t>(mapWidth * mapHeight, 0), "/player_exit.txt" },
+		{ frontDeposit, vector<uint8_t>(mapWidth * mapHeight, 0), "/key_deposit.txt" },  /* deprecated */
+		{ table,        vector<uint8_t>(mapWidth * mapHeight, 0), "/table.txt" },        /* deprecated */
 	};
 
 	// Loop over tiles where (mapX, mapY) is the map position and
@@ -274,11 +290,24 @@ int main(int argc, char *argv[]) {
 						height = 1;
 						break;
 					default:
+						bool found = false;
 						for (auto &boolMap : booleanMaps) {
 							if (colorCode == boolMap.colorCode) {
 								boolMap.map[mapY * mapWidth + mapX] = 1;
+								found = true;
+								break;
 							}
 						}
+						if (found) break;
+
+						for (auto &m : modelTypes) {
+							if (colorCode == m.colorCode) {
+								envObjects[mapY * mapWidth + mapX] = static_cast<uint8_t>(m.modelType);
+								found = true;
+								break;
+							}
+						}
+
 						break;
 					}
 				}
@@ -298,6 +327,7 @@ int main(int argc, char *argv[]) {
 	writeFile(folderName, "/walls.txt", walls, mapWidth, mapHeight);
 	writeFile(folderName, "/heights.txt", heights, mapWidth, mapHeight);
 	writeFile(folderName, "/ramps.txt", rampDirections, mapWidth, mapHeight);
+	writeFile(folderName, "/env_objs.txt", envObjects, mapWidth, mapHeight);
 
 	for (auto &boolMap : booleanMaps) {
 		int count = writeFile(folderName, boolMap.filename, boolMap.map, mapWidth, mapHeight);

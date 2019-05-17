@@ -2,7 +2,7 @@
 #define ITEM_MODEL_TYPE_H
 
 enum class ItemModelType {
-	apple,
+	apple = 1,
 	bananaGreen,
 	bananaPerfect,
 	bananaVeryRipe,
