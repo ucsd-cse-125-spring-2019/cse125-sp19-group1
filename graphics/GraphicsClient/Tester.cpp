@@ -820,9 +820,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	// Check for a key press
 	if (action == GLFW_PRESS)
 	{
+		// TODO: Remove the following if block; meant just to test sound
+		// and show how to use the soundSystem
 		if (!(soundSystem->shouldIgnoreSound())) {
 			fprintf(stdout, "before playSound: %d\n", sound_toilet);
-			soundSystem->playSound(sound_toilet);
+			// soundSystem->playSound(sound_toilet);
+			soundSystem->playSoundNoOverlap(sound_toilet);
 		}
 
 		// Check if escape was pressed

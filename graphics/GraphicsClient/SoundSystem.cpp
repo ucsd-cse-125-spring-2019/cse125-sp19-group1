@@ -15,6 +15,7 @@ SoundSystem::SoundSystem()
 
 	int driverCount = 0;
 	system->getNumDrivers(&driverCount);
+	channel = 0;
 
 	if (driverCount == 0) {
 		fprintf(stdout, "SoundSystem ERROR: driverCount = 0, possibly because no audio devices are plugged in\n");
@@ -73,12 +74,12 @@ void SoundSystem::createSound(Sound ** pSound, const char* pFile)
 	}
 }
 
+// this method will play a sound, regardless of other sounds
+// are currently playing
 void SoundSystem::playSound(Sound * pSound, bool bLoop)
 {
 	FMOD_RESULT result;
-	FMOD::Channel **channel = 0;
 
-	/*
 	if (!bLoop) {
 		pSound->setMode(FMOD_LOOP_OFF);
 	}
@@ -86,9 +87,8 @@ void SoundSystem::playSound(Sound * pSound, bool bLoop)
 		pSound->setMode(FMOD_LOOP_NORMAL);
 		pSound->setLoopCount(-1);
 	}
-	*/
 
-	result = system->playSound(pSound, 0, false, 0); // channel);
+	result = system->playSound(pSound, 0, false, &channel);
 
 	if (result != FMOD_OK) {
 		if (result == FMOD_ERR_INVALID_PARAM) {
@@ -99,6 +99,40 @@ void SoundSystem::playSound(Sound * pSound, bool bLoop)
 			fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
 		}
 	}
+}
+
+// if there are sounds being played, don't play this
+void SoundSystem::playSoundNoOverlap(Sound * pSound, bool bLoop)
+{
+	FMOD_RESULT result;
+	bool playing = false;
+	fprintf(stdout, "called playSoundNoOverlap\n");
+
+
+	result = channel->isPlaying(&playing);
+	if (!playing) {
+		if (!bLoop) {
+			pSound->setMode(FMOD_LOOP_OFF);
+		}
+		else {
+			pSound->setMode(FMOD_LOOP_NORMAL);
+			pSound->setLoopCount(-1);
+		}
+
+		fprintf(stdout, "playSoundNoOverlap playing sound\n");
+		result = system->playSound(pSound, 0, false, &channel);
+
+		if (result != FMOD_OK) {
+			if (result == FMOD_ERR_INVALID_PARAM) {
+				fprintf(stdout, "playSound ERROR: pSound=%d\n", pSound);
+				fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
+			}
+			else {
+				fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
+			}
+		}
+	}
+	
 }
 
 void SoundSystem::releaseSound(Sound * pSound)
