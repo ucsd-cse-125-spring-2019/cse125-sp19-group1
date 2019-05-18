@@ -324,6 +324,19 @@ JailTile * GameData::getJailTile(Location loc)
 	}
 	return nullptr;
 }
+
+ObjectTile * GameData::getObjectTile(Location loc)
+{
+
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::JAIL)
+			return dynamic_cast<ObjectTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+}
 ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
 {
 	float increment = TILE_SIZE / 2;

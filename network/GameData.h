@@ -78,6 +78,7 @@ public:
 	RampTile * getRampTile(Location loc);
 	JailTile * getJailTile(Location loc);
 	ObjectTile * getAdjacentObjectTile(Location loc, Direction dir);
+	ObjectTile * getObjectTile(Location loc);
 protected:
 	bool beginCountdown;
 	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;

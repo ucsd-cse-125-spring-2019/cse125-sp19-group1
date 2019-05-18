@@ -133,6 +133,7 @@
     <ClInclude Include="..\..\network\ClientGame.h" />
     <ClInclude Include="..\..\network\ClientNetwork.h" />
     <ClInclude Include="..\..\network\GameData.h" />
+    <ClInclude Include="..\..\network\GameManager.h" />
     <ClInclude Include="..\..\network\Gate.h" />
     <ClInclude Include="..\..\network\GateTile.h" />
     <ClInclude Include="..\..\network\Item.h" />
@@ -145,6 +146,7 @@
     <ClInclude Include="..\..\network\Player2.h" />
     <ClInclude Include="..\..\network\Player3.h" />
     <ClInclude Include="..\..\network\RampTile.h" />
+    <ClInclude Include="..\..\network\ServerGame - Copy.h" />
     <ClInclude Include="..\..\network\ServerGame.h" />
     <ClInclude Include="..\..\network\ServerNetwork.h" />
     <ClInclude Include="..\..\network\StringParser.h" />
@@ -178,8 +180,10 @@
     <ClCompile Include="..\..\network\ClientGame.cpp" />
     <ClCompile Include="..\..\network\ClientNetwork.cpp" />
     <ClCompile Include="..\..\network\GameData.cpp" />
+    <ClCompile Include="..\..\network\GameManager.cpp" />
     <ClCompile Include="..\..\network\NetworkServices.cpp" />
     <ClCompile Include="..\..\network\Player.cpp" />
+    <ClCompile Include="..\..\network\ServerGame - Copy.cpp" />
     <ClCompile Include="..\..\network\ServerGame.cpp" />
     <ClCompile Include="..\..\network\ServerNetwork.cpp" />
     <ClCompile Include="..\..\network\StringParser.cpp" />

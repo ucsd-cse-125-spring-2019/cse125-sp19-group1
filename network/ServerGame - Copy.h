@@ -1,8 +1,9 @@
 #include "ServerNetwork.h"
 #include "NetworkData.h"
-#include "Atlas.h"
+//#include "Atlas.h"
 #include <string>
 #include "GameData.h"
+#include "GameManager.h"
 
 class ServerGame
 {
@@ -17,16 +18,8 @@ public:
 	void sendActionPackets();
 	void sendInitPackets();
 	void initNewClient();
-	void updateForwardEvent(int id);
-	void updateBackwardEvent(int id);
-	void updateLeftEvent(int id);
-	void updateRightEvent(int id);
-	void updateHeight(int id);
-	void updateCollision(int id);
-	void updatePlayerCollision(int id, int dir);
-	void resetGame();
 
-	GameData * gameData;
+	
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 
@@ -35,16 +28,10 @@ private:
     // The ServerNetwork object 
     ServerNetwork* network;
 
-	//Atlas* atlas;
-
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
 	
 	bool newPlayerInit;
-	bool gameStarted;
-	bool allPlayersReady;
-	bool initCharacters;
-
-	bool moveForward, moveBackward, moveLeft, moveRight;
-
+	//bool initCharacters;
+	GameManager * gameManager;
 };
