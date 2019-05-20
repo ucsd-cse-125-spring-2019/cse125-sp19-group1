@@ -209,7 +209,7 @@ void ServerGame::receiveFromClients()
 				break;
 			}
 		}
-		
+		gameManager->updatePlayerFacingDirection(playerID);
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
 	}
