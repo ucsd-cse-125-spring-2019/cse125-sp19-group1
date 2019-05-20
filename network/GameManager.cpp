@@ -10,6 +10,11 @@ bool GameManager::gameHasStarted()
 	return gameStarted;
 }
 
+bool GameManager::gameIsOver()
+{
+	return animalWin || chefWin;
+}
+
 void GameManager::updateRightEvent(int id)
 {
 	moveRight = true;

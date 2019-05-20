@@ -96,7 +96,7 @@ void ServerGame::receiveFromClients()
 				break;
 			case READY_EVENT:
 				printf("server received ENTER event packet from client\n");
-				if(!gameStarted)
+				if(!gameManager->gameHasStarted())
 					gameData->getPlayer(iter->first)->toggleReady();
 				break;
 			case START_EVENT:

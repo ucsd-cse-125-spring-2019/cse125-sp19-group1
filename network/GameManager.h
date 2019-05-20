@@ -13,10 +13,11 @@ public:
 	void updateHeight(int id);
 	void updateCollision(int id);
 	void updatePlayerCollision(int id, int dir);
+	void togglePlayerReady(int id);
 	//void resetGame();
 
 	bool gameHasStarted();
-	bool gameIsOver()
+	bool gameIsOver();
 
 protected:
 	GameData * gameData;
