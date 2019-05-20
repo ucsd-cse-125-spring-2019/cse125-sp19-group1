@@ -27,6 +27,12 @@ using namespace std;
 #define MARGIN_TOP 1
 #define MARGIN_BOTTOM 1
 
+enum class ExitGroup {
+	front = 1u,
+	bathroom,
+	vent,
+};
+
 enum MapColorCode {
 	wall              = 0x334e64,  //This is a Wall - R: 51 G : 78 B : 100 (#334e64)
 	itemSpawn         = 0xe2a9e6,  //Can Spawn Item - R : 226 G : 169 B : 230 (#e2a9e6)
@@ -216,11 +222,15 @@ int main(int argc, char *argv[]) {
 	vector<uint8_t> heights;
 	vector<uint8_t> rampDirections;
 	vector<uint8_t> envObjects;
+	vector<uint8_t> playerExits;
+	vector<uint8_t> keyDeposits;
 	
 	walls.resize(mapWidth * mapHeight);
 	heights.resize(mapWidth * mapHeight);
 	rampDirections.resize(mapWidth * mapHeight);
 	envObjects.resize(mapWidth * mapHeight);
+	playerExits.resize(mapWidth * mapHeight);
+	keyDeposits.resize(mapWidth * mapHeight);
 
 	static struct {
 		MapColorCode colorCode;
@@ -230,8 +240,8 @@ int main(int argc, char *argv[]) {
 		{ itemSpawn,    vector<uint8_t>(mapWidth * mapHeight, 0), "/item_spawn.txt" },
 		{ playerSpawn,  vector<uint8_t>(mapWidth * mapHeight, 0), "/player_spawn.txt" },
 		{ playerTrap,   vector<uint8_t>(mapWidth * mapHeight, 0), "/player_trap.txt" },
-		{ playerExit,   vector<uint8_t>(mapWidth * mapHeight, 0), "/player_exit.txt" },
-		{ frontDeposit, vector<uint8_t>(mapWidth * mapHeight, 0), "/key_deposit.txt" },  /* deprecated */
+		//{ playerExit,   vector<uint8_t>(mapWidth * mapHeight, 0), "/player_exit.txt" },
+		//{ frontDeposit, vector<uint8_t>(mapWidth * mapHeight, 0), "/key_deposit.txt" },  /* deprecated */
 		{ table,        vector<uint8_t>(mapWidth * mapHeight, 0), "/table.txt" },        /* deprecated */
 	};
 
@@ -241,6 +251,7 @@ int main(int argc, char *argv[]) {
 	for (unsigned y = MARGIN_TOP; y < height - MARGIN_BOTTOM; y += TILE_WIDTH) {
 		mapX = 0;
 		for (unsigned x = MARGIN_LEFT; x < width - MARGIN_RIGHT; x += TILE_WIDTH) {
+			const size_t mapOffset = mapY * mapWidth + mapX;
 			MapColorCode colorCode;
 
 			uint8_t sides = DirectionBitmask::noSide;
@@ -265,7 +276,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
-			walls[mapY * mapWidth + mapX] = sides;
+			walls[mapOffset] = sides;
 			
 			DirectionBitmask rampDirection = DirectionBitmask::noSide;
 			uint8_t height = 0;
@@ -303,11 +314,30 @@ int main(int argc, char *argv[]) {
 						rampDirection = DirectionBitmask::westSide;
 						height = 1;
 						break;
+					case bathroomDeposit:
+						keyDeposits[mapOffset] = static_cast<uint8_t>(ExitGroup::bathroom);
+						goto defaultColorCodeCase;
+					case frontDeposit:
+						keyDeposits[mapOffset] = static_cast<uint8_t>(ExitGroup::front);
+						goto defaultColorCodeCase;
+					case ventDeposit:
+						keyDeposits[mapOffset] = static_cast<uint8_t>(ExitGroup::vent);
+						goto defaultColorCodeCase;
+					case bathroomExit:
+						playerExits[mapOffset] = static_cast<uint8_t>(ExitGroup::bathroom);
+						goto defaultColorCodeCase;
+					case frontExit:
+						playerExits[mapOffset] = static_cast<uint8_t>(ExitGroup::front);
+						goto defaultColorCodeCase;
+					case ventExit:
+						playerExits[mapOffset] = static_cast<uint8_t>(ExitGroup::vent);
+						goto defaultColorCodeCase;
+					defaultColorCodeCase:
 					default:
 						bool found = false;
 						for (auto &boolMap : booleanMaps) {
 							if (colorCode == boolMap.colorCode) {
-								boolMap.map[mapY * mapWidth + mapX] = 1;
+								boolMap.map[mapOffset] = 1;
 								found = true;
 								break;
 							}
@@ -316,7 +346,7 @@ int main(int argc, char *argv[]) {
 
 						for (auto &m : modelTypes) {
 							if (colorCode == m.colorCode) {
-								envObjects[mapY * mapWidth + mapX] = static_cast<uint8_t>(m.modelType);
+								envObjects[mapOffset] = static_cast<uint8_t>(m.modelType);
 								found = true;
 								break;
 							}
@@ -328,8 +358,8 @@ int main(int argc, char *argv[]) {
 
 			}
 
-			rampDirections[mapY * mapWidth + mapX] = rampDirection;
-			heights[mapY * mapWidth + mapX] = height;
+			rampDirections[mapOffset] = rampDirection;
+			heights[mapOffset] = height;
 
 			mapX++;
 		}
@@ -342,6 +372,8 @@ int main(int argc, char *argv[]) {
 	writeFile(folderName, "/heights.txt", heights, mapWidth, mapHeight);
 	writeFile(folderName, "/ramps.txt", rampDirections, mapWidth, mapHeight);
 	writeFile(folderName, "/env_objs.txt", envObjects, mapWidth, mapHeight);
+	writeFile(folderName, "/player_exit.txt", playerExits, mapWidth, mapHeight);
+	writeFile(folderName, "/key_deposit.txt", keyDeposits, mapWidth, mapHeight);
 
 	for (auto &boolMap : booleanMaps) {
 		int count = writeFile(folderName, boolMap.filename, boolMap.map, mapWidth, mapHeight);
