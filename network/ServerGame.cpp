@@ -258,15 +258,17 @@ void ServerGame::receiveFromClients()
 										std::map<unsigned int, SOCKET>::iterator iter2;
 										for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
 										{
-											if (iter2 == iter || gameData->getPlayer(iter2->first)->isChef())
+											if (iter2 == iter)
 											{
-												if (!gameData->getPlayer(iter2->first)->isChef() &&
-													!gameData->getPlayer(iter2->first)->getIsCaught())
-												{
-													chefWin = false;
-												}
 												continue;
 											}
+											if (!gameData->getPlayer(iter2->first)->isChef() &&
+												!gameData->getPlayer(iter2->first)->getIsCaught())
+											{
+												chefWin = false;
+											}
+												
+											
 											Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
 											//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
 											if (player->inRange(loc, tLoc) &&
