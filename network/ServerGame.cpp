@@ -764,6 +764,15 @@ void ServerGame::updateHeight(int id)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	gameData->getPlayer(id)->setLocation(x, y, z);
+
+	if (gameData->getPlayer(id)->isChef())
+	{
+		if (gameData->getPlayer(id)->getCaughtAnimal())
+		{
+			int animalId = gameData->getPlayer(id)->getCaughtAnimalId();
+			gameData->getPlayer(animalId)->setLocation(gameData->getPlayer(id)->getLocation());
+		}
+	}
 }
 
 void ServerGame::updatePlayerCollision(int id, int dir) 
