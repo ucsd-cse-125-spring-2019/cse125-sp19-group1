@@ -15,7 +15,7 @@
 #include "Geometry.h"
 //#include "./server/ServerGame.h"
 //#include "./server/ClientGame.h"
-#include "../../network/ServerGame.h"
+#include "../../network/ServerGame - Copy.h"
 #include "../../network/ClientGame.h"
 
 #define CHEF_NAME_SHORT "Cheoffrey"

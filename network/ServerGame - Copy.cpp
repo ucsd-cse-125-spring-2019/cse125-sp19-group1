@@ -5,11 +5,10 @@
 #include <string>
 #include <cstring>
 #include <chrono>
- 
-unsigned int ServerGame::client_id; 
 
 ServerGame::ServerGame(void)
 {
+	client_id = 0;
 	newPlayerInit = false;
     // id's to assign clients for our table
     client_id = 0;
@@ -102,10 +101,10 @@ void ServerGame::receiveFromClients()
 				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
-				if (!gameStarted && allPlayersReady)
+				if (!gameManager->gameHasStarted() && gameManager->getAllPlayersReady())
 				{
 					//initCharacters = true;
-					gameData->startCountdown();
+					gameManager->startCountdown();
 				}
 				break;
 			case SELECT_EVENT:
@@ -118,19 +117,19 @@ void ServerGame::receiveFromClients()
 				break;
 			case SELECT1_EVENT:
 				printf("server received SELECT1 event packet from client\n");
-				gameData->getPlayer(iter->first)->setModelType(ModelType::CHEF);
+				gameManager->updatePlayerModel(playerID, ModelType::CHEF);
 				break;
 			case SELECT2_EVENT:
 				printf("server received SELECT2 event packet from client\n");
-				gameData->getPlayer(iter->first)->setModelType(ModelType::RACOON);
+				gameManager->updatePlayerModel(playerID, ModelType::RACOON);
 				break;
 			case SELECT3_EVENT:
 				printf("server received SELECT3 event packet from client\n");
-				gameData->getPlayer(iter->first)->setModelType(ModelType::CAT);
+				gameManager->updatePlayerModel(playerID, ModelType::CAT);
 				break;
 			case SELECT4_EVENT:
 				printf("server received SELECT4 event packet from client\n");
-				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
+				gameManager->updatePlayerModel(playerID, ModelType::DOG);
 				break;
 			case FORWARD_EVENT:
 				if (gameManager->gameHasStarted() && !gameManager->gameIsOver())
@@ -173,47 +172,7 @@ void ServerGame::receiveFromClients()
 			{
 				if (gameManager->gameHasStarted() && !gameManager->gameIsOver())
 				{
-					if (Player * player = gameData->getPlayer(iter->first))
-					{
-						if (player->getInteracting() ||
-							player->getIsCaught() ||
-							player->getHidden()) {
-							break;
-						}
-
-						Location loc = player->getLocation();
-
-						if (player->getInteracting()) {
-							double seconds = player->getInteractingTime(0);
-							if (seconds > gameData->getBoxTime()) {
-								std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
-								gameData->getAtlas()->updateBoxLayout(loc);
-								player->setInteracting(false);
-							}
-						}
-
-						if (player->getInteracting() &&
-							!player->isChef()) {
-							std::cout << "RELEASED SPACE" << std::endl;
-							player->setInteracting(false);
-						}
-
-
-						if (player->getOpeningGate() &&
-							!player->isChef() && gameData->getAtlas()->hasGate(loc))
-						{
-							GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-							if (!gateTile->isOpen())
-							{
-								std::cout << "RELEASED SPACE" << std::endl;
-								player->setOpeningGate(false);
-
-								//update progress of gate 
-								double seconds = player->getInteractingTime(0);
-								gateTile->constructGate(seconds);
-							}
-						}
-					}
+					gameManager->releaseEvent(playerID);
 				}
 			
 				break;
@@ -222,28 +181,7 @@ void ServerGame::receiveFromClients()
 			{
 				if (gameManager->gameHasStarted() && !gameManager->gameIsOver())
 				{
-					if (Player * player = gameData->getPlayer(iter->first))
-					{
-						if (player->getInteracting() ||
-							player->getIsCaught() ||
-							player->getHidden()) {
-							break;
-						}
-
-						std::cout << "facing:" << static_cast<int>(player->getFacingDirection()) << std::endl;
-						Location loc = player->getLocation();
-
-						// PLayer cannot drop item if there is an item already on the current tile
-						if (!(gameData->getAtlas()->tileHasItem(loc)))
-						{
-							ItemName itemName = player->getInventory();
-							gameData->getAtlas()->updateTileItem(loc, itemName);
-							player->setInventory(ItemName::EMPTY);
-
-							gameData->getAtlas()->updateDroppedItem(itemName, loc);
-
-						}
-					}
+					gameManager->dropEvent(playerID);
 				}
 				break;
 			}
@@ -251,44 +189,7 @@ void ServerGame::receiveFromClients()
 			{
 				if (gameManager->gameHasStarted() && !gameManager->gameIsOver())
 				{
-					if (Player * player = gameData->getPlayer(iter->first))
-					{
-						if (player->getInteracting() ||
-							player->getIsCaught()) {
-							break;
-						}
-
-						Location loc = player->getLocation();
-						if (!(gameData->getAtlas()->hasHide(loc))) { return; }
-
-						HideTile * hideTile = (HideTile *)(gameData->getAtlas()->getTileAt(loc));
-
-						if (player->isChef()) {
-							if (!hideTile->checkHideTileEmpty())
-							{
-								int animal = hideTile->getAnimalHiding();
-								gameData->getPlayer(animal)->setIsCaught(true);
-								player->setCaughtAnimalId(animal);
-								player->setCaughtAnimal(true);
-								player->setHidden(false);
-								hideTile->setAnimalHiding(-1);
-							}
-						}
-						else {
-							if (player->getHidden())
-							{
-								player->setHidden(false);
-								hideTile->setAnimalHiding(-1);
-							}
-							else if (hideTile->checkHideTileEmpty())
-							{
-								//set hideTile full
-								hideTile->setAnimalHiding(iter->first);
-								//set animal to hidden
-								player->setHidden(true);
-							}
-						}
-					}
+					gameManager->hideEvent(playerID);
 				}
 				break;
 			}

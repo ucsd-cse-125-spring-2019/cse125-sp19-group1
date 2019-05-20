@@ -348,7 +348,7 @@ void GameManager::interactEvent(int id)
 
 		if (player->isChef())
 		{
-			swingAction(player);
+			swingAction(id);
 		}
 		else
 		{
@@ -439,8 +439,9 @@ void GameManager::interactEvent(int id)
 	}
 }
 
-void GameManager::swingAction(Player * player)
+void GameManager::swingAction(int id)
 {
+	Player * player = gameData->getPlayer(id);
 	Location loc = player->getLocation();
 
 	//drop off animal
@@ -510,4 +511,126 @@ void GameManager::swingAction(Player * player)
 void GameManager::togglePlayerReady(int id)
 {
 	gameData->getPlayer(id)->toggleReady();
+}
+
+bool GameManager::getAllPlayersReady()
+{
+	return allPlayersReady;
+}
+
+void GameManager::startCountdown()
+{
+	gameData->startCountdown();
+}
+
+void GameManager::releaseEvent(int id)
+{
+	if (Player * player = gameData->getPlayer(id))
+	{
+		if (player->getInteracting() ||
+			player->getIsCaught() ||
+			player->getHidden()) {
+			return;
+		}
+
+		Location loc = player->getLocation();
+
+		if (player->getInteracting()) {
+			double seconds = player->getInteractingTime(0);
+			if (seconds > gameData->getBoxTime()) {
+				std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
+				gameData->getAtlas()->updateBoxLayout(loc);
+				player->setInteracting(false);
+			}
+		}
+
+		if (player->getInteracting() &&
+			!player->isChef()) {
+			std::cout << "RELEASED SPACE" << std::endl;
+			player->setInteracting(false);
+		}
+
+
+		if (player->getOpeningGate() &&
+			!player->isChef() && gameData->getAtlas()->hasGate(loc))
+		{
+			GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+			if (!gateTile->isOpen())
+			{
+				std::cout << "RELEASED SPACE" << std::endl;
+				player->setOpeningGate(false);
+
+				//update progress of gate 
+				double seconds = player->getInteractingTime(0);
+				gateTile->constructGate(seconds);
+			}
+		}
+	}
+}
+
+void GameManager::dropEvent(int id)
+{
+	if (Player * player = gameData->getPlayer(id))
+	{
+		if (player->getInteracting() ||
+			player->getIsCaught() ||
+			player->getHidden()) {
+			return;
+		}
+
+		std::cout << "facing:" << static_cast<int>(player->getFacingDirection()) << std::endl;
+		Location loc = player->getLocation();
+
+		// PLayer cannot drop item if there is an item already on the current tile
+		if (!(gameData->getAtlas()->tileHasItem(loc)))
+		{
+			ItemName itemName = player->getInventory();
+			gameData->getAtlas()->updateTileItem(loc, itemName);
+			player->setInventory(ItemName::EMPTY);
+
+			gameData->getAtlas()->updateDroppedItem(itemName, loc);
+
+		}
+	}
+}
+void GameManager::hideEvent(int id)
+{
+	if (Player * player = gameData->getPlayer(id))
+	{
+		if (player->getInteracting() ||
+			player->getIsCaught()) {
+			return;
+		}
+
+		Location loc = player->getLocation();
+		if (!(gameData->getAtlas()->hasHide(loc))) { return; }
+
+		HideTile * hideTile = (HideTile *)(gameData->getAtlas()->getTileAt(loc));
+
+		if (player->isChef()) {
+			if (!hideTile->checkHideTileEmpty())
+			{
+				int animal = hideTile->getAnimalHiding();
+				gameData->getPlayer(animal)->setIsCaught(true);
+				player->setCaughtAnimalId(animal);
+				player->setCaughtAnimal(true);
+				player->setHidden(false);
+				hideTile->setAnimalHiding(-1);
+			}
+		}
+		else {
+			if (player->getHidden())
+			{
+				player->setHidden(false);
+				hideTile->setAnimalHiding(-1);
+			}
+			else if (hideTile->checkHideTileEmpty())
+			{
+				//set hideTile full
+				hideTile->setAnimalHiding(id);
+				//set animal to hidden
+				player->setHidden(true);
+			}
+		}
+	}
 }

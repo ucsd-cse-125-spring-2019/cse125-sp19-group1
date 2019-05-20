@@ -23,6 +23,7 @@ public:
 	void resetGame();
 
 	bool gameHasStarted();
+	bool getAllPlayersReady();
 	bool gameIsOver();
 
 	std::string encodeGameData(bool newPlayerInit);
@@ -33,9 +34,13 @@ public:
 	void update();
 
 	bool isCountingDown();
+	void startCountdown();
 
 	void interactEvent(int id);
-	void swingAction(Player * player);
+	void releaseEvent(int id);
+	void dropEvent(int id);
+	void hideEvent(int id);
+	void swingAction(int id);
 protected:
 	GameData * gameData;
 	bool gameStarted = true;
@@ -44,5 +49,5 @@ protected:
 	bool moveForward, moveBackward, moveLeft, moveRight;
 	unsigned int SPEED = 2;
 	bool chefWin = false;
-	bool animalWin = false;
+	bool animalWin = false;	
 };
