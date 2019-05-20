@@ -101,6 +101,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\network\ServerGame - Copy.cpp">
+	<Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UICanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -238,6 +241,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\ObjectTile.h">
+	<Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UICanvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\GameManager.h">

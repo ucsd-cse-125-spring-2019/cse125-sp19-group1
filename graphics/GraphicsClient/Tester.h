@@ -18,6 +18,11 @@
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
+#define CHEF_NAME_SHORT "Cheoffrey"
+#define CHEF_NAME_LONG "Chef Cheoffrey"
+#define GAME_NAME_SHORT "Restaurant Run"
+#define GAME_NAME_LONG "Chef Cheoffrey's Restaurant Run"
+
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
 
@@ -50,9 +55,6 @@
 #define RACCOON_FOG_DISTANCE 160
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
-
-#define CANVAS_MDL_PATH     (MODELS_PATH "canvas.fbx")
-#define CANVAS_TEX_PATH		(TEXTURES_PATH "canvas.ppm");
 
 // function declarations
 glm::vec3 directionBitmaskToVector(int bitmask);
