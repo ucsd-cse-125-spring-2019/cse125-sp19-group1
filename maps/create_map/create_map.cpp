@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstdint>
+#include <cmath>
 #include <string>
 #include "lodepng/lodepng.h"
 #include "../../graphics/GraphicsClient/ItemModelType.h"
@@ -127,6 +128,15 @@ bool decodePixel(MapColorCode &colorCode, const unsigned char *pixelBytes) {
 
 	return false;
 }
+
+#if !defined(_WIN32) && !defined(WIN32) && !defined(fopen_s)
+errno_t fopen_s(FILE **openedFile, const char *name, const char *mode) {
+	if (!openedFile || !name || !mode) return EINVAL;
+	FILE *f = fopen(name, mode);
+	*openedFile = f;
+	return f ? 0 : errno;
+}
+#endif
 
 // filename must be preceeded by a path separator character
 static int writeFile(string &folderName, const char *filename, vector<uint8_t> &map, unsigned mapWidth, unsigned mapHeight) {
@@ -335,7 +345,11 @@ int main(int argc, char *argv[]) {
 		if (count <= 0) {
 			cout << "WARNING: " << (boolMap.filename + 1) << " is all zeros" << endl;
 
-			unsigned needle[3] = { (boolMap.colorCode >> 16) & 0xFF, (boolMap.colorCode >> 8) & 0xFF , boolMap.colorCode & 0xFF };
+			unsigned needle[3] = { 
+				(boolMap.colorCode >> 16) & 0xFFu, 
+				(boolMap.colorCode >> 8) & 0xFFu, 
+				boolMap.colorCode & 0xFFu
+			};
 			int pixCount = 0;
 			for (size_t i = 0; i < image.size(); i += 4) {
 				unsigned haystack[3] = {image[i], image[i+1], image[i+2]};
