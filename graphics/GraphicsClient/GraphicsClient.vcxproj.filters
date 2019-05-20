@@ -97,6 +97,9 @@
     <ClCompile Include="Tokenizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UICanvas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -232,6 +235,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\ObjectTile.h">
+	<Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UICanvas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

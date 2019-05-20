@@ -130,11 +130,11 @@ void main()
   //res = OverrideUI(res);
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
-  if(fract(fragPos.x / 20)  < 0.1 && fract(fragPos.z / 20) < 0.1) {
+  /*if(fract(fragPos.x / 20)  < 0.1 && fract(fragPos.z / 20) < 0.1) {
     color = vec4(0.0,1.0,0.0,1.0);
   }
-  else {
+  else {*/
   color = vec4(res.x * visibility, res.y * visibility, res.z * visibility, transparency);
-  }
+  //}
   //color = texColor;
 }
