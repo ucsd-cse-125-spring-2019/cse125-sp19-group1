@@ -333,6 +333,89 @@ void reloadPlayers()
 #endif
 }
 
+void resetEnvObjs()
+{
+	const auto &tileLayout = client->getGameData()->clientTileLayout;
+
+	if (!tileLayout.size()) {
+		cerr << "reloadMap(): map is empty\n";
+		return;
+	}
+
+	if (envObjsTransform == nullptr) {
+		envObjsTransform = new Transform(glm::mat4(1.f));
+		root->addChild(envObjsTransform);
+	}
+
+	uint8_t objIdx = 0;
+	envObjs.resize(floorArray.size());
+	for (size_t z = 0; z < envObjs.size(); z++) {
+		auto &row = envObjs[z];
+		row.resize(floorArray[z].size());
+		for (size_t x = 0; x < row.size(); x++) {
+			const auto &tile = tileLayout[z][x];
+
+#ifdef ENV_OBJS_DEMO
+			if (objIdx == 0) objIdx = 1;
+			else if (++objIdx >= itemModels.size()) objIdx = 1;
+#else
+			switch (tile->getTileType())
+			{
+			case TileType::JAIL:
+			{
+				objIdx = static_cast<uint8_t>(ItemModelType::jail);
+				break;
+			}
+			case TileType::BOX:
+			{
+				BoxTile * boxTile = (BoxTile *)tile;
+				objIdx = boxTile->hasBox() ? static_cast<uint8_t>(ItemModelType::box) : 0;
+				break;
+			}
+			default:
+				objIdx = envObjsMap[z][x];
+				break;
+			}
+			
+			if (objIdx == 0) {
+				row[x] = nullptr;
+				continue;
+			}
+#endif
+
+			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
+
+
+			// Try to turn the object away from the wall
+			float angle = 0.f;
+			auto wall = tile->getWall();
+			if (wall & DirectionBitmask::southSide) {
+				angle = glm::pi<float>();
+			}
+			else if (wall & DirectionBitmask::westSide) {
+				angle = glm::half_pi<float>();
+			}
+			else if (wall & DirectionBitmask::eastSide) {
+				angle = -glm::half_pi<float>();
+			}
+
+			const auto &settings = *(itemModels[objIdx].settings);
+			glm::vec3 tileTranslate;
+			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
+			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
+			glm::vec3 modelTranslate = settings.translate;
+			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
+			row[x]->addChild(itemModels[objIdx].geometry);
+			envObjsTransform->addChild(row[x]);
+		}
+	}
+}
+
 void reloadMap()
 {
 	deallocFloor();
@@ -351,11 +434,6 @@ void reloadMap()
 		const auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(TILE_SCALE));
 		floorTransform = new Transform(glm::translate(scale, transAmount));
 		root->addChild(floorTransform);
-	}
-
-	if (envObjsTransform == nullptr) {
-		envObjsTransform = new Transform(glm::mat4(1.f));
-		root->addChild(envObjsTransform);
 	}
 
 	// Floor tiles
@@ -463,60 +541,7 @@ void reloadMap()
 		}
 	}
 
-	uint8_t objIdx = 0;
-	envObjs.resize(floorArray.size());
-	for (size_t z = 0; z < envObjs.size(); z++) {
-		auto &row = envObjs[z];
-		row.resize(floorArray[z].size());
-		for (size_t x = 0; x < row.size(); x++) {
-			const auto &tile = tileLayout[z][x];
-
-#ifdef ENV_OBJS_DEMO
-			if (objIdx == 0) objIdx = 1;
-			else if (++objIdx >= itemModels.size()) objIdx = 1;
-#else
-			objIdx = envObjsMap[z][x];
-			if (tile->getTileType() == TileType::JAIL) {
-				objIdx = static_cast<uint8_t>(ItemModelType::jail);
-			}
-
-			if (objIdx == 0) {
-				row[x] = nullptr;
-				continue;
-			}
-#endif
-
-			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
-			
-
-			// Try to turn the object away from the wall
-			float angle = 0.f;
-			auto wall = tile->getWall();
-			if (wall & DirectionBitmask::southSide) {
-				angle = glm::pi<float>();
-			}
-			else if (wall & DirectionBitmask::westSide) {
-				angle = glm::half_pi<float>();
-			}
-			else if (wall & DirectionBitmask::eastSide) {
-				angle = -glm::half_pi<float>();
-			}
-
-			const auto &settings = *(itemModels[objIdx].settings);
-			glm::vec3 tileTranslate;
-			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
-			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
-			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
-			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
-			glm::vec3 modelTranslate = settings.translate;
-			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
-			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
-			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
-			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
-			row[x]->addChild(itemModels[objIdx].geometry);
-			envObjsTransform->addChild(row[x]);
-		}
-	}
+	resetEnvObjs();
 }
 
 void deallocFloor()
