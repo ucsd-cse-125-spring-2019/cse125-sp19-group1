@@ -35,7 +35,7 @@ private:
     // The ServerNetwork object 
     ServerNetwork* network;
 
-	Atlas* atlas;
+	//Atlas* atlas;
 
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
@@ -44,4 +44,7 @@ private:
 	bool gameStarted;
 	bool allPlayersReady;
 	bool initCharacters;
+
+	bool moveForward, moveBackward, moveLeft, moveRight;
+
 };

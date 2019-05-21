@@ -77,6 +77,7 @@ void ServerGame::receiveFromClients()
 
 			continue;
 		}
+		moveForward = moveBackward = moveLeft = moveRight = false;
 
 		unsigned int i = 0;
 		while (i < (unsigned int)data_length)
@@ -254,45 +255,31 @@ void ServerGame::receiveFromClients()
 										player->setActionStartTime();
 
 										chefWin = true;
-										std::map<unsigned int, SOCKET>::iterator iter2;
-										for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
+										for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
 										{
-											if (iter2 == iter || gameData->getPlayer(iter2->first)->isChef())
+											if (iter2->first == iter->first)
 											{
-												if (!gameData->getPlayer(iter2->first)->isChef() &&
-													!gameData->getPlayer(iter2->first)->getIsCaught())
-												{
-													chefWin = false;
-												}
 												continue;
 											}
-											Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-											//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
+
+											Location tLoc = iter2->second->getLocation();
 											if (player->inRange(loc, tLoc) &&
-												!gameData->getPlayer(iter2->first)->getIsCaught())
+												!iter2->second->getIsCaught())
 											{
 												player->setCaughtAnimal(true);
 												player->setCaughtAnimalId(iter2->first);
-												gameData->getPlayer(iter2->first)->setIsCaught(true);
+												iter2->second->setIsCaught(true);
+
+												//update animal's location to chef's location
+												iter2->second->setLocation(player->getLocation());
 											}
-											continue;
-										}
-										Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-										//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-										if (player->inRange(loc, tLoc) &&
-											!gameData->getPlayer(iter2->first)->getIsCaught())
-										{
-											player->setCaughtAnimal(true);
-											player->setCaughtAnimalId(iter2->first);
-											gameData->getPlayer(iter2->first)->setIsCaught(true);
 
-											//update animal's location to somewhere off map
-											gameData->getPlayer(iter2->first)->setLocation(-100, -100, -100);
-										}
+											if (!iter2->second->isChef() &&
+												!iter2->second->getIsCaught())
+											{
+												chefWin = false;
+											}
 
-										if (!gameData->getPlayer(iter2->first)->getIsCaught())
-										{
-											chefWin = false;
 										}
 									}
 									if (chefWin)
@@ -305,12 +292,25 @@ void ServerGame::receiveFromClients()
 							{
 								Location loc = player->getLocation();
 								ItemModelType item = gameData->getAtlas()->getTileItem(loc);
+								Direction dir = player->getFacingDirection();
+								ObjectTile * objectTile = gameData->getAdjacentObjectTile(loc, dir);
 
-								if (item != ItemModelType::EMPTY && player->getInventory() == ItemModelType::EMPTY)
+								if (player->getInventory() == ItemModelType::EMPTY && (item != ItemModelType::EMPTY || objectTile && objectTile->getItem() == ItemModelType::cake))
 								{
-									player->setInventory(item);
-									gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
+									
+									if (objectTile && objectTile->getItem() == ItemModelType::cake)
+									{
+										std::cout << "table has cake!" << std::endl;
+										player->setInventory(objectTile->getItem());
+										objectTile->setItem(ItemModelType::EMPTY);
 
+
+									}
+									else if (item != ItemModelType::EMPTY)
+									{
+										player->setInventory(item);
+										gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
+									}
 								}
 								//else if (gameData->getAtlas()->hasGate(loc))
 								else if (GateTile * gateTile = gameData->getGateTile(loc))
@@ -331,7 +331,7 @@ void ServerGame::receiveFromClients()
 									}
 									if (gateTile->hasAllKeys() && gateTile->isOpen())
 									{
-										if (static_cast<Key>(player->getInventory()) == Key::CAKE)
+										if (player->getInventory() == ItemModelType::cake)
 										{
 											animalWin = true;
 											std::cout << "ANIMAL WIN" << std::endl;
@@ -389,8 +389,7 @@ void ServerGame::receiveFromClients()
 
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
-						if (player->getInteracting() ||
-							player->getIsCaught() ||
+						if (player->getIsCaught() ||
 							player->getHidden()) {
 							break;
 						}
@@ -446,7 +445,7 @@ void ServerGame::receiveFromClients()
 							break;
 						}
 
-
+						std::cout << "facing:" << static_cast<int>(player->getFacingDirection()) << std::endl;
 						Location loc = player->getLocation();
 
 						// PLayer cannot drop item if there is an item already on the current tile
@@ -523,6 +522,29 @@ void ServerGame::receiveFromClients()
 				printf("error in packet types\n");
 				break;
 			}
+		}
+		if (Player * player = gameData->getPlayer(iter->first))
+		{
+			int sum = 0;
+			if (moveForward)
+			{
+				sum += 5;
+			}
+			if (moveBackward)
+			{
+				sum -= 5;
+			}
+			if (moveRight)
+			{
+				sum += 1;
+			}
+			if (moveLeft)
+			{
+				sum -= 1;
+			}
+			
+			Direction facingDirection = static_cast<Direction>(sum);
+			player->setFacingDirection(facingDirection);
 		}
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
@@ -652,29 +674,40 @@ void ServerGame::initNewClient()
 
 void ServerGame::updateRightEvent(int id)
 {
+	moveRight = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+	//gameData->getPlayer(id)->setFacingDir(2);
+
 	updatePlayerCollision(id, 0);
 }
 
 void ServerGame::updateBackwardEvent(int id)
 {
+	moveBackward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+	//gameData->getPlayer(id)->setFacingDir(3);
+
 	updatePlayerCollision(id, 1);
 }
 
 void ServerGame::updateForwardEvent(int id)
 {
+	moveForward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+	//gameData->getPlayer(id)->setFacingDir(1);
 	updatePlayerCollision(id, 2);
 }
 
 void ServerGame::updateLeftEvent(int id)
 {
+	moveLeft = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+	//gameData->getPlayer(id)->setFacingDir(4);
+
 	updatePlayerCollision(id, 3);
 }
 
@@ -717,6 +750,15 @@ void ServerGame::updateHeight(int id)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	gameData->getPlayer(id)->setLocation(x, y, z);
+
+	if (gameData->getPlayer(id)->isChef())
+	{
+		if (gameData->getPlayer(id)->getCaughtAnimal())
+		{
+			int animalId = gameData->getPlayer(id)->getCaughtAnimalId();
+			gameData->getPlayer(animalId)->setLocation(gameData->getPlayer(id)->getLocation());
+		}
+	}
 }
 
 void ServerGame::updatePlayerCollision(int id, int dir) 
@@ -773,9 +815,13 @@ void ServerGame::updateCollision(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
 	//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-	gameData->getAtlas()->detectCollision(loc);
+	gameData->getAtlas()->detectWallCollision(loc);
 	//gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 	gameData->getPlayer(id)->setLocation(loc);
+	gameData->getAtlas()->detectObjectCollision(loc);
+	gameData->getPlayer(id)->setLocation(loc);
+
+
 }
 
 void ServerGame::resetGame() 

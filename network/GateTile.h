@@ -2,8 +2,8 @@
 #include "Tile.h"
 #include <vector>
 
-#define TOTAL_CONSTRUCT_TIME 60
-enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE };
+#define TOTAL_CONSTRUCT_TIME 30
+enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE=100 };
 
 class GateTile : public Tile
 {
@@ -11,12 +11,12 @@ public:
 	
 	// Default constructor
 	GateTile(std::vector<Key> aKeys = {}, int num = 0, int aWallLayout = 0, int aHeight = 0) :
-		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0f), validKeys(aKeys) {}
+		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0), validKeys(aKeys) {}
 
 	// Getters
 	int			getGateNum() { return gateNum; }
 	int			getKeyProgress() { return keyProgress; }
-	float		getCurrentConstructTime() { return currentConstructTime; }
+	double		getCurrentConstructTime() { return currentConstructTime; }
 	bool		hasAllKeys() { return keyProgress == 3; }
 	bool		isOpen() { return currentConstructTime >= TOTAL_CONSTRUCT_TIME; }
 
