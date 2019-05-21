@@ -37,18 +37,15 @@ Keyframe ** AnimationChannel::getKeyframes() {
 void AnimationChannel::SetTransform(float currTime) {
 	//switch keyframes if current time surpasses next keyframe
 	if (currTime > keyframes[currKeyframe + 1]->getTime()) {
-		if (currKeyframe + 1 >= this->getNumKeyframes()) {
-			currKeyframe = 0;
-		}
-		else {
+		if (currKeyframe + 1 < this->getNumKeyframes()) {
 			currKeyframe += 1;
+			Keyframe * key = keyframes[currKeyframe];
+			glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), key->getScaling());
+			glm::quat rotationQuat = glm::quat(key->getRotation());
+			glm::mat4 rotationMatrix = rotationQuat.operator glm::mat<4, 4, float, glm::packed_highp>();
+			glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), key->getPosition());
+			transform = translationMatrix * rotationMatrix * scalingMatrix;
 		}
-		Keyframe * key = keyframes[currKeyframe];
-		glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), key->getScaling());
-		glm::quat rotationQuat = glm::quat(key->getRotation());
-		glm::mat4 rotationMatrix = rotationQuat.operator glm::mat<4, 4, float, glm::packed_highp>();
-		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), key->getPosition());
-		transform = translationMatrix * rotationMatrix * scalingMatrix;
 	}
 }
 
@@ -57,7 +54,7 @@ glm::mat4 AnimationChannel::GetTransform() {
 }
 
 void AnimationChannel::ToNextKeyframe() {
-	if (currKeyframe + 1 <= this->getNumKeyframes()) {
+	if (currKeyframe + 1 < this->getNumKeyframes()) {
 		currKeyframe += 1;
 		Keyframe * key = keyframes[currKeyframe];
 		glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), key->getScaling());
