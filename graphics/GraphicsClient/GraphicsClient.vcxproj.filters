@@ -1,274 +1,91 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Animation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationChannel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationPlayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="animloader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\Atlas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Bone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ClientGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ClientNetwork.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DirLight.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FBXObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FogGenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\GameData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Geometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Keyframe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MeshEntry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\NetworkServices.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Node.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="objloader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ServerGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ServerNetwork.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Skeleton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\StringParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tester.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="textureloader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\Tile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UIObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\Walls.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tokenizer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-      <Filter>Source Files</Filter>
-    <ClCompile Include="SoundSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UICanvas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClCompile Include="..\..\network\Atlas.cpp" />
+    <ClCompile Include="..\..\network\ClientGame.cpp" />
+    <ClCompile Include="..\..\network\ClientNetwork.cpp" />
+    <ClCompile Include="..\..\network\GameData.cpp" />
+    <ClCompile Include="..\..\network\NetworkServices.cpp" />
+    <ClCompile Include="..\..\network\Player.cpp" />
+    <ClCompile Include="..\..\network\ServerGame.cpp" />
+    <ClCompile Include="..\..\network\ServerNetwork.cpp" />
+    <ClCompile Include="..\..\network\StringParser.cpp" />
+    <ClCompile Include="..\..\network\Tile.cpp" />
+    <ClCompile Include="..\..\network\Walls.cpp" />
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="AnimationChannel.cpp" />
+    <ClCompile Include="AnimationPlayer.cpp" />
+    <ClCompile Include="animloader.cpp" />
+    <ClCompile Include="DirLight.cpp" />
+    <ClCompile Include="FBXObject.cpp" />
+    <ClCompile Include="Bone.cpp" />
+    <ClCompile Include="FogGenerator.cpp" />
+    <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="Keyframe.cpp" />
+    <ClCompile Include="MeshEntry.cpp" />
+    <ClCompile Include="Node.cpp" />
+    <ClCompile Include="objloader.cpp" />
+    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="Skeleton.cpp" />
+    <ClCompile Include="SoundSystem.cpp" />
+    <ClCompile Include="Tester.cpp" />
+    <ClCompile Include="textureloader.cpp" />
+    <ClCompile Include="Tokenizer.cpp" />
+    <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="UIObject.cpp" />
+    <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="UICanvas.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Animation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationChannel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="animloader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Atlas.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\BoxTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Bone.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\ClientGame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\ClientNetwork.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Core.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DirLight.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FBXObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="FogGenerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\GameData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Gate.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\GateTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Geometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Item.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Keyframe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Location.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MeshEntry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\NetworkData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\NetworkServices.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Node.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="objloader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Player.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\RampTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\ServerGame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\ServerNetwork.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Skeleton.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\StringParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tester.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textureloader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Tile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UIObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Walls.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\JailTile.h">
-	  <Filter>Header Files</Filter>
-	</ClInclude>
-    <ClInclude Include="..\..\network\Chef.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Player2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\Player3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Tokenizer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-<<<<<<< HEAD
-    <ClInclude Include="SoundSystem.h">
-=======
-    <ClInclude Include="UICanvas.h">
->>>>>>> master
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="..\..\network\Atlas.h" />
+    <ClInclude Include="..\..\network\BoxTile.h" />
+    <ClInclude Include="..\..\network\ClientGame.h" />
+    <ClInclude Include="..\..\network\ClientNetwork.h" />
+    <ClInclude Include="..\..\network\GameData.h" />
+    <ClInclude Include="..\..\network\Gate.h" />
+    <ClInclude Include="..\..\network\GateTile.h" />
+    <ClInclude Include="..\..\network\Item.h" />
+    <ClInclude Include="..\..\network\JailTile.h" />
+    <ClInclude Include="..\..\network\Location.h" />
+    <ClInclude Include="..\..\network\NetworkData.h" />
+    <ClInclude Include="..\..\network\NetworkServices.h" />
+    <ClInclude Include="..\..\network\Player.h" />
+    <ClInclude Include="..\..\network\RampTile.h" />
+    <ClInclude Include="..\..\network\ServerGame.h" />
+    <ClInclude Include="..\..\network\ServerNetwork.h" />
+    <ClInclude Include="..\..\network\StringParser.h" />
+    <ClInclude Include="..\..\network\Tile.h" />
+    <ClInclude Include="..\..\network\Walls.h" />
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="AnimationChannel.h" />
+    <ClInclude Include="AnimationPlayer.h" />
+    <ClInclude Include="animloader.h" />
+    <ClInclude Include="Core.h" />
+    <ClInclude Include="DirLight.h" />
+    <ClInclude Include="FBXObject.h" />
+    <ClInclude Include="Bone.h" />
+    <ClInclude Include="FogGenerator.h" />
+    <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Keyframe.h" />
+    <ClInclude Include="MeshEntry.h" />
+    <ClInclude Include="Node.h" />
+    <ClInclude Include="objloader.h" />
+    <ClInclude Include="shader.h" />
+    <ClInclude Include="Skeleton.h" />
+    <ClInclude Include="SoundSystem.h" />
+    <ClInclude Include="Tester.h" />
+    <ClInclude Include="textureloader.h" />
+    <ClInclude Include="Tokenizer.h" />
+    <ClInclude Include="Transform.h" />
+    <ClInclude Include="UIObject.h" />
+    <ClInclude Include="Vertex.h" />
+    <ClInclude Include="UICanvas.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="obj_shader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="obj_shader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="packages.config">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="ui_shader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="ui_shader.vert">
-      <Filter>Source Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{13915da2-125a-4e66-8db1-9eae4d4187eb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{910f5ab9-9595-4144-a970-51cd56b09671}</UniqueIdentifier>
-    </Filter>
+    <None Include="obj_shader.frag" />
+    <None Include="obj_shader.vert" />
+    <None Include="packages.config" />
+    <None Include="ui_shader.frag" />
+    <None Include="ui_shader.vert" />
   </ItemGroup>
 </Project>
