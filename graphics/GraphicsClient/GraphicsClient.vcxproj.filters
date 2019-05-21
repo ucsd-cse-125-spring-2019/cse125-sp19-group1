@@ -97,6 +97,10 @@
     <ClCompile Include="Tokenizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+      <Filter>Source Files</Filter>
+    <ClCompile Include="SoundSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="UICanvas.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -234,7 +238,11 @@
     <ClInclude Include="Tokenizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+<<<<<<< HEAD
+    <ClInclude Include="SoundSystem.h">
+=======
     <ClInclude Include="UICanvas.h">
+>>>>>>> master
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
