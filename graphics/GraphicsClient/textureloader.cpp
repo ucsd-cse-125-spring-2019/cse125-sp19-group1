@@ -68,7 +68,7 @@ GLuint loadTexture(const char * textureName)
 	glGenTextures(1, &texture[0]);
 
 	const char * fileType = strrchr(textureName, '.');
-	if (fileType == nullptr || *fileType != '.' || !strcmp(fileType + 1, "ppm")) {
+	if (fileType == nullptr || !strcmp(fileType, ".ppm")) {
 		int twidth, theight;   // texture width/height [pixels]
 		unsigned char* tdata;  // texture pixel data
 							   // Load image file
