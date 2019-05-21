@@ -53,11 +53,11 @@ public:
 	std::vector<std::vector<Tile *>> getTileLayout();
 
 	int	getBoxTime() { return timeToOpenBox; }
-	int getChefSwingTime() { return timeToSwingNet; }
+	double getChefSwingTime() { return timeToSwingNet; }
 	double getOpenJailTime() { return timeToOpenJail; }
 
 	int timeToOpenBox = 2; //in seconds
-	int timeToSwingNet = 0.75;
+	double timeToSwingNet = 0.5;
 	double timeToOpenJail = 1.5;
 
 	int	chefAnger = 0;
