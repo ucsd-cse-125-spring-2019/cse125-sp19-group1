@@ -10,7 +10,7 @@
 
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
-//#define ENV_OBJS_DEMO
+#define ENV_OBJS_DEMO
 
 #define TILE_HEIGHT_ADJUST -2.f
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
@@ -31,49 +31,69 @@ const char* window_title = GAME_NAME_SHORT;
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
 
+static const struct PlayerModelSettings {
+	const char *modelPath;       // filesystem path to a model geometry file
+	const char *texturePath;     // filesystem path to a texture file
+	const char *name;            // name for use in debug messages, maybe user-visible too
+	ModelType modelType;         // A unique ID, like ModelType::CHEF
+	bool attachSkel;             // true if animated with a skeleton
+	float scale;                 // scale adjustment
+	glm::vec3 translate;         // position adjustment
+} playerModelSettings[] = {
+	// modelPath         texturePath        name              modelType        attachSkel scale   translate
+	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
+	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
+	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
+	{ DOG_MDL_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     false,  1.f,    glm::vec3(0.f) },
+};
+
+#define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".ppm"
+#define MDL_SAME_TEX(x) MDL_AND_TEX(x, x)
+
 static const struct ItemModelSettings {
-	const char *modelPath;
-	const char *texturePath;
-	const char *name;
-	ItemModelType id;
-	float scale;
-	glm::vec3 translate;
+	const char *modelPath;       // filesystem path to a model geometry file
+	const char *texturePath;     // filesystem path to a texture file
+	const char *name;            // name for use in debug messages, maybe user-visible too
+	ItemModelType id;            // A unique ID, like ItemModelType::apple
+	float scale;                 // scale adjustment
+	glm::vec3 translate;         // position adjustment
 } itemModelSettings[] = {
-	{ MODELS_PATH "apple.fbx", TEXTURES_PATH "apple.ppm", "apple", ItemModelType::apple, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananagreen.ppm", "green banana", ItemModelType::bananaGreen, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaperfect.ppm", "perfect banana", ItemModelType::bananaPerfect, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "box.fbx", TEXTURES_PATH "box.ppm", "box", ItemModelType::box, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "cake.fbx", TEXTURES_PATH "cake.ppm", "cake", ItemModelType::cake, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas, 3.f, glm::vec3(0.f) },
-	{ MODELS_PATH "cookingpot.fbx", TEXTURES_PATH "cookingpot.ppm", "cooking pot", ItemModelType::cookingPot, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "door.fbx", TEXTURES_PATH "door.ppm", "door", ItemModelType::door, 1.f, glm::vec3(0.f, 0.0f, -0.45f) },
-	{ MODELS_PATH "fork.fbx", TEXTURES_PATH "fork.ppm", "fork", ItemModelType::fork, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "garbagebag.fbx", TEXTURES_PATH "garbagebag.ppm", "garbage bag", ItemModelType::garbageBag, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "jail.fbx", TEXTURES_PATH "jail.ppm", "jail", ItemModelType::jail, 0.5f, glm::vec3(0.f) },
-	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key1.ppm", "key #1", ItemModelType::key1, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key2.ppm", "key #2", ItemModelType::key2, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key3.ppm", "key #3", ItemModelType::key3, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop.ppm", "key drop", ItemModelType::keyDrop, 2.f, glm::vec3(0.f) },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_bathroom.ppm", "bathroom key drop", ItemModelType::keyDropBathroom, 2.f, glm::vec3(0.f) },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_frontexit.ppm", "front exit key drop", ItemModelType::keyDropFrontExit, 2.f, glm::vec3(0.f) },
-	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_vent.ppm", "vent key drop", ItemModelType::keyDropVent, 2.f, glm::vec3(0.f) },
-	{ MODELS_PATH "knife.fbx", TEXTURES_PATH "knife.ppm", "knife", ItemModelType::knife, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "orange.fbx", TEXTURES_PATH "orange.ppm", "orange fruit", ItemModelType::orange, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "painting.fbx", TEXTURES_PATH "painting.ppm", "wall painting", ItemModelType::painting, 3.f, glm::vec3(0.f, 0.5f, -0.4f) },
-	{ MODELS_PATH "pear.fbx", TEXTURES_PATH "pear.ppm", "pear", ItemModelType::pear, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "plate.fbx", TEXTURES_PATH "plate.ppm", "plate", ItemModelType::plate, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "plunger.fbx", TEXTURES_PATH "plunger.ppm", "plunger", ItemModelType::plunger, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "restaurantchair.fbx", TEXTURES_PATH "restaurantchair.ppm", "restaurant chair", ItemModelType::restaurantChair, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "rope.fbx", TEXTURES_PATH "rope.ppm", "rope", ItemModelType::rope, 1.f, glm::vec3(0.f) },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver1.ppm", "screwdriver #1", ItemModelType::screwdriver1, 0.225f, glm::vec3(0.f) },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver2.ppm", "screwdriver #2", ItemModelType::screwdriver2, 0.225f, glm::vec3(0.f) },
-	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver3.ppm", "screwdriver #3", ItemModelType::screwdriver3, 0.225f, glm::vec3(0.f) },
-	{ MODELS_PATH "stove.fbx", TEXTURES_PATH "stove.ppm", "stove", ItemModelType::stove, 1.45f, glm::vec3(0.f, 0.f, -0.225f) },
-	{ MODELS_PATH "toilet.fbx", TEXTURES_PATH "toilet.ppm", "toilet", ItemModelType::toilet, 0.65f, glm::vec3(0.f) },
-	{ MODELS_PATH "toiletpaper.fbx", TEXTURES_PATH "toiletpaper.ppm", "toilet paper", ItemModelType::toiletPaper, 0.9f, glm::vec3(0.f) },
-	{ MODELS_PATH "vent.fbx", TEXTURES_PATH "vent.ppm", "vent", ItemModelType::vent, 3.f, glm::vec3(0.f, 0.5f, -0.47f) },
-	{ MODELS_PATH "window.fbx", TEXTURES_PATH "window.ppm", "window", ItemModelType::window, 1.75f, glm::vec3(0.f, 0.5f, -0.4f) },
+	// model and texture paths                      name                    id                               scale  translate
+	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,               1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,              1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("canvas"),                       "canvas",               ItemModelType::canvas,            3.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f) },
+	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.5f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,              1.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,              1.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,              1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("keydrop"),                      "key drop",             ItemModelType::keyDrop,           2.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,   2.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit,  2.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,       2.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,          3.f,  glm::vec3(0.f, 0.5f, -0.4f) },
+	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,           1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,   1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,              1.f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f) },
+	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,          0.65f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,              3.f,  glm::vec3(0.f, 0.5f, -0.47f) },
+	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,          1.75f,  glm::vec3(0.f, 0.5f, -0.4f) },
 };
 
 struct ItemModel {
@@ -90,8 +110,14 @@ glm::mat4 V; // V for view
 DirLight * light = nullptr;
 FogGenerator * fog = nullptr;
 
-FBXObject * playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
-Geometry * playerGeometry[NUM_PLAYER_MODEL_TYPES] = { nullptr };
+struct PlayerModel {
+	const PlayerModelSettings *settings;
+	FBXObject *object;
+	Geometry *geometry;
+	Transform *transform;
+};
+
+PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 
 FBXObject * tileModel = nullptr;
 FBXObject * wallModel = nullptr;
@@ -200,7 +226,7 @@ struct PlayerState {
 		else {
 			transform = new Transform(transformMat);
 		}
-		transform->addChild(playerGeometry[geometryIdx]);
+		transform->addChild(playerModels[geometryIdx].transform);
 	}
 };
 
@@ -615,26 +641,26 @@ void Init()
 	using namespace std::chrono;
 	auto modelLoadingStart = high_resolution_clock::now();
 	
-	cout << "\tloading " << "chef" << endl;
-	playerModels[CHEF_IDX    ] = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
-	
-	cout << "\tloading " << "raccoon" << endl;
-	playerModels[RACCOON_IDX ] = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
-	
-	cout << "\tloading " << "cat" << endl;
-	playerModels[CAT_IDX     ] = new FBXObject(CAT_DAE_PATH, CAT_TEX_PATH, true);
-	
-	cout << "\tloading " << "dog" << endl;
-	playerModels[DOG_IDX     ] = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
+	for (auto &setting : playerModelSettings) {
+		cout << "\tloading " << setting.name << endl;
 
+		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+
+		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+
+		model.settings = &setting;
+		model.object = new FBXObject(setting.modelPath, setting.texturePath, setting.attachSkel);
+		model.geometry = new Geometry(model.object, objShaderProgram);
+		model.transform = new Transform(transform);
+
+		model.transform->addChild(model.geometry);
+	}
+	
 	cout << "\tloading " << "tile" << endl;
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
 	
 	cout << "\tloading " << "wall" << endl;
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);	
-	for (unsigned i = 0; i < NUM_PLAYER_MODEL_TYPES; i++) {
-		playerGeometry[i] = new Geometry(playerModels[i], objShaderProgram);
-	}
 
 	uiCanvas = new UICanvas(uiShaderProgram);
 
@@ -700,16 +726,17 @@ void CleanUp() {
 	itemModels.clear();
 
 	for (auto &model : playerModels) {
-		if (model) {
-			delete model;
-			model = nullptr;
+		if (model.transform) {
+			delete model.transform;
+			model.transform = nullptr;
 		}
-	}
-
-	for (auto &geom : playerGeometry) {
-		if (geom) {
-			delete geom;
-
+		if (model.geometry) {
+			delete model.geometry;
+			model.geometry = nullptr;
+		}
+		if (model.object) {
+			delete model.object;
+			model.object = nullptr;
 		}
 	}
 
@@ -1006,8 +1033,8 @@ void IdleCallback()
 		server->update();
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 		
-		for (auto model : playerModels) {
-			model->Update();
+		for (auto &model : playerModels) {
+			model.object->Update();
 		}
 		uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
 		std::map<int, Player*> players = gameData->getAllPlayers();
@@ -1104,8 +1131,8 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
 
 		if (key == GLFW_KEY_A) {
-			for (auto model : playerModels) {
-				model->ToNextKeyframe();
+			for (auto &model : playerModels) {
+				model.object->ToNextKeyframe();
 			}
 		}
 
