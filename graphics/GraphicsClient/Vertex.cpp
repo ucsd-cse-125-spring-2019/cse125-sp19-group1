@@ -7,9 +7,9 @@ Vertex::Vertex(unsigned int newID, glm::vec3 * newPos, glm::vec3 * newNorm)
 	normal = glm::vec3(*newNorm);
 }
 
-void Vertex::AddWeight(int boneID, float boneWeight) {
+void Vertex::AddWeight(string boneName, float boneWeight) {
 	if (weights.size() < NUM_WEIGHTS)
-		weights.push_back(std::pair<int, float>(boneID, boneWeight));
+		weights.push_back(std::pair<string, float>(boneName, boneWeight));
 	else {
 		int lightestIndex = 0;
 		float lightestWeight = weights[0].second;
@@ -21,14 +21,14 @@ void Vertex::AddWeight(int boneID, float boneWeight) {
 		}
 		// replace the lightest weight if this weight is heavier
 		if (boneWeight > lightestWeight)
-			weights[lightestIndex] = std::pair<int, float>(boneID, boneWeight);
+			weights[lightestIndex] = std::pair<string, float>(boneName, boneWeight);
 	}
 }
 
 void Vertex::NormalizeWeights() {
 	// add dummy weights
 	while (weights.size() != NUM_WEIGHTS) {
-		weights.push_back(std::pair<int, float>(-1, 0.0f));
+		weights.push_back(std::pair<string, float>("", 0.0f));
 	}
 	float totalWeight = 0.0f;
 	for (int i = 0; i < weights.size(); i++)
@@ -39,7 +39,7 @@ void Vertex::NormalizeWeights() {
 	}
 }
 
-std::vector<std::pair<int, float>> * Vertex::GetWeights() {
+std::vector<std::pair<string, float>> * Vertex::GetWeights() {
 	return &weights;
 }
 
@@ -59,7 +59,7 @@ void Vertex::Print() {
 	std::cout << "for vertex (" << position[0] << ", " << position[1] << ", " << position[2] << "): ";
 	float total = 0;
 	for (int i = 0; i < weights.size(); i++) {
-		std::pair<int, float> currWeight = weights[i];
+		std::pair<string, float> currWeight = weights[i];
 		std::cout << currWeight.first << ", " << currWeight.second << "; ";
 		total += currWeight.second;
 	}

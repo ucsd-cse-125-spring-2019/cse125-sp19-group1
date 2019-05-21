@@ -112,7 +112,7 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 			Bone * skelBone = skel->GetBone(bone->mName.C_Str());
 			// add the weight to the Vertex that it is supposed to influence
 			if (vertexID < skelVertices->size() && skelBone != NULL)
-				(*skelVertices)[vertexID]->AddWeight(skelBone->GetID(), weight.mWeight);
+				(*skelVertices)[vertexID]->AddWeight(skelBone->GetName(), weight.mWeight);
 			else
 				std::cout << "Error loading the skeleton!" << std::endl;
 		}

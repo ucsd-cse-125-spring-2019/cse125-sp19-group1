@@ -33,6 +33,7 @@ in vec3 specular;
 in float shininess;
 in vec4 ShadowCoord;
 in vec2 UV;
+in vec4 weights;
 
 // You can output many things. The first vec4 type output determines the color of the fragment
 out vec4 color;

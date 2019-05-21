@@ -39,6 +39,8 @@ private:
 	glm::vec3 default_spec = glm::vec3(0.118281f, 0.085802f, 0.066065f);
 	float default_shininess =  0.5f;
 
+	float animTimer;
+
 public:
 	// creating. destroying, and debugging
 	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel);
@@ -73,6 +75,7 @@ public:
 	void SetDepthTest(bool depthTestEnabled);
 
 	void ToNextKeyframe();
+	void UpdateSkin();
 	void LoadMatrices(const char * path);
 };
 

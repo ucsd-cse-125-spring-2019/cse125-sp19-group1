@@ -44,9 +44,9 @@ void main()
 {
   // calculating effect of bones, if necessary
   mat4 M = mat4(1.0f);
-  if (isAnimated == 1) {
-    M = (weightValues.x * bones[weightIDs.x]) + (weightValues.y * bones[weightIDs.y]) + (weightValues.z * bones[weightIDs.z]) + (weightValues.w * bones[weightIDs.w]);
-  }
+  //if (isAnimated == 1) {
+    //M = (weightValues.x * bones[weightIDs.x]) + (weightValues.y * bones[weightIDs.y]) + (weightValues.z * bones[weightIDs.z]) + (weightValues.w * bones[weightIDs.w]);
+  //}
 
   // OpenGL maintains the D matrix so you only need to multiply by P, V (aka C inverse), and M
   gl_Position = projection *  modelview * M * vec4(position.x, position.y, position.z, 1.0);
