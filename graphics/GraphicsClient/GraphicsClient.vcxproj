@@ -150,6 +150,7 @@
     <ClInclude Include="..\..\network\StringParser.h" />
     <ClInclude Include="..\..\network\Tile.h" />
     <ClInclude Include="..\..\network\Walls.h" />
+    <ClInclude Include="AbstractGraphicsEngine.h" />
     <ClInclude Include="Animation.h" />
     <ClInclude Include="AnimationChannel.h" />
     <ClInclude Include="AnimationPlayer.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="FogGenerator.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="ItemModelType.h" />
+    <ClInclude Include="InGameGraphicsEngine.h" />
     <ClInclude Include="Keyframe.h" />
     <ClInclude Include="MeshEntry.h" />
     <ClInclude Include="Node.h" />
@@ -188,6 +190,7 @@
     <ClCompile Include="..\..\network\StringParser.cpp" />
     <ClCompile Include="..\..\network\Tile.cpp" />
     <ClCompile Include="..\..\network\Walls.cpp" />
+    <ClCompile Include="AbstractGraphicsEngine.cpp" />
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="AnimationChannel.cpp" />
     <ClCompile Include="AnimationPlayer.cpp" />
@@ -197,6 +200,7 @@
     <ClCompile Include="Bone.cpp" />
     <ClCompile Include="FogGenerator.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="InGameGraphicsEngine.cpp" />
     <ClCompile Include="Keyframe.cpp" />
     <ClCompile Include="MeshEntry.cpp" />
     <ClCompile Include="Node.cpp" />

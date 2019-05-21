@@ -103,6 +103,12 @@
     <ClCompile Include="..\..\network\Walls.cpp">
       <Filter>Source Files\Networking and State Tracking</Filter>
     </ClCompile>
+    <ClCompile Include="AbstractGraphicsEngine.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="InGameGraphicsEngine.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -235,6 +241,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ItemModelType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AbstractGraphicsEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InGameGraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
