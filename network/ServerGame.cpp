@@ -262,12 +262,6 @@ void ServerGame::receiveFromClients()
 												continue;
 											}
 
-											if (!iter2->second->isChef() &&
-												!iter2->second->getIsCaught())
-											{
-												chefWin = false;
-											}
-
 											Location tLoc = iter2->second->getLocation();
 											if (player->inRange(loc, tLoc) &&
 												!iter2->second->getIsCaught())
@@ -280,10 +274,12 @@ void ServerGame::receiveFromClients()
 												iter2->second->setLocation(player->getLocation());
 											}
 
-											if (!iter2->second->getIsCaught())
+											if (!iter2->second->isChef() &&
+												!iter2->second->getIsCaught())
 											{
 												chefWin = false;
 											}
+
 										}
 									}
 									if (chefWin)
