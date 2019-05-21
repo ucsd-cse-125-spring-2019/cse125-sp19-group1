@@ -3,8 +3,14 @@
 Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
 	id = -1; // default ID; should be updated later (if all goes correctly)
 	name = string(newName);
+	// TODO: initializing this matrix to zero affects...the ears and tail?!?!?
+	// joint5 has animation data in the file, but it doesn't have an assimp channel?
+	// note that we are still attaching channel matrix data to it; it just has a null channel
+	// not necessarly problematic because channel has essentially been reduced to a counter
+	// we may just want to change keyframes here as we go through the matrix array
 	transform = glm::mat4(1.0f);
-	offset = glm::mat4(1.0f);
+	// TODO: initializing this to zero is okay?
+	offset = glm::mat4(0.0f);
 	nodeTransform = glm::mat4(nodeMat);
 	parent = newParent;
 	isBone = false;
@@ -64,20 +70,16 @@ void Bone::Update(glm::mat4 globalInverseT, glm::mat4 parentT) {
 	glm::mat4 globalT;
 
 	if (channel != NULL) {
-		globalT = parentT * channelMatrices[channel->GetCurrKeyframe()]; //(channel->GetTransform());
-		if (isBone) {
-			// updating the transform matrix, which the vertices will access when updating skin
+		globalT = parentT * channelMatrices[channel->GetCurrKeyframe()];
+		// updating the transform matrix, which the vertices will access when updating skin
+		if (isBone)
 			transform = globalInverseT * globalT * offset;
-			//transform = globalT * offset;
-		}
 	}
-	else {
+	else
 		globalT = parentT * nodeTransform;
-	}
 
-	for (int i = 0; i < children.size(); i++) {
+	for (int i = 0; i < children.size(); i++)
 		children[i]->Update(globalInverseT, globalT);
-	}
 }
 
 void Bone::PrintMatrix(glm::mat4 * matrix) {

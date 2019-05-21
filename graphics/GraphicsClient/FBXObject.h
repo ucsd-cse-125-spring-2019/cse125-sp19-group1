@@ -11,6 +11,11 @@
 class FBXObject
 {
 private:
+	// TODO: re-enable shader animations
+	bool SHADER_ANIM_ENABLED = false;
+	// this determines whether animations should run on their own
+	bool RUN_ANIM_AUTO = true;
+
 	glm::vec3 ambient, diffuse, specular;
 	float shininess;
 
