@@ -111,6 +111,10 @@ vector<vector<Transform *>> envObjs;
 
 vector<vector<uint8_t>> envObjsMap;
 
+SoundSystem * soundSystem;
+Sound * sound_toilet;
+Sound * sound_search_item;
+
 struct PlayerState {
 	Transform *transform;       // for position and rotation
 	float targetAngle;          // the angle it's trying to animate to
@@ -538,6 +542,16 @@ void Init()
 	server = new ServerGame();
 	client = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
+
+	soundSystem = new SoundSystem();
+
+	// If no audio device is plugged in, sound system will refuse to create sounds
+	if (!(soundSystem->shouldIgnoreSound())) {
+		fprintf(stdout, "createSound before: sound_toilet=%d\n", sound_toilet);
+		soundSystem->createSound(&sound_toilet, SOUNDS_TOILET);
+		fprintf(stdout, "createSound after: sound_toilet=%d\n", sound_toilet);
+		soundSystem->createSound(&sound_search_item, SOUNDS_SEARCH_ITEM);
+	}
 
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
@@ -1019,6 +1033,14 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 	// Check for a key press
 	if (action == GLFW_PRESS)
 	{
+		// TODO: Remove the following if block; meant just to test sound
+		// and show how to use the soundSystem
+		if (!(soundSystem->shouldIgnoreSound())) {
+			fprintf(stdout, "before playSound: %d\n", sound_toilet);
+			// soundSystem->playSound(sound_toilet);
+			soundSystem->playSoundNoOverlap(sound_toilet);
+		}
+
 		// Check if escape was pressed
 		if (key == GLFW_KEY_ESCAPE)
 		{

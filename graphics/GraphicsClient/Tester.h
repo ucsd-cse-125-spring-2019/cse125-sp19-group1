@@ -13,6 +13,7 @@
 #include "Node.h"
 #include "Transform.h"
 #include "Geometry.h"
+#include "SoundSystem.h"
 //#include "./server/ServerGame.h"
 //#include "./server/ClientGame.h"
 #include "../../network/ServerGame.h"
@@ -55,6 +56,23 @@
 #define RACCOON_FOG_DISTANCE 160
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
+
+#define CANVAS_MDL_PATH     (MODELS_PATH "canvas.fbx")
+#define CANVAS_TEX_PATH		(TEXTURES_PATH "canvas.ppm");
+
+// Paths for sounds
+#define SOUNDS_PATH			"../../sounds/"
+#define SOUNDS_DOOR			(SOUNDS_PATH "frontexit_door_short.mp3")
+#define SOUNDS_DOOR_UNLOCK	(SOUNDS_PATH "frontexit_unlock_short.mp3")
+#define SOUNDS_FOUND_ITEM	(SOUNDS_PATH "found_item_short.mp3")
+#define SOUNDS_NET			(SOUNDS_PATH "pop.mp3")	// FIXME placeholder for swoosh
+#define SOUNDS_RACCOON_UP	(SOUNDS_PATH "RaccoonDownUp.mp3")
+#define SOUNDS_RACCOON_DOWN	(SOUNDS_PATH "RaccoonUpDown.mp3")
+#define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
+#define SOUNDS_TOILET		(SOUNDS_PATH "bathroom_toilet.mp3")
+#define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
+#define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
+#define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
 
 // function declarations
 glm::vec3 directionBitmaskToVector(int bitmask);
