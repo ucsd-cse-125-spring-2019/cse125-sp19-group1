@@ -57,11 +57,20 @@ public:
 	double getOpenJailTime() { return timeToOpenJail; }
 
 	int timeToOpenBox = 2; //in seconds
-	int timeToSwingNet = 1;
+	int timeToSwingNet = 0.5;
 	double timeToOpenJail = 1.5;
 
 	int	chefAnger = 0;
+	int maxChefAnger = 60;
+	int currentTime = -1;
+	int chefAngerInterval = 10;
+	
 	void incrementChefAnger() { chefAnger++; }
+	int getChefAngerInterval() { return chefAngerInterval; }
+	int getChefAnger() { return chefAnger; }
+	int getMaxAnger() { return maxChefAnger; }
+	int getCurrentTime() { return currentTime; }
+	void setCurrentTime() { currentTime = getGameClock(); }
 
 	std::chrono::time_point<std::chrono::system_clock> gameClock;
 	void startGameClock();

@@ -69,55 +69,67 @@ void Player::setHidden(bool hide)
 	hidden = hide;
 }
 
-void Player::setInteracting(bool interact) {
+void Player::setInteracting(bool interact) 
+{
 	interacting = interact;
 }
 
 
-void Player::setOpenJail(bool interact) {
+void Player::setOpenJail(bool interact) 
+{
 	openingJail = interact;
 }
 
 
-void Player::setOpeningGate(bool status) {
+void Player::setOpeningGate(bool status) 
+{
 	openingGate = status;
 }
 
 
-ModelType Player::getModelType() const {
+ModelType Player::getModelType() const 
+{
 	return modelType;
 }
 
-bool Player::isChef() const {
+bool Player::isChef() const 
+{
 	return modelType == ModelType::CHEF;
 }
 
-void Player::setCaughtAnimal(bool caught) {
+void Player::setCaughtAnimal(bool caught) 
+{
 	caughtAnimal = caught;
 }
 
-void Player::setIsCaught(bool caught) {
+void Player::setIsCaught(bool caught) 
+{
 	isCaught = caught;
 }
 
-bool Player::getCaughtAnimal() const {
+bool Player::getCaughtAnimal() const 
+{
 	return caughtAnimal;
 }
 
-int Player::getCaughtAnimalId() const {
+int Player::getCaughtAnimalId() const 
+{
 	return caughtAnimalId;
 }
 
-void Player::setCaughtAnimalId(int id) {
+void Player::setCaughtAnimalId(int id) 
+{
 	caughtAnimalId = id;
 }
 
 //bool Player::getIsCaught() {
-bool Player::getIsCaught() const {
+bool Player::getIsCaught() const 
+{
 	return isCaught;
 }
 
-bool Player::inRange(Location & myLoc, Location & theirLoc) {
+bool Player::inRange(Location & myLoc, Location & theirLoc) 
+{
 	double dist = sqrt(pow(myLoc.getX() - theirLoc.getX(), 2) +
 		pow(myLoc.getY() - theirLoc.getY(), 2) +
 		pow(myLoc.getZ() - theirLoc.getZ(), 2) * 1.0);
@@ -127,15 +139,18 @@ bool Player::inRange(Location & myLoc, Location & theirLoc) {
 	return false;
 }
 
-void Player::setActionStartTime() {
+void Player::setActionStartTime() 
+{
 	actionStartTime = std::chrono::system_clock::now();
 }
 
-void Player::setStartJailTime() {
+void Player::setStartJailTime() 
+{
 	startJail = std::chrono::system_clock::now();
 }
 
-double Player::getInteractingTime(int opt) {
+double Player::getInteractingTime(int opt) 
+{
 	auto now = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = now - actionStartTime;
 	if (opt == 1) 
@@ -143,6 +158,47 @@ double Player::getInteractingTime(int opt) {
 		elapsed_seconds = now - startJail;
 	}
 	return elapsed_seconds.count();
+}
+
+
+//chef interaction/power-up methods
+void Player::updateChefSpeedMultiplier(int anger) 
+{
+	if (getSlowChef()) 
+	{
+		chefSpeedMultiplier = slowedSpeed;
+		radius = 10;
+	}
+	else if (anger < 12) 
+	{
+		chefSpeedMultiplier = 1.0;
+		radius = 10;
+	}
+	else if (anger < 24) 
+	{
+		chefSpeedMultiplier = 1.3;
+		radius = 12;
+	}
+	else if (anger < 36) 
+	{
+		chefSpeedMultiplier = 1.6;
+		radius = 14;
+	}
+	else if (anger < 48) 
+	{
+		chefSpeedMultiplier = 1.9;
+		radius = 16;
+	}
+	else if (anger < 59) 
+	{
+		chefSpeedMultiplier = 2.2;
+		radius = 18;
+	}
+	else 
+	{
+		chefSpeedMultiplier = 2.5;
+		radius = 20;
+	}
 }
 
 

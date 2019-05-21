@@ -71,8 +71,16 @@ public:
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
-	
 	double getInteractingTime(int opt);
+
+	//chef interaction/power-up methods
+	double chefSpeedMultiplier = 1.0;
+	double slowedSpeed = 0.5;
+	bool slowChef = false;
+	bool getSlowChef() { return slowChef; }
+	void toggleSlowChef() { slowChef = !slowChef; }
+	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
+	void updateChefSpeedMultiplier(int anger);
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;

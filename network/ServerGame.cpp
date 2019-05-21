@@ -566,6 +566,18 @@ void ServerGame::receiveFromClients()
 		initCharacters = false;
 	}
 	allPlayersReady = true;
+
+	//All server loop checks 
+
+	if (gameData->getGameClock() % gameData->getChefAngerInterval() == 0) {
+		if (gameData->getGameClock() > gameData->getCurrentTime() &&
+			gameData->getChefAnger() < gameData->getMaxAnger()) {
+			gameData->incrementChefAnger();
+			gameData->setCurrentTime();
+		}
+	}
+
+
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		if (Player * player = gameData->getPlayer(iter->first))
@@ -576,6 +588,11 @@ void ServerGame::receiveFromClients()
 			}
 			Location loc = player->getLocation();
 			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
+
+			if (player->isChef()) {
+				player->updateChefSpeedMultiplier(gameData->getChefAnger());
+				
+			}
 
 			if (player->getIsCaught())
 			{
@@ -676,7 +693,15 @@ void ServerGame::updateRightEvent(int id)
 {
 	moveRight = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
-	gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+	if (gameData->getPlayer(id)->isChef()) 
+	{
+		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
+		gameData->getPlayer(id)->setLocation(loc.getX() + (int)(SPEED*multiplier), loc.getY(), loc.getZ());
+	}
+	else 
+	{
+		gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+	}
 	//gameData->getPlayer(id)->setFacingDir(2);
 
 	updatePlayerCollision(id, 0);
@@ -686,7 +711,15 @@ void ServerGame::updateBackwardEvent(int id)
 {
 	moveBackward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
-	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+	if (gameData->getPlayer(id)->isChef())
+	{
+		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - (int)(SPEED*multiplier));
+	}
+	else
+	{
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+	}
 	//gameData->getPlayer(id)->setFacingDir(3);
 
 	updatePlayerCollision(id, 1);
@@ -696,7 +729,15 @@ void ServerGame::updateForwardEvent(int id)
 {
 	moveForward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
-	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+	if (gameData->getPlayer(id)->isChef())
+	{
+		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + (int)(SPEED*multiplier));
+	}
+	else
+	{
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+	}
 	//gameData->getPlayer(id)->setFacingDir(1);
 	updatePlayerCollision(id, 2);
 }
@@ -705,7 +746,15 @@ void ServerGame::updateLeftEvent(int id)
 {
 	moveLeft = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
-	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+	if (gameData->getPlayer(id)->isChef())
+	{
+		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
+		gameData->getPlayer(id)->setLocation(loc.getX() - (int)(SPEED*multiplier), loc.getY(), loc.getZ());
+	}
+	else
+	{
+		gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+	}
 	//gameData->getPlayer(id)->setFacingDir(4);
 
 	updatePlayerCollision(id, 3);
