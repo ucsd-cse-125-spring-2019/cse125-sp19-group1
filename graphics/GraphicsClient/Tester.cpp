@@ -368,8 +368,7 @@ void resetEnvObjs()
 			}
 			case TileType::BOX:
 			{
-				BoxTile * boxTile = (BoxTile *)tile;
-				objIdx = boxTile->hasBox() ? static_cast<uint8_t>(ItemModelType::box) : 0;
+				objIdx = static_cast<uint8_t>(ItemModelType::box);
 				break;
 			}
 			default:
@@ -413,6 +412,28 @@ void resetEnvObjs()
 			row[x]->addChild(itemModels[objIdx].geometry);
 			envObjsTransform->addChild(row[x]);
 		}
+	}
+}
+
+void updateBoxVisibility()
+{
+	const auto &tileLayout = client->getGameData()->clientTileLayout;
+
+	if (!tileLayout.size()) {
+		return;
+	}
+
+	unsigned y = 0;
+	for (auto &row : envObjs) {
+		unsigned x = 0;
+		for (auto tile : row) {
+			if (tileLayout[y][x]->getTileType() == TileType::BOX) {
+				tile->hidden = !((BoxTile *)tile)->hasBox();
+			}
+
+			++x;
+		}
+		++y;
 	}
 }
 
@@ -939,6 +960,8 @@ void IdleCallback()
 		client->update();
 		const auto gameData = client->getGameData();
 		if (gameData) {
+			updateBoxVisibility();
+
 #ifdef DUMMY_ID
 			bool playersChanged = (players.size() != gameData->players.size() + 1);
 #else
