@@ -109,6 +109,15 @@
     <ClCompile Include="InGameGraphicsEngine.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="LoadingGraphicsEngine.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="lodepng.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -247,6 +256,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InGameGraphicsEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadingGraphicsEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="lodepng.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

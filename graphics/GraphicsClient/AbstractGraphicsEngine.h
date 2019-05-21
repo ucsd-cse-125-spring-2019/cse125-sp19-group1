@@ -2,6 +2,8 @@
 
 #include "Core.h"
 
+extern int windowWidth, windowHeight;
+
 class AbstractGraphicsEngine
 {
 public:

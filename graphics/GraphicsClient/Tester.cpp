@@ -4,6 +4,7 @@
 
 #include "Tester.h"
 #include "InGameGraphicsEngine.h"
+#include "LoadingGraphicsEngine.h"
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
@@ -15,6 +16,7 @@ int windowHeight = 0;
 const char* window_title = GAME_NAME_SHORT;
 
 static InGameGraphicsEngine * inGameEngine;
+static LoadingGraphicsEngine * loadingEngine;
 static AbstractGraphicsEngine * currentEngine;
 static ServerGame * server = nullptr;
 static ClientGame * client = nullptr;
@@ -85,9 +87,11 @@ void Init()
 	//_beginthread(serverLoop, 0, (void*)12);
 
 	inGameEngine = new InGameGraphicsEngine(client);
-	currentEngine = inGameEngine;
+	loadingEngine = new LoadingGraphicsEngine();
+	currentEngine = loadingEngine;
 
 	inGameEngine->StartLoading();
+	loadingEngine->StartLoading();
 }
 
 void serverLoop(void * args) {
@@ -98,7 +102,13 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
+	currentEngine = nullptr;
+
 	inGameEngine->CleanUp();
+	loadingEngine->CleanUp();
+
+	delete inGameEngine;
+	delete loadingEngine;
 }
 
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -219,6 +229,12 @@ int main(void)
 
 		auto start = high_resolution_clock::now();
 
+		if (currentEngine == loadingEngine) {
+			if (inGameEngine->fullyLoaded) {
+				currentEngine = inGameEngine;
+			}
+		}
+		
 		if (currentEngine && currentEngine->fullyLoaded) {
 			if (!currentEngine->calledMainLoopBegin) {
 				currentEngine->ResizeCallback(window, windowWidth, windowHeight);

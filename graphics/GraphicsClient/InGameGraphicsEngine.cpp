@@ -60,7 +60,7 @@
 
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
-//#define ENV_OBJS_DEMO
+#define ENV_OBJS_DEMO
 
 #define TILE_HEIGHT_ADJUST -2.f
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
@@ -91,7 +91,7 @@ static const struct PlayerModelSettings {
 	{ DOG_MDL_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     false,  1.f,    glm::vec3(0.f) },
 };
 
-#define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".ppm"
+#define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
 #define MDL_SAME_TEX(x) MDL_AND_TEX(x, x)
 
 static const struct ItemModelSettings {
@@ -136,8 +136,8 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f) },
 	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,          0.65f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,              3.f,  glm::vec3(0.f, 0.5f, -0.47f) },
-	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,          1.75f,  glm::vec3(0.f, 0.5f, -0.4f) },
+	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,              3.f,  glm::vec3(0.f, 0.2f, -0.47f) },
+	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,          1.25f,  glm::vec3(0.f, 0.5f, -0.4f) },
 };
 
 struct ItemModel {
