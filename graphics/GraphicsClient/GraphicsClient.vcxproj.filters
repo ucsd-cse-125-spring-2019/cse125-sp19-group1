@@ -106,7 +106,9 @@
     <ClCompile Include="AbstractGraphicsEngine.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="InGameGraphicsEngine.cpp" />
+    <ClCompile Include="InGameGraphicsEngine.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -244,7 +246,9 @@
     <ClInclude Include="AbstractGraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InGameGraphicsEngine.h" />
+    <ClInclude Include="InGameGraphicsEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

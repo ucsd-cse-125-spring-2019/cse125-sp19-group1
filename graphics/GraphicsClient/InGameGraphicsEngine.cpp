@@ -916,6 +916,8 @@ void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis) {
 InGameGraphicsEngine::InGameGraphicsEngine(ClientGame *newClient)
 {
 	client = newClient;
+	calledMainLoopBegin = false;
+	fullyLoaded = false;
 }
 
 
@@ -1004,6 +1006,8 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
 	root->addChild(allPlayersNode);
+
+	fullyLoaded = true;
 }
 
 void InGameGraphicsEngine::CleanUp()
@@ -1055,6 +1059,8 @@ void InGameGraphicsEngine::CleanUp()
 
 void InGameGraphicsEngine::MainLoopBegin()
 {
+	calledMainLoopBegin = true;
+
 	UpdateView();
 	MoveCamera(glm::vec3(0.f));
 
@@ -1069,7 +1075,16 @@ void InGameGraphicsEngine::MainLoopEnd()
 
 void InGameGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 {
+	// Set the viewport size. This is the only matrix that OpenGL maintains for us in modern OpenGL!
+	glViewport(0, 0, windowWidth, windowHeight);
 
+	if (windowHeight > 0)
+	{
+		P = glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4000.0f);
+		//orthoP = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, -1.0f, 1.0f);
+		orthoP = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
+		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+	}
 }
 
 void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)

@@ -86,6 +86,8 @@ void Init()
 
 	inGameEngine = new InGameGraphicsEngine(client);
 	currentEngine = inGameEngine;
+
+	inGameEngine->StartLoading();
 }
 
 void serverLoop(void * args) {
@@ -101,6 +103,12 @@ void CleanUp() {
 
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
 {
+#ifdef __APPLE__
+	glfwGetFramebufferSize(window, &newWidth, &newHeight); // In case your Mac has a retina display
+#endif
+	windowWidth = newWidth;
+	windowHeight = newHeight;
+
 	if (currentEngine)
 		currentEngine->ResizeCallback(window, newWidth, newHeight);
 }
@@ -211,7 +219,14 @@ int main(void)
 
 		auto start = high_resolution_clock::now();
 
-		currentEngine->MainLoopCallback(window);
+		if (currentEngine && currentEngine->fullyLoaded) {
+			if (!currentEngine->calledMainLoopBegin) {
+				currentEngine->ResizeCallback(window, windowWidth, windowHeight);
+				currentEngine->MainLoopBegin();
+			}
+			currentEngine->MainLoopCallback(window);
+		}
+		
 		server->update();
 
 		auto finish = high_resolution_clock::now();

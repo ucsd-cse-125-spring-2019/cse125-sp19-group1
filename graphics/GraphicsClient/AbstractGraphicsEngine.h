@@ -5,6 +5,7 @@
 class AbstractGraphicsEngine
 {
 public:
+	bool calledMainLoopBegin;
 	bool fullyLoaded;  // true if the engine has finished loading and is ready to render
 
 	virtual void StartLoading() = 0;  // may launch a thread and return immediately
