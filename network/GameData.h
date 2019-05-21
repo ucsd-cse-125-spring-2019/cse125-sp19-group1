@@ -57,7 +57,7 @@ public:
 	double getOpenJailTime() { return timeToOpenJail; }
 
 	int timeToOpenBox = 2; //in seconds
-	int timeToSwingNet = 0.5;
+	int timeToSwingNet = 0.75;
 	double timeToOpenJail = 1.5;
 
 	int	chefAnger = 0;
