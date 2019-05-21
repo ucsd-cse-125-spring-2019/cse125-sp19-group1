@@ -10,6 +10,8 @@
 #include "FBXObject.h"
 #include "UIObject.h"
 
+#include <thread>
+
 #define RACCOON_DAE_PATH  (ANIMATIONS_PATH "raccoonWalk.dae")
 #define RACCOON_MDL_PATH  (MODELS_PATH "raccoon.fbx")
 #define RACCOON_TEX_PATH  (TEXTURES_PATH "raccoon.ppm")
@@ -912,6 +914,63 @@ void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis) {
 	UpdateView();
 }
 
+void LoadModels()
+{
+	// Load models
+	cout << "Loading models..." << endl;
+
+	using namespace std::chrono;
+	auto modelLoadingStart = high_resolution_clock::now();
+
+	for (auto &setting : playerModelSettings) {
+		cout << "\tloading " << setting.name << endl;
+
+		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+
+		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+
+		model.settings = &setting;
+		model.object = new FBXObject(setting.modelPath, setting.texturePath, setting.attachSkel, false);
+		model.geometry = new Geometry(model.object, objShaderProgram);
+		model.transform = new Transform(transform);
+
+		model.transform->addChild(model.geometry);
+	}
+
+	cout << "\tloading " << "tile" << endl;
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
+
+	cout << "\tloading " << "wall" << endl;
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
+
+	tileGeometry = new Geometry(tileModel, objShaderProgram);
+	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
+	size_t largestIdx = 0;
+	for (auto &setting : itemModelSettings) {
+		size_t idx = static_cast<size_t>(setting.id);
+		if (largestIdx < idx) {
+			largestIdx = idx;
+		}
+	}
+
+	itemModels.resize(largestIdx + 1);
+
+	for (auto &setting : itemModelSettings) {
+
+		cout << "\tloading " << setting.name << endl;
+
+		auto &m = itemModels[static_cast<size_t>(setting.id)];
+		m.settings = &setting;
+		m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
+		m.geometry = new Geometry(m.object, objShaderProgram);
+	}
+
+	auto modelLoadingEnd = high_resolution_clock::now();
+	std::chrono::duration<float> modelLoadingDuration = modelLoadingEnd - modelLoadingStart;
+	cout << "\tfinished loading models in " << modelLoadingDuration.count() << " seconds\n";
+}
+
 
 InGameGraphicsEngine::InGameGraphicsEngine(ClientGame *newClient)
 {
@@ -947,67 +1006,20 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 
 	loadMapArray(envObjsMap, "../../maps/tinytinymap/env_objs.txt");
 
-	// Load models
-	cout << "Loading models..." << endl;
-
-	using namespace std::chrono;
-	auto modelLoadingStart = high_resolution_clock::now();
-
-	for (auto &setting : playerModelSettings) {
-		cout << "\tloading " << setting.name << endl;
-
-		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
-
-		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
-
-		model.settings = &setting;
-		model.object = new FBXObject(setting.modelPath, setting.texturePath, setting.attachSkel);
-		model.geometry = new Geometry(model.object, objShaderProgram);
-		model.transform = new Transform(transform);
-
-		model.transform->addChild(model.geometry);
-	}
-
-	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
-
-	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
-
-	uiCanvas = new UICanvas(uiShaderProgram);
-
-	tileGeometry = new Geometry(tileModel, objShaderProgram);
-	wallGeometry = new Geometry(wallModel, objShaderProgram);
-
-	size_t largestIdx = 0;
-	for (auto &setting : itemModelSettings) {
-		size_t idx = static_cast<size_t>(setting.id);
-		if (largestIdx < idx) {
-			largestIdx = idx;
-		}
-	}
-
-	itemModels.resize(largestIdx + 1);
-
-	for (auto &setting : itemModelSettings) {
-
-		cout << "\tloading " << setting.name << endl;
-
-		auto &m = itemModels[static_cast<size_t>(setting.id)];
-		m.settings = &setting;
-		m.object = new FBXObject(setting.modelPath, setting.texturePath, false);
-		m.geometry = new Geometry(m.object, objShaderProgram);
-	}
-
-	auto modelLoadingEnd = high_resolution_clock::now();
-	std::chrono::duration<float> modelLoadingDuration = modelLoadingEnd - modelLoadingStart;
-	cout << "\tfinished loading models in " << modelLoadingDuration.count() << " seconds\n";
-
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
 	root->addChild(allPlayersNode);
 
-	fullyLoaded = true;
+	uiCanvas = new UICanvas(uiShaderProgram);
+
+	auto finish = [](bool *finishedFlag) {
+		LoadModels();
+		*finishedFlag = true;
+	};
+
+	thread t(finish, &fullyLoaded);
+	//finish(fullyLoaded);
+	t.detach();
 }
 
 void InGameGraphicsEngine::CleanUp()
@@ -1060,6 +1072,26 @@ void InGameGraphicsEngine::CleanUp()
 void InGameGraphicsEngine::MainLoopBegin()
 {
 	calledMainLoopBegin = true;
+
+	using namespace std::chrono;
+	auto setupStart = high_resolution_clock::now();
+
+	cout << "Calling RenderingSetup() on objects...\n ";
+	
+	tileModel->RenderingSetup();
+	wallModel->RenderingSetup();
+	for (auto &model : playerModels) {
+		if (model.object)
+			model.object->RenderingSetup();
+	}
+	for (auto &model : itemModels) {
+		if (model.object)
+			model.object->RenderingSetup();
+	}
+
+	auto setupEnd = high_resolution_clock::now();
+	std::chrono::duration<float> setupDuration = setupEnd - setupStart;
+	cout << "\tfinished RenderingSetup() in " << setupDuration.count() << " seconds\n";
 
 	UpdateView();
 	MoveCamera(glm::vec3(0.f));

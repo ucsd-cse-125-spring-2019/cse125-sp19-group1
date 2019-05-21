@@ -164,22 +164,22 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->KeyCallback(window, key, scancode, action, mods);
 }
 
 void CursorPosCallback(GLFWwindow * window, double xpos, double ypos) {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->CursorPosCallback(window, xpos, ypos);
 }
 
 void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset) {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->MouseWheelCallback(window, xoffset, yoffset);
 }
 
 void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods) {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->MouseButtonCallback(window, button, action, mods);
 }
 
