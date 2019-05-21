@@ -255,47 +255,35 @@ void ServerGame::receiveFromClients()
 										player->setActionStartTime();
 
 										chefWin = true;
-										std::map<unsigned int, SOCKET>::iterator iter2;
-										for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
+										for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
 										{
-											if (iter2 == iter)
+											if (iter2->first == iter->first)
 											{
 												continue;
 											}
-											if (!gameData->getPlayer(iter2->first)->isChef() &&
-												!gameData->getPlayer(iter2->first)->getIsCaught())
+
+											if (!iter2->second->isChef() &&
+												!iter2->second->getIsCaught())
 											{
 												chefWin = false;
 											}
-												
-											
-											Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-											//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
+
+											Location tLoc = iter2->second->getLocation();
 											if (player->inRange(loc, tLoc) &&
-												!gameData->getPlayer(iter2->first)->getIsCaught())
+												!iter2->second->getIsCaught())
 											{
 												player->setCaughtAnimal(true);
 												player->setCaughtAnimalId(iter2->first);
-												gameData->getPlayer(iter2->first)->setIsCaught(true);
+												iter2->second->setIsCaught(true);
+
+												//update animal's location to chef's location
+												iter2->second->setLocation(player->getLocation());
 											}
-											continue;
-										}
-										Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-										//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-										if (player->inRange(loc, tLoc) &&
-											!gameData->getPlayer(iter2->first)->getIsCaught())
-										{
-											player->setCaughtAnimal(true);
-											player->setCaughtAnimalId(iter2->first);
-											gameData->getPlayer(iter2->first)->setIsCaught(true);
 
-											//update animal's location to somewhere off map
-											gameData->getPlayer(iter2->first)->setLocation(-100, -100, -100);
-										}
-
-										if (!gameData->getPlayer(iter2->first)->getIsCaught())
-										{
-											chefWin = false;
+											if (!iter2->second->getIsCaught())
+											{
+												chefWin = false;
+											}
 										}
 									}
 									if (chefWin)
