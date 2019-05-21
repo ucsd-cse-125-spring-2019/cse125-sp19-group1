@@ -2,106 +2,106 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="Animation.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="AnimationChannel.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="AnimationPlayer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="animloader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\Atlas.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Bone.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ClientGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ClientNetwork.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="DirLight.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="FBXObject.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="FogGenerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\GameData.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Geometry.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Keyframe.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="MeshEntry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\NetworkServices.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Node.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="objloader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\Player.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ServerGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ServerNetwork.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="SoundSystem.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="shader.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Skeleton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\StringParser.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Tester.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="textureloader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\Tile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Tokenizer.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Transform.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="UICanvas.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="UIObject.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
     <ClCompile Include="Vertex.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\Atlas.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\ClientGame.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\ClientNetwork.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\GameData.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\NetworkServices.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\Player.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\ServerGame.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\ServerNetwork.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\StringParser.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\network\Tile.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="Tokenizer.cpp">
+      <Filter>Source Files\Networking and State Tracking</Filter>
     </ClCompile>
     <ClCompile Include="..\..\network\Walls.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Networking and State Tracking</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -236,20 +236,20 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="obj_shader.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="obj_shader.vert">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="packages.config">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="obj_shader.frag">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
+    <None Include="obj_shader.vert">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
     <None Include="ui_shader.frag">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
     <None Include="ui_shader.vert">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -258,6 +258,12 @@
     </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{460e7638-cbe4-43df-9949-dba8113a28dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Client Graphics Rendering">
+      <UniqueIdentifier>{d838710c-9be8-4106-af30-f76bd48854f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Networking and State Tracking">
+      <UniqueIdentifier>{b4e41b16-c7ab-4ac4-a10f-129d0af6b5df}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
