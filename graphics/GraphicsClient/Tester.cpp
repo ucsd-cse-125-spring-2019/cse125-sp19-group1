@@ -3,8 +3,14 @@
 ////////////////////////////////////////
 
 #include "Tester.h"
+#include "ItemModelType.h"
+
 #include <ctime>
 #include <algorithm>
+
+// Uncomment to render a repeating pattern of all environment objects
+// This is good for debugging scale/positioning/rendering
+//#define ENV_OBJS_DEMO
 
 #define TILE_HEIGHT_ADJUST -2.f
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
@@ -18,12 +24,65 @@ int elapsedTime = 0;
 GLFWwindow * window = nullptr;
 int windowWidth;
 int windowHeight;
-const char* window_title = "TESTER";
+const char* window_title = GAME_NAME_SHORT;
 
 #define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
+
+static const struct ItemModelSettings {
+	const char *modelPath;
+	const char *texturePath;
+	const char *name;
+	ItemModelType id;
+	float scale;
+	glm::vec3 translate;
+} itemModelSettings[] = {
+	{ MODELS_PATH "apple.fbx", TEXTURES_PATH "apple.ppm", "apple", ItemModelType::apple, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananagreen.ppm", "green banana", ItemModelType::bananaGreen, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaperfect.ppm", "perfect banana", ItemModelType::bananaPerfect, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "banana.fbx", TEXTURES_PATH "bananaveryveryripe.ppm", "very ripe banana", ItemModelType::bananaVeryRipe, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "box.fbx", TEXTURES_PATH "box.ppm", "box", ItemModelType::box, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "cake.fbx", TEXTURES_PATH "cake.ppm", "cake", ItemModelType::cake, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "canvas.fbx", TEXTURES_PATH "canvas.ppm", "canvas", ItemModelType::canvas, 3.f, glm::vec3(0.f) },
+	{ MODELS_PATH "cookingpot.fbx", TEXTURES_PATH "cookingpot.ppm", "cooking pot", ItemModelType::cookingPot, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "door.fbx", TEXTURES_PATH "door.ppm", "door", ItemModelType::door, 1.f, glm::vec3(0.f, 0.0f, -0.45f) },
+	{ MODELS_PATH "fork.fbx", TEXTURES_PATH "fork.ppm", "fork", ItemModelType::fork, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "garbagebag.fbx", TEXTURES_PATH "garbagebag.ppm", "garbage bag", ItemModelType::garbageBag, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "jail.fbx", TEXTURES_PATH "jail.ppm", "jail", ItemModelType::jail, 0.5f, glm::vec3(0.f) },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key1.ppm", "key #1", ItemModelType::key1, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key2.ppm", "key #2", ItemModelType::key2, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "key.fbx", TEXTURES_PATH "key3.ppm", "key #3", ItemModelType::key3, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop.ppm", "key drop", ItemModelType::keyDrop, 2.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_bathroom.ppm", "bathroom key drop", ItemModelType::keyDropBathroom, 2.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_frontexit.ppm", "front exit key drop", ItemModelType::keyDropFrontExit, 2.f, glm::vec3(0.f) },
+	{ MODELS_PATH "keydrop.fbx", TEXTURES_PATH "keydrop_vent.ppm", "vent key drop", ItemModelType::keyDropVent, 2.f, glm::vec3(0.f) },
+	{ MODELS_PATH "knife.fbx", TEXTURES_PATH "knife.ppm", "knife", ItemModelType::knife, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "orange.fbx", TEXTURES_PATH "orange.ppm", "orange fruit", ItemModelType::orange, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "painting.fbx", TEXTURES_PATH "painting.ppm", "wall painting", ItemModelType::painting, 3.f, glm::vec3(0.f, 0.5f, -0.4f) },
+	{ MODELS_PATH "pear.fbx", TEXTURES_PATH "pear.ppm", "pear", ItemModelType::pear, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "plate.fbx", TEXTURES_PATH "plate.ppm", "plate", ItemModelType::plate, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "plunger.fbx", TEXTURES_PATH "plunger.ppm", "plunger", ItemModelType::plunger, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "restaurantchair.fbx", TEXTURES_PATH "restaurantchair.ppm", "restaurant chair", ItemModelType::restaurantChair, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "rope.fbx", TEXTURES_PATH "rope.ppm", "rope", ItemModelType::rope, 1.f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver1.ppm", "screwdriver #1", ItemModelType::screwdriver1, 0.225f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver2.ppm", "screwdriver #2", ItemModelType::screwdriver2, 0.225f, glm::vec3(0.f) },
+	{ MODELS_PATH "screwdriver.fbx", TEXTURES_PATH "screwdriver3.ppm", "screwdriver #3", ItemModelType::screwdriver3, 0.225f, glm::vec3(0.f) },
+	{ MODELS_PATH "stove.fbx", TEXTURES_PATH "stove.ppm", "stove", ItemModelType::stove, 1.45f, glm::vec3(0.f, 0.f, -0.225f) },
+	{ MODELS_PATH "toilet.fbx", TEXTURES_PATH "toilet.ppm", "toilet", ItemModelType::toilet, 0.65f, glm::vec3(0.f) },
+	{ MODELS_PATH "toiletpaper.fbx", TEXTURES_PATH "toiletpaper.ppm", "toilet paper", ItemModelType::toiletPaper, 0.9f, glm::vec3(0.f) },
+	{ MODELS_PATH "vent.fbx", TEXTURES_PATH "vent.ppm", "vent", ItemModelType::vent, 3.f, glm::vec3(0.f, 0.5f, -0.47f) },
+	{ MODELS_PATH "window.fbx", TEXTURES_PATH "window.ppm", "window", ItemModelType::window, 1.75f, glm::vec3(0.f, 0.5f, -0.4f) },
+};
+
+struct ItemModel {
+	const ItemModelSettings *settings;
+	FBXObject *object;
+	Geometry *geometry;
+};
+
+vector<ItemModel> itemModels;
 
 glm::mat4 P; // P for projection
 glm::mat4 orthoP; // P for 2d elements;
@@ -37,7 +96,7 @@ Geometry * playerGeometry[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 FBXObject * tileModel = nullptr;
 FBXObject * wallModel = nullptr;
 
-FBXObject * uiCanvas = nullptr;
+UICanvas * uiCanvas = nullptr;
 GLuint objShaderProgram;
 GLuint uiShaderProgram;
 
@@ -45,9 +104,12 @@ GLuint uiTexture;
 
 Geometry * tileGeometry;
 Geometry * wallGeometry;
-std::vector<std::vector<Transform *>> floorArray;
-std::vector<std::vector<Transform *>> northWalls;
-std::vector<std::vector<Transform *>> westWalls;
+vector<vector<Transform *>> floorArray;
+vector<vector<Transform *>> northWalls;
+vector<vector<Transform *>> westWalls;
+vector<vector<Transform *>> envObjs;
+
+vector<vector<uint8_t>> envObjsMap;
 
 SoundSystem * soundSystem;
 Sound * sound_toilet;
@@ -69,7 +131,7 @@ struct PlayerState {
 
 #ifdef DUMMY_ID
 	// Warning: this constructor is only for debugging use
-	PlayerState(int newId, int geomIdx) {
+	PlayerState(int newId, int geomIdx) : PlayerState() {
 		id = newId;
 		geometryIdx = geomIdx;
 
@@ -146,6 +208,7 @@ Transform * root = nullptr;
 Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
 Transform * floorTransform = nullptr;
+Transform * envObjsTransform = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
@@ -265,8 +328,8 @@ void reloadPlayers()
 #ifdef DUMMY_ID
 	// add a dummy player
 	players.emplace_back(DUMMY_ID, CHEF_IDX);
-	const auto &state = players[players.size() - 1];
-	allPlayersNode->addChild(state.transform);
+	const auto state = &players[players.size() - 1];
+	allPlayersNode->addChild(state->transform);
 #endif
 }
 
@@ -287,6 +350,12 @@ void reloadMap()
 		const glm::vec3 transAmount(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2);
 		const auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(TILE_SCALE));
 		floorTransform = new Transform(glm::translate(scale, transAmount));
+		root->addChild(floorTransform);
+	}
+
+	if (envObjsTransform == nullptr) {
+		envObjsTransform = new Transform(glm::mat4(1.f));
+		root->addChild(envObjsTransform);
 	}
 
 	// Floor tiles
@@ -394,7 +463,60 @@ void reloadMap()
 		}
 	}
 
-	root->addChild(floorTransform);
+	uint8_t objIdx = 0;
+	envObjs.resize(floorArray.size());
+	for (size_t z = 0; z < envObjs.size(); z++) {
+		auto &row = envObjs[z];
+		row.resize(floorArray[z].size());
+		for (size_t x = 0; x < row.size(); x++) {
+			const auto &tile = tileLayout[z][x];
+
+#ifdef ENV_OBJS_DEMO
+			if (objIdx == 0) objIdx = 1;
+			else if (++objIdx >= itemModels.size()) objIdx = 1;
+#else
+			objIdx = envObjsMap[z][x];
+			if (tile->getTileType() == TileType::JAIL) {
+				objIdx = static_cast<uint8_t>(ItemModelType::jail);
+			}
+
+			if (objIdx == 0) {
+				row[x] = nullptr;
+				continue;
+			}
+#endif
+
+			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
+			
+
+			// Try to turn the object away from the wall
+			float angle = 0.f;
+			auto wall = tile->getWall();
+			if (wall & DirectionBitmask::southSide) {
+				angle = glm::pi<float>();
+			}
+			else if (wall & DirectionBitmask::westSide) {
+				angle = glm::half_pi<float>();
+			}
+			else if (wall & DirectionBitmask::eastSide) {
+				angle = -glm::half_pi<float>();
+			}
+
+			const auto &settings = *(itemModels[objIdx].settings);
+			glm::vec3 tileTranslate;
+			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
+			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
+			glm::vec3 modelTranslate = settings.translate;
+			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
+			row[x]->addChild(itemModels[objIdx].geometry);
+			envObjsTransform->addChild(row[x]);
+		}
+	}
 }
 
 void deallocFloor()
@@ -439,24 +561,63 @@ void Init()
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
 	
+	loadMapArray(envObjsMap, "../../maps/tinytinymap/env_objs.txt");
+
 	// Load models
+	cout << "Loading models..." << endl;
+
+	using namespace std::chrono;
+	auto modelLoadingStart = high_resolution_clock::now();
+	
+	cout << "\tloading " << "chef" << endl;
 	playerModels[CHEF_IDX    ] = new FBXObject(CHEF_DAE_PATH, CHEF_TEX_PATH, false);
+	
+	cout << "\tloading " << "raccoon" << endl;
 	playerModels[RACCOON_IDX ] = new FBXObject(RACCOON_DAE_PATH, RACCOON_TEX_PATH, true);
+	
+	cout << "\tloading " << "cat" << endl;
 	playerModels[CAT_IDX     ] = new FBXObject(CAT_DAE_PATH, CAT_TEX_PATH, true);
+	
+	cout << "\tloading " << "dog" << endl;
 	playerModels[DOG_IDX     ] = new FBXObject(DOG_MDL_PATH, DOG_TEX_PATH, false);
 
+	cout << "\tloading " << "tile" << endl;
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
+	
+	cout << "\tloading " << "wall" << endl;
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);	
 	for (unsigned i = 0; i < NUM_PLAYER_MODEL_TYPES; i++) {
 		playerGeometry[i] = new Geometry(playerModels[i], objShaderProgram);
 	}
 
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false);
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false);
-	uiCanvas = new FBXObject(CANVAS_MDL_PATH, DOG_TEX_PATH, false);
-	uiCanvas->SetDepthTest(false);
-
+	uiCanvas = new UICanvas(uiShaderProgram);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
+	size_t largestIdx = 0;
+	for (auto &setting : itemModelSettings) {
+		size_t idx = static_cast<size_t>(setting.id);
+		if (largestIdx < idx) {
+			largestIdx = idx;
+		}
+	}
+
+	itemModels.resize(largestIdx + 1);
+
+	for (auto &setting : itemModelSettings) {
+
+		cout << "\tloading " << setting.name << endl;
+
+		auto &m = itemModels[static_cast<size_t>(setting.id)];
+		m.settings = &setting;
+		m.object = new FBXObject(setting.modelPath, setting.texturePath, false);
+		m.geometry = new Geometry(m.object, objShaderProgram);
+	}
+
+	auto modelLoadingEnd = high_resolution_clock::now();
+	std::chrono::duration<float> modelLoadingDuration = modelLoadingEnd - modelLoadingStart;
+	cout << "\tfinished loading models in " << modelLoadingDuration.count() << " seconds\n";
 
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
@@ -464,6 +625,9 @@ void Init()
 
 	UpdateView();
 	MoveCamera(glm::vec3(0.f));
+
+	const auto gameData = client->getGameData();
+	gameData->startGameClock();
 }
 
 void serverLoop(void * args) {
@@ -481,6 +645,13 @@ void CleanUp() {
 	}
 
 	players.clear();
+
+	for (auto &model : itemModels) {
+		if (model.object) delete model.object;
+		if (model.geometry) delete model.geometry;
+	}
+
+	itemModels.clear();
 
 	for (auto &model : playerModels) {
 		if (model) {
@@ -752,6 +923,12 @@ void IdleCallback()
 
 			const auto &playersMap = client->getGameData()->players;
 			for (auto &state : players) {
+#ifdef DUMMY_ID
+				if (state.id == DUMMY_ID) {
+					continue;
+				}
+#endif
+
 				if (playersMap.count(state.id) <= 0) {
 					playersChanged = true;
 					break;
@@ -784,6 +961,41 @@ void IdleCallback()
 		for (auto model : playerModels) {
 			model->Update();
 		}
+		uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
+		std::map<int, Player*> players = gameData->getAllPlayers();
+		//check if animals are caught
+		for (auto it = players.begin(); it != players.end(); ++ it) {
+				//std::cerr << "In caught loop" << "\n";
+				Player * currPlayer = it->second;
+				if (currPlayer->getIsCaught()) {
+					if (currPlayer->getModelType() == ModelType::CAT) {
+						uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
+						uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
+					}
+					if (currPlayer->getModelType() == ModelType::DOG) {
+						uiCanvas->setVisible(uiCanvas->DOG_HAPPY, false);
+						uiCanvas->setVisible(uiCanvas->DOG_JAIL, true);
+					}
+					if (currPlayer->getModelType() == ModelType::RACOON) {
+						uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
+						uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
+					}
+				}
+				else {
+					if (currPlayer->getModelType() == ModelType::CAT) {
+						uiCanvas->setVisible(uiCanvas->CAT_HAPPY, true);
+						uiCanvas->setVisible(uiCanvas->CAT_JAIL, false);
+					}
+					if (currPlayer->getModelType() == ModelType::DOG) {
+						uiCanvas->setVisible(uiCanvas->DOG_HAPPY, true);
+						uiCanvas->setVisible(uiCanvas->DOG_JAIL, false);
+					}
+					if (currPlayer->getModelType() == ModelType::RACOON) {
+						uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, true);
+						uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, false);
+					}
+				}
+		}
 	}
 
 }
@@ -804,7 +1016,8 @@ void DisplayCallback(GLFWwindow* window)
 		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
 	}
 	root->draw(V, P, glm::mat4(1.0));
-	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
+
+	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
@@ -835,6 +1048,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
+		if (key == GLFW_KEY_M) {
+			uiCanvas->setAngerRatio(1.0f);
+			uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
+			uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
+		}
+
+
 		if (key == GLFW_KEY_A) {
 			for (auto model : playerModels) {
 				model->ToNextKeyframe();
@@ -860,6 +1080,15 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 		if (key == GLFW_KEY_SPACE) {
 			// interact key press
 			client->sendPackets(INTERACT_EVENT);
+		}
+
+		if (key == GLFW_KEY_ENTER) {
+			// interact key press
+			client->sendPackets(READY_EVENT);
+		}
+		if (key == GLFW_KEY_O) {
+			// interact key press
+			client->sendPackets(START_EVENT);
 		}
 		if (key == GLFW_KEY_D) {
 			client->sendPackets(DROP_EVENT);

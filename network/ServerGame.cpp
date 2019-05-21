@@ -13,7 +13,10 @@ bool animalWin = false;
 
 ServerGame::ServerGame(void)
 {
+	initCharacters = false;
+	gameStarted = true;
 	newPlayerInit = false;
+	allPlayersReady = false;
     // id's to assign clients for our table
     client_id = 0;
  
@@ -48,8 +51,10 @@ void ServerGame::receiveFromClients()
 	// go through all clients
 	std::map<unsigned int, SOCKET>::iterator iter;
 
+
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); )//iter++)
 	{
+		int playerID = iter->first;
 		int data_length = network->receiveData(iter->first, network_data);
 		//cout << "size:" << network->sessions.size() << std::endl;
 		if (data_length <= 0)
@@ -62,7 +67,7 @@ void ServerGame::receiveFromClients()
 			{
 				printf("Client disconnected\n");
 				closesocket(iter->second);
-				gameData->removeClient(iter->first);
+				gameData->removePlayer(iter->first, ClientType::SERVER_SIDE);
 				network->sessions.erase(iter++);
 			}
 			else
@@ -94,8 +99,26 @@ void ServerGame::receiveFromClients()
 			case ACTION_EVENT:
 				printf("server received action event packet from client\n");
 				break;
+			case READY_EVENT:
+				printf("server received ENTER event packet from client\n");
+				if(!gameStarted)
+					gameData->getPlayer(iter->first)->toggleReady();
+				break;
+			case START_EVENT:
+				printf("server received START event packet from client\n");
+				if (!gameStarted && allPlayersReady)
+				{
+					initCharacters = true;
+					gameData->startCountdown();
+				}
+				break;
+			case SELECT_EVENT:
+				printf("server received SELECT event packet from client\n");
+				break;
 			case SELECT0_EVENT:
 				printf("server received SELECT0 event packet from client\n");
+				//gameData->getPlayer(iter->first)->setModelType(ModelType::DEFAULT);
+
 				break;
 			case SELECT1_EVENT:
 				printf("server received SELECT1 event packet from client\n");
@@ -114,213 +137,245 @@ void ServerGame::receiveFromClients()
 				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
 				break;
 			case FORWARD_EVENT:
-				if (chefWin || animalWin) { break; }
+				if (gameStarted)
+				{
+					if (chefWin || animalWin) { break; }
 
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught() ||
-					gameData->getPlayer(iter->first)->getHidden()) { 
-					break; 
+					if (gameData->getPlayer(iter->first)->getInteracting() ||
+						gameData->getPlayer(iter->first)->getIsCaught() ||
+						gameData->getPlayer(iter->first)->getHidden()) {
+						break;
+					}
+
+					updateForwardEvent(iter->first);
+					updateCollision(iter->first);
+					updateHeight(iter->first);
 				}
-
-				updateForwardEvent(iter->first);
-				updateCollision(iter->first);
-				updateHeight(iter->first);
 				break;
 
 			case BACKWARD_EVENT:
-				if (chefWin || animalWin) { break; }
+				if (gameStarted)
+				{
+					if (chefWin || animalWin) { break; }
 
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught() ||
-					gameData->getPlayer(iter->first)->getHidden()) {
-					break;
+					if (gameData->getPlayer(iter->first)->getInteracting() ||
+						gameData->getPlayer(iter->first)->getIsCaught() ||
+						gameData->getPlayer(iter->first)->getHidden()) {
+						break;
+					}
+
+					updateBackwardEvent(iter->first);
+					updateCollision(iter->first);
+					updateHeight(iter->first);
 				}
-
-				updateBackwardEvent(iter->first);
-				updateCollision(iter->first);
-				updateHeight(iter->first);
 				break;
 
 			case LEFT_EVENT:
-				if (chefWin || animalWin) { break; }
+				if (gameStarted)
+				{
+					if (chefWin || animalWin) { break; }
 
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught() ||
-					gameData->getPlayer(iter->first)->getHidden()) {
-					break;
+					if (gameData->getPlayer(iter->first)->getInteracting() ||
+						gameData->getPlayer(iter->first)->getIsCaught() ||
+						gameData->getPlayer(iter->first)->getHidden()) {
+						break;
+					}
+
+					updateLeftEvent(iter->first);
+					updateCollision(iter->first);
+					updateHeight(iter->first);
 				}
-
-				updateLeftEvent(iter->first);
-				updateCollision(iter->first);
-				updateHeight(iter->first);
 				break;
 
 			case RIGHT_EVENT:
-				if (chefWin || animalWin) { break; }
+				if (gameStarted)
+				{
+					if (chefWin || animalWin) { break; }
 
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught() ||
-					gameData->getPlayer(iter->first)->getHidden()) {
-					break;
+					if (gameData->getPlayer(iter->first)->getInteracting() ||
+						gameData->getPlayer(iter->first)->getIsCaught() ||
+						gameData->getPlayer(iter->first)->getHidden()) {
+						break;
+					}
+
+					updateRightEvent(iter->first);
+					updateCollision(iter->first);
+					updateHeight(iter->first);
 				}
-
-				updateRightEvent(iter->first);
-				updateCollision(iter->first);
-				updateHeight(iter->first);
 				break;
 
 			case INTERACT_EVENT:
 			{
-				if (chefWin || animalWin) { break; }
-
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught() ||
-					gameData->getPlayer(iter->first)->getHidden()) {
-					break;
-				}
-
-				Location loc = gameData->getPlayer(iter->first)->getLocation();
-				//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
-				if (gameData->getPlayer(iter->first)->isChef()) 
+				if (gameStarted)
 				{
-					if (gameData->getPlayer(iter->first)->getCaughtAnimal())
+					if (chefWin || animalWin) { break; }
+
+					if (Player * player = gameData->getPlayer(iter->first))
 					{
-						std::cout << "CAUGHT ANIMAL" << std::endl;
-
-						//drop off animal
-						if (gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
-						{
-							int animal = gameData->getPlayer(iter->first)->getCaughtAnimalId();
-							//update jail with animal
-							std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
-							gameData->getAtlas()->placeInJail(loc, animal);
-							gameData->getPlayer(iter->first)->setCaughtAnimal(false);
-
-							//update animal's location to jail
-							int x = (int)(loc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
-							int y = loc.getY();
-							int z = (int)(loc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
-							gameData->getPlayer(animal)->setLocation(x, y, z);
+						if (player->getInteracting() ||
+							player->getIsCaught() ||
+							player->getHidden()) {
+							break;
 						}
-					}
-					else
-					{
-						std::cout << "SWINGING" << std::endl;
-						if (!gameData->getPlayer(iter->first)->getInteracting())
-						{
-							std::cout << "CAN SWING" << std::endl;
-							gameData->getPlayer(iter->first)->setInteracting(true);
-							gameData->getPlayer(iter->first)->setStartTime();
 
-							chefWin = true;
-							std::map<unsigned int, SOCKET>::iterator iter2;
-							for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
+						Location loc = player->getLocation();
+						/*if (player->isChef())
+						{
+							*///if (player->getIsCaught()) { break; }
+
+							//Location loc = player->getLocation();
+							if (player->isChef())
 							{
-								if (iter2 == iter || gameData->getPlayer(iter2->first)->isChef())
+								std::cout << "CAUGHT ANIMAL" << std::endl;
+
+								//drop off animal
+								if (player->getCaughtAnimal() && gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 								{
-									if (!gameData->getPlayer(iter2->first)->isChef() &&
-										!gameData->getPlayer(iter2->first)->getIsCaught()) 
+									int animal = player->getCaughtAnimalId();
+									//update jail with animal
+									std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
+									gameData->getAtlas()->placeInJail(loc, animal);
+									player->setCaughtAnimal(false);
+
+									//update animal's location to jail
+									int x = (int)(loc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+									int y = loc.getY();
+									int z = (int)(loc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+									gameData->getPlayer(animal)->setLocation(x, y, z);
+
+								}
+								else
+								{
+									std::cout << "SWINGING" << std::endl;
+									if (!player->getInteracting())
 									{
-										chefWin = false;
+										std::cout << "CAN SWING" << std::endl;
+										player->setInteracting(true);
+										player->setActionStartTime();
+
+										chefWin = true;
+										std::map<unsigned int, SOCKET>::iterator iter2;
+										for (iter2 = network->sessions.begin(); iter2 != network->sessions.end(); iter2++)
+										{
+											if (iter2 == iter || gameData->getPlayer(iter2->first)->isChef())
+											{
+												if (!gameData->getPlayer(iter2->first)->isChef() &&
+													!gameData->getPlayer(iter2->first)->getIsCaught())
+												{
+													chefWin = false;
+												}
+												continue;
+											}
+											Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
+											//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
+											if (player->inRange(loc, tLoc) &&
+												!gameData->getPlayer(iter2->first)->getIsCaught())
+											{
+												player->setCaughtAnimal(true);
+												player->setCaughtAnimalId(iter2->first);
+												gameData->getPlayer(iter2->first)->setIsCaught(true);
+											}
+											continue;
+										}
+										Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
+										//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
+										if (player->inRange(loc, tLoc) &&
+											!gameData->getPlayer(iter2->first)->getIsCaught())
+										{
+											player->setCaughtAnimal(true);
+											player->setCaughtAnimalId(iter2->first);
+											gameData->getPlayer(iter2->first)->setIsCaught(true);
+
+											//update animal's location to somewhere off map
+											gameData->getPlayer(iter2->first)->setLocation(-100, -100, -100);
+										}
+
+										if (!gameData->getPlayer(iter2->first)->getIsCaught())
+										{
+											chefWin = false;
+										}
 									}
-									continue;
+									if (chefWin)
+									{
+										std::cout << "CHEF WIN" << std::endl;
+									}
 								}
-								Location tLoc = gameData->getPlayer(iter2->first)->getLocation();
-								//std::vector<float> theirLoc{ tLoc.getX(), tLoc.getY(), tLoc.getZ() };
-								if (gameData->getPlayer(iter->first)->inRange(loc, tLoc) &&
-									!gameData->getPlayer(iter2->first)->getIsCaught())
+							}
+							else
+							{
+								Location loc = player->getLocation();
+								ItemName item = gameData->getAtlas()->getTileItem(loc);
+
+								if (item != ItemName::EMPTY && player->getInventory() == ItemName::EMPTY)
 								{
-									gameData->getPlayer(iter->first)->setCaughtAnimal(true);
-									gameData->getPlayer(iter->first)->setCaughtAnimalId(iter2->first);
-									gameData->getPlayer(iter2->first)->setIsCaught(true);
+									player->setInventory(item);
+									gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
 
-									//update animal's location to somewhere off map
-									gameData->getPlayer(iter2->first)->setLocation(-100, -100, -100);
 								}
-
-								if (!gameData->getPlayer(iter2->first)->getIsCaught())
+								//else if (gameData->getAtlas()->hasGate(loc))
+								else if (GateTile * gateTile = gameData->getGateTile(loc))
 								{
-									chefWin = false;
+									
+									//GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+									if (gateTile->isValidKey(static_cast<Key>(player->getInventory())))
+									{
+
+										gateTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
+										player->setInventory(ItemName::EMPTY);
+									}
+									if (gateTile->hasAllKeys() && !player->getOpeningGate())
+									{
+
+										player->setOpeningGate(true);
+										player->setActionStartTime();
+									}
+									if (gateTile->hasAllKeys() && gateTile->isOpen())
+									{
+										if (static_cast<Key>(player->getInventory()) == Key::CAKE)
+										{
+											animalWin = true;
+											std::cout << "ANIMAL WIN" << std::endl;
+										}
+
+									}
+								}
+								//else if (gameData->getAtlas()->hasJail(loc))
+								else if (JailTile * jailTile = gameData->getJailTile(loc))
+								{
+									//JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
+									player->setOpenJail(true);
+									player->setStartJailTime();
+
+									//update jail progres
+									std::cout << "UNLOCKING JAIL" << std::endl;
+
+									jailTile->unlockJail();
+
+
+									//check if jail progress == 5
+									if (jailTile->getProgress() >= 5)
+									{
+										std::cout << "ANIMAL IS RELEASED" << std::endl;
+										//update animal 
+										int animal = jailTile->getCapturedAnimal();
+										gameData->getPlayer(animal)->setIsCaught(false);
+
+										//update jail
+										jailTile->resetJail();
+
+									}
+								}
+								else if (gameData->getAtlas()->hasBox(loc))
+								{
+									std::cout << "HAS BOX" << std::endl;
+									if (!player->getInteracting()) {
+										std::cout << "starting to interact!" << std::endl;
+										player->setInteracting(true);
+										player->setActionStartTime();
+									}
 								}
 							}
-							if (chefWin) 
-							{
-								std::cout << "CHEF WIN" << std::endl;
-							}
-						}
-					}
-				}
-				else
-				{
-					Location loc = gameData->getPlayer(iter->first)->getLocation();
-					ItemName item = gameData->getAtlas()->getTileItem(loc);
-					
-					if (item != ItemName::EMPTY && gameData->getPlayer(iter->first)->getInventory() == ItemName::EMPTY)
-					{
-						gameData->getPlayer(iter->first)->setInventory(item);
-						gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
-
-					}
-					else if (gameData->getAtlas()->hasGate(loc))
-					{
-
-						GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-						if (gateTile->isValidKey(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory())))
-						{
-							gateTile->updateKeyProgress(static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()));
-							gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
-						}
-						if (gateTile->hasAllKeys() && !gameData->getPlayer(iter->first)->getOpeningGate())
-						{
-
-							gameData->getPlayer(iter->first)->setOpeningGate(true);
-							gameData->getPlayer(iter->first)->setStartTime();
-						}
-						if (gateTile->hasAllKeys() && gateTile->isOpen())
-						{
-							if (static_cast<Key>(gameData->getPlayer(iter->first)->getInventory()) == Key::CAKE)
-							{
-								animalWin = true;
-								std::cout << "ANIMAL WIN" << std::endl;
-							}
-						}
-					}
-					else if (gameData->getAtlas()->hasJail(loc))
-					{
-						std::cout << "HAS JAIL" << std::endl;
-						if (!gameData->getAtlas()->isJailEmpty(loc))
-						{
-							JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
-							gameData->getPlayer(iter->first)->setOpenJail(true);
-							gameData->getPlayer(iter->first)->setStartJailTime();
-							
-							//update jail progres
-							std::cout << "UNLOCKING JAIL" << std::endl;
-
-							jailTile->unlockJail();
-
-
-							//check if jail progress == 5
-							if (jailTile->getProgress() >= 5)
-							{
-							std::cout << "ANIMAL IS RELEASED" << std::endl;
-								//update animal 
-								int animal = jailTile->getCapturedAnimal();
-								gameData->getPlayer(animal)->setIsCaught(false);
-
-								//update jail
-								jailTile->resetJail();
-							}
-						}
-					}
-					else if (gameData->getAtlas()->hasBox(loc))
-					{
-						std::cout << "HAS BOX" << std::endl;
-						if (!gameData->getPlayer(iter->first)->getInteracting()) {
-							std::cout << "starting to interact!" << std::endl;
-							gameData->getPlayer(iter->first)->setInteracting(true);
-							gameData->getPlayer(iter->first)->setStartTime();
-						}
+						//}
 					}
 				}
 				break;
@@ -328,81 +383,83 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
-				if (chefWin || animalWin) { break; }
-
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught() ||
-					gameData->getPlayer(iter->first)->getHidden()) {
-					break;
-				}
-
-				Location loc = gameData->getPlayer(iter->first)->getLocation();
-
-				if (gameData->getPlayer(iter->first)->getInteracting()) {
-					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-					if (seconds > gameData->getBoxTime()) {
-						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
-						gameData->getAtlas()->updateBoxLayout(loc);
-						gameData->getPlayer(iter->first)->setInteracting(false);
-					}
-				}
-
-				if (gameData->getPlayer(iter->first)->getInteracting() && 
-					!gameData->getPlayer(iter->first)->isChef()) {
-					std::cout << "RELEASED SPACE" << std::endl;
-					gameData->getPlayer(iter->first)->setInteracting(false);
-				}
-
-
-				if (gameData->getPlayer(iter->first)->getOpeningGate() &&
-					!gameData->getPlayer(iter->first)->isChef() && gameData->getAtlas()->hasGate(loc))
+				if (gameStarted)
 				{
-					GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-					if (!gateTile->isOpen())
-					{
-						std::cout << "RELEASED SPACE" << std::endl;
-						gameData->getPlayer(iter->first)->setOpeningGate(false);
+					if (chefWin || animalWin) { break; }
 
-						//update progress of gate 
-						double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-						gateTile->constructGate(seconds);
+					if (Player * player = gameData->getPlayer(iter->first))
+					{
+						if (player->getInteracting() ||
+							player->getIsCaught() ||
+							player->getHidden()) {
+							break;
+						}
+
+						Location loc = player->getLocation();
+
+						if (player->getInteracting()) {
+							double seconds = player->getInteractingTime(0);
+							if (seconds > gameData->getBoxTime()) {
+								std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
+								gameData->getAtlas()->updateBoxLayout(loc);
+								player->setInteracting(false);
+							}
+						}
+
+						if (player->getInteracting() &&
+							!player->isChef()) {
+							std::cout << "RELEASED SPACE" << std::endl;
+							player->setInteracting(false);
+						}
+
+
+						if (player->getOpeningGate() &&
+							!player->isChef() && gameData->getAtlas()->hasGate(loc))
+						{
+							GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+							if (!gateTile->isOpen())
+							{
+								std::cout << "RELEASED SPACE" << std::endl;
+								player->setOpeningGate(false);
+
+								//update progress of gate 
+								double seconds = player->getInteractingTime(0);
+								gateTile->constructGate(seconds);
+							}
+						}
 					}
 				}
+			
 				break;
 			}
 			case DROP_EVENT:
 			{
-				if (chefWin || animalWin) { break; }
-
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught() ||
-					gameData->getPlayer(iter->first)->getHidden()) {
-					break;
-				}
-
-				Location loc = gameData->getPlayer(iter->first)->getLocation();
-
-				// PLayer cannot drop item if there is an item already on the current tile
-				if (!(gameData->getAtlas()->tileHasItem(loc)))
+				if (gameStarted)
 				{
-					ItemName itemName = gameData->getPlayer(iter->first)->getInventory();
-					gameData->getAtlas()->updateTileItem(loc, itemName);
-					gameData->getPlayer(iter->first)->setInventory(ItemName::EMPTY);
+					if (chefWin || animalWin) { break; }
 
-					gameData->getAtlas()->updateDroppedItem(itemName, loc);
-					/*Item temp;
-					gameData->getAtlas()->getItem(itemName, temp);
-					if (temp.getName() != ItemName::EMPTY)
+					if (Player * player = gameData->getPlayer(iter->first))
 					{
-						temp.setHoldStatus(false);
-						int row, col;
-						Atlas::getMapCoords(loc, row, col);
-						if (temp.hasBeenMoved(row, col))
-						{
-							temp.setDropped(true);
-							temp.setDroppedTime(clock());
+						if (player->getInteracting() ||
+							player->getIsCaught() ||
+							player->getHidden()) {
+							break;
 						}
-					}*/
+
+
+						Location loc = player->getLocation();
+
+						// PLayer cannot drop item if there is an item already on the current tile
+						if (!(gameData->getAtlas()->tileHasItem(loc)))
+						{
+							ItemName itemName = player->getInventory();
+							gameData->getAtlas()->updateTileItem(loc, itemName);
+							player->setInventory(ItemName::EMPTY);
+
+							gameData->getAtlas()->updateDroppedItem(itemName, loc);
+
+						}
+					}
 				}
 				break;
 			}
@@ -410,39 +467,42 @@ void ServerGame::receiveFromClients()
 			{
 				if (chefWin || animalWin) { break; }
 
-				if (gameData->getPlayer(iter->first)->getInteracting() ||
-					gameData->getPlayer(iter->first)->getIsCaught()) {
-					break;
-				}
-
-				Location loc = gameData->getPlayer(iter->first)->getLocation();
-				if (!(gameData->getAtlas()->hasHide(loc))) { return; }
-
-				HideTile * hideTile = (HideTile *)(gameData->getAtlas()->getTileAt(loc));
-
-				if (gameData->getPlayer(iter->first)->isChef()) {
-					if (!hideTile->checkHideTileEmpty())
-					{
-						int animal = hideTile->getAnimalHiding();
-						gameData->getPlayer(animal)->setIsCaught(true);
-						gameData->getPlayer(iter->first)->setCaughtAnimalId(animal);
-						gameData->getPlayer(iter->first)->setCaughtAnimal(true);
-						gameData->getPlayer(iter->first)->setHidden(false);
-						hideTile->setAnimalHiding(-1);
+				if (Player * player = gameData->getPlayer(iter->first))
+				{
+					if (player->getInteracting() ||
+						player->getIsCaught()) {
+						break;
 					}
-				}
-				else {
-					if (gameData->getPlayer(iter->first)->getHidden()) 
-					{
-						gameData->getPlayer(iter->first)->setHidden(false);
-						hideTile->setAnimalHiding(-1);
+
+					Location loc = player->getLocation();
+					if (!(gameData->getAtlas()->hasHide(loc))) { return; }
+
+					HideTile * hideTile = (HideTile *)(gameData->getAtlas()->getTileAt(loc));
+
+					if (player->isChef()) {
+						if (!hideTile->checkHideTileEmpty())
+						{
+							int animal = hideTile->getAnimalHiding();
+							gameData->getPlayer(animal)->setIsCaught(true);
+							player->setCaughtAnimalId(animal);
+							player->setCaughtAnimal(true);
+							player->setHidden(false);
+							hideTile->setAnimalHiding(-1);
+						}
 					}
-					else if (hideTile->checkHideTileEmpty())
-					{
-						//set hideTile full
-						hideTile->setAnimalHiding(iter->first);
-						//set animal to hidden
-						gameData->getPlayer(iter->first)->setHidden(true);
+					else {
+						if (player->getHidden())
+						{
+							player->setHidden(false);
+							hideTile->setAnimalHiding(-1);
+						}
+						else if (hideTile->checkHideTileEmpty())
+						{
+							//set hideTile full
+							hideTile->setAnimalHiding(iter->first);
+							//set animal to hidden
+							player->setHidden(true);
+						}
 					}
 				}
 				break;
@@ -469,25 +529,45 @@ void ServerGame::receiveFromClients()
 	}
 	gameData->getAtlas()->checkDroppedItems();
 	//sendActionPackets(); // uncomment to always send data from server
+	if (gameData->countdownStarted() && !gameData->countdownDone())
+	{
+		sendActionPackets();
+	}
+
+	if (gameData->countdownDone())
+	{
+		gameStarted = true;
+	}
+
+	if (initCharacters)
+	{
+		initCharacters = false;
+	}
+	allPlayersReady = true;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
-		if (gameData->getPlayer(iter->first)) {
-			Location loc = gameData->getPlayer(iter->first)->getLocation();
+		if (Player * player = gameData->getPlayer(iter->first))
+		{
+			if (!player->isReady())
+			{
+				allPlayersReady = false;
+			}
+			Location loc = player->getLocation();
 			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 
-			if (gameData->getPlayer(iter->first)->getIsCaught())
+			if (player->getIsCaught())
 			{
 				continue;
 			}
 
-			if (gameData->getPlayer(iter->first)->getInteracting())
+			if (player->getInteracting())
 			{
-				double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
-				if (gameData->getPlayer(iter->first)->isChef())
+				double seconds = player->getInteractingTime(0);
+				if (player->isChef())
 				{
 					if (seconds > gameData->getChefSwingTime()) {
 						std::cout << "CAN SWING AGAIN" << std::endl;
-						gameData->getPlayer(iter->first)->setInteracting(false);
+						player->setInteracting(false);
 					}
 				}
 				else
@@ -495,18 +575,18 @@ void ServerGame::receiveFromClients()
 					if (seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
-						gameData->getPlayer(iter->first)->setInteracting(false);
+						player->setInteracting(false);
 					}
 				}
 			}
 
-			if (gameData->getPlayer(iter->first)->getOpenJail()) 
+			if (player->getOpenJail()) 
 			{
-				double seconds = gameData->getPlayer(iter->first)->checkProgress(1);
-				if (!gameData->getPlayer(iter->first)->isChef())
+				double seconds = player->getInteractingTime(1);
+				if (!player->isChef())
 				{
 					if (seconds > gameData->getOpenJailTime()) {
-						gameData->getPlayer(iter->first)->setOpenJail(false);
+						player->setOpenJail(false);
 					}
 				}
 			}
@@ -517,9 +597,9 @@ void ServerGame::receiveFromClients()
 
 				if (!gateTile->isOpen())
 				{
-					double seconds = gameData->getPlayer(iter->first)->checkProgress(0);
+					double seconds = player->getInteractingTime(0);
 
-					if (gameData->getPlayer(iter->first)->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
+					if (player->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
 					{
 						std::cout << "GATE CONSTRUCTED" << std::endl;
 						gateTile->constructGate(seconds);
@@ -567,7 +647,7 @@ void ServerGame::initNewClient()
 	//updating current data structure to hold onto client
 	//std::vector<int> loc{ 10, 0, 10 };
 
-	gameData->addNewClient(client_id, Location(30, 0, 30));
+	gameData->addNewPlayer(client_id, Location(30, 0, 30), ClientType::SERVER_SIDE);
 }
 
 void ServerGame::updateRightEvent(int id)
@@ -709,7 +789,7 @@ void ServerGame::resetGame()
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		Location loc = gameData->initLocs[count];
-		gameData->addNewClient(iter->first, loc);
+		gameData->addNewPlayer(iter->first, loc, ClientType::SERVER_SIDE);
 		count++;
 	}
 	std::cout << "GAME RESET" << std::endl;
