@@ -304,12 +304,12 @@ void ServerGame::receiveFromClients()
 							else
 							{
 								Location loc = player->getLocation();
-								ItemName item = gameData->getAtlas()->getTileItem(loc);
+								ItemModelType item = gameData->getAtlas()->getTileItem(loc);
 
-								if (item != ItemName::EMPTY && player->getInventory() == ItemName::EMPTY)
+								if (item != ItemModelType::EMPTY && player->getInventory() == ItemModelType::EMPTY)
 								{
 									player->setInventory(item);
-									gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
+									gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
 
 								}
 								//else if (gameData->getAtlas()->hasGate(loc))
@@ -321,7 +321,7 @@ void ServerGame::receiveFromClients()
 									{
 
 										gateTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
-										player->setInventory(ItemName::EMPTY);
+										player->setInventory(ItemModelType::EMPTY);
 									}
 									if (gateTile->hasAllKeys() && !player->getOpeningGate())
 									{
@@ -452,9 +452,9 @@ void ServerGame::receiveFromClients()
 						// PLayer cannot drop item if there is an item already on the current tile
 						if (!(gameData->getAtlas()->tileHasItem(loc)))
 						{
-							ItemName itemName = player->getInventory();
+							ItemModelType itemName = player->getInventory();
 							gameData->getAtlas()->updateTileItem(loc, itemName);
-							player->setInventory(ItemName::EMPTY);
+							player->setInventory(ItemModelType::EMPTY);
 
 							gameData->getAtlas()->updateDroppedItem(itemName, loc);
 

@@ -10,17 +10,17 @@ class Tile
 public:
 
 	// Constructor with default values if no params set
-	Tile(TileType aType = TileType::DEFAULT, int aWallLayout = 0, int aHeight = 0, ItemName anItem = ItemName::EMPTY);
+	Tile(TileType aType = TileType::DEFAULT, int aWallLayout = 0, int aHeight = 0, ItemModelType anItem = ItemModelType::EMPTY);
 	
 	// Getters
 	TileType	getTileType();
 	int			getWall();
 	int			getHeight();
-	ItemName	getItem();
+	ItemModelType	getItem();
 	bool		isDirty();
 
 	// Setters
-	void setItem(ItemName anItem);
+	void setItem(ItemModelType anItem);
 	void setDirty();
 
 	// Encode/Decode functions - overridden in subclasses
@@ -31,7 +31,7 @@ public:
 	//bool hasBox() const; 
 	int getWall() const;
 	int getHeight() const;
-	ItemName getItem() const;
+	ItemModelType getItem() const;
 	TileType getTileType() const;
 
 //	std::string encodeTileData();
@@ -42,7 +42,7 @@ protected:
 	TileType	tileType;
 	int			wall;
 	int			height;
-	ItemName	itemName;
+	ItemModelType	itemName;
 	
 	// Additional variables
 	bool		dirty;

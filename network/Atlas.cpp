@@ -162,11 +162,11 @@ Atlas::Atlas()
 		// Gets row and col location of the box
 		int row = boxLocationsIter->first;
 		int col = boxLocationsIter->second;
-		ItemName randItem = ItemName::EMPTY;
+		ItemModelType randItem = ItemModelType::EMPTY;
 		
 		// Get random item that is still available
 		while(std::find(itemList.begin(), itemList.end(), randItem) == itemList.end())
-			randItem = static_cast<ItemName>(rand() % MAX_ITEMS + 1);
+			randItem = static_cast<ItemModelType>(rand() % MAX_ITEMS + 1);
 
 		itemsMap.emplace(randItem, Item(randItem, row, col));
 		keyLocations[row][col] = static_cast<int>(randItem);
@@ -252,19 +252,19 @@ void Atlas::detectCollision(Location & loc) {
 	}
 }
 
-ItemName Atlas::getTileItem(Location & loc)
+ItemModelType Atlas::getTileItem(Location & loc)
 {
 	// find which tile player is in
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
 	if (row >= tileLayout.size() || col >= tileLayout[row].size())
-		return ItemName::EMPTY;
+		return ItemModelType::EMPTY;
 
 	return tileLayout[row][col]->getItem();
 }
 
-void Atlas::getItem(ItemName anItem, Item & outputItem)
+void Atlas::getItem(ItemModelType anItem, Item & outputItem)
 {
 	if (itemsMap.count(anItem) > 0)
 	{
@@ -402,11 +402,11 @@ void Atlas::updateBoxLayout(Location & loc)
 	}
 
 	if (keyLocations[row][col]) {
-		tileLayout[row][col]->setItem(static_cast<ItemName>(keyLocations[row][col]));
+		tileLayout[row][col]->setItem(static_cast<ItemModelType>(keyLocations[row][col]));
 	}
 }
 
-void Atlas::updateTileItem(Location & loc, ItemName anItem)
+void Atlas::updateTileItem(Location & loc, ItemModelType anItem)
 {
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
@@ -415,9 +415,9 @@ void Atlas::updateTileItem(Location & loc, ItemName anItem)
 		return;
 
 	// If param is EMPTY, then an item has been picked up
-	if (anItem == ItemName::EMPTY)
+	if (anItem == ItemModelType::EMPTY)
 	{
-		ItemName currItem = tileLayout[row][col]->getItem();
+		ItemModelType currItem = tileLayout[row][col]->getItem();
 		if (itemsMap.count(currItem) > 0)
 		{
 			itemsMap.at(currItem).resetDropStatus();
@@ -439,10 +439,10 @@ bool Atlas::tileHasItem(Location & loc)
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	return tileLayout[row][col]->getItem() != ItemName::EMPTY;
+	return tileLayout[row][col]->getItem() != ItemModelType::EMPTY;
 }
 
-void Atlas::updateDroppedItem(ItemName anItem, Location loc)
+void Atlas::updateDroppedItem(ItemModelType anItem, Location loc)
 {
 	if (itemsMap.count(anItem) > 0)
 	{
@@ -475,17 +475,17 @@ void Atlas::checkDroppedItems()
 }
 
 // Recursive function to return items back to spawn if they cannot find an adjacent free tile
-void Atlas::returnItemToSpawn(ItemName anItem, int spawnRow, int spawnCol)
+void Atlas::returnItemToSpawn(ItemModelType anItem, int spawnRow, int spawnCol)
 {
 
 	int dropRow, dropCol;
 	itemsMap[anItem].getDropLocation(dropRow, dropCol);
-	tileLayout[dropRow][dropCol]->setItem(ItemName::EMPTY);
+	tileLayout[dropRow][dropCol]->setItem(ItemModelType::EMPTY);
 
 	// Check if spawn tile location has an item
-	if (tileLayout[spawnRow][spawnCol]->getItem() != ItemName::EMPTY)
+	if (tileLayout[spawnRow][spawnCol]->getItem() != ItemModelType::EMPTY)
 	{
-		ItemName occupyingItem = tileLayout[spawnRow][spawnCol]->getItem();
+		ItemModelType occupyingItem = tileLayout[spawnRow][spawnCol]->getItem();
 
 		int destRow, destCol;
 		getAdjacentFreeTile(spawnRow, spawnCol, destRow, destCol);
@@ -521,7 +521,7 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 		if (!wall[3]) {
 			if (currCol - radius > 0)
 			{
-				if (tileLayout[currRow][currCol - radius]->getItem() == ItemName::EMPTY)
+				if (tileLayout[currRow][currCol - radius]->getItem() == ItemModelType::EMPTY)
 				{
 					freeTiles.push_back(std::pair<int, int>(currRow, currCol - radius));
 				}
@@ -531,7 +531,7 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 		if (!wall[2]) {
 			if (currRow - radius > 0)
 			{
-				if (tileLayout[currRow - radius][currCol]->getItem() == ItemName::EMPTY)
+				if (tileLayout[currRow - radius][currCol]->getItem() == ItemModelType::EMPTY)
 				{
 					freeTiles.push_back(std::pair<int, int>(currRow - radius, currCol ));
 				}
@@ -541,7 +541,7 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 		if (!wall[1]) {
 			if (currRow + radius > tileLayout.size())
 			{
-				if (tileLayout[currRow + radius][currCol]->getItem() == ItemName::EMPTY)
+				if (tileLayout[currRow + radius][currCol]->getItem() == ItemModelType::EMPTY)
 				{
 					freeTiles.push_back(std::pair<int, int>(currRow + radius, currCol));
 				}
@@ -551,7 +551,7 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 		if (!wall[0]) {
 			if (currCol + radius < tileLayout[currRow].size())
 			{
-				if (tileLayout[currRow][currCol + radius]->getItem() == ItemName::EMPTY)
+				if (tileLayout[currRow][currCol + radius]->getItem() == ItemModelType::EMPTY)
 				{
 					freeTiles.push_back(std::pair<int, int>(currRow, currCol + radius));
 				}

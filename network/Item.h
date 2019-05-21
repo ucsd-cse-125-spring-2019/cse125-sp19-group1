@@ -1,18 +1,19 @@
 #pragma once
 #include "Location.h"
 #include <chrono>
+#include "../graphics/GraphicsClient/ItemModelType.h"
 
-enum class ItemName { EMPTY = 0, KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE = 100 };
+//enum class ItemModelType { EMPTY = 0, KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9, CAKE = 100 };
 
 struct Item {
 
 public:
 
-	Item() : name(ItemName::EMPTY), location(Location()), dropTime(std::chrono::system_clock::now()), spawnRowIndex(0), spawnColIndex(0) {}
-	Item(ItemName anItem, Location aLoc) :name(anItem), location(aLoc), dropTime(std::chrono::system_clock::now()), spawnRowIndex(0), spawnColIndex(0) {}
-	Item(ItemName anItem, int row, int col) :name(anItem), location(Location()), dropTime(std::chrono::system_clock::now()), spawnRowIndex(row), spawnColIndex(col), droppedRowIndex(row), droppedColIndex(col) {}
+	Item() : name(ItemModelType::EMPTY), location(Location()), dropTime(std::chrono::system_clock::now()), spawnRowIndex(0), spawnColIndex(0) {}
+	Item(ItemModelType anItem, Location aLoc) :name(anItem), location(aLoc), dropTime(std::chrono::system_clock::now()), spawnRowIndex(0), spawnColIndex(0) {}
+	Item(ItemModelType anItem, int row, int col) :name(anItem), location(Location()), dropTime(std::chrono::system_clock::now()), spawnRowIndex(row), spawnColIndex(col), droppedRowIndex(row), droppedColIndex(col) {}
 
-	ItemName getName() { return name; }
+	ItemModelType getName() { return name; }
 	Location getLocation() { return location; }
 	void getSpawnLocation(int & row, int & col) { row = spawnRowIndex; col = spawnColIndex; }
 	void getDropLocation(int & row, int & col) { row = droppedRowIndex; col = droppedColIndex; }
@@ -41,7 +42,7 @@ public:
 	}
 
 protected:
-	ItemName name;
+	ItemModelType name;
 	Location location;
 	int spawnRowIndex;
 	int spawnColIndex;
