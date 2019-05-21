@@ -291,24 +291,25 @@ void ServerGame::receiveFromClients()
 							else
 							{
 								Location loc = player->getLocation();
-								ItemName item = gameData->getAtlas()->getTileItem(loc);
+								ItemModelType item = gameData->getAtlas()->getTileItem(loc);
 								Direction dir = player->getFacingDirection();
 								ObjectTile * objectTile = gameData->getAdjacentObjectTile(loc, dir);
 
-								if (player->getInventory() == ItemName::EMPTY && (item != ItemName::EMPTY || objectTile && objectTile->getItem() == ItemName::CAKE))
+								if (player->getInventory() == ItemModelType::EMPTY && (item != ItemModelType::EMPTY || objectTile && objectTile->getItem() == ItemModelType::cake))
 								{
 									
-									if (objectTile && objectTile->getItem() == ItemName::CAKE)
+									if (objectTile && objectTile->getItem() == ItemModelType::cake)
 									{
 										std::cout << "table has cake!" << std::endl;
 										player->setInventory(objectTile->getItem());
-										objectTile->setItem(ItemName::EMPTY);
+										objectTile->setItem(ItemModelType::EMPTY);
+
 
 									}
-									else if (item != ItemName::EMPTY)
+									else if (item != ItemModelType::EMPTY)
 									{
 										player->setInventory(item);
-										gameData->getAtlas()->updateTileItem(loc, ItemName::EMPTY);
+										gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
 									}
 								}
 								//else if (gameData->getAtlas()->hasGate(loc))
@@ -320,7 +321,7 @@ void ServerGame::receiveFromClients()
 									{
 
 										gateTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
-										player->setInventory(ItemName::EMPTY);
+										player->setInventory(ItemModelType::EMPTY);
 									}
 									if (gateTile->hasAllKeys() && !player->getOpeningGate())
 									{
@@ -330,7 +331,7 @@ void ServerGame::receiveFromClients()
 									}
 									if (gateTile->hasAllKeys() && gateTile->isOpen())
 									{
-										if (static_cast<Key>(player->getInventory()) == Key::CAKE)
+										if (player->getInventory() == ItemModelType::cake)
 										{
 											animalWin = true;
 											std::cout << "ANIMAL WIN" << std::endl;
@@ -450,9 +451,9 @@ void ServerGame::receiveFromClients()
 						// PLayer cannot drop item if there is an item already on the current tile
 						if (!(gameData->getAtlas()->tileHasItem(loc)))
 						{
-							ItemName itemName = player->getInventory();
+							ItemModelType itemName = player->getInventory();
 							gameData->getAtlas()->updateTileItem(loc, itemName);
-							player->setInventory(ItemName::EMPTY);
+							player->setInventory(ItemModelType::EMPTY);
 
 							gameData->getAtlas()->updateDroppedItem(itemName, loc);
 

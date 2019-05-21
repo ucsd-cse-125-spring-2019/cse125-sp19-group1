@@ -32,7 +32,7 @@ public:
 	Player(int anID, Location aLoc);
 
 	// Getters
-	ItemName	getInventory() const;
+	ItemModelType	getInventory() const;
 	bool		getInteracting() const;
 	bool		getOpenJail() const;
 	bool		getOpeningGate() const;
@@ -48,7 +48,7 @@ public:
 	Direction getFacingDirection() const;
 
 	// Setters
-	void setInventory(ItemName anItem);
+	void setInventory(ItemModelType anItem);
 	void setModelType(ModelType type);
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
@@ -97,7 +97,7 @@ public:
 protected:
 	Location	location;
 	int			playerID;
-	ItemName	inventory;
+	ItemModelType	inventory;
 	bool		hasCake;
 	ModelType	modelType;
 	bool		interacting;
