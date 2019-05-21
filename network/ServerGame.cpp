@@ -388,8 +388,7 @@ void ServerGame::receiveFromClients()
 
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
-						if (player->getInteracting() ||
-							player->getIsCaught() ||
+						if (player->getIsCaught() ||
 							player->getHidden()) {
 							break;
 						}
