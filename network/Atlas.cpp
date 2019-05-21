@@ -25,6 +25,7 @@ Atlas::Atlas()
 	std::ifstream jailFile("../../maps/tinytinymap/player_trap.txt");
 	std::ifstream rampFile("../../maps/tinytinymap/ramps.txt");
 	std::ifstream keyDepositFile("../../maps/tinytinymap/key_deposit.txt");
+	std::ifstream objectFile("../../maps/tinytinymap/table.txt");
 
 	std::string wallLine;
 	std::string boxLine;
@@ -33,6 +34,9 @@ Atlas::Atlas()
 	std::string jailLine;
 	std::string rampLine;
 	std::string keyDepositLine;
+	std::string objectLine;
+
+	std::pair<int, int> tableLoc;
 
 	//printf("INITIALIZING WALLS!\n");
 
@@ -43,6 +47,7 @@ Atlas::Atlas()
 	std::getline(jailFile, jailLine); // removes first line from file
 	std::getline(rampFile, rampLine); // removes first line from file
 	std::getline(keyDepositFile, keyDepositLine); // removes first line from file
+	std::getline(objectFile, objectLine); // removes first line from file
 	int row = 0;
 	while (std::getline(wallFile, wallLine))
 	{
@@ -53,6 +58,7 @@ Atlas::Atlas()
 		std::getline(jailFile, jailLine);
 		std::getline(rampFile, rampLine);
 		std::getline(keyDepositFile, keyDepositLine);
+		std::getline(objectFile, objectLine);
 		std::stringstream wallStream(wallLine);
 		std::stringstream boxStream(boxLine);
 		std::stringstream gateStream(gateLine);
@@ -60,6 +66,7 @@ Atlas::Atlas()
 		std::stringstream jailStream(jailLine);
 		std::stringstream rampStream(rampLine);
 		std::stringstream keyDepositStream(keyDepositLine);
+		std::stringstream objectStream(objectLine);
 		std::string wallNum;
 		std::string boxNum;
 		std::string gateNum;
@@ -67,6 +74,7 @@ Atlas::Atlas()
 		std::string jailNum;
 		std::string rampNum;
 		std::string keyDepositNum;
+		std::string objectNum;
 		std::vector<Tile *> tileRow;
 		std::vector<int> keyLocationsRow;
 		while (wallStream >> wallNum)
@@ -78,6 +86,7 @@ Atlas::Atlas()
 			jailStream >> jailNum;
 			rampStream >> rampNum;
 			keyDepositStream >> keyDepositNum;
+			objectStream >> objectNum;
 
 			// Initialize default variables for a tile
 			TileType type(TileType::DEFAULT);
@@ -104,14 +113,17 @@ Atlas::Atlas()
 			{
 				type = TileType::KEY_DROP;
 			}
-
+			else if (objectNum != "0")
+			{
+				type = TileType::OBJECT;
+			}
 			switch (type)
 			{
 			case TileType::BOX:
 				tileRow.push_back(new BoxTile(wall, height));
 				boxLocations.push_back(std::pair<int, int>(row, col));
 				break;
-			case TileType::JAIL: // change to JailTile
+			case TileType::JAIL:
 				tileRow.push_back(new JailTile(wall, height));
 				break;
 			case TileType::GATE: 
@@ -123,8 +135,12 @@ Atlas::Atlas()
 			case TileType::KEY_DROP: // change to KeyDropTile
 				tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
 				break;
-			case TileType::TABLE: // change to ObjectTile
-				tileRow.push_back(new Tile(TileType::TABLE, wall, height));
+			case TileType::OBJECT: // change to ObjectTile
+				tileRow.push_back(new ObjectTile(static_cast<ObjectType>(std::stoi(objectNum)), wall, height));
+				if (objectNum == "1")
+				{
+					tableLoc = std::pair<int, int>(row, col);
+				}
 				break;
 			case TileType::DEFAULT: default:
 				tileRow.push_back(new Tile(TileType::DEFAULT, wall, height));
@@ -175,6 +191,8 @@ Atlas::Atlas()
 		itemList.erase(std::find(itemList.begin(), itemList.end(), randItem));
 	}
 
+	itemsMap.emplace(ItemModelType::cake, Item(ItemModelType::cake, tableLoc.first, tableLoc.second)); // adds cake to table location
+	tileLayout[tableLoc.first][tableLoc.second]->setItem(ItemModelType::cake);
 	std::cout << "keys" << std::endl;
 	// Debug print key layout
 	for (auto v : keyLocations)
@@ -188,7 +206,7 @@ Atlas::Atlas()
 	std::cout << "end atlas constructor\n";
 }
 
-void Atlas::detectCollision(Location & loc) {
+void Atlas::detectWallCollision(Location & loc) {
 	// find which tile player is in
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
@@ -250,6 +268,79 @@ void Atlas::detectCollision(Location & loc) {
 			loc.setX(right_bound - PLAYER_RADIUS);
 		}
 	}
+}
+void Atlas::detectObjectCollision(Location & loc) {
+	// find which tile player is in
+	int row = (int)(loc.getZ() / TILE_SIZE);
+	int col = (int)(loc.getX() / TILE_SIZE);
+
+	if (row >= tileLayout.size())
+		row = tileLayout.size() - 1;
+
+	else if (row < 0)
+		row = 0;
+
+	if (col >= tileLayout[row].size())
+	{
+		col = tileLayout[row].size() - 1;
+	}
+	else if (col < 0)
+		col = 0;
+
+
+	std::vector<Tile *> adjacentObjTiles;
+
+	if (row - 1 >= 0)
+	{
+		if (tileLayout[row - 1][col]->getTileType() == TileType::OBJECT)
+		{
+			int up_bound = row * TILE_SIZE;
+			if (loc.getZ() - PLAYER_RADIUS <= up_bound) {
+				printf("collided with up obj\n");
+				loc.setZ(up_bound + PLAYER_RADIUS);
+			}
+		}
+	}
+
+	if (row + 1 < tileLayout.size())
+
+	{
+		if (tileLayout[row + 1][col]->getTileType() == TileType::OBJECT)
+		{
+			int down_bound = row * TILE_SIZE + TILE_SIZE-1;// need -1 so that it does not go into the next tile
+			if (loc.getZ() + PLAYER_RADIUS >= down_bound) {
+				printf("collided with down obj\n");
+				loc.setZ(down_bound - PLAYER_RADIUS);
+			}
+		}
+	}
+	
+	if (col - 1 >= 0)
+	{
+		if (tileLayout[row][col - 1]->getTileType() == TileType::OBJECT)
+		{
+			int left_bound = col * TILE_SIZE;
+			if (loc.getX() - PLAYER_RADIUS <= left_bound) {
+				printf("collided with left obj\n");
+				loc.setX(left_bound + PLAYER_RADIUS);
+			}
+		}
+			
+		
+	}
+
+	if (col + 1 < tileLayout.size())
+	{
+		if (tileLayout[row][col + 1]->getTileType() == TileType::OBJECT)
+		{
+			int right_bound = col * TILE_SIZE + TILE_SIZE-1; // need -1 so that it does not go into the next tile
+			if (loc.getX() + PLAYER_RADIUS >= right_bound) {
+				printf("collided with right obj\n");
+				loc.setX(right_bound - PLAYER_RADIUS);
+			}
+		}
+	}
+
 }
 
 ItemModelType Atlas::getTileItem(Location & loc)
@@ -432,7 +523,10 @@ Tile * Atlas::getTileAt(Location & loc)
 	int row = (int)(loc.getZ() / TILE_SIZE);
 	int col = (int)(loc.getX() / TILE_SIZE);
 
-	return tileLayout[row][col];
+	if (row >= 0 && row < tileLayout.size() && col >= 0 && col < tileLayout[row].size())
+		return tileLayout[row][col];
+	else
+		return nullptr;
 }
 bool Atlas::tileHasItem(Location & loc)
 {
