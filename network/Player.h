@@ -30,7 +30,6 @@ public:
 	
 	// Constructors
 	Player();
-	Player(int anID);
 	Player(int anID, Location aLoc);
 
 	// Getters
@@ -85,24 +84,23 @@ public:
 	void addDecodeFunctions();
 	void decodeLocation(std::string value);
 	void decodeInventory(std::string value);
-	void decodeCakeStatus(std::string value);
 	void decodeModelType(std::string value);
 	void decodeHidden(std::string value);
+	void decodeInteractAction(std::string value);
 
 	// Encode functions
 	void addEncodeFunctions();
 	std::string encodeLocation();
 	std::string encodeInventory();
-	std::string encodeCakeStatus();
 	std::string encodeModelType();
 	std::string encodeHidden();
+	std::string encodeInteractAction();
 
 protected:
 	Action		action;
 	Location	location;
 	int			playerID;
 	ItemModelType	inventory;
-	bool		hasCake;
 	ModelType	modelType;
 	bool		interacting;
 	bool		openingJail;

@@ -285,7 +285,7 @@ void ServerGame::receiveFromClients()
 										gateTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
 										player->setInventory(ItemModelType::EMPTY);
 									}
-									if (gateTile->hasAllKeys() && !player->getOpeningGate())
+									if (gateTile->hasAllKeys() && !player->getOpeningGate() && !gateTile->isOpen())
 									{
 
 										//player->setOpeningGate(true);
@@ -620,6 +620,8 @@ void ServerGame::receiveFromClients()
 							{
 								std::cout << "GATE CONSTRUCTED" << std::endl;
 								gateTile->constructGate(seconds);
+								player->setInteracting(false);
+								player->setAction(Action::NONE);
 							}
 						}
 					}

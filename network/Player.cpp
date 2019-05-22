@@ -1,17 +1,8 @@
 #include "Player.h"
 
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
-Player::Player(int anID) : playerID(anID), inventory(ItemModelType::EMPTY), hasCake(false), modelType(ModelType::RACOON)
-{
-	location = Location();
-	addEncodeFunctions();
-	addDecodeFunctions();
-	if (anID == 1) {
-		modelType = ModelType::CHEF;
-	}
-}
 
-Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemModelType::EMPTY), hasCake(false), modelType(ModelType::RACOON)
+Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemModelType::EMPTY), modelType(ModelType::RACOON)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
@@ -48,6 +39,7 @@ void Player::setFacingDirection(Direction dir) { facingDirection = dir; }
 void Player::setAction(Action anAction)
 {
 	action = anAction;
+	dirtyVariablesMap["interactAction"] = true;
 }
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -203,10 +195,6 @@ void Player::decodeInventory(std::string value)
 {
 	inventory = static_cast<ItemModelType>(std::stoi(value));
 }
-void Player::decodeCakeStatus(std::string value)
-{
-	hasCake = std::stoi(value) == 1;
-}
 
 void Player::decodeModelType(std::string value)
 {
@@ -217,28 +205,33 @@ void Player::decodeHidden(std::string value)
 	hidden = std::stoi(value) == 1;
 }
 
+void Player::decodeInteractAction(std::string value)
+{
+	action = static_cast<Action>(std::stoi(value));
+}
+
 void Player::addDecodeFunctions()
 {
 	decodingFunctions["location"] = &Player::decodeLocation;
 	decodingFunctions["model"] = &Player::decodeModelType;
-	decodingFunctions["hasCake"] = &Player::decodeCakeStatus;
 	decodingFunctions["inventory"] = &Player::decodeInventory;
 	decodingFunctions["hidden"] = &Player::decodeHidden;
+	decodingFunctions["interactAction"] = &Player::decodeInteractAction;
 }
 
 void Player::addEncodeFunctions()
 {
 	encodingFunctions["location"] = &Player::encodeLocation;
 	encodingFunctions["model"] = &Player::encodeModelType;
-	encodingFunctions["hasCake"] = &Player::encodeCakeStatus;
 	encodingFunctions["inventory"] = &Player::encodeInventory;
 	encodingFunctions["hidden"] = &Player::encodeHidden;
+	encodingFunctions["interactAction"] = &Player::encodeInteractAction;
 
 	dirtyVariablesMap["location"] = true;
 	dirtyVariablesMap["inventory"] = true;
-	dirtyVariablesMap["hasCake"] = true;
 	dirtyVariablesMap["model"] = true;
 	dirtyVariablesMap["hidden"] = true;
+	dirtyVariablesMap["interactAction"] = true;
 
 }
 std::string Player::encodeLocation() {
@@ -252,13 +245,6 @@ std::string Player::encodeInventory() {
 	std::stringstream encodedData;
 	encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
 	dirtyVariablesMap["inventory"] = false;
-
-	return encodedData.str();
-}
-std::string Player::encodeCakeStatus() {
-	std::stringstream encodedData;
-	encodedData << "hasCake: " << hasCake << std::endl;
-	dirtyVariablesMap["hasCake"] = false;
 
 	return encodedData.str();
 }
@@ -279,4 +265,10 @@ std::string Player::encodeHidden() {
 	return encodedData.str();
 }
 
+std::string Player::encodeInteractAction() {
+	std::stringstream encodedData;
+	encodedData << "interactAction: " << static_cast<int>(action) << std::endl;
+	dirtyVariablesMap["interactAction"] = false;
 
+	return encodedData.str();
+}
