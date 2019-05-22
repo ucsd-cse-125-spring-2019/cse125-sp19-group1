@@ -1,13 +1,11 @@
 #pragma once
-
 #include "AbstractGraphicsEngine.h"
-#include "../../network/ClientGame.h"
 
-class InGameGraphicsEngine : public AbstractGraphicsEngine
+class LoadingGraphicsEngine : public AbstractGraphicsEngine
 {
 public:
-	InGameGraphicsEngine(ClientGame *newClient);
-	~InGameGraphicsEngine();
+	LoadingGraphicsEngine();
+	~LoadingGraphicsEngine();
 
 	virtual void StartLoading();  // may launch a thread and return immediately
 	virtual void CleanUp();

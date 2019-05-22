@@ -4,6 +4,7 @@
 
 #include "Tester.h"
 #include "InGameGraphicsEngine.h"
+#include "LoadingGraphicsEngine.h"
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
@@ -15,6 +16,7 @@ int windowHeight = 0;
 const char* window_title = GAME_NAME_SHORT;
 
 static InGameGraphicsEngine * inGameEngine;
+static LoadingGraphicsEngine * loadingEngine;
 static AbstractGraphicsEngine * currentEngine;
 static ServerGame * server = nullptr;
 static ClientGame * client = nullptr;
@@ -85,9 +87,11 @@ void Init()
 	//_beginthread(serverLoop, 0, (void*)12);
 
 	inGameEngine = new InGameGraphicsEngine(client);
-	currentEngine = inGameEngine;
+	loadingEngine = new LoadingGraphicsEngine();
+	currentEngine = loadingEngine;
 
 	inGameEngine->StartLoading();
+	loadingEngine->StartLoading();
 }
 
 void serverLoop(void * args) {
@@ -98,7 +102,13 @@ void serverLoop(void * args) {
 
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
+	currentEngine = nullptr;
+
 	inGameEngine->CleanUp();
+	loadingEngine->CleanUp();
+
+	delete inGameEngine;
+	delete loadingEngine;
 }
 
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -164,22 +174,22 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->KeyCallback(window, key, scancode, action, mods);
 }
 
 void CursorPosCallback(GLFWwindow * window, double xpos, double ypos) {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->CursorPosCallback(window, xpos, ypos);
 }
 
 void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset) {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->MouseWheelCallback(window, xoffset, yoffset);
 }
 
 void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods) {
-	if (currentEngine)
+	if (currentEngine && currentEngine->fullyLoaded)
 		currentEngine->MouseButtonCallback(window, button, action, mods);
 }
 
@@ -219,6 +229,12 @@ int main(void)
 
 		auto start = high_resolution_clock::now();
 
+		if (currentEngine == loadingEngine) {
+			if (inGameEngine->fullyLoaded) {
+				currentEngine = inGameEngine;
+			}
+		}
+		
 		if (currentEngine && currentEngine->fullyLoaded) {
 			if (!currentEngine->calledMainLoopBegin) {
 				currentEngine->ResizeCallback(window, windowWidth, windowHeight);

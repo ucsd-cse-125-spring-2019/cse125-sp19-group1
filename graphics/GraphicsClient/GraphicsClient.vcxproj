@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{A9924152-8D03-4207-BE62-CE1F5A6ACBE9}</ProjectGuid>
     <RootNamespace>GraphicsClient</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -164,6 +164,8 @@
     <ClInclude Include="ItemModelType.h" />
     <ClInclude Include="InGameGraphicsEngine.h" />
     <ClInclude Include="Keyframe.h" />
+    <ClInclude Include="LoadingGraphicsEngine.h" />
+    <ClInclude Include="lodepng.h" />
     <ClInclude Include="MeshEntry.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="objloader.h" />
@@ -177,6 +179,7 @@
     <ClInclude Include="UICanvas.h" />
     <ClInclude Include="UIObject.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\network\Atlas.cpp" />
@@ -202,6 +205,8 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="InGameGraphicsEngine.cpp" />
     <ClCompile Include="Keyframe.cpp" />
+    <ClCompile Include="LoadingGraphicsEngine.cpp" />
+    <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="MeshEntry.cpp" />
     <ClCompile Include="Node.cpp" />
     <ClCompile Include="objloader.cpp" />
@@ -215,6 +220,7 @@
     <ClCompile Include="UICanvas.cpp" />
     <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag" />
