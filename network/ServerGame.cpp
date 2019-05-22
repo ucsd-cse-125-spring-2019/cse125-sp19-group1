@@ -592,6 +592,7 @@ void ServerGame::receiveFromClients()
 						gameData->getAtlas()->updateBoxLayout(loc);
 						player->setInteracting(false);
 						player->setAction(Action::NONE);
+						sendActionPackets();
 					}
 				}
 				else if (player->getAction() == Action::UNLOCK_JAIL)
@@ -603,6 +604,7 @@ void ServerGame::receiveFromClients()
 							player->setOpenJail(false);
 							player->setInteracting(false);
 							player->setAction(Action::NONE);
+							sendActionPackets();
 						}
 					}
 				}
@@ -622,6 +624,7 @@ void ServerGame::receiveFromClients()
 								gateTile->constructGate(seconds);
 								player->setInteracting(false);
 								player->setAction(Action::NONE);
+								sendActionPackets();
 							}
 						}
 					}
