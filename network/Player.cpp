@@ -164,7 +164,7 @@ std::string Player::encodePlayerData(bool newPlayerInit)
 			if (encodingFunctions.count(key) > 0)
 			{
 				encodedData << (this->*encodingFunctions.at(key))();
-
+				dirtyVariablesMap[key] = false;
 			}
 			else
 				std::cout << "Missing encoding function for key " << key << std::endl;
@@ -237,14 +237,14 @@ void Player::addEncodeFunctions()
 std::string Player::encodeLocation() {
 	std::stringstream encodedData;
 	encodedData << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
-	dirtyVariablesMap["location"] = false;
+	//dirtyVariablesMap["location"] = false;
 
 	return encodedData.str();
 }
 std::string Player::encodeInventory() {
 	std::stringstream encodedData;
 	encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
-	dirtyVariablesMap["inventory"] = false;
+	//dirtyVariablesMap["inventory"] = false;
 
 	return encodedData.str();
 }
@@ -252,7 +252,7 @@ std::string Player::encodeInventory() {
 std::string Player::encodeModelType() {
 	std::stringstream encodedData;
 	encodedData << "model: " << static_cast<int>(modelType) << std::endl;
-	dirtyVariablesMap["model"] = false;
+	//dirtyVariablesMap["model"] = false;
 
 	return encodedData.str();
 }
@@ -260,7 +260,7 @@ std::string Player::encodeModelType() {
 std::string Player::encodeHidden() {
 	std::stringstream encodedData;
 	encodedData << "hidden: " << hidden << std::endl;
-	dirtyVariablesMap["hidden"] = false;
+	//dirtyVariablesMap["hidden"] = false;
 
 	return encodedData.str();
 }
@@ -268,7 +268,7 @@ std::string Player::encodeHidden() {
 std::string Player::encodeInteractAction() {
 	std::stringstream encodedData;
 	encodedData << "interactAction: " << static_cast<int>(action) << std::endl;
-	dirtyVariablesMap["interactAction"] = false;
+	//dirtyVariablesMap["interactAction"] = false;
 
 	return encodedData.str();
 }
