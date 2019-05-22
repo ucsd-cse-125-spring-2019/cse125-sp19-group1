@@ -36,10 +36,11 @@ void Player::toggleReady()
 	ready = !ready;
 }
 ItemModelType Player::getInventory() const { return inventory; }
-bool Player::getInteracting() { return interacting; }
+bool Player::isInteracting() { return interacting; }
 bool Player::getOpenJail() const { return openingJail; }
 bool Player::getOpeningGate() const { return openingGate; }
 bool Player::getHidden() { return hidden; }
+Action Player::getAction() const { return action; }
 
 Direction Player::getFacingDirection() const { return facingDirection; }
 void Player::setFacingDirection(Direction dir) { facingDirection = dir; std::cout << "updatefacing\n"; }

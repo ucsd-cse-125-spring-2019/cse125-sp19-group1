@@ -25,6 +25,7 @@ public:
 	void updateCollision(int id);
 	void updatePlayerCollision(int id, int dir);
 	void resetGame();
+	void updateMovement(int dir, int id);
 
 	GameData * gameData;
 private:

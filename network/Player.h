@@ -22,6 +22,8 @@ enum class Direction {
 	SOUTHWEST = SOUTH + WEST
 };
 
+enum class Action { OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET };
+
 class Player
 {
 public:
@@ -33,7 +35,8 @@ public:
 
 	// Getters
 	ItemModelType	getInventory() const;
-	bool		getInteracting() const;
+	bool		isInteracting() const;
+	Action		getAction() const;
 	bool		getOpenJail() const;
 	bool		getOpeningGate() const;
 	Location	getLocation() const;
@@ -54,7 +57,7 @@ public:
 	void setLocation(Location aLoc);
 	bool getHidden();
 	void setHidden(bool hide);
-	bool getInteracting();
+	bool isInteracting();
 
 	void setInteracting(bool interact);
 	void setOpenJail(bool interact);
@@ -95,6 +98,7 @@ public:
 	std::string encodeHidden();
 
 protected:
+	Action		action;
 	Location	location;
 	int			playerID;
 	ItemModelType	inventory;

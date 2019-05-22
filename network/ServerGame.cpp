@@ -137,83 +137,44 @@ void ServerGame::receiveFromClients()
 				printf("server received SELECT4 event packet from client\n");
 				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
 				break;
+				/*if (gameStarted && !(chefWin || animalWin))
+				{
+					if (chefWin || animalWin) { break; }*/
 			case FORWARD_EVENT:
-				if (gameStarted)
+				if (gameStarted && !(chefWin || animalWin)) 
 				{
-					if (chefWin || animalWin) { break; }
-
-					if (gameData->getPlayer(iter->first)->getInteracting() ||
-						gameData->getPlayer(iter->first)->getIsCaught() ||
-						gameData->getPlayer(iter->first)->getHidden()) {
-						break;
-					}
-
-					updateForwardEvent(iter->first);
-					updateCollision(iter->first);
-					updateHeight(iter->first);
+					updateMovement(1, playerID);
 				}
 				break;
-
+				
 			case BACKWARD_EVENT:
-				if (gameStarted)
+				if (gameStarted && !(chefWin || animalWin))
 				{
-					if (chefWin || animalWin) { break; }
-
-					if (gameData->getPlayer(iter->first)->getInteracting() ||
-						gameData->getPlayer(iter->first)->getIsCaught() ||
-						gameData->getPlayer(iter->first)->getHidden()) {
-						break;
-					}
-
-					updateBackwardEvent(iter->first);
-					updateCollision(iter->first);
-					updateHeight(iter->first);
+					updateMovement(2, playerID);
 				}
 				break;
-
+				
 			case LEFT_EVENT:
-				if (gameStarted)
+				if (gameStarted && !(chefWin || animalWin))
 				{
-					if (chefWin || animalWin) { break; }
-
-					if (gameData->getPlayer(iter->first)->getInteracting() ||
-						gameData->getPlayer(iter->first)->getIsCaught() ||
-						gameData->getPlayer(iter->first)->getHidden()) {
-						break;
-					}
-
-					updateLeftEvent(iter->first);
-					updateCollision(iter->first);
-					updateHeight(iter->first);
+					updateMovement(3, playerID);
 				}
 				break;
-
+				
 			case RIGHT_EVENT:
-				if (gameStarted)
+				if (gameStarted && !(chefWin || animalWin))
 				{
-					if (chefWin || animalWin) { break; }
-
-					if (gameData->getPlayer(iter->first)->getInteracting() ||
-						gameData->getPlayer(iter->first)->getIsCaught() ||
-						gameData->getPlayer(iter->first)->getHidden()) {
-						break;
-					}
-
-					updateRightEvent(iter->first);
-					updateCollision(iter->first);
-					updateHeight(iter->first);
+					updateMovement(4, playerID);
 				}
 				break;
-
 			case INTERACT_EVENT:
 			{
-				if (gameStarted)
+				if (gameStarted && !(chefWin || animalWin))
 				{
-					if (chefWin || animalWin) { break; }
 
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
-						if (player->getInteracting() ||
+						if (player->isInteracting() ||
 							player->getIsCaught() ||
 							player->getHidden()) {
 							break;
@@ -248,7 +209,7 @@ void ServerGame::receiveFromClients()
 								else
 								{
 									std::cout << "SWINGING" << std::endl;
-									if (!player->getInteracting())
+									if (!player->isInteracting())
 									{
 										std::cout << "CAN SWING" << std::endl;
 										player->setInteracting(true);
@@ -368,7 +329,7 @@ void ServerGame::receiveFromClients()
 								else if (gameData->getAtlas()->hasBox(loc))
 								{
 									std::cout << "HAS BOX" << std::endl;
-									if (!player->getInteracting()) {
+									if (!player->isInteracting()) {
 										std::cout << "starting to interact!" << std::endl;
 										player->setInteracting(true);
 										player->setActionStartTime();
@@ -383,9 +344,8 @@ void ServerGame::receiveFromClients()
 
 			case RELEASE_EVENT:
 			{
-				if (gameStarted)
+				if (gameStarted && !(chefWin || animalWin))
 				{
-					if (chefWin || animalWin) { break; }
 
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
@@ -396,7 +356,7 @@ void ServerGame::receiveFromClients()
 
 						Location loc = player->getLocation();
 
-						if (player->getInteracting()) {
+						if (player->isInteracting()) {
 							double seconds = player->getInteractingTime(0);
 							if (seconds > gameData->getBoxTime()) {
 								std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
@@ -405,7 +365,7 @@ void ServerGame::receiveFromClients()
 							}
 						}
 
-						if (player->getInteracting() &&
+						if (player->isInteracting() &&
 							!player->isChef()) {
 							std::cout << "RELEASED SPACE" << std::endl;
 							player->setInteracting(false);
@@ -433,13 +393,12 @@ void ServerGame::receiveFromClients()
 			}
 			case DROP_EVENT:
 			{
-				if (gameStarted)
+				if (gameStarted && !(chefWin || animalWin))
 				{
-					if (chefWin || animalWin) { break; }
 
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
-						if (player->getInteracting() ||
+						if (player->isInteracting() ||
 							player->getIsCaught() ||
 							player->getHidden()) {
 							break;
@@ -468,7 +427,7 @@ void ServerGame::receiveFromClients()
 
 				if (Player * player = gameData->getPlayer(iter->first))
 				{
-					if (player->getInteracting() ||
+					if (player->isInteracting() ||
 						player->getIsCaught()) {
 						break;
 					}
@@ -582,7 +541,7 @@ void ServerGame::receiveFromClients()
 				continue;
 			}
 
-			if (player->getInteracting())
+			if (player->isInteracting())
 			{
 				double seconds = player->getInteractingTime(0);
 				if (player->isChef())
@@ -672,6 +631,28 @@ void ServerGame::initNewClient()
 	gameData->addNewPlayer(client_id, Location(30, 0, 30), ClientType::SERVER_SIDE);
 }
 
+void ServerGame::updateMovement(int dir, int id)
+{
+	if (gameData->getPlayer(id)->isInteracting() ||
+		gameData->getPlayer(id)->getIsCaught() ||
+		gameData->getPlayer(id)->getHidden()) {
+		return;
+	}
+	switch (dir)
+	{
+	case 1: updateForwardEvent(id);
+		break;
+	case 2: updateBackwardEvent(id);
+		break;
+	case 3: updateLeftEvent(id);
+		break;
+	case 4: updateRightEvent(id);
+		break;
+	}
+	updateCollision(id);
+	updateHeight(id);
+}
+
 void ServerGame::updateRightEvent(int id)
 {
 	moveRight = true;
@@ -718,6 +699,17 @@ void ServerGame::updateHeight(int id)
 	{ 
 		int y = gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 * TILE_HEIGHT;
 		gameData->getPlayer(id)->setLocation(loc.getX(), y, loc.getZ());
+
+		// Update location of captured animal to the chef's location
+		if (gameData->getPlayer(id)->isChef())
+		{
+			if (gameData->getPlayer(id)->getCaughtAnimal())
+			{
+				int animalId = gameData->getPlayer(id)->getCaughtAnimalId();
+				gameData->getPlayer(animalId)->setLocation(gameData->getPlayer(id)->getLocation());
+			}
+		}
+
 		return; 
 	}
 
@@ -751,6 +743,7 @@ void ServerGame::updateHeight(int id)
 	}
 	gameData->getPlayer(id)->setLocation(x, y, z);
 
+	// Update location of captured animal to the chef's location
 	if (gameData->getPlayer(id)->isChef())
 	{
 		if (gameData->getPlayer(id)->getCaughtAnimal())
@@ -771,11 +764,16 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 	//2 == forward
 	//3 == left
 	//dmap<string, vector<int>>::iterator it;
-
+	Player * player = gameData->getPlayer(id);
 	std::map < int, Player * > players = gameData->getAllPlayers();
 	for (auto it = players.begin(); it != players.end(); it++)
 	{
 		if (it->first == id) {
+			continue;
+		}
+
+		// Ignore player collision check for the animal that the chef is carrying
+		if (player->isChef() && player->getCaughtAnimal() && player->getCaughtAnimalId() == it->first) {
 			continue;
 		}
 
