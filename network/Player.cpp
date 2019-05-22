@@ -36,15 +36,19 @@ void Player::toggleReady()
 	ready = !ready;
 }
 ItemModelType Player::getInventory() const { return inventory; }
-bool Player::isInteracting() { return interacting; }
+bool Player::isInteracting() const { return interacting; }
 bool Player::getOpenJail() const { return openingJail; }
 bool Player::getOpeningGate() const { return openingGate; }
 bool Player::getHidden() { return hidden; }
 Action Player::getAction() const { return action; }
 
 Direction Player::getFacingDirection() const { return facingDirection; }
-void Player::setFacingDirection(Direction dir) { facingDirection = dir; std::cout << "updatefacing\n"; }
+void Player::setFacingDirection(Direction dir) { facingDirection = dir; }
 
+void Player::setAction(Action anAction)
+{
+	action = anAction;
+}
 void Player::setLocation(float argX, float argY, float argZ)
 {
 	location.update(argX, argY, argZ);

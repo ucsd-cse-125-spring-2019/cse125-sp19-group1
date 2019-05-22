@@ -213,6 +213,7 @@ void ServerGame::receiveFromClients()
 									{
 										std::cout << "CAN SWING" << std::endl;
 										player->setInteracting(true);
+										player->setAction(Action::SWING_NET);
 										player->setActionStartTime();
 
 										chefWin = true;
@@ -287,7 +288,9 @@ void ServerGame::receiveFromClients()
 									if (gateTile->hasAllKeys() && !player->getOpeningGate())
 									{
 
-										player->setOpeningGate(true);
+										//player->setOpeningGate(true);
+										player->setAction(Action::CONSTRUCT_GATE);
+										player->setInteracting(true);
 										player->setActionStartTime();
 									}
 									if (gateTile->hasAllKeys() && gateTile->isOpen())
@@ -304,7 +307,9 @@ void ServerGame::receiveFromClients()
 								else if (JailTile * jailTile = gameData->getJailTile(loc))
 								{
 									//JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
-									player->setOpenJail(true);
+									//player->setOpenJail(true);
+									player->setAction(Action::UNLOCK_JAIL);
+									player->setInteracting(true);
 									player->setStartJailTime();
 
 									//update jail progres
@@ -332,6 +337,7 @@ void ServerGame::receiveFromClients()
 									if (!player->isInteracting()) {
 										std::cout << "starting to interact!" << std::endl;
 										player->setInteracting(true);
+										player->setAction(Action::OPEN_BOX);
 										player->setActionStartTime();
 									}
 								}
@@ -358,34 +364,62 @@ void ServerGame::receiveFromClients()
 
 						if (player->isInteracting()) {
 							double seconds = player->getInteractingTime(0);
-							if (seconds > gameData->getBoxTime()) {
-								std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
-								gameData->getAtlas()->updateBoxLayout(loc);
+
+							if (player->getAction() == Action::OPEN_BOX)
+							{
+								if (seconds > gameData->getBoxTime()) {
+									std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
+									gameData->getAtlas()->updateBoxLayout(loc);
+									player->setInteracting(false);
+									player->setAction(Action::NONE);
+								}
+							}
+							else if (player->getAction() == Action::CONSTRUCT_GATE)
+							{
+								if (!player->isChef() && gameData->getAtlas()->hasGate(loc))
+								{
+									GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+									if (!gateTile->isOpen())
+									{
+										std::cout << "RELEASED SPACE" << std::endl;
+										player->setInteracting(false);
+										player->setAction(Action::NONE);
+
+										//update progress of gate 
+										double seconds = player->getInteractingTime(0);
+										gateTile->constructGate(seconds);
+									}
+								}
+							}
+
+							if (!player->isChef()) {
+								std::cout << "RELEASED SPACE" << std::endl;
 								player->setInteracting(false);
+								player->setAction(Action::NONE);
 							}
 						}
 
-						if (player->isInteracting() &&
+						/*if (player->isInteracting() &&
 							!player->isChef()) {
 							std::cout << "RELEASED SPACE" << std::endl;
 							player->setInteracting(false);
-						}
+						}*/
 
 
-						if (player->getOpeningGate() &&
-							!player->isChef() && gameData->getAtlas()->hasGate(loc))
-						{
-							GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-							if (!gateTile->isOpen())
-							{
-								std::cout << "RELEASED SPACE" << std::endl;
-								player->setOpeningGate(false);
+						//if (player->getOpeningGate() &&
+						//	!player->isChef() && gameData->getAtlas()->hasGate(loc))
+						//{
+						//	GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+						//	if (!gateTile->isOpen())
+						//	{
+						//		std::cout << "RELEASED SPACE" << std::endl;
+						//		player->setOpeningGate(false);
 
-								//update progress of gate 
-								double seconds = player->getInteractingTime(0);
-								gateTile->constructGate(seconds);
-							}
-						}
+						//		//update progress of gate 
+						//		double seconds = player->getInteractingTime(0);
+						//		gateTile->constructGate(seconds);
+						//	}
+						//}
 					}
 				}
 			
@@ -551,17 +585,48 @@ void ServerGame::receiveFromClients()
 						player->setInteracting(false);
 					}
 				}
-				else
+				else if(player->getAction() == Action::OPEN_BOX)
 				{
 					if (seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
 						player->setInteracting(false);
+						player->setAction(Action::NONE);
+					}
+				}
+				else if (player->getAction() == Action::UNLOCK_JAIL)
+				{
+					double seconds = player->getInteractingTime(1);
+					if (!player->isChef())
+					{
+						if (seconds > gameData->getOpenJailTime()) {
+							player->setOpenJail(false);
+							player->setInteracting(false);
+							player->setAction(Action::NONE);
+						}
+					}
+				}
+				else if (player->getAction() == Action::CONSTRUCT_GATE)
+				{
+					if (gameData->getAtlas()->hasGate(loc))
+					{
+						GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
+
+						if (!gateTile->isOpen())
+						{
+							double seconds = player->getInteractingTime(0);
+
+							if (gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
+							{
+								std::cout << "GATE CONSTRUCTED" << std::endl;
+								gateTile->constructGate(seconds);
+							}
+						}
 					}
 				}
 			}
 
-			if (player->getOpenJail()) 
+			/*if (player->getOpenJail()) 
 			{
 				double seconds = player->getInteractingTime(1);
 				if (!player->isChef())
@@ -570,9 +635,9 @@ void ServerGame::receiveFromClients()
 						player->setOpenJail(false);
 					}
 				}
-			}
+			}*/
 
-			if (gameData->getAtlas()->hasGate(loc))
+			/*if (gameData->getAtlas()->hasGate(loc))
 			{
 				GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 
@@ -586,7 +651,7 @@ void ServerGame::receiveFromClients()
 						gateTile->constructGate(seconds);
 					}
 				}
-			}
+			}*/
 		}
 	}
 }
@@ -658,8 +723,6 @@ void ServerGame::updateRightEvent(int id)
 	moveRight = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
-	//gameData->getPlayer(id)->setFacingDir(2);
-
 	updatePlayerCollision(id, 0);
 }
 
@@ -668,8 +731,6 @@ void ServerGame::updateBackwardEvent(int id)
 	moveBackward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
-	//gameData->getPlayer(id)->setFacingDir(3);
-
 	updatePlayerCollision(id, 1);
 }
 
@@ -678,8 +739,9 @@ void ServerGame::updateForwardEvent(int id)
 	moveForward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
-	//gameData->getPlayer(id)->setFacingDir(1);
 	updatePlayerCollision(id, 2);
+	std::cout << "NORTH\n";
+
 }
 
 void ServerGame::updateLeftEvent(int id)
@@ -687,9 +749,8 @@ void ServerGame::updateLeftEvent(int id)
 	moveLeft = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 	gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
-	//gameData->getPlayer(id)->setFacingDir(4);
-
 	updatePlayerCollision(id, 3);
+	std::cout << "WEST\n";
 }
 
 void ServerGame::updateHeight(int id)
@@ -713,7 +774,7 @@ void ServerGame::updateHeight(int id)
 		return; 
 	}
 
-	std::cout << "THERES A RAMP" << std::endl;
+	//std::cout << "THERES A RAMP" << std::endl;
 
 	int x = loc.getX();
 	int y;
@@ -812,10 +873,9 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 void ServerGame::updateCollision(int id)
 {
 	Location loc = gameData->getPlayer(id)->getLocation();
-	//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 	gameData->getAtlas()->detectWallCollision(loc);
-	//gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 	gameData->getPlayer(id)->setLocation(loc);
+	
 	gameData->getAtlas()->detectObjectCollision(loc);
 	gameData->getPlayer(id)->setLocation(loc);
 

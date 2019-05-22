@@ -22,7 +22,7 @@ enum class Direction {
 	SOUTHWEST = SOUTH + WEST
 };
 
-enum class Action { OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET };
+enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET };
 
 class Player
 {
@@ -57,7 +57,6 @@ public:
 	void setLocation(Location aLoc);
 	bool getHidden();
 	void setHidden(bool hide);
-	bool isInteracting();
 
 	void setInteracting(bool interact);
 	void setOpenJail(bool interact);
@@ -67,6 +66,7 @@ public:
 	void setCaughtAnimalId(int id);
 	void setActionStartTime();
 	void setStartJailTime();
+	void setAction(Action anAction);
 
 	void toggleReady();
 	
