@@ -9,6 +9,8 @@
 #include "Item.h"
 #include "Location.h"
 
+#include "GameConfigs.h"
+
 #define NUM_PLAYER_MODEL_TYPES (4)
 enum class ModelType { DEFAULT = -1, CHEF = 0, RACOON, CAT, DOG};
 enum class Direction {
@@ -36,8 +38,8 @@ public:
 	ItemModelType	getInventory() const;
 	bool		isInteracting() const;
 	Action		getAction() const;
-	bool		getOpenJail() const;
-	bool		getOpeningGate() const;
+	//bool		getOpenJail() const;
+	//bool		getOpeningGate() const;
 	Location	getLocation() const;
 	ModelType	getModelType() const;
 	bool		isChef() const;
@@ -58,13 +60,13 @@ public:
 	void setHidden(bool hide);
 
 	void setInteracting(bool interact);
-	void setOpenJail(bool interact);
-	void setOpeningGate(bool status);
+	//void setOpenJail(bool interact);
+	//void setOpeningGate(bool status);
 	void setCaughtAnimal(bool caught);
 	void setIsCaught(bool caught);
 	void setCaughtAnimalId(int id);
 	void setActionStartTime();
-	void setStartJailTime();
+	void setUnlockJailStartTime();
 	void setAction(Action anAction);
 
 	void toggleReady();
@@ -103,17 +105,17 @@ protected:
 	ItemModelType	inventory;
 	ModelType	modelType;
 	bool		interacting;
-	bool		openingJail;
-	bool		openingGate;
+	//bool		openingJail;
+	//bool		openingGate;
 	bool		caughtAnimal = false;
 	bool		isCaught = false;
 	int			radius = 10;
 	int			caughtAnimalId;
 	bool		hidden = false;
+	float		visionRadius;
 
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
-	std::chrono::time_point<std::chrono::system_clock> startJail;
-	std::chrono::time_point<std::chrono::system_clock> startGate;
+	std::chrono::time_point<std::chrono::system_clock> unlockJailStartTime;
 
 	std::map < std::string, bool> dirtyVariablesMap;
 	using decodeFunctionType = void (Player::*)(std::string value);

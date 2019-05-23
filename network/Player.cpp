@@ -28,8 +28,8 @@ void Player::toggleReady()
 }
 ItemModelType Player::getInventory() const { return inventory; }
 bool Player::isInteracting() const { return interacting; }
-bool Player::getOpenJail() const { return openingJail; }
-bool Player::getOpeningGate() const { return openingGate; }
+//bool Player::getOpenJail() const { return openingJail; }
+//bool Player::getOpeningGate() const { return openingGate; }
 bool Player::getHidden() { return hidden; }
 Action Player::getAction() const { return action; }
 
@@ -71,14 +71,14 @@ void Player::setInteracting(bool interact) {
 }
 
 
-void Player::setOpenJail(bool interact) {
-	openingJail = interact;
-}
-
-
-void Player::setOpeningGate(bool status) {
-	openingGate = status;
-}
+//void Player::setOpenJail(bool interact) {
+//	openingJail = interact;
+//}
+//
+//
+//void Player::setOpeningGate(bool status) {
+//	openingGate = status;
+//}
 
 
 ModelType Player::getModelType() const {
@@ -128,8 +128,8 @@ void Player::setActionStartTime() {
 	actionStartTime = std::chrono::system_clock::now();
 }
 
-void Player::setStartJailTime() {
-	startJail = std::chrono::system_clock::now();
+void Player::setUnlockJailStartTime() {
+	unlockJailStartTime = std::chrono::system_clock::now();
 }
 
 double Player::getInteractingTime(int opt) {
@@ -137,7 +137,7 @@ double Player::getInteractingTime(int opt) {
 	std::chrono::duration<double> elapsed_seconds = now - actionStartTime;
 	if (opt == 1) 
 	{
-		elapsed_seconds = now - startJail;
+		elapsed_seconds = now - unlockJailStartTime;
 	}
 	return elapsed_seconds.count();
 }

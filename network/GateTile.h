@@ -2,7 +2,6 @@
 #include "Tile.h"
 #include <vector>
 
-#define TOTAL_CONSTRUCT_TIME 30
 enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9 };
 
 class GateTile : public Tile
@@ -18,7 +17,7 @@ public:
 	int			getKeyProgress() { return keyProgress; }
 	double		getCurrentConstructTime() { return currentConstructTime; }
 	bool		hasAllKeys() { return keyProgress == 3; }
-	bool		isOpen() { return currentConstructTime >= TOTAL_CONSTRUCT_TIME; }
+	bool		isOpen() { return currentConstructTime >= TIME_TO_CONSTRUCT_GATE; }
 
 	// Setters
 

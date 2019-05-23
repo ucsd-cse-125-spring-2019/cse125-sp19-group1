@@ -23,7 +23,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	{
 		encodedData << iter->second->encodePlayerData(newPlayerInit);
 	}
-	encodedData << "client: " << GENERALDATA_ID << std::endl;
+	encodedData << "client: " << GENERAL_GAME_DATA_ID << std::endl;
 
 	if (beginCountdown)
 	{
@@ -222,14 +222,14 @@ void GameData::decodeGameData(const char * data)
 		if (p.first == "client")
 		{
 			playerID = std::stoi(value);
-			if (players.count(playerID) == 0 && playerID != GENERALDATA_ID)
+			if (players.count(playerID) == 0 && playerID != GENERAL_GAME_DATA_ID)
 			{
 				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
 		}
 		else
 		{
-			if (playerID == GENERALDATA_ID)
+			if (playerID == GENERAL_GAME_DATA_ID)
 			{
 				if (decodingFunctions.count(key) > 0)
 					(this->*decodingFunctions[key])(value); // Format for calling the functions from the map

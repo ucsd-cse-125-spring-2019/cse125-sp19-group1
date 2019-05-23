@@ -8,9 +8,11 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+
+#include "GameConfigs.h"
 //#include "Gate.h"
 
-#define GENERALDATA_ID -999
+#define GENERAL_GAME_DATA_ID -999
 #define SERVER_GAMEDATA 123
 
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
@@ -52,13 +54,13 @@ public:
 
 	std::vector<std::vector<Tile *>> getTileLayout();
 
-	int	getBoxTime() { return timeToOpenBox; }
-	int getChefSwingTime() { return timeToSwingNet; }
-	double getOpenJailTime() { return timeToOpenJail; }
+	//int	getBoxTime() { return timeToOpenBox; }
+	//int getChefSwingTime() { return timeToSwingNet; }
+	//double getOpenJailTime() { return timeToOpenJail; }
 
-	int timeToOpenBox = 2; //in seconds
-	int timeToSwingNet = 1;
-	double timeToOpenJail = 1.5;
+	//int timeToOpenBox = 2; //in seconds
+	//int timeToSwingNet = 1;
+	//double timeToOpenJail = 1.5;
 
 	int	chefAnger = 0;
 	void incrementChefAnger() { chefAnger++; }

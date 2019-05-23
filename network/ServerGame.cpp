@@ -259,7 +259,7 @@ void ServerGame::receiveFromClients()
 
 								if (player->getInventory() == ItemModelType::EMPTY && (item != ItemModelType::EMPTY || objectTile && objectTile->getItem() == ItemModelType::cake))
 								{
-									
+									// Pr
 									if (objectTile && objectTile->getItem() == ItemModelType::cake)
 									{
 										std::cout << "table has cake!" << std::endl;
@@ -285,7 +285,7 @@ void ServerGame::receiveFromClients()
 										gateTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
 										player->setInventory(ItemModelType::EMPTY);
 									}
-									if (gateTile->hasAllKeys() && !player->getOpeningGate() && !gateTile->isOpen())
+									if (gateTile->hasAllKeys() /*&& !player->getOpeningGate()*/ && !gateTile->isOpen())
 									{
 
 										//player->setOpeningGate(true);
@@ -308,27 +308,33 @@ void ServerGame::receiveFromClients()
 								{
 									//JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
 									//player->setOpenJail(true);
-									player->setAction(Action::UNLOCK_JAIL);
-									player->setInteracting(true);
-									player->setStartJailTime();
+									double seconds = player->getInteractingTime(1);
+									
+									// Only allow another jail action if enough time has passed
+									if (seconds > UNLOCK_JAIL_COOLDOWN) {
 
-									//update jail progres
-									std::cout << "UNLOCKING JAIL" << std::endl;
+										player->setAction(Action::UNLOCK_JAIL);
+										player->setInteracting(true);
+										player->setActionStartTime();
+										player->setUnlockJailStartTime();
 
-									jailTile->unlockJail();
+										//update jail progres
+										std::cout << "UNLOCKING JAIL" << std::endl;
 
+										jailTile->unlockJail();
 
-									//check if jail progress == 5
-									if (jailTile->getProgress() >= 5)
-									{
-										std::cout << "ANIMAL IS RELEASED" << std::endl;
-										//update animal 
-										int animal = jailTile->getCapturedAnimal();
-										gameData->getPlayer(animal)->setIsCaught(false);
+										//check if jail progress == 5
+										if (jailTile->getProgress() >= 5)
+										{
+											std::cout << "ANIMAL IS RELEASED" << std::endl;
+											//update animal 
+											int animal = jailTile->getCapturedAnimal();
+											gameData->getPlayer(animal)->setIsCaught(false);
 
-										//update jail
-										jailTile->resetJail();
+											//update jail
+											jailTile->resetJail();
 
+										}
 									}
 								}
 								else if (gameData->getAtlas()->hasBox(loc))
@@ -367,7 +373,7 @@ void ServerGame::receiveFromClients()
 
 							if (player->getAction() == Action::OPEN_BOX)
 							{
-								if (seconds > gameData->getBoxTime()) {
+								if (seconds > TIME_TO_OPEN_BOX) {
 									std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 									gameData->getAtlas()->updateBoxLayout(loc);
 									player->setInteracting(false);
@@ -580,14 +586,16 @@ void ServerGame::receiveFromClients()
 				double seconds = player->getInteractingTime(0);
 				if (player->isChef())
 				{
-					if (seconds > gameData->getChefSwingTime()) {
+					if (seconds > SWING_NET_DELAY) {
 						std::cout << "CAN SWING AGAIN" << std::endl;
 						player->setInteracting(false);
+						player->setAction(Action::NONE);
+						sendActionPackets();
 					}
 				}
 				else if(player->getAction() == Action::OPEN_BOX)
 				{
-					if (seconds > gameData->getBoxTime()) {
+					if (seconds > TIME_TO_OPEN_BOX) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
 						player->setInteracting(false);
@@ -597,11 +605,11 @@ void ServerGame::receiveFromClients()
 				}
 				else if (player->getAction() == Action::UNLOCK_JAIL)
 				{
-					double seconds = player->getInteractingTime(1);
+					double seconds = player->getInteractingTime(0);
 					if (!player->isChef())
 					{
-						if (seconds > gameData->getOpenJailTime()) {
-							player->setOpenJail(false);
+						if (seconds > UNLOCK_JAIL_DELAY) {
+							//player->setOpenJail(false);
 							player->setInteracting(false);
 							player->setAction(Action::NONE);
 							sendActionPackets();
@@ -618,7 +626,7 @@ void ServerGame::receiveFromClients()
 						{
 							double seconds = player->getInteractingTime(0);
 
-							if (gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
+							if (gateTile->getCurrentConstructTime() + seconds >= TIME_TO_CONSTRUCT_GATE)
 							{
 								std::cout << "GATE CONSTRUCTED" << std::endl;
 								gateTile->constructGate(seconds);
@@ -636,7 +644,7 @@ void ServerGame::receiveFromClients()
 				double seconds = player->getInteractingTime(1);
 				if (!player->isChef())
 				{
-					if (seconds > gameData->getOpenJailTime()) {
+					if (seconds > UNLOCK_JAIL_COOLDOWN) {
 						player->setOpenJail(false);
 					}
 				}
@@ -650,7 +658,7 @@ void ServerGame::receiveFromClients()
 				{
 					double seconds = player->getInteractingTime(0);
 
-					if (player->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TOTAL_CONSTRUCT_TIME)
+					if (player->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TIME_TO_CONSTRUCT_GATE)
 					{
 						std::cout << "GATE CONSTRUCTED" << std::endl;
 						gateTile->constructGate(seconds);
