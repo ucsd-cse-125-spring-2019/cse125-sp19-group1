@@ -15,7 +15,7 @@
 #define CANVAS_MDL_PATH  (CANVAS_PATH "canvas2.fbx")
 
 #define PAW_ANGLE_OFFSET (-0.18f * glm::pi<float>())
-#define PAW_MAX_ALPHA (0.5f)
+#define PAW_MAX_ALPHA (0.7f)
 
 static const glm::mat4 identifyMat(1.f);
 static GLuint passthroughShaderProgram = 0;
@@ -127,7 +127,7 @@ static glm::mat4 dotTransform(glm::vec3 position)
 
 static glm::mat4 pawTransform(glm::vec3 position, float angle)
 {
-#define PAW_SCALE 0.1f
+#define PAW_SCALE 0.125f
 	glm::mat4 scale = glm::scale(glm::translate(identifyMat, position), glm::vec3((PAW_SCALE * windowHeight) / windowWidth, PAW_SCALE, PAW_SCALE));
 	return glm::rotate(scale, angle + PAW_ANGLE_OFFSET, glm::vec3(0.f, 0.f, 1.f));
 }
@@ -146,9 +146,9 @@ static void drawPaw(glm::vec3 position, float alpha, float angle)
 
 static bool isOffscreen(glm::vec3 p)
 {
-#define TOO_FAR (1.0f + PAW_SCALE * 0.7)
+#define TOO_FAR (1.0f + PAW_SCALE)
 
-	return (fabs(p.x) > TOO_FAR && fabs(p.y) > TOO_FAR);
+	return (fabs(p.x) > TOO_FAR || fabs(p.y) > TOO_FAR);
 }
 
 void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
@@ -215,13 +215,14 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	
 	static float pawAlphas[2] = { PAW_MAX_ALPHA, PAW_MAX_ALPHA };
 	static float pawAngle = -PAW_ANGLE_OFFSET;
-#define PAW_NUM_STARTING 2
+#define PAW_NUM_STARTING 3
 	struct {
 		glm::vec3 pos[2];
 		float angle;
 	} pawStartingPositions[] = {
-		{{glm::vec3(0.275f, -1.1f, 0.f), glm::vec3(0.525f, -1.25f, 0.f)}, -PAW_ANGLE_OFFSET},
-		{{glm::vec3(0.5f, 1.1f, 0.f), glm::vec3(0.65f, 1.375f, 0.f)}, glm::pi<float>()},
+		{{glm::vec3(0.275f, -1.15f, 0.f), glm::vec3(0.525f, -1.30f, 0.f)}, -PAW_ANGLE_OFFSET},
+		{{glm::vec3(-1.15f, 0.5f, 0.f), glm::vec3(-1.425f, 0.65f, 0.f)}, -0.9f * glm::half_pi<float>()},
+		{{glm::vec3(0.5f, -1.15f, 0.f), glm::vec3(0.65f, -1.425f, 0.f)}, 0},
 	};
 	static unsigned pawStartingIdx = 0;
 
@@ -239,7 +240,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	auto movementAngle = pawAngle + glm::half_pi<float>();
 	glm::vec3 pawDirection(cosf(movementAngle), sinf(movementAngle), 0.f);
 
-#define PAW_PERIOD 1.25
+#define PAW_PERIOD 0.825
 	float pawPhase = fmod(now, PAW_PERIOD) / PAW_PERIOD;
 
 #define PAW_DOWN_FRAC 0.5
@@ -299,8 +300,11 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 				pawAngle = pawStartingPositions[pawStartingIdx].angle;
 				pawIdx = 0;
 			}
+
+			cout << "Paw: <" << pawPos[pawIdx].x << ", " << pawPos[pawIdx].y << ">\n";
 		}
 		pawAlphas[pawIdx] = pawSubphase * PAW_MAX_ALPHA;
+		pawAnimationOffset[pawIdx] = -(1.f - pawSubphase) * pawDirection * 0.015f;
 		break;
 	default:
 		break;

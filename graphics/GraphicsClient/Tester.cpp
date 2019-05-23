@@ -231,7 +231,7 @@ int main(void)
 
 		if (currentEngine == loadingEngine) {
 			if (inGameEngine->fullyLoaded) {
-				//currentEngine = inGameEngine;
+				currentEngine = inGameEngine;
 			}
 		}
 		
