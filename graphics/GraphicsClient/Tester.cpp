@@ -64,6 +64,8 @@ void SetupOpenGLSettings()
 	glShadeModel(GL_SMOOTH);
 	// Auto normalize surface normals
 	glEnable(GL_NORMALIZE);
+	// Enable the 4x multisampling that we asked GLFW for
+	glEnable(GL_MULTISAMPLE);
 }
 
 void PrintVersions()
@@ -229,7 +231,7 @@ int main(void)
 
 		if (currentEngine == loadingEngine) {
 			if (inGameEngine->fullyLoaded) {
-				currentEngine = inGameEngine;
+				//currentEngine = inGameEngine;
 			}
 		}
 		

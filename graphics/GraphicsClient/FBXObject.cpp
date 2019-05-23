@@ -1,12 +1,13 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, bool setupRendering) {
+FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, bool setupRendering, GLint filtering) {
 	// initialize variables
 	Init(attachSkel);
 	// read in the model and its texture from the given files
 	Parse(path);
 
 	this->texPath = texPath;
+	this->filtering = filtering;
 
 	if (setupRendering) {
 		// initialize rendering variables
@@ -231,7 +232,7 @@ void FBXObject::RenderingSetup() {
 	SetBuffers();
 
 	// Load the corresponding model texture
-	texNum = loadTexture(texPath);
+	texNum = loadTexture(texPath, nullptr, nullptr, filtering);
 }
 
 void FBXObject::UpdateBuffers() {

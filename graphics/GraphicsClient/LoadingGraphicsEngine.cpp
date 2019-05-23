@@ -15,6 +15,7 @@
 #define CANVAS_MDL_PATH  (CANVAS_PATH "canvas2.fbx")
 
 #define PAW_ANGLE_OFFSET (-0.18f * glm::pi<float>())
+#define PAW_MAX_ALPHA (0.5f)
 
 static const glm::mat4 identifyMat(1.f);
 static GLuint passthroughShaderProgram = 0;
@@ -23,16 +24,10 @@ FBXObject *backgroundObj = nullptr;
 FBXObject *dotObj = nullptr;
 FBXObject *pawObj = nullptr;
 
-float pawAngle = -PAW_ANGLE_OFFSET;
-glm::vec3 pawPos[2] = {
-	glm::vec3(-0.5f, -0.5f, 0.f),
-	glm::vec3(-0.25f, -0.65f, 0.f),
-};
-
 
 static FBXObject * createObjectForTexture(const char *texturePath)
 {
-	auto obj = new FBXObject(CANVAS_MDL_PATH, texturePath, false);
+	auto obj = new FBXObject(CANVAS_MDL_PATH, texturePath, false, GL_LINEAR);
 	obj->SetDepthTest(false);
 
 	return obj;
@@ -149,6 +144,13 @@ static void drawPaw(glm::vec3 position, float alpha, float angle)
 	pawObj->Draw(passthroughShaderProgram, &identifyMat, &identifyMat, pawTransform(position, angle));
 }
 
+static bool isOffscreen(glm::vec3 p)
+{
+#define TOO_FAR (1.0f + PAW_SCALE * 0.7)
+
+	return (fabs(p.x) > TOO_FAR && fabs(p.y) > TOO_FAR);
+}
+
 void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 {
 	glViewport(0, 0, windowWidth, windowHeight);
@@ -211,8 +213,103 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 		drawDot(dotPositions[i], dotAlphas[i]);
 	}
 	
-	drawPaw(pawPos[0], 0.75f, pawAngle);
-	drawPaw(pawPos[1], 0.75f, pawAngle);
+	static float pawAlphas[2] = { PAW_MAX_ALPHA, PAW_MAX_ALPHA };
+	static float pawAngle = -PAW_ANGLE_OFFSET;
+#define PAW_NUM_STARTING 2
+	struct {
+		glm::vec3 pos[2];
+		float angle;
+	} pawStartingPositions[] = {
+		{{glm::vec3(0.275f, -1.1f, 0.f), glm::vec3(0.525f, -1.25f, 0.f)}, -PAW_ANGLE_OFFSET},
+		{{glm::vec3(0.5f, 1.1f, 0.f), glm::vec3(0.65f, 1.375f, 0.f)}, glm::pi<float>()},
+	};
+	static unsigned pawStartingIdx = 0;
+
+	static glm::vec3 pawPos[2] = {
+		glm::vec3(-0.5f, -0.5f, 0.f),
+		glm::vec3(-0.25f, -0.65f, 0.f),
+	};
+	static glm::vec3 pawAnimationOffset[2] = {
+		glm::vec3(0.f),
+		glm::vec3(0.f),
+	};
+	static unsigned pawIdx = 1;
+	static int pawPreviousPhaseIdx = 0;
+
+	auto movementAngle = pawAngle + glm::half_pi<float>();
+	glm::vec3 pawDirection(cosf(movementAngle), sinf(movementAngle), 0.f);
+
+#define PAW_PERIOD 1.25
+	float pawPhase = fmod(now, PAW_PERIOD) / PAW_PERIOD;
+
+#define PAW_DOWN_FRAC 0.5
+#define PAW_FADEOUT_FRAC 0.075
+#define PAW_FADEIN_FRAC 0.075
+#define PAW_UP_FRAC (1.0 - PAW_FADEOUT_FRAC - PAW_FADEIN_FRAC - PAW_DOWN_FRAC)
+	int pawPhaseIdx;
+	float pawSubphase;
+	if (pawPhase < PAW_DOWN_FRAC) {
+		pawSubphase = (pawPhase - 0.f) / PAW_DOWN_FRAC;
+		pawPhaseIdx = 0;
+	}
+	else if (pawPhase < PAW_DOWN_FRAC + PAW_FADEOUT_FRAC) {
+		pawSubphase = (pawPhase - PAW_DOWN_FRAC) / PAW_FADEOUT_FRAC;
+		pawPhaseIdx = 1;
+	}
+	else if (pawPhase < PAW_DOWN_FRAC + PAW_FADEOUT_FRAC + PAW_UP_FRAC) {
+		pawSubphase = (pawPhase - (PAW_DOWN_FRAC + PAW_FADEOUT_FRAC)) / PAW_UP_FRAC;
+		pawPhaseIdx = 2;
+	}
+	else {
+		pawSubphase = (pawPhase - (1.0 - PAW_FADEIN_FRAC)) / PAW_FADEIN_FRAC;
+		pawPhaseIdx = 3;
+	}
+
+	/*
+	 * Paw phases:
+	 * 1. both paws down
+	 * 2. paw i fades out and animates forward
+	 * 3. paw i stays invisible
+	 *    3a. if both paws offscreen, reposition
+	 * 4. paw i fades in at new position
+	 */
+	pawAlphas[1] = pawAlphas[0] = PAW_MAX_ALPHA;
+	pawAnimationOffset[1] = pawAnimationOffset[0] = glm::vec3(0.f);
+	switch (pawPhaseIdx)
+	{
+	case 0:
+		if (pawPreviousPhaseIdx) {
+			pawIdx = !pawIdx;
+		}
+		break;
+	case 1:
+		pawAlphas[pawIdx] = (1.f - pawSubphase) * PAW_MAX_ALPHA;
+		pawAnimationOffset[pawIdx] = pawSubphase * pawDirection * 0.015f;
+		break;
+	case 2:
+		pawAlphas[pawIdx] = 0.f;
+		break;
+	case 3:
+		if (pawPreviousPhaseIdx == 2) {
+			pawPos[pawIdx] += pawDirection * 0.55f;
+			if (isOffscreen(pawPos[0]) && isOffscreen(pawPos[1])) {
+				pawStartingIdx = (pawStartingIdx + 1) % PAW_NUM_STARTING;
+				pawPos[0] = pawStartingPositions[pawStartingIdx].pos[0];
+				pawPos[1] = pawStartingPositions[pawStartingIdx].pos[1];
+				pawAngle = pawStartingPositions[pawStartingIdx].angle;
+				pawIdx = 0;
+			}
+		}
+		pawAlphas[pawIdx] = pawSubphase * PAW_MAX_ALPHA;
+		break;
+	default:
+		break;
+	}
+
+	pawPreviousPhaseIdx = pawPhaseIdx;
+
+	drawPaw(pawPos[0] + pawAnimationOffset[0], pawAlphas[0], pawAngle);
+	drawPaw(pawPos[1] + pawAnimationOffset[1], pawAlphas[1], pawAngle);
 
 	// Swap buffers
 	glfwSwapBuffers(window);

@@ -20,6 +20,8 @@ private:
 	GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
 	GLuint texNum;
 
+	GLint filtering;
+
 	glm::mat4 toWorld;
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> vertices;
@@ -42,7 +44,7 @@ private:
 
 public:
 	// creating. destroying, and debugging
-	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, bool setupRendering = true);
+	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, bool setupRendering = true, GLint filtering = GL_NEAREST);
 	void Init(bool attachSkel);
 	void Parse(const char* filepath);
 	~FBXObject();

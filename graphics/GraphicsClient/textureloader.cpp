@@ -60,7 +60,7 @@ unsigned char* loadPPM(const char* filename, int& width, int& height)
 }
 
 
-GLuint loadTexture(const char * textureName, int *texWidth, int *texHeight)
+GLuint loadTexture(const char * textureName, int *texWidth, int *texHeight, GLint filtering)
 {
 	GLuint texture[1];     // storage for one texture
 
@@ -125,8 +125,8 @@ GLuint loadTexture(const char * textureName, int *texWidth, int *texHeight)
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
 
 	// Set bi-linear filtering for both minification and magnification
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filtering);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filtering);
 
 	return texture[0];
 }
