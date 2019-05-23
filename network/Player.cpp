@@ -1,7 +1,7 @@
 #include "Player.h"
 
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
-Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(false), modelType(ModelType::RACOON)
+Player::Player(int anID) : playerID(anID), inventory(ItemModelType::EMPTY), hasCake(false), modelType(ModelType::RACOON)
 {
 	location = Location();
 	addEncodeFunctions();
@@ -11,7 +11,7 @@ Player::Player(int anID) : playerID(anID), inventory(ItemName::EMPTY), hasCake(f
 	}
 }
 
-Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemName::EMPTY), hasCake(false), modelType(ModelType::RACOON)
+Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemModelType::EMPTY), hasCake(false), modelType(ModelType::RACOON)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
@@ -35,7 +35,7 @@ void Player::toggleReady()
 {
 	ready = !ready;
 }
-ItemName Player::getInventory() const { return inventory; }
+ItemModelType Player::getInventory() const { return inventory; }
 bool Player::getInteracting() { return interacting; }
 bool Player::getOpenJail() const { return openingJail; }
 bool Player::getOpeningGate() const { return openingGate; }
@@ -57,7 +57,7 @@ void Player::setLocation(Location aLoc)
 	dirtyVariablesMap["location"] = true;
 }
 
-void Player::setInventory(ItemName anItem)
+void Player::setInventory(ItemModelType anItem)
 {
 	inventory = anItem;
 	dirtyVariablesMap["inventory"] = true;
@@ -251,7 +251,7 @@ void Player::decodeLocation(std::string value)
 
 void Player::decodeInventory(std::string value)
 {
-	inventory = static_cast<ItemName>(std::stoi(value));
+	inventory = static_cast<ItemModelType>(std::stoi(value));
 }
 void Player::decodeCakeStatus(std::string value)
 {

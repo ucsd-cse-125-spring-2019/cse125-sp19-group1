@@ -1,11 +1,17 @@
-#include "textureloader.h"
+#define _CRT_SECURE_NO_WARNINGS 1
 
+#include "textureloader.h"
+//#include "WICTextureLoader.h"
+#include "lodepng.h"
+
+#include <cstdlib>
+#include <vector>
 
 unsigned char* loadPPM(const char* filename, int& width, int& height)
 {
 	const int BUFSIZE = 128;
 	FILE* fp;
-	unsigned int read;
+	size_t read;
 	unsigned char* rawData;
 	char buf[3][BUFSIZE];
 	char* retval_fgets;
@@ -57,25 +63,60 @@ unsigned char* loadPPM(const char* filename, int& width, int& height)
 GLuint loadTexture(const char * textureName)
 {
 	GLuint texture[1];     // storage for one texture
-	int twidth, theight;   // texture width/height [pixels]
-	unsigned char* tdata;  // texture pixel data
-
-	// Load image file
-	tdata = loadPPM(textureName, twidth, theight);
-	//std::cerr << "Cat Image: " << twidth << " X " << theight << std::endl;
-	if (tdata == NULL) return -1;
 
 	// Create ID for texture
 	glGenTextures(1, &texture[0]);
 
+	const char * fileType = strrchr(textureName, '.');
+	if (fileType == nullptr || !strcmp(fileType, ".ppm")) {
+		int twidth, theight;   // texture width/height [pixels]
+		unsigned char* tdata;  // texture pixel data
+							   // Load image file
+		tdata = loadPPM(textureName, twidth, theight);
+		//std::cerr << "Cat Image: " << twidth << " X " << theight << std::endl;
+		if (tdata == NULL) {
+			glDeleteTextures(1, &texture[0]);
+			return -1;
+		}
+
+		// Set this texture to be the one we are working with
+		glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+		// Generate the texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, twidth, theight, 0, GL_RGB, GL_UNSIGNED_BYTE, tdata);
+	}
+	else {
+		std::vector<unsigned char> bytes;
+		unsigned width, height;
+
+		if (lodepng::decode(bytes, width, height, textureName)) {
+			glDeleteTextures(1, &texture[0]);
+			return -1;
+		}
+
+		// Set this texture to be the one we are working with
+		glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+		// Generate the texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &(bytes[0]));
+
+		/*wchar_t filename[512];
+		mbstowcs(filename, textureName, 512);
+
+		if (WICTexImage2DFromFile(texture[0], 0, filename) < 0) {
+			glDeleteTextures(1, &texture[0]);
+			return -1;
+		}*/
+
+
+	}
+
 	// Set this texture to be the one we are working with
 	glBindTexture(GL_TEXTURE_2D, texture[0]);
-
-	// Generate the texture
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, twidth, theight, 0, GL_RGB, GL_UNSIGNED_BYTE, tdata);
 
 	// Set bi-linear filtering for both minification and magnification
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 	return texture[0];
 }

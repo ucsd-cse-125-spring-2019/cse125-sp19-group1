@@ -385,7 +385,7 @@ ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
 
 	Tile * tile = getTile(loc);
 
-	if (tile->getTileType() == TileType::OBJECT)
+	if (tile && tile->getTileType() == TileType::OBJECT)
 	{
 		return dynamic_cast<ObjectTile *>(tile);
 	}

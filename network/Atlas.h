@@ -20,7 +20,7 @@
 #define TILE_HEIGHT 10
 #define PLAYER_RADIUS 2
 #define WALL_SIZE 2
-#define MAX_ITEMS 9
+#define MAX_ITEMS 14
 #define ITEM_DROP_DURATION 10
 
 class Atlas
@@ -33,7 +33,7 @@ public:
 
 	void detectWallCollision(Location & loc);
 	void detectObjectCollision(Location & loc);
-	ItemName getTileItem(Location & loc);
+	ItemModelType getTileItem(Location & loc);
 	bool hasGate(Location & loc);
 	bool hasBox(Location & loc);
 	
@@ -48,9 +48,9 @@ public:
 	Tile * getTileAt(Location & loc);
 
 	bool tileHasItem(Location & loc);
-	void updateTileItem(Location & loc, ItemName anItem);
+	void updateTileItem(Location & loc, ItemModelType anItem);
 	void getAdjacentFreeTile(int currRow, int currCol, int & row, int & col);
-	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
+	void returnItemToSpawn(ItemModelType anItem, int currRow, int currCol);
 
 	std::string encodeTileLayoutData(bool newPlayerInit);
 	bool hasRamp(Location & loc);
@@ -59,24 +59,30 @@ public:
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
 	std::vector<std::pair<int, int>> jailLocations;
-	std::map<ItemName, Item> itemsMap;
+	std::map<ItemModelType, Item> itemsMap;
 
-	void getItem(ItemName anItem, Item & outputItem);
+	void getItem(ItemModelType anItem, Item & outputItem);
 
 	void checkDroppedItems();
-	void updateDroppedItem(ItemName anItem, Location loc);
+	void updateDroppedItem(ItemModelType anItem, Location loc);
 
-	std::vector<ItemName> itemList = 
+	std::vector<ItemModelType> itemList = 
 	{
-		ItemName::KEY1,
-		ItemName::KEY2,
-		ItemName::KEY3,
-		ItemName::KEY4,
-		ItemName::KEY5,
-		ItemName::KEY6,
-		ItemName::KEY7,
-		ItemName::KEY8,
-		ItemName::KEY9
+		ItemModelType::key1,
+		ItemModelType::key2,
+		ItemModelType::key3,
+		ItemModelType::plunger,
+		ItemModelType::rope,
+		ItemModelType::toiletPaper,
+		ItemModelType::screwdriver1,
+		ItemModelType::screwdriver2,
+		ItemModelType::screwdriver3,
+		ItemModelType::apple,
+		ItemModelType::orange,
+		ItemModelType::bananaGreen,
+		ItemModelType::bananaPerfect,
+		ItemModelType::bananaVeryRipe,
+		
 	};
 
 protected:

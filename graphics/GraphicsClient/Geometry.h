@@ -18,6 +18,7 @@ public:
 	glm::mat4 t;
 	GLint shaderProgram;
 	int refCount;
+	bool hidden;
 	Geometry(FBXObject * fbx, GLint shaderProgram);
 	//~Geometry();
 	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);

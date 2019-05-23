@@ -69,11 +69,11 @@ public:
 
 	/* Animal ------------------------------------------------------------------------------*/
 
-	ItemName	getInventory() const;
+	ItemModelType	getInventory() const;
 
 
 	void setIsCaught(bool caught);
-	void setInventory(ItemName anItem);
+	void setInventory(ItemModelType anItem);
 	bool		getIsCaught() const;
 
 
@@ -106,7 +106,7 @@ protected:
 	int			caughtAnimalId;
 
 	// Animal Only
-	ItemName	inventory;
+	ItemModelType	inventory;
 	bool		openingJail;
 	bool		openingGate;
 	bool		isCaught = false;
