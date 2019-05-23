@@ -35,6 +35,7 @@
     <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="UICanvas.cpp" />
+    <ClCompile Include="ParticleSpawner.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h" />
@@ -80,6 +81,7 @@
     <ClInclude Include="UIObject.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="UICanvas.h" />
+    <ClInclude Include="ParticleSpawner.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag" />

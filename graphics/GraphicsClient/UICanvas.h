@@ -55,6 +55,7 @@ public:
 	void draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
 	void setAngerRatio(float newAngerRatio);
 	void setVisible(UIType item, bool visible);
+	void dropItems();
 	UICanvas(GLuint shaderProgram);
 	~UICanvas();
 private:

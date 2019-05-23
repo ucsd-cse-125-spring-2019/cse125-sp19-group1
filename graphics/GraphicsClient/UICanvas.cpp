@@ -71,3 +71,19 @@ void UICanvas::draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model) {
 		}
 	}
 }
+
+void UICanvas::dropItems() {
+	visibleItems[RACCOON_ITEM] = false;
+	visibleItems[CAT_ITEM] = false;
+	visibleItems[DOG_ITEM] = false;
+	visibleItems[CAKE_ITEM] = false;
+	visibleItems[YELLOW_KEY_ITEM] = false;
+	visibleItems[BLUE_KEY_ITEM] = false;
+	visibleItems[GREEN_KEY_ITEM] = false;
+	visibleItems[PLUNGER_ITEM] = false;
+	visibleItems[ROPE_ITEM] = false;
+	visibleItems[TOILET_PAPER_ITEM] = false;
+	visibleItems[RED_SCREWDRIVER_ITEM] = false;
+	visibleItems[GREEN_SCREWDRIVER_ITEM] = false;
+	visibleItems[YELLOW_SCREWDRIVER_ITEM] = false;
+}

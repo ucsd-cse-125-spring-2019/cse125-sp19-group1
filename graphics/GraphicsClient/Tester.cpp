@@ -963,41 +963,61 @@ void IdleCallback()
 		}
 		uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
 		std::map<int, Player*> players = gameData->getAllPlayers();
+		UpdateJailUI(players);
 		//check if animals are caught
-		for (auto it = players.begin(); it != players.end(); ++ it) {
-				//std::cerr << "In caught loop" << "\n";
-				Player * currPlayer = it->second;
-				if (currPlayer->getIsCaught()) {
-					if (currPlayer->getModelType() == ModelType::CAT) {
-						uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
-						uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
-					}
-					if (currPlayer->getModelType() == ModelType::DOG) {
-						uiCanvas->setVisible(uiCanvas->DOG_HAPPY, false);
-						uiCanvas->setVisible(uiCanvas->DOG_JAIL, true);
-					}
-					if (currPlayer->getModelType() == ModelType::RACOON) {
-						uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
-						uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
-					}
-				}
-				else {
-					if (currPlayer->getModelType() == ModelType::CAT) {
-						uiCanvas->setVisible(uiCanvas->CAT_HAPPY, true);
-						uiCanvas->setVisible(uiCanvas->CAT_JAIL, false);
-					}
-					if (currPlayer->getModelType() == ModelType::DOG) {
-						uiCanvas->setVisible(uiCanvas->DOG_HAPPY, true);
-						uiCanvas->setVisible(uiCanvas->DOG_JAIL, false);
-					}
-					if (currPlayer->getModelType() == ModelType::RACOON) {
-						uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, true);
-						uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, false);
-					}
-				}
+
+
+		//check for item holding
+		int myId = client->getMyID();
+		ItemName currItem = players[myId]->getInventory();
+
+	}
+}
+
+void UpdateItemUI(ItemName currItem) {
+	if (currItem == ItemName::CAKE) {
+		uiCanvas->dropItems();
+		uiCanvas->setVisible(UICanvas::CAKE_ITEM, true);
+	}
+	else if (currItem == ItemName::KEY1) {
+		uiCanvas->dropItems();
+		uiCanvas->setVisible(UICanvas::CAKE_ITEM, true);
+	}
+}
+
+void UpdateJailUI(std::map<int, Player*> players) {
+	for (auto it = players.begin(); it != players.end(); ++it) {
+		//std::cerr << "In caught loop" << "\n";
+		Player * currPlayer = it->second;
+		if (currPlayer->getIsCaught()) {
+			if (currPlayer->getModelType() == ModelType::CAT) {
+				uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
+			}
+			if (currPlayer->getModelType() == ModelType::DOG) {
+				uiCanvas->setVisible(uiCanvas->DOG_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->DOG_JAIL, true);
+			}
+			if (currPlayer->getModelType() == ModelType::RACOON) {
+				uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
+			}
+		}
+		else {
+			if (currPlayer->getModelType() == ModelType::CAT) {
+				uiCanvas->setVisible(uiCanvas->CAT_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->CAT_JAIL, false);
+			}
+			if (currPlayer->getModelType() == ModelType::DOG) {
+				uiCanvas->setVisible(uiCanvas->DOG_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->DOG_JAIL, false);
+			}
+			if (currPlayer->getModelType() == ModelType::RACOON) {
+				uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, false);
+			}
 		}
 	}
-
 }
 
 void DisplayCallback(GLFWwindow* window)
