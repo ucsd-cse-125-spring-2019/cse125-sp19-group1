@@ -72,8 +72,10 @@ void assignIDs(Skeleton * skel) {
 	std::map<string, Bone *> * bones = skel->GetBones();
 	unsigned int currID = 0;
 	for (map<string, Bone *>::iterator it = bones->begin(); it != bones->end(); it++) {
-		it->second->SetID(currID);
-		currID++;
+		if (it->second->CheckIsBone()) {
+			it->second->SetID(currID);
+			currID++;
+		}
 	}
 }
 

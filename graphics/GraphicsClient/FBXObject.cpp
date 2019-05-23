@@ -68,12 +68,9 @@ void FBXObject::PrintSkeleton() {
 void FBXObject::Update() {
 	// This function will handle anything that must continuously occur.
 	// right now trying to handle updating the animation through this function.
-	if (RUN_ANIM_AUTO) {
-		animTimer++;
-		if (fmod(animTimer, 50.0f) == 0.0f) {
-			ToNextKeyframe();
-		}
-	}
+	animTimer++;
+	if (RUN_ANIM_AUTO && fmod(animTimer, 50.0f) == 0.0f)
+		ToNextKeyframe();
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -188,8 +185,10 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 		glUniform1i(uIsAnimated, 1);
 		std::vector<glm::mat4> boneTransforms;
 		std::map<string, Bone *> * skelBones = skel->GetBones();
-		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++)
-			boneTransforms.push_back(it->second->GetTransform());
+		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
+			if (it->second->CheckIsBone())
+				boneTransforms.push_back(it->second->GetTransform());
+		}
 		glUniformMatrix4fv(uBones, boneTransforms.size(), GL_FALSE, &((boneTransforms[0])[0][0]));
 	}
 	else
@@ -286,6 +285,7 @@ void FBXObject::SetBuffers() {
 		std::vector<glm::vec4> weightIndices;
 		std::vector<glm::vec4> weightValues;
 		std::vector<Vertex *> * skelVertices = skel->GetVertices();
+		int highestID = 0;
 		for (int i = 0; i < skelVertices->size(); i++) {
 			std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
 			glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
@@ -297,6 +297,10 @@ void FBXObject::SetBuffers() {
 					Bone * currBone = skel->GetBone(currWeight.first);
 					if (currBone != NULL) {
 						currIndices[j] = currBone->GetID();
+						if (currIndices[j] == -1) std::cout << "-1 ID FOR NECESSARY BONE: " << currBone->GetName() << std::endl;
+						else {
+							if (currIndices[j] > highestID) highestID = currIndices[j];
+						}
 						currValues[j] = currWeight.second;
 					}
 				}
@@ -346,6 +350,7 @@ void FBXObject::UpdateSkin2() {
 	std::vector<glm::vec4> weightIndices;
 	std::vector<glm::vec4> weightValues;
 	std::vector<Vertex *> * skelVertices = skel->GetVertices();
+	int highestID = 0;
 	for (int i = 0; i < skelVertices->size(); i++) {
 		std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
 		glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
@@ -357,6 +362,10 @@ void FBXObject::UpdateSkin2() {
 				Bone * currBone = skel->GetBone(currWeight.first);
 				if (currBone != NULL) {
 					currIndices[j] = currBone->GetID();
+					if (currIndices[j] == -1) std::cout << "-1 ID FOR NECESSARY BONE: " << currBone->GetName() << std::endl;
+					else {
+						if (currIndices[j] > highestID) highestID = currIndices[j];
+					}
 					currValues[j] = currWeight.second;
 				}
 			}
@@ -368,8 +377,13 @@ void FBXObject::UpdateSkin2() {
 	// create the array of matrices
 	std::vector<glm::mat4> boneTransforms;
 	std::map<string, Bone *> * skelBones = skel->GetBones();
-	for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++)
-		boneTransforms.push_back(it->second->GetTransform());
+
+	std::cout << "HIGHEST ID: " << highestID << " vs NUM BONES: " << skelBones->size() << std::endl;
+
+	for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
+		if (it->second->CheckIsBone())
+			boneTransforms.push_back(it->second->GetTransform());
+	}
 
 	// apply matrices to vertices
 	glm::vec4 currWI;

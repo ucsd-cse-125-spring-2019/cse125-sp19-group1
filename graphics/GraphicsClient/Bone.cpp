@@ -118,6 +118,6 @@ void Bone::SetID(unsigned int newID) {
 	id = newID;
 }
 
-unsigned int Bone::GetID() {
+int Bone::GetID() {
 	return id;
 }

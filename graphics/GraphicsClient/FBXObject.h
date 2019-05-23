@@ -12,7 +12,7 @@ class FBXObject
 {
 private:
 	// TODO: re-enable shader animations
-	bool SHADER_ANIM_ENABLED = false;
+	bool SHADER_ANIM_ENABLED = true;
 	// this determines whether animations should run on their own
 	bool RUN_ANIM_AUTO = false;
 

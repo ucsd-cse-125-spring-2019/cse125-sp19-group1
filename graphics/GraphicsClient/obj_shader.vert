@@ -22,7 +22,7 @@ uniform vec3 specColor;
 uniform float shineAmt;
 uniform mat4 depthBiasMVP;
 uniform int isAnimated;
-uniform mat4 bones [200];
+uniform mat4 bones [31];
 
 // Outputs of the vertex shader are the inputs of the same name of the fragment shader.
 // The default output, gl_Position, should be assigned something. You can define as many
@@ -45,7 +45,10 @@ void main()
   // calculating effect of bones, if necessary
   mat4 M = mat4(1.0f);
   if (isAnimated == 1) {
-    M = (weightValues.x * bones[weightIDs.x]) + (weightValues.y * bones[weightIDs.y]) + (weightValues.z * bones[weightIDs.z]) + (weightValues.w * bones[weightIDs.w]);
+    M = (weightValues[0] * bones[weightIDs[0]]);
+	M += (weightValues[1] * bones[weightIDs[1]]);
+	M += (weightValues[2] * bones[weightIDs[2]]);
+	M += (weightValues[3] * bones[weightIDs[3]]);
   }
 
   // OpenGL maintains the D matrix so you only need to multiply by P, V (aka C inverse), and M
