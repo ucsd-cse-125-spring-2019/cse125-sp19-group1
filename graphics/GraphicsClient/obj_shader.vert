@@ -1,4 +1,4 @@
-#version 460
+#version 330
 // NOTE: Do NOT use any version older than 330! Bad things will happen!
 
 // This is an example vertex shader. GLSL is very similar to C.
