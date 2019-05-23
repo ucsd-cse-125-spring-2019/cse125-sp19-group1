@@ -15,9 +15,9 @@ int windowWidth = 0;
 int windowHeight = 0;
 const char* window_title = GAME_NAME_SHORT;
 
-static InGameGraphicsEngine * inGameEngine;
-static LoadingGraphicsEngine * loadingEngine;
-static AbstractGraphicsEngine * currentEngine;
+static InGameGraphicsEngine * inGameEngine = nullptr;
+static LoadingGraphicsEngine * loadingEngine = nullptr;
+static AbstractGraphicsEngine * currentEngine = nullptr;
 static ServerGame * server = nullptr;
 static ClientGame * client = nullptr;
 

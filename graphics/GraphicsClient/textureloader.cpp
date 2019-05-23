@@ -60,7 +60,7 @@ unsigned char* loadPPM(const char* filename, int& width, int& height)
 }
 
 
-GLuint loadTexture(const char * textureName)
+GLuint loadTexture(const char * textureName, int *texWidth, int *texHeight)
 {
 	GLuint texture[1];     // storage for one texture
 
@@ -79,6 +79,11 @@ GLuint loadTexture(const char * textureName)
 			return -1;
 		}
 
+		if (texWidth && texHeight) {
+			*texWidth = twidth;
+			*texHeight = theight;
+		}
+
 		// Set this texture to be the one we are working with
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
 
@@ -92,6 +97,11 @@ GLuint loadTexture(const char * textureName)
 		if (lodepng::decode(bytes, width, height, textureName)) {
 			glDeleteTextures(1, &texture[0]);
 			return -1;
+		}
+
+		if (texWidth && texHeight) {
+			*texWidth = width;
+			*texHeight = height;
 		}
 
 		// Set this texture to be the one we are working with
