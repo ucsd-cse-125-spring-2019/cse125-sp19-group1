@@ -395,8 +395,17 @@ void ServerGame::receiveFromClients()
 									std::cout << "HAS BOX" << std::endl;
 									if (!player->getInteracting()) {
 										std::cout << "starting to interact!" << std::endl;
-										player->setInteracting(true);
-										player->setActionStartTime();
+
+										if (player->getInstantSearch()) 
+										{
+											gameData->getAtlas()->updateBoxLayout(loc);
+										}
+										else
+										{
+											player->setInteracting(true);
+											player->setOpeningBox(true);
+											player->setActionStartTime();
+										}
 									}
 								}
 							}
@@ -408,7 +417,19 @@ void ServerGame::receiveFromClients()
 			case POWERUP_EVENT:
 			{
 				Player * player = gameData->getPlayer(iter->first);
-				ItemName it = player->getInventory();
+				if (player->getInteracting() ||
+					player->getIsCaught() ||
+					player->getHidden()) {
+					break;
+				}
+
+				if (!player->isChef()) {
+					if (!player->getInteracting()) {
+						player->setInteracting(true);
+						player->setPoweringUp(true);
+						player->setActionStartTime();
+					}
+				}
 			}
 			case RELEASE_EVENT:
 			{
@@ -425,12 +446,13 @@ void ServerGame::receiveFromClients()
 
 						Location loc = player->getLocation();
 
-						if (player->getInteracting()) {
+						if (player->getInteracting() && player->getOpeningBox()) {
 							double seconds = player->getInteractingTime(0);
 							if (seconds > gameData->getBoxTime()) {
 								std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 								gameData->getAtlas()->updateBoxLayout(loc);
 								player->setInteracting(false);
+								player->setOpeningBox(false);
 							}
 						}
 
@@ -613,7 +635,6 @@ void ServerGame::receiveFromClients()
 		}
 	}
 
-
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
 		if (Player * player = gameData->getPlayer(iter->first))
@@ -626,13 +647,33 @@ void ServerGame::receiveFromClients()
 			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 
 			if (player->isChef()) {
-				player->updateChefSpeedMultiplier(gameData->getChefAnger());
-				
+				player->updateChefMultiplier(gameData->getChefAnger());
 			}
 
 			if (player->getIsCaught())
 			{
 				continue;
+			}
+
+			if (player->getBlindChef() && gameData->getGameClock() > player->getVisionTime() + MAX_CHEF_TIME)
+			{
+				player->toggleBlindChef();
+				gameData->setChefVisionLimit(1);
+			}
+
+			if (player->getSlowChef() && gameData->getGameClock() > player->getSlowTime() + MAX_CHEF_TIME)
+			{
+				player->toggleSlowChef();
+			}
+
+			if (player->getGhost() && gameData->getGameClock() > player->getSpeedTime() + MAX_ANIMAL_GHOST_TIME)
+			{
+				player->toggleGhost();
+			}
+
+			if (player->getInstantSearch() && gameData->getGameClock() > player->getSearchTime() + MAX_ANIMAL_SEARCH_TIME)
+			{
+				player->toggleInstantSearch();
 			}
 
 			if (player->getInteracting())
@@ -647,10 +688,47 @@ void ServerGame::receiveFromClients()
 				}
 				else
 				{
-					if (seconds > gameData->getBoxTime()) {
+					if (player->getOpeningBox() && seconds > gameData->getBoxTime()) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
 						player->setInteracting(false);
+						player->setOpeningBox(false);
+					}
+
+					//Handling power ups
+					if (player->getPoweringUp() && seconds > gameData->getAbilityChargeTime()) {
+						std::cout << "POWERING UP" << std::endl;
+						player->setInteracting(false);
+						player->setPoweringUp(false);
+
+						ItemModelType it = player->getInventory();
+						if (it == ItemModelType::apple)
+						{
+							//call limit chef vision
+							player->toggleBlindChef();
+							player->setVisionStartTime();
+							gameData->setChefVisionLimit(0.4);
+						}
+						else if (it == ItemModelType::orange)
+						{
+							//call limit chef speed 
+							player->toggleSlowChef();
+							player->setSlowStartTime();
+						}
+						else if (it == ItemModelType::bananaGreen)
+						{
+							//call ghost because green means go 
+							player->setSpeedStartTime();
+						}
+						else if (it == ItemModelType::bananaPerfect)
+						{
+							//call flash because yellow banana
+						}
+						else if (it == ItemModelType::bananaVeryRipe)
+						{
+							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
+							player->setSearchStartTime();
+						}
 					}
 				}
 			}
@@ -681,6 +759,8 @@ void ServerGame::receiveFromClients()
 					}
 				}
 			}
+
+
 		}
 	}
 }
@@ -736,7 +816,14 @@ void ServerGame::updateRightEvent(int id)
 	}
 	else 
 	{
-		gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+		if (gameData->getPlayer(id)->getGhost()) 
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
+		}
+		else 
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+		}
 	}
 	//gameData->getPlayer(id)->setFacingDir(2);
 
@@ -754,7 +841,14 @@ void ServerGame::updateBackwardEvent(int id)
 	}
 	else
 	{
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+		if (gameData->getPlayer(id)->getGhost()) 
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED * GHOST_MULTIPLIER);
+		}
+		else
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+		}
 	}
 	//gameData->getPlayer(id)->setFacingDir(3);
 
@@ -772,7 +866,14 @@ void ServerGame::updateForwardEvent(int id)
 	}
 	else
 	{
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+		if (gameData->getPlayer(id)->getGhost())
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED * GHOST_MULTIPLIER);
+		}
+		else
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+		}
 	}
 	//gameData->getPlayer(id)->setFacingDir(1);
 	updatePlayerCollision(id, 2);
@@ -789,7 +890,14 @@ void ServerGame::updateLeftEvent(int id)
 	}
 	else
 	{
-		gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+		if (gameData->getPlayer(id)->getGhost())
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
+		}
+		else 
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+		}
 	}
 	//gameData->getPlayer(id)->setFacingDir(4);
 

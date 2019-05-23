@@ -1184,6 +1184,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		if (key == GLFW_KEY_D) {
 			client->sendPackets(DROP_EVENT);
 		}
+		if (key == GLFW_KEY_F) {
+			client->sendPackets(POWERUP_EVENT);
+		}
 		if (key == GLFW_KEY_H) {
 			// interact key press
 			client->sendPackets(HIDE_EVENT);

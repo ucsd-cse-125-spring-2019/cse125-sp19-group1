@@ -144,6 +144,23 @@ void Player::setActionStartTime()
 	actionStartTime = std::chrono::system_clock::now();
 }
 
+void Player::setSpeedStartTime()
+{
+	speedStartTime = std::chrono::system_clock::now();
+}
+void Player::setSearchStartTime()
+{
+	searchStartTime = std::chrono::system_clock::now();
+}
+void Player::setVisionStartTime()
+{
+	visionStartTime = std::chrono::system_clock::now();
+}
+void Player::setSlowStartTime()
+{
+	slowStartTime = std::chrono::system_clock::now();
+}
+
 void Player::setStartJailTime() 
 {
 	startJail = std::chrono::system_clock::now();
@@ -160,15 +177,39 @@ double Player::getInteractingTime(int opt)
 	return elapsed_seconds.count();
 }
 
+double Player::getSpeedTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - speedStartTime;
+	return elapsed_seconds.count();
+}
+
+double Player::getSearchTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - searchStartTime;
+	return elapsed_seconds.count();
+}
+
+double Player::getVisionTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - visionStartTime;
+	return elapsed_seconds.count();
+}
+
+double Player::getSlowTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - slowStartTime;
+	return elapsed_seconds.count();
+}
+
 
 //chef interaction/power-up methods
-void Player::updateChefSpeedMultiplier(int anger) 
+void Player::updateChefMultiplier(int anger) 
 {
-	if (getSlowChef()) 
-	{
-		chefSpeedMultiplier = slowedSpeed;
-	}
-	else if (anger < 12) 
+	if (anger < 12) 
 	{
 		chefSpeedMultiplier = 1.0;
 		radius = 10;
@@ -197,6 +238,11 @@ void Player::updateChefSpeedMultiplier(int anger)
 	{
 		chefSpeedMultiplier = 2.5;
 		radius = 20;
+	}
+
+	if (getSlowChef())
+	{
+		chefSpeedMultiplier = slowedSpeed;
 	}
 }
 

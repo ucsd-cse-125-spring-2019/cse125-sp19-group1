@@ -64,6 +64,21 @@ public:
 	void setCaughtAnimalId(int id);
 	void setActionStartTime();
 	void setStartJailTime();
+	void setSpeedStartTime();
+	void setSearchStartTime();
+	void setVisionStartTime();
+	void setSlowStartTime();
+
+	double getSpeedTime();
+	double getSearchTime();
+	double getVisionTime();
+	double getSlowTime();
+	
+	bool getPoweringUp() { return poweringUp; }
+	bool getOpeningBox() { return openingBox; }
+	void setPoweringUp(bool power) { poweringUp = power; }
+	void setOpeningBox(bool interact) { openingBox = interact; }
+
 
 	void toggleReady();
 	
@@ -79,8 +94,22 @@ public:
 	bool slowChef = false;
 	bool getSlowChef() { return slowChef; }
 	void toggleSlowChef() { slowChef = !slowChef; }
+
+	bool blindChef = false;
+	bool getBlindChef() { return blindChef; }
+	void toggleBlindChef() { blindChef = !blindChef; }
+
 	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
-	void updateChefSpeedMultiplier(int anger);
+	void updateChefMultiplier(int anger);
+
+	//player interaction/power-up methods
+	bool ghost = false;
+	bool getGhost() { return ghost; }
+	void toggleGhost() { ghost = !ghost; }
+
+	bool instantSearch = false;
+	bool getInstantSearch() { return instantSearch; }
+	void toggleInstantSearch() { instantSearch = !instantSearch; }
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;
@@ -109,8 +138,10 @@ protected:
 	bool		hasCake;
 	ModelType	modelType;
 	bool		interacting;
+	bool		poweringUp;
 	bool		openingJail;
 	bool		openingGate;
+	bool		openingBox;
 	bool		caughtAnimal = false;
 	bool		isCaught = false;
 	int			radius = 10;
@@ -120,6 +151,10 @@ protected:
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;
+	std::chrono::time_point<std::chrono::system_clock> speedStartTime;
+	std::chrono::time_point<std::chrono::system_clock> searchStartTime;
+	std::chrono::time_point<std::chrono::system_clock> visionStartTime;
+	std::chrono::time_point<std::chrono::system_clock> slowStartTime;
 
 	std::map < std::string, bool> dirtyVariablesMap;
 	using decodeFunctionType = void (Player::*)(std::string value);
