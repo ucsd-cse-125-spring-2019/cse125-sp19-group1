@@ -171,7 +171,6 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 	uMaterialS = glGetUniformLocation(shaderProgram, "specColor");
 	uShine = glGetUniformLocation(shaderProgram, "shineAmt");
 	uIsAnimated = glGetUniformLocation(shaderProgram, "isAnimated");
-	uBones = glGetUniformLocation(shaderProgram, "bones");
 
 	// Now send these values to the shader program
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &((*P)[0][0]));
@@ -186,10 +185,16 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 		std::vector<glm::mat4> boneTransforms;
 		std::map<string, Bone *> * skelBones = skel->GetBones();
 		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
-			if (it->second->CheckIsBone())
+			if (it->second->CheckIsBone()) {
 				boneTransforms.push_back(it->second->GetTransform());
+				//boneTransforms.push_back(glm::mat4(1.0f));
+				string boneString = string("bones[");
+				boneString += std::to_string(it->second->GetID());
+				boneString += "]";
+				uBones = glGetUniformLocation(shaderProgram, boneString.c_str());
+				glUniformMatrix4fv(uBones, 1, GL_FALSE, &(boneTransforms[it->second->GetID()][0][0]));
+			}
 		}
-		glUniformMatrix4fv(uBones, boneTransforms.size(), GL_FALSE, &((boneTransforms[0])[0][0]));
 	}
 	else
 		glUniform1i(uIsAnimated, 0);

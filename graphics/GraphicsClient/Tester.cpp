@@ -790,9 +790,9 @@ void DisplayCallback(GLFWwindow* window)
 	if (myState) {
 		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
 	}
-	root->draw(V, P, glm::mat4(1.0));
+	//root->draw(V, P, glm::mat4(1.0));
 	//uiCanvas->Draw(uiShaderProgram, &V, &P, glm::mat4(1.0));
-
+	playerModels[CAT_IDX]->Draw(objShaderProgram, &V, &P, glm::mat4(1.0));
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 
