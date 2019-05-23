@@ -2,7 +2,8 @@
 
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 
-Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemModelType::EMPTY), modelType(ModelType::RACOON)
+Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemModelType::EMPTY),
+	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
@@ -10,11 +11,7 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 		modelType = ModelType::CHEF;
 	}
 }
-void Player::setModelType(ModelType type)
-{
-	modelType = type;
-	dirtyVariablesMap["model"] = true;
-}
+
 
  Location Player::getLocation() const { return location; }
 bool Player::isReady() const
@@ -36,6 +33,11 @@ Action Player::getAction() const { return action; }
 Direction Player::getFacingDirection() const { return facingDirection; }
 void Player::setFacingDirection(Direction dir) { facingDirection = dir; }
 
+void Player::setModelType(ModelType type)
+{
+	modelType = type;
+	dirtyVariablesMap["model"] = true;
+}
 void Player::setAction(Action anAction)
 {
 	action = anAction;
@@ -117,7 +119,7 @@ bool Player::inRange(Location & myLoc, Location & theirLoc) {
 	double dist = sqrt(pow(myLoc.getX() - theirLoc.getX(), 2) +
 		pow(myLoc.getY() - theirLoc.getY(), 2) +
 		pow(myLoc.getZ() - theirLoc.getZ(), 2) * 1.0);
-	if (dist < radius) {
+	if (dist < catchRadius) {
 		return true;
 	}
 	return false;
@@ -148,12 +150,6 @@ std::string Player::encodePlayerData(bool newPlayerInit)
 	std::stringstream encodedData;
 	encodedData << "client: " << playerID << std::endl;
 
-	//encodedData << "isChef: " << isChef << std::endl;
-	//encodedData << "model: " << static_cast<int>(modelType) << std::endl;
-	//encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
-	//encodedData << "hasCake: " << hasCake << std::endl;
-	//encodedData << "hidden: " << hidden << std::endl;
-	//encodedData << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
 	for (auto p : dirtyVariablesMap)
 	{
 		std::string key = p.first;
@@ -208,6 +204,10 @@ void Player::decodeInteractAction(std::string value)
 {
 	action = static_cast<Action>(std::stoi(value));
 }
+void Player::decodeVisionRadius(std::string value)
+{
+	visionRadius = std::stof(value);
+}
 
 void Player::addDecodeFunctions()
 {
@@ -216,6 +216,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["inventory"] = &Player::decodeInventory;
 	decodingFunctions["hidden"] = &Player::decodeHidden;
 	decodingFunctions["interactAction"] = &Player::decodeInteractAction;
+	decodingFunctions["visionRadius"] = &Player::decodeVisionRadius;
 }
 
 void Player::addEncodeFunctions()
@@ -225,25 +226,25 @@ void Player::addEncodeFunctions()
 	encodingFunctions["inventory"] = &Player::encodeInventory;
 	encodingFunctions["hidden"] = &Player::encodeHidden;
 	encodingFunctions["interactAction"] = &Player::encodeInteractAction;
+	encodingFunctions["visionRadius"] = &Player::encodeVisionRadius;
 
 	dirtyVariablesMap["location"] = true;
 	dirtyVariablesMap["inventory"] = true;
 	dirtyVariablesMap["model"] = true;
 	dirtyVariablesMap["hidden"] = true;
 	dirtyVariablesMap["interactAction"] = true;
+	dirtyVariablesMap["visionRadius"] = true;
 
 }
 std::string Player::encodeLocation() {
 	std::stringstream encodedData;
 	encodedData << "location: " << location.getX() << " " << location.getY() << " " << location.getZ() << std::endl;
-	//dirtyVariablesMap["location"] = false;
 
 	return encodedData.str();
 }
 std::string Player::encodeInventory() {
 	std::stringstream encodedData;
 	encodedData << "inventory: " << static_cast<int>(inventory) << std::endl;
-	//dirtyVariablesMap["inventory"] = false;
 
 	return encodedData.str();
 }
@@ -251,7 +252,6 @@ std::string Player::encodeInventory() {
 std::string Player::encodeModelType() {
 	std::stringstream encodedData;
 	encodedData << "model: " << static_cast<int>(modelType) << std::endl;
-	//dirtyVariablesMap["model"] = false;
 
 	return encodedData.str();
 }
@@ -259,7 +259,6 @@ std::string Player::encodeModelType() {
 std::string Player::encodeHidden() {
 	std::stringstream encodedData;
 	encodedData << "hidden: " << hidden << std::endl;
-	//dirtyVariablesMap["hidden"] = false;
 
 	return encodedData.str();
 }
@@ -267,7 +266,13 @@ std::string Player::encodeHidden() {
 std::string Player::encodeInteractAction() {
 	std::stringstream encodedData;
 	encodedData << "interactAction: " << static_cast<int>(action) << std::endl;
-	//dirtyVariablesMap["interactAction"] = false;
+
+	return encodedData.str();
+}
+
+std::string Player::encodeVisionRadius() {
+	std::stringstream encodedData;
+	encodedData << "visionRadius: " << visionRadius << std::endl;
 
 	return encodedData.str();
 }

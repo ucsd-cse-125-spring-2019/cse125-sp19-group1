@@ -89,6 +89,7 @@ public:
 	void decodeModelType(std::string value);
 	void decodeHidden(std::string value);
 	void decodeInteractAction(std::string value);
+	void decodeVisionRadius(std::string value);
 
 	// Encode functions
 	void addEncodeFunctions();
@@ -97,6 +98,7 @@ public:
 	std::string encodeModelType();
 	std::string encodeHidden();
 	std::string encodeInteractAction();
+	std::string encodeVisionRadius();
 
 protected:
 	Action		action;
@@ -107,9 +109,9 @@ protected:
 	bool		interacting;
 	//bool		openingJail;
 	//bool		openingGate;
-	bool		caughtAnimal = false;
 	bool		isCaught = false;
-	int			radius = 10;
+	int			catchRadius = 10;
+	bool		caughtAnimal = false;
 	int			caughtAnimalId;
 	bool		hidden = false;
 	float		visionRadius;
