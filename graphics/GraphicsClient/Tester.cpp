@@ -218,7 +218,7 @@ void SetupCallbacks()
 int main(void)
 {
 	// Create the GLFW window
-	window = CreateWindowFrame(640, 480);
+	window = CreateWindowFrame(800, 600);
 	// Print OpenGL and GLSL versions
 	PrintVersions();
 	// Setup callbacks

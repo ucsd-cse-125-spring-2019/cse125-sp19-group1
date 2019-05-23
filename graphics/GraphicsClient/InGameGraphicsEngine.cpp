@@ -287,7 +287,7 @@ Transform * envObjsTransform = nullptr;
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
 glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camera looks at
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
-const glm::vec3 cam_angle(-15.f, 100.f, -45.f);  // camera's preferred offset from cam_look_at
+const glm::vec3 cam_angle(-10.f, 50.f, -30.f);  // camera's preferred offset from cam_look_at
 
 bool mouseRotation = false;
 glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
