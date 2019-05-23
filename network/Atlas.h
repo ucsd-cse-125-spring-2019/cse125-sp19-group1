@@ -58,6 +58,7 @@ public:
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
+	std::vector<std::pair<int, int>> jailLocations;
 	std::map<ItemName, Item> itemsMap;
 
 	void getItem(ItemName anItem, Item & outputItem);

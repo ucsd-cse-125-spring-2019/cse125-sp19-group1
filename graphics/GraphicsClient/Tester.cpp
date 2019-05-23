@@ -1037,6 +1037,10 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 			// interact key press
 			client->sendPackets(HIDE_EVENT);
 		}
+		if (key == GLFW_KEY_F) {
+			// interact key press
+			client->sendPackets(POWERUP_EVENT);
+		}
 		if (key == GLFW_KEY_0) {
 			client->sendPackets(SELECT0_EVENT);
 		}

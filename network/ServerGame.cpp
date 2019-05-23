@@ -263,15 +263,40 @@ void ServerGame::receiveFromClients()
 											}
 
 											Location tLoc = iter2->second->getLocation();
-											if (player->inRange(loc, tLoc) &&
-												!iter2->second->getIsCaught())
+											if (player->inRange(loc, tLoc) && !iter2->second->getIsCaught())
 											{
-												player->setCaughtAnimal(true);
-												player->setCaughtAnimalId(iter2->first);
+												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5) 
+												{
+													//get random jail
+													//deloy animal in random jail
+													auto jailLocations = gameData->getAtlas()->jailLocations;
+													Location jloc = Location();
+													for (auto it = jailLocations.begin();
+														it != jailLocations.end();  // Use (), and assuming itt was a typo
+														it++)
+													{
+														Location jLoc = Location(it->second, 0, it->first);
+														if (gameData->getAtlas()->hasJail(jLoc)) {
+															JailTile * jailTile = gameData->getJailTile(loc);
+															jLoc.update(it->second, (float)jailTile->getHeight(), it->first);
+															if (jailTile->isJailEmpty()) {
+																iter2->second->setLocation(jLoc.getX(), jLoc.getY(), jLoc.getZ());
+																gameData->getAtlas()->placeInJail(loc, iter2->first);
+																break;
+															}
+														}
+													}
+												}
+												else
+												{
+													player->setCaughtAnimal(true);
+													player->setCaughtAnimalId(iter2->first);
+													iter2->second->setLocation(-100, -100, -100);
+												}
 												iter2->second->setIsCaught(true);
 
 												//update animal's location to chef's location
-												iter2->second->setLocation(player->getLocation());
+												//iter2->second->setLocation(player->getLocation());
 											}
 
 											if (!iter2->second->isChef() &&
@@ -379,7 +404,11 @@ void ServerGame::receiveFromClients()
 				}
 				break;
 			}
-
+			case POWERUP_EVENT:
+			{
+				Player * player = gameData->getPlayer(iter->first);
+				ItemName it = player->getInventory();
+			}
 			case RELEASE_EVENT:
 			{
 				if (gameStarted)
@@ -570,9 +599,16 @@ void ServerGame::receiveFromClients()
 	//All server loop checks 
 
 	if (gameData->getGameClock() % gameData->getChefAngerInterval() == 0) {
-		if (gameData->getGameClock() > gameData->getCurrentTime() &&
-			gameData->getChefAnger() < gameData->getMaxAnger()) {
-			gameData->incrementChefAnger();
+		if (gameData->getGameClock() > gameData->getCurrentTime()) 
+		{
+			if (gameData->getChefAnger() < gameData->getMaxAnger())
+			{
+				gameData->incrementChefAnger();
+			}
+			if (gameData->getChefVision() < gameData->getChefMaxVision())
+			{
+				gameData->incrementChefVision();
+			}
 			gameData->setCurrentTime();
 		}
 	}

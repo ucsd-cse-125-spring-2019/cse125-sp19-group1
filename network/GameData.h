@@ -64,7 +64,12 @@ public:
 	int maxChefAnger = 60;
 	int currentTime = -1;
 	int chefAngerInterval = 10;
-	
+	double chefVision = 85;
+	double chefMaxVision = 160;
+
+	double getChefVision() { return chefVision; }
+	double getChefMaxVision() { return chefMaxVision; }
+	void incrementChefVision() { chefVision++; }
 	void incrementChefAnger() { chefAnger++; }
 	int getChefAngerInterval() { return chefAngerInterval; }
 	int getChefAnger() { return chefAnger; }

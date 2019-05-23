@@ -167,7 +167,6 @@ void Player::updateChefSpeedMultiplier(int anger)
 	if (getSlowChef()) 
 	{
 		chefSpeedMultiplier = slowedSpeed;
-		radius = 10;
 	}
 	else if (anger < 12) 
 	{

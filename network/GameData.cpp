@@ -33,6 +33,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	}
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
+	encodedData << "chefVision:" << getChefVision() << std::endl;
 	std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
@@ -230,6 +231,9 @@ void GameData::decodeGameData(const char * data)
 		}
 		else if (p.first == "chefAnger") {
 			chefAnger = std::stoi(value);
+		}
+		else if (p.first == "chefVision") {
+			chefVision = std::stoi(value);
 		}
 		else
 		{
