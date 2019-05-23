@@ -109,7 +109,6 @@ void Player::setCaughtAnimalId(int id) {
 	caughtAnimalId = id;
 }
 
-//bool Player::getIsCaught() {
 bool Player::getIsCaught() const {
 	return isCaught;
 }
