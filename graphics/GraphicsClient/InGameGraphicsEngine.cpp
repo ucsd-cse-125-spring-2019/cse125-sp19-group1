@@ -107,37 +107,35 @@ static const struct ItemModelSettings {
 	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,               1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,              1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("canvas"),                       "canvas",               ItemModelType::canvas,            3.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f) },
 	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.5f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("keydrop"),                      "key drop",             ItemModelType::keyDrop,           2.f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,   2.f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit,  2.f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,       2.f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,          3.f,  glm::vec3(0.f, 0.5f, -0.4f) },
+	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f) },
 	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,           1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,   1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,              1.f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f) },
 	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f) },
-	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,          0.65f,  glm::vec3(0.f) },
+	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,              3.f,  glm::vec3(0.f, 0.2f, -0.47f) },
-	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,          1.25f,  glm::vec3(0.f, 0.5f, -0.4f) },
+	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f) },
+	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f) },
 };
 
 struct ItemModel {
@@ -377,7 +375,7 @@ void resetEnvObjs()
 		auto &row = envObjs[z];
 		row.resize(floorArray[z].size());
 		for (size_t x = 0; x < row.size(); x++) {
-			const auto &tile = tileLayout[z][x];
+			const auto tile = tileLayout[z][x];
 
 #ifdef ENV_OBJS_DEMO
 			if (objIdx == 0) objIdx = 1;
@@ -407,7 +405,10 @@ void resetEnvObjs()
 #endif
 
 			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
-
+			if (modelType == ItemModelType::EMPTY || !itemModels[objIdx].settings) {
+				row[x] = nullptr;
+				continue;
+			}
 
 			// Try to turn the object away from the wall
 			float angle = 0.f;
@@ -883,11 +884,6 @@ void DisplayCallback(GLFWwindow* window)
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
-
-	// Swap buffers
-	glfwSwapBuffers(window);
-	// Gets events, including input such as keyboard and mouse or window resizing
-	glfwPollEvents();
 }
 
 void UpdateView() {

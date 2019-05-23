@@ -15,7 +15,7 @@
 #define CANVAS_MDL_PATH  (CANVAS_PATH "canvas2.fbx")
 
 #define PAW_ANGLE_OFFSET (-0.18f * glm::pi<float>())
-#define PAW_MAX_ALPHA (0.7f)
+#define PAW_MAX_ALPHA (0.81f)
 
 static const glm::mat4 identifyMat(1.f);
 static GLuint passthroughShaderProgram = 0;
@@ -37,6 +37,7 @@ LoadingGraphicsEngine::LoadingGraphicsEngine()
 {
 	fullyLoaded = false;
 	calledMainLoopBegin = false;
+	loadingAlpha = 1.f;
 }
 
 LoadingGraphicsEngine::~LoadingGraphicsEngine()
@@ -155,7 +156,11 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 {
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Clear the color and depth buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	if (loadingAlpha >= 1.f) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -166,7 +171,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	glUseProgram(passthroughShaderProgram);
 
-	glUniform1f(uAlpha, 1.f);
+	glUniform1f(uAlpha, loadingAlpha);
 	backgroundObj->Draw(passthroughShaderProgram, &identifyMat, &identifyMat, bgMat);
 
 	static const glm::vec3 dotPositions[] = {
@@ -210,7 +215,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	}
 
 	for (unsigned i = 0; i < 3; ++i) {
-		drawDot(dotPositions[i], dotAlphas[i]);
+		drawDot(dotPositions[i], dotAlphas[i] * loadingAlpha);
 	}
 	
 	static float pawAlphas[2] = { PAW_MAX_ALPHA, PAW_MAX_ALPHA };
@@ -301,7 +306,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 				pawIdx = 0;
 			}
 
-			cout << "Paw: <" << pawPos[pawIdx].x << ", " << pawPos[pawIdx].y << ">\n";
+			//cout << "Paw: <" << pawPos[pawIdx].x << ", " << pawPos[pawIdx].y << ">\n";
 		}
 		pawAlphas[pawIdx] = pawSubphase * PAW_MAX_ALPHA;
 		pawAnimationOffset[pawIdx] = -(1.f - pawSubphase) * pawDirection * 0.015f;
@@ -312,12 +317,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	pawPreviousPhaseIdx = pawPhaseIdx;
 
-	drawPaw(pawPos[0] + pawAnimationOffset[0], pawAlphas[0], pawAngle);
-	drawPaw(pawPos[1] + pawAnimationOffset[1], pawAlphas[1], pawAngle);
-
-	// Swap buffers
-	glfwSwapBuffers(window);
-	// Gets events, including input such as keyboard and mouse or window resizing
-	glfwPollEvents();
+	drawPaw(pawPos[0] + pawAnimationOffset[0], pawAlphas[0] * sqrt(loadingAlpha), pawAngle);
+	drawPaw(pawPos[1] + pawAnimationOffset[1], pawAlphas[1] * sqrt(loadingAlpha), pawAngle);
 }
 

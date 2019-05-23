@@ -41,6 +41,10 @@ void FBXObject::Parse(const char *filepath)
 
 FBXObject::~FBXObject()
 {
+	if (skel) {
+		delete skel;
+	}
+
 	if (renderingIsSetup) {
 		// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a
 		// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
@@ -355,4 +359,5 @@ void FBXObject::LoadMatrices(const char * path) {
 		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
 
 	token->Close();
+	delete token;
 }

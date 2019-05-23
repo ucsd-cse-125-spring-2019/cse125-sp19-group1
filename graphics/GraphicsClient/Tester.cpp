@@ -8,7 +8,7 @@
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
-#include <ctime>
+#include <cmath>
 
 GLFWwindow * window = nullptr;
 int windowWidth = 0;
@@ -104,11 +104,17 @@ void serverLoop(void * args) {
 void CleanUp() {
 	currentEngine = nullptr;
 
-	inGameEngine->CleanUp();
-	loadingEngine->CleanUp();
+	if (inGameEngine) {
+		inGameEngine->CleanUp();
+		delete inGameEngine;
+		inGameEngine = nullptr;
+	}
 
-	delete inGameEngine;
-	delete loadingEngine;
+	if (loadingEngine) {
+		loadingEngine->CleanUp();
+		delete loadingEngine;
+		loadingEngine = nullptr;
+	}
 }
 
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -222,6 +228,8 @@ int main(void)
 	// Initialize objects/pointers for rendering
 	Init();
 
+	double loadingFadeoutStart;
+
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
 	{
@@ -232,6 +240,20 @@ int main(void)
 		if (currentEngine == loadingEngine) {
 			if (inGameEngine->fullyLoaded) {
 				currentEngine = inGameEngine;
+				loadingFadeoutStart = glfwGetTime();
+			}
+		}
+		else if (loadingEngine) {
+#define LOADING_FADEOUT_TIME 1.35
+			double delta = glfwGetTime() - loadingFadeoutStart;
+			if (delta < LOADING_FADEOUT_TIME) {
+				loadingEngine->loadingAlpha = 1.f - delta / LOADING_FADEOUT_TIME;
+			}
+			else {
+				loadingEngine->loadingAlpha = 0.f;
+				loadingEngine->MainLoopEnd();
+				delete loadingEngine;
+				loadingEngine = nullptr;
 			}
 		}
 		
@@ -241,6 +263,15 @@ int main(void)
 				currentEngine->MainLoopBegin();
 			}
 			currentEngine->MainLoopCallback(window);
+
+			if (loadingEngine && currentEngine != loadingEngine) {
+				loadingEngine->MainLoopCallback(window);
+			}
+
+			// Swap buffers
+			glfwSwapBuffers(window);
+			// Gets events, including input such as keyboard and mouse or window resizing
+			glfwPollEvents();
 		}
 		
 		server->update();
