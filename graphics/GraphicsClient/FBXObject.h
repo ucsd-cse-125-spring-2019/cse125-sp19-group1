@@ -81,6 +81,7 @@ public:
 
 	void ToNextKeyframe();
 	void UpdateSkin();
+	void UpdateSkin2();
 	void LoadMatrices(const char * path);
 };
 

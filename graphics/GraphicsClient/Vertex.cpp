@@ -34,9 +34,8 @@ void Vertex::NormalizeWeights() {
 	for (int i = 0; i < weights.size(); i++)
 		totalWeight += weights[i].second;
 
-	for (int j = 0; j < weights.size(); j++) {
+	for (int j = 0; j < weights.size(); j++)
 		weights[j].second = weights[j].second / totalWeight;
-	}
 }
 
 std::vector<std::pair<string, float>> * Vertex::GetWeights() {

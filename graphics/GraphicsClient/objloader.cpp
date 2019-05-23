@@ -35,8 +35,8 @@ void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertice
 {
 	// creating actual Bone objects and populating the Skeleton
 	traverseSkeleton(root, skel);
-	assignIDs(skel);
 	assignOffsetMatrices(mesh, skel);
+	assignIDs(skel);
 	// extracting information about how bones affect vertices through weights
 	populateSkelVertices(mesh, vertices, normals, skel);
 	

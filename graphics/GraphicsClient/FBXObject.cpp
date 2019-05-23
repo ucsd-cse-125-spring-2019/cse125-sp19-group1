@@ -189,8 +189,7 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 		std::vector<glm::mat4> boneTransforms;
 		std::map<string, Bone *> * skelBones = skel->GetBones();
 		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++)
-			if (it->second->CheckIsBone())
-				boneTransforms.push_back(it->second->GetTransform());
+			boneTransforms.push_back(it->second->GetTransform());
 		glUniformMatrix4fv(uBones, boneTransforms.size(), GL_FALSE, &((boneTransforms[0])[0][0]));
 	}
 	else
@@ -338,8 +337,56 @@ void FBXObject::ToNextKeyframe() {
 		animPlayer->ToNextKeyframe();
 		skel->Update(animPlayer->GetGlobalInverseT());
 		if (!SHADER_ANIM_ENABLED)
-			UpdateSkin();
+			UpdateSkin2();
 	}
+}
+
+void FBXObject::UpdateSkin2() {
+	// get the indices and actual weights of the matrices to apply to the vertices
+	std::vector<glm::vec4> weightIndices;
+	std::vector<glm::vec4> weightValues;
+	std::vector<Vertex *> * skelVertices = skel->GetVertices();
+	for (int i = 0; i < skelVertices->size(); i++) {
+		std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
+		glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
+		glm::vec4 currValues = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		// number of weights is restricted to a maximum of four
+		for (int j = 0; j < currWeights->size() && j < 4; j++) {
+			std::pair<string, float> currWeight = (*currWeights)[j];
+			if (currWeight.first != "") {
+				Bone * currBone = skel->GetBone(currWeight.first);
+				if (currBone != NULL) {
+					currIndices[j] = currBone->GetID();
+					currValues[j] = currWeight.second;
+				}
+			}
+		}
+		weightIndices.push_back(currIndices);
+		weightValues.push_back(currValues);
+	}
+
+	// create the array of matrices
+	std::vector<glm::mat4> boneTransforms;
+	std::map<string, Bone *> * skelBones = skel->GetBones();
+	for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++)
+		boneTransforms.push_back(it->second->GetTransform());
+
+	// apply matrices to vertices
+	glm::vec4 currWI;
+	glm::vec4 currWV;
+	glm::mat4 M;
+	for (int vIndex = 0; vIndex < vertices.size(); vIndex++) {
+		currWI = weightIndices[vIndex];
+		currWV = weightValues[vIndex];
+		M = glm::mat4(0.0f);
+		for (int wIndex = 0; wIndex < 4; wIndex++) {
+			M += currWV[wIndex] * boneTransforms[currWI[wIndex]];
+		}
+		vertices[vIndex] = M * glm::vec4((*skelVertices)[vIndex]->GetPos(), 1.0f);
+		normals[vIndex] = M * glm::vec4((*skelVertices)[vIndex]->GetNorm(), 0.0f);
+	}
+
+	UpdateBuffers();
 }
 
 void FBXObject::UpdateSkin() {
