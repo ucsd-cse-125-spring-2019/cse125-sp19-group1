@@ -17,6 +17,7 @@
 #define MAX_CHEF_TIME 7
 #define MAX_ANIMAL_GHOST_TIME 7
 #define MAX_ANIMAL_SEARCH_TIME 7
+#define FLASH_DISTANCE 14
 
 
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
