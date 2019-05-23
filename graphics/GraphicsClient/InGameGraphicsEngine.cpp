@@ -1098,6 +1098,9 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 	const auto gameData = client->getGameData();
 	gameData->startGameClock();
+
+	// Set clear color
+	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
 }
 
 void InGameGraphicsEngine::MainLoopEnd()

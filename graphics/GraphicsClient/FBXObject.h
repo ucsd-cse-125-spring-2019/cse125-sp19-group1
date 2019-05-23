@@ -68,7 +68,7 @@ public:
 	void SetSpecular(glm::vec3 newSpec);
 	void SetShine(float newShine);
 	// rendering
-	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
+	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
 	void RenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();

@@ -170,7 +170,7 @@ void FBXObject::SetDepthTest(bool depthTestEnabled) {
 }
 
 
-void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model)
+void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model)
 {
 	if (!renderingIsSetup)
 		return;

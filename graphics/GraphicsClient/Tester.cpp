@@ -60,8 +60,6 @@ void SetupOpenGLSettings()
 	/* Enable culling of faces to speed up rendering
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK); */
-	// Set clear color
-	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
 	// Set shading to smooth
 	glShadeModel(GL_SMOOTH);
 	// Auto normalize surface normals
