@@ -300,11 +300,11 @@ void Atlas::detectObjectCollision(Location & loc) {
 		col = 0;
 
 
-	std::vector<Tile *> adjacentObjTiles;
 
 	if (row - 1 >= 0)
 	{
-		if (tileLayout[row - 1][col]->getTileType() == TileType::OBJECT || tileLayout[row - 1][col]->getTileType() == TileType::JAIL)
+		if ((tileLayout[row - 1][col]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row - 1][col])->getModel() != ItemModelType::painting) || tileLayout[row - 1][col]->getTileType() == TileType::JAIL)
 		{
 			int up_bound = row * TILE_SIZE;
 			if (loc.getZ() - PLAYER_RADIUS <= up_bound) {
@@ -317,7 +317,8 @@ void Atlas::detectObjectCollision(Location & loc) {
 	if (row + 1 < tileLayout.size())
 
 	{
-		if (tileLayout[row + 1][col]->getTileType() == TileType::OBJECT || tileLayout[row + 1][col]->getTileType() == TileType::JAIL)
+		if ((tileLayout[row + 1][col]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row + 1][col])->getModel() != ItemModelType::painting) || tileLayout[row + 1][col]->getTileType() == TileType::JAIL)
 		{
 			int down_bound = row * TILE_SIZE + TILE_SIZE-1;// need -1 so that it does not go into the next tile
 			if (loc.getZ() + PLAYER_RADIUS >= down_bound) {
@@ -329,7 +330,8 @@ void Atlas::detectObjectCollision(Location & loc) {
 	
 	if (col - 1 >= 0)
 	{
-		if (tileLayout[row][col - 1]->getTileType() == TileType::OBJECT || tileLayout[row][col - 1]->getTileType() == TileType::JAIL)
+		if ((tileLayout[row][col - 1]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row][col - 1])->getModel() != ItemModelType::painting) || tileLayout[row][col - 1]->getTileType() == TileType::JAIL)
 		{
 			int left_bound = col * TILE_SIZE;
 			if (loc.getX() - PLAYER_RADIUS <= left_bound) {
@@ -343,7 +345,8 @@ void Atlas::detectObjectCollision(Location & loc) {
 
 	if (col + 1 < tileLayout[row].size())
 	{
-		if (tileLayout[row][col + 1]->getTileType() == TileType::OBJECT || tileLayout[row][col + 1]->getTileType() == TileType::JAIL)
+		if ((tileLayout[row][col + 1]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row][col + 1])->getModel() != ItemModelType::painting) || tileLayout[row][col + 1]->getTileType() == TileType::JAIL)
 		{
 			int right_bound = col * TILE_SIZE + TILE_SIZE-1; // need -1 so that it does not go into the next tile
 			if (loc.getX() + PLAYER_RADIUS >= right_bound) {

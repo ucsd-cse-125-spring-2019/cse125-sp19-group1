@@ -12,7 +12,7 @@ public:
 	ObjectTile(ItemModelType anObj = ItemModelType::table, int aWallLayout = 0, int aHeight = 0) : Tile(TileType::OBJECT, aWallLayout, aHeight), objectType(anObj) {}
 
 	// Getter
-	ItemModelType getObjectType() { return objectType; }
+	ItemModelType getModel() { return objectType; }
 	// Setter
 
 	// Encode function
