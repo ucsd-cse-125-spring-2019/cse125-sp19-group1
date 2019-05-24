@@ -175,7 +175,7 @@ void ServerGame::receiveFromClients()
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
 						if (player->isInteracting() ||
-							player->getIsCaught() ||
+							player->isCaught() ||
 							player->getHidden()) {
 							break;
 						}
@@ -191,7 +191,7 @@ void ServerGame::receiveFromClients()
 								std::cout << "CAUGHT ANIMAL" << std::endl;
 
 								//drop off animal
-								if (player->getCaughtAnimal() && gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
+								if (player->hasCaughtAnimal() && gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 								{
 									int animal = player->getCaughtAnimalId();
 									//update jail with animal
@@ -226,18 +226,18 @@ void ServerGame::receiveFromClients()
 
 											Location tLoc = iter2->second->getLocation();
 											if (player->inRange(loc, tLoc) &&
-												!iter2->second->getIsCaught())
+												!iter2->second->isCaught())
 											{
 												player->setCaughtAnimal(true);
 												player->setCaughtAnimalId(iter2->first);
-												iter2->second->setIsCaught(true);
+												iter2->second->setCaughtStatus(true);
 
 												//update animal's location to chef's location
 												iter2->second->setLocation(player->getLocation());
 											}
 
 											if (!iter2->second->isChef() &&
-												!iter2->second->getIsCaught())
+												!iter2->second->isCaught())
 											{
 												chefWin = false;
 											}
@@ -329,7 +329,7 @@ void ServerGame::receiveFromClients()
 											std::cout << "ANIMAL IS RELEASED" << std::endl;
 											//update animal 
 											int animal = jailTile->getCapturedAnimal();
-											gameData->getPlayer(animal)->setIsCaught(false);
+											gameData->getPlayer(animal)->setCaughtStatus(false);
 
 											//update jail
 											jailTile->resetJail();
@@ -361,7 +361,7 @@ void ServerGame::receiveFromClients()
 
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
-						if (player->getIsCaught() ||
+						if (player->isCaught() ||
 							player->getHidden()) {
 							break;
 						}
@@ -439,7 +439,7 @@ void ServerGame::receiveFromClients()
 					if (Player * player = gameData->getPlayer(iter->first))
 					{
 						if (player->isInteracting() ||
-							player->getIsCaught() ||
+							player->isCaught() ||
 							player->getHidden()) {
 							break;
 						}
@@ -468,7 +468,7 @@ void ServerGame::receiveFromClients()
 				if (Player * player = gameData->getPlayer(iter->first))
 				{
 					if (player->isInteracting() ||
-						player->getIsCaught()) {
+						player->isCaught()) {
 						break;
 					}
 
@@ -481,7 +481,7 @@ void ServerGame::receiveFromClients()
 						if (!hideTile->checkHideTileEmpty())
 						{
 							int animal = hideTile->getAnimalHiding();
-							gameData->getPlayer(animal)->setIsCaught(true);
+							gameData->getPlayer(animal)->setCaughtStatus(true);
 							player->setCaughtAnimalId(animal);
 							player->setCaughtAnimal(true);
 							player->setHidden(false);
@@ -576,7 +576,7 @@ void ServerGame::receiveFromClients()
 			Location loc = player->getLocation();
 			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 
-			if (player->getIsCaught())
+			if (player->isCaught())
 			{
 				continue;
 			}
@@ -712,7 +712,7 @@ void ServerGame::initNewClient()
 void ServerGame::updateMovement(int dir, int id)
 {
 	if (gameData->getPlayer(id)->isInteracting() ||
-		gameData->getPlayer(id)->getIsCaught() ||
+		gameData->getPlayer(id)->isCaught() ||
 		gameData->getPlayer(id)->getHidden()) {
 		return;
 	}
@@ -777,7 +777,7 @@ void ServerGame::updateHeight(int id)
 		// Update location of captured animal to the chef's location
 		if (gameData->getPlayer(id)->isChef())
 		{
-			if (gameData->getPlayer(id)->getCaughtAnimal())
+			if (gameData->getPlayer(id)->hasCaughtAnimal())
 			{
 				int animalId = gameData->getPlayer(id)->getCaughtAnimalId();
 				gameData->getPlayer(animalId)->setLocation(gameData->getPlayer(id)->getLocation());
@@ -820,7 +820,7 @@ void ServerGame::updateHeight(int id)
 	// Update location of captured animal to the chef's location
 	if (gameData->getPlayer(id)->isChef())
 	{
-		if (gameData->getPlayer(id)->getCaughtAnimal())
+		if (gameData->getPlayer(id)->hasCaughtAnimal())
 		{
 			int animalId = gameData->getPlayer(id)->getCaughtAnimalId();
 			gameData->getPlayer(animalId)->setLocation(gameData->getPlayer(id)->getLocation());
@@ -847,7 +847,7 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 		}
 
 		// Ignore player collision check for the animal that the chef is carrying
-		if (player->isChef() && player->getCaughtAnimal() && player->getCaughtAnimalId() == it->first) {
+		if (player->isChef() && player->hasCaughtAnimal() && player->getCaughtAnimalId() == it->first) {
 			continue;
 		}
 

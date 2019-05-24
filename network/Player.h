@@ -43,9 +43,10 @@ public:
 	Location	getLocation() const;
 	ModelType	getModelType() const;
 	bool		isChef() const;
-	bool		getCaughtAnimal() const;
-	bool		getIsCaught() const;
+	bool		isCaught() const;
+	bool		hasCaughtAnimal() const;
 	int			getCaughtAnimalId() const;
+	ModelType	getCaughtAnimalType() const;
 
 	bool		isReady() const;
 
@@ -62,16 +63,18 @@ public:
 	void setInteracting(bool interact);
 	//void setOpenJail(bool interact);
 	//void setOpeningGate(bool status);
+	void setCaughtStatus(bool caught);
+
 	void setCaughtAnimal(bool caught);
-	void setIsCaught(bool caught);
 	void setCaughtAnimalId(int id);
+	void setCaughtAnimalType(ModelType type);
 	void setActionStartTime();
 	void setUnlockJailStartTime();
 	void setAction(Action anAction);
+	void setFacingDirection(Direction dir);
 
 	void toggleReady();
 	
-	void setFacingDirection(Direction dir);
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
@@ -90,6 +93,8 @@ public:
 	void decodeHidden(std::string value);
 	void decodeInteractAction(std::string value);
 	void decodeVisionRadius(std::string value);
+	void decodeCaughtStatus(std::string value);
+	void decodeCaughtAnimalType(std::string value);
 
 	// Encode functions
 	void addEncodeFunctions();
@@ -99,6 +104,8 @@ public:
 	std::string encodeHidden();
 	std::string encodeInteractAction();
 	std::string encodeVisionRadius();
+	std::string encodeCaughtStatus();
+	std::string encodeCaughtAnimalType();
 
 protected:
 	Action		action;
@@ -109,10 +116,11 @@ protected:
 	bool		interacting;
 	//bool		openingJail;
 	//bool		openingGate;
-	bool		isCaught = false;
+	bool		caughtStatus = false;
 	int			catchRadius = 10;
 	bool		caughtAnimal = false;
 	int			caughtAnimalId;
+	ModelType	caughtAnimalType;
 	bool		hidden = false;
 	float		visionRadius;
 

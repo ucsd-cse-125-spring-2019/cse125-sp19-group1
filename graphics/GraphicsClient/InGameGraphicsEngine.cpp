@@ -829,7 +829,7 @@ void IdleCallback()
 		for (auto it = players.begin(); it != players.end(); ++it) {
 			//std::cerr << "In caught loop" << "\n";
 			Player * currPlayer = it->second;
-			if (currPlayer->getIsCaught()) {
+			if (currPlayer->isCaught()) {
 				if (currPlayer->getModelType() == ModelType::CAT) {
 					uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
 					uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
