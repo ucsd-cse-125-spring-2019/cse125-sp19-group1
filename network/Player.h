@@ -64,7 +64,6 @@ public:
 	//void setOpenJail(bool interact);
 	//void setOpeningGate(bool status);
 	void setCaughtStatus(bool caught);
-
 	void setCaughtAnimal(bool caught);
 	void setCaughtAnimalId(int id);
 	void setCaughtAnimalType(ModelType type);
@@ -94,6 +93,7 @@ public:
 	void decodeInteractAction(std::string value);
 	void decodeVisionRadius(std::string value);
 	void decodeCaughtStatus(std::string value);
+	void decodeCaughtAnimal(std::string value);
 	void decodeCaughtAnimalType(std::string value);
 
 	// Encode functions
@@ -105,6 +105,7 @@ public:
 	std::string encodeInteractAction();
 	std::string encodeVisionRadius();
 	std::string encodeCaughtStatus();
+	std::string encodeCaughtAnimal();
 	std::string encodeCaughtAnimalType();
 
 protected:

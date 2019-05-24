@@ -220,7 +220,11 @@ void Player::decodeCaughtStatus(std::string value)
 {
 	caughtStatus = value == "1";
 }
-void Player::decodeCaughtStatus(std::string value)
+void Player::decodeCaughtAnimal(std::string value)
+{
+	caughtAnimal = value == "1";
+}
+void Player::decodeCaughtAnimalType(std::string value)
 {
 	caughtAnimalType = static_cast<ModelType>(std::stoi(value));
 }
@@ -234,7 +238,9 @@ void Player::addDecodeFunctions()
 	decodingFunctions["interactAction"] = &Player::decodeInteractAction;
 	decodingFunctions["visionRadius"] = &Player::decodeVisionRadius;
 	decodingFunctions["caughtStatus"] = &Player::decodeCaughtStatus;
+	decodingFunctions["caughtAnimal"] = &Player::decodeCaughtAnimal;
 	decodingFunctions["caughtAnimalType"] = &Player::decodeCaughtAnimalType;
+
 }
 
 void Player::addEncodeFunctions()
@@ -246,7 +252,9 @@ void Player::addEncodeFunctions()
 	encodingFunctions["interactAction"] = &Player::encodeInteractAction;
 	encodingFunctions["visionRadius"] = &Player::encodeVisionRadius;
 	encodingFunctions["caughtStatus"] = &Player::encodeCaughtStatus;
+	encodingFunctions["caughtAnimal"] = &Player::encodeCaughtAnimal;
 	encodingFunctions["caughtAnimalType"] = &Player::encodeCaughtAnimalType;
+
 
 	dirtyVariablesMap["location"] = true;
 	dirtyVariablesMap["inventory"] = true;
@@ -255,6 +263,7 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["interactAction"] = true;
 	dirtyVariablesMap["visionRadius"] = true;
 	dirtyVariablesMap["caughtStatus"] = true;
+	dirtyVariablesMap["caughtAnimal"] = true;
 	dirtyVariablesMap["caughtAnimalType"] = true;
 
 }
@@ -304,10 +313,16 @@ std::string Player::encodeCaughtStatus() {
 
 	return encodedData.str();
 }
+std::string Player::encodeCaughtAnimal() {
+	std::stringstream encodedData;
+	encodedData << "caughtAnimal: " << caughtAnimal << std::endl;
+
+	return encodedData.str();
+}
 
 std::string Player::encodeCaughtAnimalType() {
 	std::stringstream encodedData;
-	encodedData << "caughtAnimalType: " << caughtAnimalType << std::endl;
+	encodedData << "caughtAnimalType: " << static_cast<int>(caughtAnimalType) << std::endl;
 
 	return encodedData.str();
 }
