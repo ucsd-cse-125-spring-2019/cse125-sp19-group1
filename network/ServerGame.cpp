@@ -189,14 +189,17 @@ void ServerGame::receiveFromClients()
 							if (player->isChef())
 							{
 								std::cout << "CAUGHT ANIMAL" << std::endl;
+								Direction dir = player->getFacingDirection();
+								JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir);
 
 								//drop off animal
-								if (player->hasCaughtAnimal() && gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
+								if (player->hasCaughtAnimal() && jailTile && jailTile->isJailEmpty())//gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 								{
 									int animal = player->getCaughtAnimalId();
 									//update jail with animal
 									std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
-									gameData->getAtlas()->placeInJail(loc, animal);
+									//gameData->getAtlas()->placeInJail(loc, animal);
+									jailTile->placeAnimalInJail(animal);
 									player->setCaughtAnimal(false);
 
 									//update animal's location to jail
