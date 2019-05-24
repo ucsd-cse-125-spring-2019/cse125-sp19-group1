@@ -39,6 +39,7 @@ enum class ItemModelType {
 	toilet,
 	vent,
 	window,
+	table,
 };
 
 #endif
