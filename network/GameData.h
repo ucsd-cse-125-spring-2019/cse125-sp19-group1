@@ -80,6 +80,8 @@ public:
 	RampTile * getRampTile(Location loc);
 	JailTile * getJailTile(Location loc);
 	ObjectTile * getAdjacentObjectTile(Location loc, Direction dir);
+	Tile * getAdjacentTile(Location loc, Direction dir);
+	JailTile * getAdjacentJailTile(Location loc, Direction dir);
 	ObjectTile * getObjectTile(Location loc);
 protected:
 	bool beginCountdown;

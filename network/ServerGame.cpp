@@ -304,7 +304,8 @@ void ServerGame::receiveFromClients()
 									}
 								}
 								//else if (gameData->getAtlas()->hasJail(loc))
-								else if (JailTile * jailTile = gameData->getJailTile(loc))
+								//else if (JailTile * jailTile = gameData->getJailTile(loc))
+								else if (JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir))
 								{
 									//JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
 									//player->setOpenJail(true);

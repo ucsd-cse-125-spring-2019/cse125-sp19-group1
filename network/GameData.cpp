@@ -337,7 +337,7 @@ ObjectTile * GameData::getObjectTile(Location loc)
 	}
 	return nullptr;
 }
-ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
+Tile * GameData::getAdjacentTile(Location loc, Direction dir)
 {
 	float increment = TILE_SIZE / 2;
 	switch (dir)
@@ -350,32 +350,37 @@ ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
 
 		break;
 	case Direction::EAST:
-		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ());
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ());
 
 		break;
 	case Direction::WEST:
-		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ());
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ());
 
 		break;
 	case Direction::NORTHEAST:
-		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ()+increment);
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() + increment);
 
 		break;
 	case Direction::NORTHWEST:
-		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ()+increment);
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() + increment);
 
 		break;
 	case Direction::SOUTHEAST:
-		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ()-increment);
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() - increment);
 
 		break;
 	case Direction::SOUTHWEST:
-		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ()-increment);
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() - increment);
 
 		break;
 	}
 
-	Tile * tile = getTile(loc);
+	return getTile(loc);
+}
+
+ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
+{
+	Tile * tile = getAdjacentTile(loc, dir);
 
 	if (tile && tile->getTileType() == TileType::OBJECT)
 	{
@@ -385,3 +390,14 @@ ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
 		return nullptr;
 }
 
+JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir)
+{
+	Tile * tile = getAdjacentTile(loc, dir);
+
+	if (tile && tile->getTileType() == TileType::JAIL)
+	{
+		return dynamic_cast<JailTile *>(tile);
+	}
+	else
+		return nullptr;
+}
