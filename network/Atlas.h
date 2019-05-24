@@ -10,6 +10,7 @@
 #include "BoxTile.h"
 #include "JailTile.h"
 #include "GateTile.h"
+#include "KeyDropTile.h"
 #include "RampTile.h"
 #include "HideTile.h"
 #include "ObjectTile.h"
@@ -56,11 +57,13 @@ public:
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
 	std::map<ItemModelType, Item> itemsMap;
+	std::map <int, GateTile *> gateMap;
 
 	void getItem(ItemModelType anItem, Item & outputItem);
 
 	void checkDroppedItems();
 	void updateDroppedItem(ItemModelType anItem, Location loc);
+	void updateGateProgress(int gateNum);
 
 	std::vector<ItemModelType> itemList = 
 	{

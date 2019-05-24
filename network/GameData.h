@@ -52,6 +52,8 @@ public:
 	std::map < int, Player * > & getAllPlayers();
 	Atlas * getAtlas();
 
+	void updateGateProgress(int gateNum);
+
 	std::vector<std::vector<Tile *>> getTileLayout();
 
 	//int	getBoxTime() { return timeToOpenBox; }
@@ -76,6 +78,7 @@ public:
 	// tile getters
 	Tile * getTile(Location loc);
 	GateTile * getGateTile(Location loc);
+	KeyDropTile * getKeyDropTile(Location loc);
 	BoxTile * getBoxTile(Location loc);
 	RampTile * getRampTile(Location loc);
 	JailTile * getJailTile(Location loc);

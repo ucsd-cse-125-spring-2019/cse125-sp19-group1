@@ -36,6 +36,11 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	return encodedData.str();
 }
 
+void GameData::updateGateProgress(int gateNum)
+{
+	getAtlas()->updateGateProgress(gateNum);
+}
+
 void GameData::startCountdown()
 {
 	countdownStartTime = std::chrono::system_clock::now();
@@ -284,6 +289,18 @@ GateTile * GameData::getGateTile(Location loc)
 	{
 		if (tile->getTileType() == TileType::GATE)
 			return dynamic_cast<GateTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+	
+}
+KeyDropTile * GameData::getKeyDropTile(Location loc)
+{
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::KEY_DROP)
+			return dynamic_cast<KeyDropTile*>(tile);
 		else
 			return nullptr;
 	}

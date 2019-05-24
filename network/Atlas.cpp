@@ -134,13 +134,32 @@ Atlas::Atlas()
 				tileRow.push_back(new JailTile(wall, height));
 				break;
 			case TileType::GATE:
-				tileRow.push_back(new GateTile(std::vector<Key>({ Key::KEY1, Key::KEY2, Key::KEY3 }), 1, wall, height));
+			{
+				int num = std::stoi(gateNum);
+				//Key key1 = static_cast<Key>(num * 1);
+				//Key key2 = static_cast<Key>(num * 2);
+				//Key key3 = static_cast<Key>(num * 3);
+				//GateTile * gateTile = new GateTile(std::vector<Key>({ key1, key2, key3 }), std::stoi(gateNum), wall, height);
+				GateTile * gateTile = new GateTile(std::stoi(gateNum), wall, height);
+				tileRow.push_back(gateTile);
+				gateMap.emplace(num, gateTile);
+
+			}
+				
 				break;
 			case TileType::RAMP:
 				tileRow.push_back(new RampTile(static_cast<Orientation>(std::stoi(rampNum)), wall, height));
 				break;
 			case TileType::KEY_DROP: // change to KeyDropTile
-				tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
+			{
+				int num = std::stoi(keyDepositNum);
+				Key key1 = static_cast<Key>(num * 1);
+				Key key2 = static_cast<Key>(num * 2);
+				Key key3 = static_cast<Key>(num * 3);
+				//tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
+				tileRow.push_back(new KeyDropTile(std::vector<Key>({ key1, key2, key3 }), num, wall, height));
+			}
+				
 				break;
 			case TileType::OBJECT: // change to ObjectTile
 				if (objectNum == "1")
@@ -533,6 +552,10 @@ void Atlas::updateTileItem(Location & loc, ItemModelType anItem)
 	
 }
 
+void Atlas::updateGateProgress(int gateNum)
+{
+	gateMap.at(gateNum)->updateKeyProgress();
+}
 Tile * Atlas::getTileAt(Location & loc)
 {
 	int row = (int)(loc.getZ() / TILE_SIZE);

@@ -278,16 +278,26 @@ void ServerGame::receiveFromClients()
 									}
 								}
 								//else if (gameData->getAtlas()->hasGate(loc))
+								else if (KeyDropTile * keyDropTile = gameData->getKeyDropTile(loc))
+								{
+									if (keyDropTile->isValidKey(static_cast<Key>(player->getInventory())))
+									{
+
+										keyDropTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
+										gameData->updateGateProgress(keyDropTile->getGateNum());
+										player->setInventory(ItemModelType::EMPTY);
+									}
+								}
 								else if (GateTile * gateTile = gameData->getGateTile(loc))
 								{
 									
 									//GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-									if (gateTile->isValidKey(static_cast<Key>(player->getInventory())))
+									/*if (gateTile->isValidKey(static_cast<Key>(player->getInventory())))
 									{
 
 										gateTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
 										player->setInventory(ItemModelType::EMPTY);
-									}
+									}*/
 									if (gateTile->hasAllKeys() /*&& !player->getOpeningGate()*/ && !gateTile->isOpen())
 									{
 

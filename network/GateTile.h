@@ -2,15 +2,17 @@
 #include "Tile.h"
 #include <vector>
 
-enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9 };
+//enum class Key { KEY1 = 1, KEY2, KEY3, KEY4, KEY5, KEY6, KEY7, KEY8, KEY9 };
 
 class GateTile : public Tile
 {
 public:
 	
 	// Default constructor
-	GateTile(std::vector<Key> aKeys = {}, int num = 0, int aWallLayout = 0, int aHeight = 0) :
-		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0), validKeys(aKeys) {}
+	//GateTile(std::vector<Key> aKeys = {}, int num = 0, int aWallLayout = 0, int aHeight = 0) :
+	//	Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0), validKeys(aKeys) {}
+	GateTile(int num = 0, int aWallLayout = 0, int aHeight = 0) :
+		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0) {}
 
 	// Getters
 	int			getGateNum() { return gateNum; }
@@ -20,7 +22,7 @@ public:
 	bool		isOpen() { return currentConstructTime >= TIME_TO_CONSTRUCT_GATE; }
 
 	// Setters
-
+	
 	// Encode function
 	virtual std::string encodeTileData()
 	{
@@ -61,20 +63,21 @@ public:
 
 	// Additional functions
 
-	// Checks if the key is valid for this gate
-	bool isValidKey(Key aKey) 
-	{ 
-		return std::find(validKeys.begin(), validKeys.end(), aKey) != validKeys.end();
-	}
+	//// Checks if the key is valid for this gate
+	//bool isValidKey(Key aKey) 
+	//{ 
+	//	return std::find(validKeys.begin(), validKeys.end(), aKey) != validKeys.end();
+	//}
 
 	// Updates progress and removes the key so that duplicate keys cannot be used
-	void updateKeyProgress(Key aKey) {
-		if (isValidKey(aKey))
-		{
+	//void updateKeyProgress(Key aKey) {
+	void updateKeyProgress() {
+		//if (isValidKey(aKey))
+		//{
 			keyProgress++;
-			validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey));
+		//	validKeys.erase(std::find(validKeys.begin(), validKeys.end(), aKey));
 			setDirty();
-		}
+		//}
 	}
 
 	// Adds construction time for building the exit once alls keys are deposited
@@ -92,5 +95,5 @@ protected:
 	double currentConstructTime;
 
 	// Additional variables
-	std::vector<Key> validKeys;
+	//std::vector<Key> validKeys;
 };
