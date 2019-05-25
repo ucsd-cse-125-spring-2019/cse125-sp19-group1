@@ -762,7 +762,7 @@ void ServerGame::receiveFromClients()
 								z += FLASH_DISTANCE/1.5;
 								x -= FLASH_DISTANCE/1.5;
 							}
-							if (x >= gameData->getBoxTile[0].size() * TILE_SIZE) x = gameData->getBoxTile.size() * TILE_SIZE - TILE_SIZE / 2;
+							if (x >= gameData->getAtlas().tileLayout->size() * TILE_SIZE) x = gameData->getBoxTile.size() * TILE_SIZE - TILE_SIZE / 2;
 							if (z >= gameData->getBoxTile.size() * TILE_SIZE) z = gameData->getBoxTile.size() * TILE_SIZE - TILE_SIZE / 2;
 							if (x < 0) x = TILE_SIZE / 2;
 							if (z < 0) z = TILE_SIZE / 2;
