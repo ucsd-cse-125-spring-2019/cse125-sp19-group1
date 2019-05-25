@@ -428,8 +428,11 @@ void ServerGame::receiveFromClients()
 						player->setInteracting(true);
 						player->setPoweringUp(true);
 						player->setActionStartTime();
+						std::cout << "starting to use powerup!" << std::endl;
+
 					}
 				}
+				break;
 			}
 			case RELEASE_EVENT:
 			{
@@ -594,8 +597,13 @@ void ServerGame::receiveFromClients()
 				sum -= 1;
 			}
 			
-			Direction facingDirection = static_cast<Direction>(sum);
-			player->setFacingDirection(facingDirection);
+			if (sum != 0)
+
+			{
+				Direction facingDirection = static_cast<Direction>(sum);
+				player->setFacingDirection(facingDirection);
+			}
+			
 		}
 		sendActionPackets(); // sends data after processing input from one clientss
 		iter++;
@@ -694,6 +702,7 @@ void ServerGame::receiveFromClients()
 						player->setInteracting(false);
 						player->setOpeningBox(false);
 					}
+					std::cout << "Interacting!!" << std::endl;
 
 					//Handling power ups
 					if (player->getPoweringUp() && seconds > gameData->getAbilityChargeTime()) {
@@ -728,45 +737,46 @@ void ServerGame::receiveFromClients()
 							float z = player->getLocation().getZ();
 							if (player->getFacingDirection() == Direction::NORTH)
 							{
-								z -= FLASH_DISTANCE;
+								z += FLASH_DISTANCE;
 							}
 							else if (player->getFacingDirection() == Direction::SOUTH)
 							{
-								z += FLASH_DISTANCE;
+								z -= FLASH_DISTANCE;
 							}
 							else if (player->getFacingDirection() == Direction::EAST)
 							{
-								x += FLASH_DISTANCE;
+								x -= FLASH_DISTANCE;
 							}
 							else if (player->getFacingDirection() == Direction::WEST)
 							{
-								x -= FLASH_DISTANCE;
+								x += FLASH_DISTANCE;
 							}
 							else if (player->getFacingDirection() == Direction::NORTHEAST)
 							{
-								z -= FLASH_DISTANCE/1.5;
-								x += FLASH_DISTANCE/1.5;
+								z += FLASH_DISTANCE/1.5;
+								x -= FLASH_DISTANCE/1.5;
 							}
 							else if (player->getFacingDirection() == Direction::NORTHWEST)
 							{
-								z -= FLASH_DISTANCE/1.5;
-								x -= FLASH_DISTANCE/1.5;
+								z += FLASH_DISTANCE/1.5;
+								x+= FLASH_DISTANCE/1.5;
 							}
 							else if (player->getFacingDirection() == Direction::SOUTHEAST)
 							{
-								z += FLASH_DISTANCE/1.5;
-								x += FLASH_DISTANCE/1.5;
+								z -= FLASH_DISTANCE/1.5;
+								x -= FLASH_DISTANCE/1.5;
 							}
 							else if (player->getFacingDirection() == Direction::SOUTHWEST)
 							{
-								z += FLASH_DISTANCE/1.5;
-								x -= FLASH_DISTANCE/1.5;
+								z -= FLASH_DISTANCE/1.5;
+								x += FLASH_DISTANCE/1.5;
 							}
-							if (x >= gameData->getBoxTile[0].size() * TILE_SIZE) x = gameData->getBoxTile.size() * TILE_SIZE - TILE_SIZE / 2;
-							if (z >= gameData->getBoxTile.size() * TILE_SIZE) z = gameData->getBoxTile.size() * TILE_SIZE - TILE_SIZE / 2;
+							//if (x >= (gameData->getTileLayout())[0].size() * TILE_SIZE) x = (gameData->getTileLayout()[0]).size() * TILE_SIZE - TILE_SIZE / 2;
+							//if (z >= gameData->getTileLayout().size() * TILE_SIZE) z = gameData->getTileLayout().size() * TILE_SIZE - TILE_SIZE / 2;
 							if (x < 0) x = TILE_SIZE / 2;
 							if (z < 0) z = TILE_SIZE / 2;
 							player->setLocation(x, y, z);
+							sendActionPackets();
 						}
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
