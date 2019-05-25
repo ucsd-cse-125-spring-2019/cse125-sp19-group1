@@ -1232,6 +1232,11 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 			// interact key release
 			client->sendPackets(RELEASE_EVENT);
 		}
+
+		if (key == GLFW_KEY_F) {
+			// interact key release
+			client->sendPackets(RELEASE_EVENT);
+		}
 	}
 }
 

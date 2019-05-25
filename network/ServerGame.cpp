@@ -424,7 +424,7 @@ void ServerGame::receiveFromClients()
 				}
 
 				if (!player->isChef()) {
-					if (!player->getInteracting()) {
+					if (!player->getInteracting() && !player->getPoweringUp()) {
 						player->setInteracting(true);
 						player->setPoweringUp(true);
 						player->setActionStartTime();
@@ -451,7 +451,7 @@ void ServerGame::receiveFromClients()
 						if (player->getInteracting() && player->getOpeningBox()) {
 							double seconds = player->getInteractingTime(0);
 							if (seconds > gameData->getBoxTime()) {
-								std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
+								std::cout << "UNLOCKED BOX" << std::endl;
 								gameData->getAtlas()->updateBoxLayout(loc);
 								player->setInteracting(false);
 								player->setOpeningBox(false);
@@ -462,6 +462,7 @@ void ServerGame::receiveFromClients()
 							!player->isChef()) {
 							std::cout << "RELEASED SPACE" << std::endl;
 							player->setInteracting(false);
+							player->setPoweringUp(false);
 						}
 
 
@@ -708,10 +709,12 @@ void ServerGame::receiveFromClients()
 						std::cout << "POWERING UP" << std::endl;
 						player->setInteracting(false);
 						player->setPoweringUp(false);
+						
 
 						ItemModelType it = player->getInventory();
 						if (it == ItemModelType::apple)
 						{
+							std::cout << "POWER: limit chef vision" << std::endl;
 							//call limit chef vision
 							player->toggleBlindChef();
 							player->setVisionStartTime();
@@ -719,17 +722,22 @@ void ServerGame::receiveFromClients()
 						}
 						else if (it == ItemModelType::orange)
 						{
+							std::cout << "POWER: limit chef speed" << std::endl;
 							//call limit chef speed 
 							player->toggleSlowChef();
 							player->setSlowStartTime();
 						}
 						else if (it == ItemModelType::bananaGreen)
 						{
+							std::cout << "POWER: ghost" << std::endl;
+
 							//call ghost because green means go 
 							player->setSpeedStartTime();
 						}
 						else if (it == ItemModelType::bananaPerfect)
 						{
+							std::cout << "POWER: flash" << std::endl;
+
 							//call flash because yellow banana
 							float x = player->getLocation().getX();
 							float y = player->getLocation().getY();
@@ -785,9 +793,12 @@ void ServerGame::receiveFromClients()
 						}
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
+							std::cout << "POWER: search" << std::endl;
+
 							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
 							player->setSearchStartTime();
 						}
+						player->setInventory(ItemModelType::EMPTY);
 					}
 				}
 			}

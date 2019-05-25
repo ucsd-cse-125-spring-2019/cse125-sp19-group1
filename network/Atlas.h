@@ -66,7 +66,7 @@ public:
 	void checkDroppedItems();
 	void updateDroppedItem(ItemModelType anItem, Location loc);
 
-	std::vector<std::vector<Tile *>> getTileLayout() { return tileLayout; }
+	std::vector<std::vector<Tile *>> getServerTileLayout() { return tileLayout; }
 
 	std::vector<ItemModelType> itemList = 
 	{
