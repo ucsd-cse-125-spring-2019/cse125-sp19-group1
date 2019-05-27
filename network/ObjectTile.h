@@ -1,17 +1,18 @@
 #pragma once
 #include "Tile.h"
+#include "../graphics/GraphicsClient/ItemModelType.h"
 
-enum class ObjectType { TABLE=1, STOVE, CHAIR};
+//enum class ItemModelType { TABLE=1, STOVE, CHAIR};
 
 class ObjectTile : public Tile
 {
 public:
 
 	// Default constructor
-	ObjectTile(ObjectType anObj = ObjectType::TABLE, int aWallLayout = 0, int aHeight = 0) : Tile(TileType::OBJECT, aWallLayout, aHeight), objectType(anObj) {}
+	ObjectTile(ItemModelType anObj = ItemModelType::table, int aWallLayout = 0, int aHeight = 0) : Tile(TileType::OBJECT, aWallLayout, aHeight), objectType(anObj) {}
 
 	// Getter
-	ObjectType getObjectType() { return objectType; }
+	ItemModelType getModel() { return objectType; }
 	// Setter
 
 	// Encode function
@@ -41,9 +42,9 @@ public:
 			>> objectType_str;
 
 		// Update class variables
-		objectType = static_cast<ObjectType>(std::stoi(objectType_str));
+		objectType = static_cast<ItemModelType>(std::stoi(objectType_str));
 	}
 
 protected:
-	ObjectType objectType;
+	ItemModelType objectType;
 };

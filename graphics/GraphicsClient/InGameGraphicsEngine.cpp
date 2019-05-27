@@ -831,7 +831,7 @@ void IdleCallback()
 		for (auto it = players.begin(); it != players.end(); ++it) {
 			//std::cerr << "In caught loop" << "\n";
 			Player * currPlayer = it->second;
-			if (currPlayer->getIsCaught()) {
+			if (currPlayer->isCaught()) {
 				if (currPlayer->getModelType() == ModelType::CAT) {
 					uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
 					uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
@@ -1184,6 +1184,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		if (key == GLFW_KEY_D) {
 			client->sendPackets(DROP_EVENT);
 		}
+		if (key == GLFW_KEY_F) {
+			client->sendPackets(POWERUP_EVENT);
+		}
 		if (key == GLFW_KEY_H) {
 			// interact key press
 			client->sendPackets(HIDE_EVENT);
@@ -1226,6 +1229,11 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		}
 
 		if (key == GLFW_KEY_SPACE) {
+			// interact key release
+			client->sendPackets(RELEASE_EVENT);
+		}
+
+		if (key == GLFW_KEY_F) {
 			// interact key release
 			client->sendPackets(RELEASE_EVENT);
 		}

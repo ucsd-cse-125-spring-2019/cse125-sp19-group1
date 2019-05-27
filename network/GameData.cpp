@@ -23,7 +23,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	{
 		encodedData << iter->second->encodePlayerData(newPlayerInit);
 	}
-	encodedData << "client: " << GENERALDATA_ID << std::endl;
+	encodedData << "client: " << GENERAL_GAME_DATA_ID << std::endl;
 
 	if (beginCountdown)
 	{
@@ -32,8 +32,15 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 		encodedData << "count down: " << 5.0 - elapsed_seconds.count() << std::endl;
 	}
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
-
+	encodedData << "chefAnger: " << getChefAnger() << std::endl;
+	encodedData << "chefVision:" << getChefVision() << std::endl;
+	std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
+}
+
+void GameData::updateGateProgress(int gateNum)
+{
+	getAtlas()->updateGateProgress(gateNum);
 }
 
 void GameData::startCountdown()
@@ -222,14 +229,20 @@ void GameData::decodeGameData(const char * data)
 		if (p.first == "client")
 		{
 			playerID = std::stoi(value);
-			if (players.count(playerID) == 0 && playerID != GENERALDATA_ID)
+			if (players.count(playerID) == 0 && playerID != GENERAL_GAME_DATA_ID)
 			{
 				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
 		}
+		else if (p.first == "chefAnger") {
+			chefAnger = std::stoi(value);
+		}
+		else if (p.first == "chefVision") {
+			chefVision = std::stoi(value);
+		}
 		else
 		{
-			if (playerID == GENERALDATA_ID)
+			if (playerID == GENERAL_GAME_DATA_ID)
 			{
 				if (decodingFunctions.count(key) > 0)
 					(this->*decodingFunctions[key])(value); // Format for calling the functions from the map
@@ -290,6 +303,18 @@ GateTile * GameData::getGateTile(Location loc)
 	return nullptr;
 	
 }
+KeyDropTile * GameData::getKeyDropTile(Location loc)
+{
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::KEY_DROP)
+			return dynamic_cast<KeyDropTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+	
+}
 BoxTile * GameData::getBoxTile(Location loc)
 {
 	if (Tile * tile = getTile(loc))
@@ -337,7 +362,7 @@ ObjectTile * GameData::getObjectTile(Location loc)
 	}
 	return nullptr;
 }
-ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
+Tile * GameData::getAdjacentTile(Location loc, Direction dir)
 {
 	float increment = TILE_SIZE / 2;
 	switch (dir)
@@ -350,32 +375,37 @@ ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
 
 		break;
 	case Direction::EAST:
-		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ());
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ());
 
 		break;
 	case Direction::WEST:
-		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ());
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ());
 
 		break;
 	case Direction::NORTHEAST:
-		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ()+increment);
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() + increment);
 
 		break;
 	case Direction::NORTHWEST:
-		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ()+increment);
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() + increment);
 
 		break;
 	case Direction::SOUTHEAST:
-		loc = Location(loc.getX()-increment, loc.getY(), loc.getZ()-increment);
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() - increment);
 
 		break;
 	case Direction::SOUTHWEST:
-		loc = Location(loc.getX()+increment, loc.getY(), loc.getZ()-increment);
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() - increment);
 
 		break;
 	}
 
-	Tile * tile = getTile(loc);
+	return getTile(loc);
+}
+
+ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
+{
+	Tile * tile = getAdjacentTile(loc, dir);
 
 	if (tile && tile->getTileType() == TileType::OBJECT)
 	{
@@ -385,3 +415,14 @@ ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
 		return nullptr;
 }
 
+JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir)
+{
+	Tile * tile = getAdjacentTile(loc, dir);
+
+	if (tile && tile->getTileType() == TileType::JAIL)
+	{
+		return dynamic_cast<JailTile *>(tile);
+	}
+	else
+		return nullptr;
+}

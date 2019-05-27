@@ -10,18 +10,16 @@
 #include "BoxTile.h"
 #include "JailTile.h"
 #include "GateTile.h"
+#include "KeyDropTile.h"
 #include "RampTile.h"
 #include "HideTile.h"
 #include "ObjectTile.h"
+#include "GameConfigs.h"
+
 #include <map>
 #include <ctime>
 
-#define TILE_SIZE 20
-#define TILE_HEIGHT 10
-#define PLAYER_RADIUS 2
-#define WALL_SIZE 2
-#define MAX_ITEMS 14
-#define ITEM_DROP_DURATION 10
+
 
 class Atlas
 {
@@ -58,12 +56,17 @@ public:
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
+	std::vector<std::pair<int, int>> jailLocations;
 	std::map<ItemModelType, Item> itemsMap;
+	std::map <int, GateTile *> gateMap;
 
 	void getItem(ItemModelType anItem, Item & outputItem);
 
 	void checkDroppedItems();
 	void updateDroppedItem(ItemModelType anItem, Location loc);
+	void updateGateProgress(int gateNum);
+
+	std::vector<std::vector<Tile *>> getServerTileLayout() { return tileLayout; }
 
 	std::vector<ItemModelType> itemList = 
 	{

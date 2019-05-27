@@ -2,6 +2,7 @@
 #include "Item.h"
 #include <string>
 #include <sstream>
+#include "GameConfigs.h"
 
 enum class TileType {DEFAULT = 0, BOX, GATE, OBJECT, KEY_DROP, JAIL, RAMP, HIDE};
 

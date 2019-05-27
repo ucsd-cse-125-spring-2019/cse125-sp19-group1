@@ -26,6 +26,7 @@ Atlas::Atlas()
 	std::ifstream rampFile("../../maps/tinytinymap/ramps.txt");
 	std::ifstream keyDepositFile("../../maps/tinytinymap/key_deposit.txt");
 	std::ifstream objectFile("../../maps/tinytinymap/table.txt");
+	std::ifstream objectFile2("../../maps/tinytinymap/env_objs.txt");
 
 	std::string wallLine;
 	std::string boxLine;
@@ -35,6 +36,7 @@ Atlas::Atlas()
 	std::string rampLine;
 	std::string keyDepositLine;
 	std::string objectLine;
+	std::string objectLine2;
 
 	std::pair<int, int> tableLoc;
 
@@ -48,6 +50,7 @@ Atlas::Atlas()
 	std::getline(rampFile, rampLine); // removes first line from file
 	std::getline(keyDepositFile, keyDepositLine); // removes first line from file
 	std::getline(objectFile, objectLine); // removes first line from file
+	std::getline(objectFile2, objectLine2); // removes first line from file
 	int row = 0;
 	while (std::getline(wallFile, wallLine))
 	{
@@ -59,6 +62,7 @@ Atlas::Atlas()
 		std::getline(rampFile, rampLine);
 		std::getline(keyDepositFile, keyDepositLine);
 		std::getline(objectFile, objectLine);
+		std::getline(objectFile2, objectLine2);
 		std::stringstream wallStream(wallLine);
 		std::stringstream boxStream(boxLine);
 		std::stringstream gateStream(gateLine);
@@ -67,6 +71,7 @@ Atlas::Atlas()
 		std::stringstream rampStream(rampLine);
 		std::stringstream keyDepositStream(keyDepositLine);
 		std::stringstream objectStream(objectLine);
+		std::stringstream objectStream2(objectLine2);
 		std::string wallNum;
 		std::string boxNum;
 		std::string gateNum;
@@ -75,6 +80,7 @@ Atlas::Atlas()
 		std::string rampNum;
 		std::string keyDepositNum;
 		std::string objectNum;
+		std::string objectNum2;
 		std::vector<Tile *> tileRow;
 		std::vector<int> keyLocationsRow;
 		while (wallStream >> wallNum)
@@ -87,6 +93,7 @@ Atlas::Atlas()
 			rampStream >> rampNum;
 			keyDepositStream >> keyDepositNum;
 			objectStream >> objectNum;
+			objectStream2 >> objectNum2;
 
 			// Initialize default variables for a tile
 			TileType type(TileType::DEFAULT);
@@ -113,7 +120,7 @@ Atlas::Atlas()
 			{
 				type = TileType::KEY_DROP;
 			}
-			else if (objectNum != "0")
+			else if (objectNum != "0" || objectNum2 != "0")
 			{
 				type = TileType::OBJECT;
 			}
@@ -125,21 +132,62 @@ Atlas::Atlas()
 				break;
 			case TileType::JAIL:
 				tileRow.push_back(new JailTile(wall, height));
+				jailLocations.push_back(std::pair<int, int>(row, col));
 				break;
-			case TileType::GATE: 
-				tileRow.push_back(new GateTile(std::vector<Key>({ Key::KEY1, Key::KEY2, Key::KEY3 }), 1, wall, height));
+			case TileType::GATE:
+			{
+				int num = std::stoi(gateNum);
+				//Key key1 = static_cast<Key>(num * 1);
+				//Key key2 = static_cast<Key>(num * 2);
+				//Key key3 = static_cast<Key>(num * 3);
+				//GateTile * gateTile = new GateTile(std::vector<Key>({ key1, key2, key3 }), std::stoi(gateNum), wall, height);
+				ItemModelType model = ItemModelType::apple;
+				switch (num)
+				{
+				case 1: model = ItemModelType::door; break;
+				case 2: model = ItemModelType::window; break;
+				case 3: model = ItemModelType::vent; break;
+					
+				}
+				GateTile * gateTile = new GateTile(std::stoi(gateNum), model, wall, height);
+				tileRow.push_back(gateTile);
+				gateMap.emplace(num, gateTile);
+
+			}
+				
 				break;
 			case TileType::RAMP:
 				tileRow.push_back(new RampTile(static_cast<Orientation>(std::stoi(rampNum)), wall, height));
 				break;
 			case TileType::KEY_DROP: // change to KeyDropTile
-				tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
+			{
+				int num = std::stoi(keyDepositNum);
+				Key key1 = static_cast<Key>(num * 1);
+				Key key2 = static_cast<Key>(num * 2);
+				Key key3 = static_cast<Key>(num * 3);
+				ItemModelType model = ItemModelType::apple;
+				switch (num)
+				{
+				case 1: model = ItemModelType::keyDropFrontExit; break;
+				case 2: model = ItemModelType::keyDropBathroom; break;
+				case 3: model = ItemModelType::keyDropVent; break;
+
+				}
+				//tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
+				tileRow.push_back(new KeyDropTile(std::vector<Key>({ key1, key2, key3 }), num, model, wall, height));
+			}
+				
 				break;
 			case TileType::OBJECT: // change to ObjectTile
-				tileRow.push_back(new ObjectTile(static_cast<ObjectType>(std::stoi(objectNum)), wall, height));
 				if (objectNum == "1")
 				{
+					//objectNum = static_cast<int>(ItemModelType::table);
+					tileRow.push_back(new ObjectTile(ItemModelType::table, wall, height));
 					tableLoc = std::pair<int, int>(row, col);
+				}
+				else if (objectNum2 != "0")
+				{
+					tileRow.push_back(new ObjectTile(static_cast<ItemModelType>(std::stoi(objectNum2)), wall, height));
 				}
 				break;
 			case TileType::DEFAULT: default:
@@ -288,11 +336,11 @@ void Atlas::detectObjectCollision(Location & loc) {
 		col = 0;
 
 
-	std::vector<Tile *> adjacentObjTiles;
 
 	if (row - 1 >= 0)
 	{
-		if (tileLayout[row - 1][col]->getTileType() == TileType::OBJECT)
+		if ((tileLayout[row - 1][col]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row - 1][col])->getModel() != ItemModelType::painting) || tileLayout[row - 1][col]->getTileType() == TileType::JAIL)
 		{
 			int up_bound = row * TILE_SIZE;
 			if (loc.getZ() - PLAYER_RADIUS <= up_bound) {
@@ -305,7 +353,8 @@ void Atlas::detectObjectCollision(Location & loc) {
 	if (row + 1 < tileLayout.size())
 
 	{
-		if (tileLayout[row + 1][col]->getTileType() == TileType::OBJECT)
+		if ((tileLayout[row + 1][col]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row + 1][col])->getModel() != ItemModelType::painting) || tileLayout[row + 1][col]->getTileType() == TileType::JAIL)
 		{
 			int down_bound = row * TILE_SIZE + TILE_SIZE-1;// need -1 so that it does not go into the next tile
 			if (loc.getZ() + PLAYER_RADIUS >= down_bound) {
@@ -317,7 +366,8 @@ void Atlas::detectObjectCollision(Location & loc) {
 	
 	if (col - 1 >= 0)
 	{
-		if (tileLayout[row][col - 1]->getTileType() == TileType::OBJECT)
+		if ((tileLayout[row][col - 1]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row][col - 1])->getModel() != ItemModelType::painting) || tileLayout[row][col - 1]->getTileType() == TileType::JAIL)
 		{
 			int left_bound = col * TILE_SIZE;
 			if (loc.getX() - PLAYER_RADIUS <= left_bound) {
@@ -329,9 +379,10 @@ void Atlas::detectObjectCollision(Location & loc) {
 		
 	}
 
-	if (col + 1 < tileLayout.size())
+	if (col + 1 < tileLayout[row].size())
 	{
-		if (tileLayout[row][col + 1]->getTileType() == TileType::OBJECT)
+		if ((tileLayout[row][col + 1]->getTileType() == TileType::OBJECT &&
+			dynamic_cast<ObjectTile*>(tileLayout[row][col + 1])->getModel() != ItemModelType::painting) || tileLayout[row][col + 1]->getTileType() == TileType::JAIL)
 		{
 			int right_bound = col * TILE_SIZE + TILE_SIZE-1; // need -1 so that it does not go into the next tile
 			if (loc.getX() + PLAYER_RADIUS >= right_bound) {
@@ -518,6 +569,10 @@ void Atlas::updateTileItem(Location & loc, ItemModelType anItem)
 	
 }
 
+void Atlas::updateGateProgress(int gateNum)
+{
+	gateMap.at(gateNum)->updateKeyProgress();
+}
 Tile * Atlas::getTileAt(Location & loc)
 {
 	int row = (int)(loc.getZ() / TILE_SIZE);
@@ -604,7 +659,7 @@ void Atlas::returnItemToSpawn(ItemModelType anItem, int spawnRow, int spawnCol)
 void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & destCol)
 {
 	int wallEncoding = tileLayout[currRow][currCol]->getWall();
-	int radius = 1;
+	int catchRadius = 1;
 	std::vector < std::pair<int, int>> freeTiles;
 	std::bitset<4> wall(wallEncoding);
 
@@ -613,41 +668,41 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 
 		//check left wall
 		if (!wall[3]) {
-			if (currCol - radius > 0)
+			if (currCol - catchRadius > 0)
 			{
-				if (tileLayout[currRow][currCol - radius]->getItem() == ItemModelType::EMPTY)
+				if (tileLayout[currRow][currCol - catchRadius]->getItem() == ItemModelType::EMPTY)
 				{
-					freeTiles.push_back(std::pair<int, int>(currRow, currCol - radius));
+					freeTiles.push_back(std::pair<int, int>(currRow, currCol - catchRadius));
 				}
 			}
 		}
 		//check up wall
 		if (!wall[2]) {
-			if (currRow - radius > 0)
+			if (currRow - catchRadius > 0)
 			{
-				if (tileLayout[currRow - radius][currCol]->getItem() == ItemModelType::EMPTY)
+				if (tileLayout[currRow - catchRadius][currCol]->getItem() == ItemModelType::EMPTY)
 				{
-					freeTiles.push_back(std::pair<int, int>(currRow - radius, currCol ));
+					freeTiles.push_back(std::pair<int, int>(currRow - catchRadius, currCol ));
 				}
 			}
 		}
 		//check down wall
 		if (!wall[1]) {
-			if (currRow + radius > tileLayout.size())
+			if (currRow + catchRadius > tileLayout.size())
 			{
-				if (tileLayout[currRow + radius][currCol]->getItem() == ItemModelType::EMPTY)
+				if (tileLayout[currRow + catchRadius][currCol]->getItem() == ItemModelType::EMPTY)
 				{
-					freeTiles.push_back(std::pair<int, int>(currRow + radius, currCol));
+					freeTiles.push_back(std::pair<int, int>(currRow + catchRadius, currCol));
 				}
 			}
 		}
 		//check right wall
 		if (!wall[0]) {
-			if (currCol + radius < tileLayout[currRow].size())
+			if (currCol + catchRadius < tileLayout[currRow].size())
 			{
-				if (tileLayout[currRow][currCol + radius]->getItem() == ItemModelType::EMPTY)
+				if (tileLayout[currRow][currCol + catchRadius]->getItem() == ItemModelType::EMPTY)
 				{
-					freeTiles.push_back(std::pair<int, int>(currRow, currCol + radius));
+					freeTiles.push_back(std::pair<int, int>(currRow, currCol + catchRadius));
 				}
 			}
 		}

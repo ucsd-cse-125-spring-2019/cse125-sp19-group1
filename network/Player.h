@@ -9,6 +9,8 @@
 #include "Item.h"
 #include "Location.h"
 
+#include "GameConfigs.h"
+
 #define NUM_PLAYER_MODEL_TYPES (4)
 enum class ModelType { DEFAULT = -1, CHEF = 0, RACOON, CAT, DOG};
 enum class Direction {
@@ -22,26 +24,29 @@ enum class Direction {
 	SOUTHWEST = SOUTH + WEST
 };
 
+enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET };
+
 class Player
 {
 public:
 	
 	// Constructors
 	Player();
-	Player(int anID);
 	Player(int anID, Location aLoc);
 
 	// Getters
 	ItemModelType	getInventory() const;
-	bool		getInteracting() const;
-	bool		getOpenJail() const;
-	bool		getOpeningGate() const;
+	bool		isInteracting() const;
+	Action		getAction() const;
+	//bool		getOpenJail() const;
+	//bool		getOpeningGate() const;
 	Location	getLocation() const;
 	ModelType	getModelType() const;
 	bool		isChef() const;
-	bool		getCaughtAnimal() const;
-	bool		getIsCaught() const;
+	bool		isCaught() const;
+	bool		hasCaughtAnimal() const;
 	int			getCaughtAnimalId() const;
+	ModelType	getCaughtAnimalType() const;
 
 	bool		isReady() const;
 
@@ -54,25 +59,67 @@ public:
 	void setLocation(Location aLoc);
 	bool getHidden();
 	void setHidden(bool hide);
-	bool getInteracting();
 
 	void setInteracting(bool interact);
-	void setOpenJail(bool interact);
-	void setOpeningGate(bool status);
+	//void setOpenJail(bool interact);
+	//void setOpeningGate(bool status);
+	void setCaughtStatus(bool caught);
 	void setCaughtAnimal(bool caught);
-	void setIsCaught(bool caught);
 	void setCaughtAnimalId(int id);
+	void setCaughtAnimalType(ModelType type);
 	void setActionStartTime();
+//<<<<<<< HEAD
+	void setUnlockJailStartTime();
+	void setAction(Action anAction);
+	void setFacingDirection(Direction dir);
+//=======
 	void setStartJailTime();
+	void setSpeedStartTime();
+	void setSearchStartTime();
+	void setVisionStartTime();
+	void setSlowStartTime();
+
+	double getSpeedTime();
+	double getSearchTime();
+	double getVisionTime();
+	double getSlowTime();
+	
+	bool getPoweringUp() { return poweringUp; }
+	bool getOpeningBox() { return openingBox; }
+	void setPoweringUp(bool power) { poweringUp = power; }
+	void setOpeningBox(bool interact) { openingBox = interact; }
+
+//>>>>>>> server
 
 	void toggleReady();
 	
-	void setFacingDirection(Direction dir);
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
-	
 	double getInteractingTime(int opt);
+
+	//chef interaction/power-up methods
+	double chefSpeedMultiplier = 1.0;
+	double slowedSpeed = 0.5;
+	bool slowChef = false;
+	bool getSlowChef() { return slowChef; }
+	void toggleSlowChef() { slowChef = !slowChef; }
+
+	bool blindChef = false;
+	bool getBlindChef() { return blindChef; }
+	void toggleBlindChef() { blindChef = !blindChef; }
+
+	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
+	void updateChefMultiplier(int anger);
+
+	//player interaction/power-up methods
+	bool ghost = false;
+	bool getGhost() { return ghost; }
+	void toggleGhost() { ghost = !ghost; }
+
+	bool instantSearch = false;
+	bool getInstantSearch() { return instantSearch; }
+	void toggleInstantSearch() { instantSearch = !instantSearch; }
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;
@@ -82,36 +129,61 @@ public:
 	void addDecodeFunctions();
 	void decodeLocation(std::string value);
 	void decodeInventory(std::string value);
-	void decodeCakeStatus(std::string value);
 	void decodeModelType(std::string value);
 	void decodeHidden(std::string value);
+	void decodeInteractAction(std::string value);
+	void decodeVisionRadius(std::string value);
+	void decodeCaughtStatus(std::string value);
+	void decodeCaughtAnimal(std::string value);
+	void decodeCaughtAnimalType(std::string value);
 
 	// Encode functions
 	void addEncodeFunctions();
 	std::string encodeLocation();
 	std::string encodeInventory();
-	std::string encodeCakeStatus();
 	std::string encodeModelType();
 	std::string encodeHidden();
+	std::string encodeInteractAction();
+	std::string encodeVisionRadius();
+	std::string encodeCaughtStatus();
+	std::string encodeCaughtAnimal();
+	std::string encodeCaughtAnimalType();
 
 protected:
+	Action		action;
 	Location	location;
 	int			playerID;
 	ItemModelType	inventory;
-	bool		hasCake;
 	ModelType	modelType;
 	bool		interacting;
+//<<<<<<< HEAD
+	//bool		openingJail;
+	//bool		openingGate;
+	bool		caughtStatus = false;
+	int			catchRadius = 10;
+//=======
+	bool		poweringUp;
 	bool		openingJail;
 	bool		openingGate;
+	bool		openingBox;
+//>>>>>>> server
 	bool		caughtAnimal = false;
-	bool		isCaught = false;
-	int			radius = 10;
 	int			caughtAnimalId;
+	ModelType	caughtAnimalType;
 	bool		hidden = false;
+	float		visionRadius;
 
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
+//<<<<<<< HEAD
+	std::chrono::time_point<std::chrono::system_clock> unlockJailStartTime;
+//=======
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;
+	std::chrono::time_point<std::chrono::system_clock> speedStartTime;
+	std::chrono::time_point<std::chrono::system_clock> searchStartTime;
+	std::chrono::time_point<std::chrono::system_clock> visionStartTime;
+	std::chrono::time_point<std::chrono::system_clock> slowStartTime;
+//>>>>>>> server
 
 	std::map < std::string, bool> dirtyVariablesMap;
 	using decodeFunctionType = void (Player::*)(std::string value);
