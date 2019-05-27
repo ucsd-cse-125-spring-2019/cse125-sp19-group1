@@ -140,7 +140,15 @@ Atlas::Atlas()
 				//Key key2 = static_cast<Key>(num * 2);
 				//Key key3 = static_cast<Key>(num * 3);
 				//GateTile * gateTile = new GateTile(std::vector<Key>({ key1, key2, key3 }), std::stoi(gateNum), wall, height);
-				GateTile * gateTile = new GateTile(std::stoi(gateNum), wall, height);
+				ItemModelType model = ItemModelType::apple;
+				switch (num)
+				{
+				case 1: model = ItemModelType::door; break;
+				case 2: model = ItemModelType::window; break;
+				case 3: model = ItemModelType::vent; break;
+					
+				}
+				GateTile * gateTile = new GateTile(std::stoi(gateNum), model, wall, height);
 				tileRow.push_back(gateTile);
 				gateMap.emplace(num, gateTile);
 
@@ -156,8 +164,16 @@ Atlas::Atlas()
 				Key key1 = static_cast<Key>(num * 1);
 				Key key2 = static_cast<Key>(num * 2);
 				Key key3 = static_cast<Key>(num * 3);
+				ItemModelType model = ItemModelType::apple;
+				switch (num)
+				{
+				case 1: model = ItemModelType::keyDropFrontExit; break;
+				case 2: model = ItemModelType::keyDropBathroom; break;
+				case 3: model = ItemModelType::keyDropVent; break;
+
+				}
 				//tileRow.push_back(new Tile(TileType::KEY_DROP, wall, height));
-				tileRow.push_back(new KeyDropTile(std::vector<Key>({ key1, key2, key3 }), num, wall, height));
+				tileRow.push_back(new KeyDropTile(std::vector<Key>({ key1, key2, key3 }), num, model, wall, height));
 			}
 				
 				break;

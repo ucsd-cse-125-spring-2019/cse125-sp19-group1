@@ -11,8 +11,8 @@ public:
 	// Default constructor
 	//GateTile(std::vector<Key> aKeys = {}, int num = 0, int aWallLayout = 0, int aHeight = 0) :
 	//	Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0), validKeys(aKeys) {}
-	GateTile(int num = 0, int aWallLayout = 0, int aHeight = 0) :
-		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), keyProgress(0), currentConstructTime(0.0) {}
+	GateTile(int num = 0, ItemModelType aModel = ItemModelType::apple, int aWallLayout = 0, int aHeight = 0) :
+		Tile(TileType::GATE, aWallLayout, aHeight), gateNum(num), model(aModel), keyProgress(0), currentConstructTime(0.0) {}
 
 	// Getters
 	int			getGateNum() { return gateNum; }
@@ -20,7 +20,7 @@ public:
 	double		getCurrentConstructTime() { return currentConstructTime; }
 	bool		hasAllKeys() { return keyProgress == 3; }
 	bool		isOpen() { return currentConstructTime >= TIME_TO_CONSTRUCT_GATE; }
-
+	ItemModelType getModel() { return model; }
 	// Setters
 	
 	// Encode function
@@ -32,7 +32,8 @@ public:
 		encodedData << Tile::encodeTileData() << " "
 			<< gateNum << " "
 			<< keyProgress << " "
-			<< currentConstructTime;
+			<< currentConstructTime << " "
+			<< static_cast<int>(model);
 
 		return encodedData.str();
 	}
@@ -48,17 +49,20 @@ public:
 		std::string gateNum_str;
 		std::string keyProgress_str;
 		std::string currentConstructTime_str;
+		std::string model_str;
 
 		// Get values from the stream
 		valueStream
 			>> gateNum_str
 			>> keyProgress_str
-			>> currentConstructTime_str;
+			>> currentConstructTime_str
+			>> model_str;
 
 		// Update class variables
 		gateNum = std::stoi(gateNum_str);
 		keyProgress = std::stoi(keyProgress_str);
 		currentConstructTime = std::stof(currentConstructTime_str);
+		model = static_cast<ItemModelType>(std::stoi(model_str));
 	}
 
 	// Additional functions
@@ -93,6 +97,7 @@ protected:
 	int gateNum;
 	int keyProgress;
 	double currentConstructTime;
+	ItemModelType model;
 
 	// Additional variables
 	//std::vector<Key> validKeys;

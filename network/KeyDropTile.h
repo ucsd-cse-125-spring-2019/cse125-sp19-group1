@@ -9,13 +9,12 @@ class KeyDropTile : public Tile
 public:
 
 	// Default constructor
-	KeyDropTile(std::vector<Key> aKeys = {}, int num = 0, int aWallLayout = 0, int aHeight = 0) :
-		Tile(TileType::KEY_DROP, aWallLayout, aHeight), gateNum(num), keyProgress(0), validKeys(aKeys) {}
+	KeyDropTile(std::vector<Key> aKeys = {}, int num = 0, ItemModelType aModel = ItemModelType::apple, int aWallLayout = 0, int aHeight = 0) :
+		Tile(TileType::KEY_DROP, aWallLayout, aHeight), gateNum(num), validKeys(aKeys), model(aModel) {}
 
 	// Getters
 	int			getGateNum() { return gateNum; }
-	//int			getKeyProgress() { return keyProgress; }
-	//bool		hasAllKeys() { return keyProgress == 3; }
+	ItemModelType getModel() { return model; }
 
 	// Setters
 
@@ -27,7 +26,7 @@ public:
 		// Call base class encode function and encode member variables from this class to the stringstream
 		encodedData << Tile::encodeTileData() << " "
 			<< gateNum << " "
-			<< keyProgress;
+			<< static_cast<int>(model);
 
 		return encodedData.str();
 	}
@@ -41,16 +40,16 @@ public:
 		// Create a stream for the remaining values
 		std::stringstream valueStream(value);
 		std::string gateNum_str;
-		std::string keyProgress_str;
+		std::string model_str;
 
 		// Get values from the stream
 		valueStream
 			>> gateNum_str
-			>> keyProgress_str;
+			>> model_str;
 
 		// Update class variables
 		gateNum = std::stoi(gateNum_str);
-		keyProgress = std::stoi(keyProgress_str);
+		model = static_cast<ItemModelType>(std::stoi(model_str));
 	}
 
 	// Additional functions
@@ -73,7 +72,7 @@ protected:
 
 	// Variable sent to client
 	int gateNum;
-	int keyProgress;
+	ItemModelType model;
 
 	// Additional variables
 	std::vector<Key> validKeys;
