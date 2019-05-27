@@ -229,6 +229,8 @@
     <None Include="obj_shader.frag" />
     <None Include="obj_shader.vert" />
     <None Include="packages.config" />
+    <None Include="passthrough.frag" />
+    <None Include="passthrough.vert" />
     <None Include="ui_shader.frag" />
     <None Include="ui_shader.vert" />
   </ItemGroup>

@@ -20,6 +20,8 @@ private:
 	GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
 	GLuint texNum;
 
+	GLint filtering;
+
 	glm::mat4 toWorld;
 	std::vector<unsigned int> indices;
 	std::vector<glm::vec3> vertices;
@@ -42,7 +44,7 @@ private:
 
 public:
 	// creating. destroying, and debugging
-	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, bool setupRendering = true);
+	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, bool setupRendering = true, GLint filtering = GL_NEAREST);
 	void Init(bool attachSkel);
 	void Parse(const char* filepath);
 	~FBXObject();
@@ -68,7 +70,7 @@ public:
 	void SetSpecular(glm::vec3 newSpec);
 	void SetShine(float newShine);
 	// rendering
-	void Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
+	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
 	void RenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();

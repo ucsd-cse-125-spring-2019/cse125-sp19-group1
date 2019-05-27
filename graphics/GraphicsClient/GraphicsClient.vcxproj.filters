@@ -293,6 +293,12 @@
     <None Include="ui_shader.vert">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
+    <None Include="passthrough.frag">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
+    <None Include="passthrough.vert">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

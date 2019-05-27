@@ -1,12 +1,13 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, bool setupRendering) {
+FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, bool setupRendering, GLint filtering) {
 	// initialize variables
 	Init(attachSkel);
 	// read in the model and its texture from the given files
 	Parse(path);
 
 	this->texPath = texPath;
+	this->filtering = filtering;
 
 	if (setupRendering) {
 		// initialize rendering variables
@@ -40,6 +41,10 @@ void FBXObject::Parse(const char *filepath)
 
 FBXObject::~FBXObject()
 {
+	if (skel) {
+		delete skel;
+	}
+
 	if (renderingIsSetup) {
 		// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a
 		// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
@@ -170,7 +175,7 @@ void FBXObject::SetDepthTest(bool depthTestEnabled) {
 }
 
 
-void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model)
+void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model)
 {
 	if (!renderingIsSetup)
 		return;
@@ -231,7 +236,7 @@ void FBXObject::RenderingSetup() {
 	SetBuffers();
 
 	// Load the corresponding model texture
-	texNum = loadTexture(texPath);
+	texNum = loadTexture(texPath, nullptr, nullptr, filtering);
 }
 
 void FBXObject::UpdateBuffers() {
@@ -354,4 +359,5 @@ void FBXObject::LoadMatrices(const char * path) {
 		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
 
 	token->Close();
+	delete token;
 }

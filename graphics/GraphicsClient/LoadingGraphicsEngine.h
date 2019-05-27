@@ -4,6 +4,8 @@
 class LoadingGraphicsEngine : public AbstractGraphicsEngine
 {
 public:
+	float loadingAlpha;
+
 	LoadingGraphicsEngine();
 	~LoadingGraphicsEngine();
 

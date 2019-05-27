@@ -8,16 +8,16 @@
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
-#include <ctime>
+#include <cmath>
 
 GLFWwindow * window = nullptr;
 int windowWidth = 0;
 int windowHeight = 0;
 const char* window_title = GAME_NAME_SHORT;
 
-static InGameGraphicsEngine * inGameEngine;
-static LoadingGraphicsEngine * loadingEngine;
-static AbstractGraphicsEngine * currentEngine;
+static InGameGraphicsEngine * inGameEngine = nullptr;
+static LoadingGraphicsEngine * loadingEngine = nullptr;
+static AbstractGraphicsEngine * currentEngine = nullptr;
 static ServerGame * server = nullptr;
 static ClientGame * client = nullptr;
 
@@ -60,12 +60,12 @@ void SetupOpenGLSettings()
 	/* Enable culling of faces to speed up rendering
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK); */
-	// Set clear color
-	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
 	// Set shading to smooth
 	glShadeModel(GL_SMOOTH);
 	// Auto normalize surface normals
 	glEnable(GL_NORMALIZE);
+	// Enable the 4x multisampling that we asked GLFW for
+	glEnable(GL_MULTISAMPLE);
 }
 
 void PrintVersions()
@@ -104,11 +104,17 @@ void serverLoop(void * args) {
 void CleanUp() {
 	currentEngine = nullptr;
 
-	inGameEngine->CleanUp();
-	loadingEngine->CleanUp();
+	if (inGameEngine) {
+		inGameEngine->CleanUp();
+		delete inGameEngine;
+		inGameEngine = nullptr;
+	}
 
-	delete inGameEngine;
-	delete loadingEngine;
+	if (loadingEngine) {
+		loadingEngine->CleanUp();
+		delete loadingEngine;
+		loadingEngine = nullptr;
+	}
 }
 
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -212,7 +218,7 @@ void SetupCallbacks()
 int main(void)
 {
 	// Create the GLFW window
-	window = CreateWindowFrame(640, 480);
+	window = CreateWindowFrame(800, 600);
 	// Print OpenGL and GLSL versions
 	PrintVersions();
 	// Setup callbacks
@@ -221,6 +227,8 @@ int main(void)
 	SetupOpenGLSettings();
 	// Initialize objects/pointers for rendering
 	Init();
+
+	double loadingFadeoutStart;
 
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
@@ -232,6 +240,20 @@ int main(void)
 		if (currentEngine == loadingEngine) {
 			if (inGameEngine->fullyLoaded) {
 				currentEngine = inGameEngine;
+				loadingFadeoutStart = glfwGetTime();
+			}
+		}
+		else if (loadingEngine) {
+#define LOADING_FADEOUT_TIME 1.35
+			double delta = glfwGetTime() - loadingFadeoutStart;
+			if (delta < LOADING_FADEOUT_TIME) {
+				loadingEngine->loadingAlpha = 1.f - delta / LOADING_FADEOUT_TIME;
+			}
+			else {
+				loadingEngine->loadingAlpha = 0.f;
+				loadingEngine->MainLoopEnd();
+				delete loadingEngine;
+				loadingEngine = nullptr;
 			}
 		}
 		
@@ -241,6 +263,15 @@ int main(void)
 				currentEngine->MainLoopBegin();
 			}
 			currentEngine->MainLoopCallback(window);
+
+			if (loadingEngine && currentEngine != loadingEngine) {
+				loadingEngine->MainLoopCallback(window);
+			}
+
+			// Swap buffers
+			glfwSwapBuffers(window);
+			// Gets events, including input such as keyboard and mouse or window resizing
+			glfwPollEvents();
 		}
 		
 		server->update();
