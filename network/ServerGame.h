@@ -47,5 +47,6 @@ private:
 	bool initCharacters;
 
 	bool moveForward, moveBackward, moveLeft, moveRight;
-
+	bool chefWin;
+	bool animalWin;
 };

@@ -8,8 +8,7 @@
  
 unsigned int ServerGame::client_id; 
 unsigned int SPEED = 2;
-bool chefWin = false;
-bool animalWin = false;
+
 
 ServerGame::ServerGame(void)
 {
@@ -20,6 +19,8 @@ ServerGame::ServerGame(void)
     // id's to assign clients for our table
     client_id = 0;
  
+	bool chefWin = false;
+	bool animalWin = false;
     // set up the server network to listen 
     network = new ServerNetwork(); 
 	//atlas = new Atlas();
