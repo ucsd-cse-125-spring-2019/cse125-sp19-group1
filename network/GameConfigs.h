@@ -22,7 +22,7 @@
 #define TIME_TO_OPEN_BOX 2 // in seconds
 #define TIME_TO_CONSTRUCT_GATE 30
 // DELAY = time to wait before you can act again
-#define SWING_NET_DELAY 1
+#define SWING_NET_DELAY 0.5
 #define UNLOCK_JAIL_DELAY 0.25
 // COOLDOWN = time to wait before you can do this action again
 #define UNLOCK_JAIL_COOLDOWN 1.5 
