@@ -15,6 +15,13 @@
 #define GENERAL_GAME_DATA_ID -999
 #define SERVER_GAMEDATA 123
 
+#define GHOST_MULTIPLIER 2
+#define MAX_CHEF_TIME 7
+#define MAX_ANIMAL_GHOST_TIME 7
+#define MAX_ANIMAL_SEARCH_TIME 7
+#define FLASH_DISTANCE 14
+
+
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
 
 class GameData
@@ -57,15 +64,40 @@ public:
 	std::vector<std::vector<Tile *>> getTileLayout();
 
 	//int	getBoxTime() { return timeToOpenBox; }
-	//int getChefSwingTime() { return timeToSwingNet; }
+	//double getChefSwingTime() { return timeToSwingNet; }
 	//double getOpenJailTime() { return timeToOpenJail; }
 
 	//int timeToOpenBox = 2; //in seconds
-	//int timeToSwingNet = 1;
+	//double timeToSwingNet = 0.5;
 	//double timeToOpenJail = 1.5;
 
+
+	double abilityChargeTime = 0.7;
+	double maxGhostTime = 7;
+	double limitChefVision = 1;
+	double maxChefLimitTime = 7;
+
+	double getAbilityChargeTime() { return abilityChargeTime; }
+	double getMaxGhostTime() { return maxGhostTime; }
+	double getMaxChefLimitTime() { return maxChefLimitTime; }
+
 	int	chefAnger = 0;
+	int maxChefAnger = 60;
+	int currentTime = -1;
+	int chefAngerInterval = 10;
+	double chefVision = 85;
+	double chefMaxVision = 160;
+
+	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
+	double getChefVision() { return chefVision * limitChefVision; }
+	double getChefMaxVision() { return chefMaxVision; }
+	void incrementChefVision() { chefVision++; }
 	void incrementChefAnger() { chefAnger++; }
+	int getChefAngerInterval() { return chefAngerInterval; }
+	int getChefAnger() { return chefAnger; }
+	int getMaxAnger() { return maxChefAnger; }
+	int getCurrentTime() { return currentTime; }
+	void setCurrentTime() { currentTime = getGameClock(); }
 
 	std::chrono::time_point<std::chrono::system_clock> gameClock;
 	void startGameClock();

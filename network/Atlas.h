@@ -56,6 +56,7 @@ public:
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
+	std::vector<std::pair<int, int>> jailLocations;
 	std::map<ItemModelType, Item> itemsMap;
 	std::map <int, GateTile *> gateMap;
 
@@ -64,6 +65,8 @@ public:
 	void checkDroppedItems();
 	void updateDroppedItem(ItemModelType anItem, Location loc);
 	void updateGateProgress(int gateNum);
+
+	std::vector<std::vector<Tile *>> getServerTileLayout() { return tileLayout; }
 
 	std::vector<ItemModelType> itemList = 
 	{

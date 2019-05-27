@@ -68,17 +68,58 @@ public:
 	void setCaughtAnimalId(int id);
 	void setCaughtAnimalType(ModelType type);
 	void setActionStartTime();
+//<<<<<<< HEAD
 	void setUnlockJailStartTime();
 	void setAction(Action anAction);
 	void setFacingDirection(Direction dir);
+//=======
+	void setStartJailTime();
+	void setSpeedStartTime();
+	void setSearchStartTime();
+	void setVisionStartTime();
+	void setSlowStartTime();
+
+	double getSpeedTime();
+	double getSearchTime();
+	double getVisionTime();
+	double getSlowTime();
+	
+	bool getPoweringUp() { return poweringUp; }
+	bool getOpeningBox() { return openingBox; }
+	void setPoweringUp(bool power) { poweringUp = power; }
+	void setOpeningBox(bool interact) { openingBox = interact; }
+
+//>>>>>>> server
 
 	void toggleReady();
 	
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
-	
 	double getInteractingTime(int opt);
+
+	//chef interaction/power-up methods
+	double chefSpeedMultiplier = 1.0;
+	double slowedSpeed = 0.5;
+	bool slowChef = false;
+	bool getSlowChef() { return slowChef; }
+	void toggleSlowChef() { slowChef = !slowChef; }
+
+	bool blindChef = false;
+	bool getBlindChef() { return blindChef; }
+	void toggleBlindChef() { blindChef = !blindChef; }
+
+	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
+	void updateChefMultiplier(int anger);
+
+	//player interaction/power-up methods
+	bool ghost = false;
+	bool getGhost() { return ghost; }
+	void toggleGhost() { ghost = !ghost; }
+
+	bool instantSearch = false;
+	bool getInstantSearch() { return instantSearch; }
+	void toggleInstantSearch() { instantSearch = !instantSearch; }
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;
@@ -115,10 +156,17 @@ protected:
 	ItemModelType	inventory;
 	ModelType	modelType;
 	bool		interacting;
+//<<<<<<< HEAD
 	//bool		openingJail;
 	//bool		openingGate;
 	bool		caughtStatus = false;
 	int			catchRadius = 10;
+//=======
+	bool		poweringUp;
+	bool		openingJail;
+	bool		openingGate;
+	bool		openingBox;
+//>>>>>>> server
 	bool		caughtAnimal = false;
 	int			caughtAnimalId;
 	ModelType	caughtAnimalType;
@@ -126,7 +174,16 @@ protected:
 	float		visionRadius;
 
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
+//<<<<<<< HEAD
 	std::chrono::time_point<std::chrono::system_clock> unlockJailStartTime;
+//=======
+	std::chrono::time_point<std::chrono::system_clock> startJail;
+	std::chrono::time_point<std::chrono::system_clock> startGate;
+	std::chrono::time_point<std::chrono::system_clock> speedStartTime;
+	std::chrono::time_point<std::chrono::system_clock> searchStartTime;
+	std::chrono::time_point<std::chrono::system_clock> visionStartTime;
+	std::chrono::time_point<std::chrono::system_clock> slowStartTime;
+//>>>>>>> server
 
 	std::map < std::string, bool> dirtyVariablesMap;
 	using decodeFunctionType = void (Player::*)(std::string value);

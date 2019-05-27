@@ -68,10 +68,10 @@ void Player::setHidden(bool hide)
 	hidden = hide;
 }
 
-void Player::setInteracting(bool interact) {
+void Player::setInteracting(bool interact) 
+{
 	interacting = interact;
 }
-
 
 //void Player::setOpenJail(bool interact) {
 //	openingJail = interact;
@@ -82,46 +82,68 @@ void Player::setInteracting(bool interact) {
 //	openingGate = status;
 //}
 
-
-ModelType Player::getModelType() const {
+ModelType Player::getModelType() const 
+{
 	return modelType;
 }
 
-bool Player::isChef() const {
+bool Player::isChef() const 
+{
 	return modelType == ModelType::CHEF;
 }
 
-void Player::setCaughtAnimal(bool caught) {
+void Player::setCaughtAnimal(bool caught) 
+{
 	caughtAnimal = caught;
 }
 void Player::setCaughtAnimalType(ModelType type) {
 	caughtAnimalType = type;
 }
 
+//<<<<<<< HEAD
 void Player::setCaughtStatus(bool caught) {
 	caughtStatus = caught;
 }
 
 bool Player::hasCaughtAnimal() const {
+//=======
+//void Player::setIsCaught(bool caught) 
+//{
+//	isCaught = caught;
+//}
+
+//bool Player::getCaughtAnimal() const 
+//{
+//>>>>>>> server
 	return caughtAnimal;
 }
 
-int Player::getCaughtAnimalId() const {
+int Player::getCaughtAnimalId() const 
+{
 	return caughtAnimalId;
 }
 ModelType Player::getCaughtAnimalType() const {
 	return caughtAnimalType;
 }
 
-void Player::setCaughtAnimalId(int id) {
+void Player::setCaughtAnimalId(int id) 
+{
 	caughtAnimalId = id;
 }
 
+//<<<<<<< HEAD
 bool Player::isCaught() const {
 	return caughtStatus;
+//=======
+////bool Player::getIsCaught() {
+//bool Player::getIsCaught() const 
+//{
+//	return isCaught;
+//>>>>>>> server
 }
 
-bool Player::inRange(Location & myLoc, Location & theirLoc) {
+bool Player::inRange(Location & myLoc, Location & theirLoc) 
+{
 	double dist = sqrt(pow(myLoc.getX() - theirLoc.getX(), 2) +
 		pow(myLoc.getY() - theirLoc.getY(), 2) +
 		pow(myLoc.getZ() - theirLoc.getZ(), 2) * 1.0);
@@ -131,15 +153,41 @@ bool Player::inRange(Location & myLoc, Location & theirLoc) {
 	return false;
 }
 
-void Player::setActionStartTime() {
+void Player::setActionStartTime() 
+{
 	actionStartTime = std::chrono::system_clock::now();
 }
 
+//<<<<<<< HEAD
 void Player::setUnlockJailStartTime() {
 	unlockJailStartTime = std::chrono::system_clock::now();
 }
+//=======
+void Player::setSpeedStartTime()
+{
+	speedStartTime = std::chrono::system_clock::now();
+}
+void Player::setSearchStartTime()
+{
+	searchStartTime = std::chrono::system_clock::now();
+}
+void Player::setVisionStartTime()
+{
+	visionStartTime = std::chrono::system_clock::now();
+}
+void Player::setSlowStartTime()
+{
+	slowStartTime = std::chrono::system_clock::now();
+}
 
-double Player::getInteractingTime(int opt) {
+void Player::setStartJailTime() 
+{
+	startJail = std::chrono::system_clock::now();
+//>>>>>>> server
+}
+
+double Player::getInteractingTime(int opt) 
+{
 	auto now = std::chrono::system_clock::now();
 	std::chrono::duration<double> elapsed_seconds = now - actionStartTime;
 	if (opt == 1) 
@@ -147,6 +195,75 @@ double Player::getInteractingTime(int opt) {
 		elapsed_seconds = now - unlockJailStartTime;
 	}
 	return elapsed_seconds.count();
+}
+
+double Player::getSpeedTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - speedStartTime;
+	return elapsed_seconds.count();
+}
+
+double Player::getSearchTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - searchStartTime;
+	return elapsed_seconds.count();
+}
+
+double Player::getVisionTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - visionStartTime;
+	return elapsed_seconds.count();
+}
+
+double Player::getSlowTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - slowStartTime;
+	return elapsed_seconds.count();
+}
+
+
+//chef interaction/power-up methods
+void Player::updateChefMultiplier(int anger) 
+{
+	if (anger < 12) 
+	{
+		chefSpeedMultiplier = 1.0;
+		catchRadius = 10;
+	}
+	else if (anger < 24) 
+	{
+		chefSpeedMultiplier = 1.3;
+		catchRadius = 12;
+	}
+	else if (anger < 36) 
+	{
+		chefSpeedMultiplier = 1.6;
+		catchRadius = 14;
+	}
+	else if (anger < 48) 
+	{
+		chefSpeedMultiplier = 1.9;
+		catchRadius = 16;
+	}
+	else if (anger < 59) 
+	{
+		chefSpeedMultiplier = 2.2;
+		catchRadius = 18;
+	}
+	else 
+	{
+		chefSpeedMultiplier = 2.5;
+		catchRadius = 20;
+	}
+
+	if (getSlowChef())
+	{
+		chefSpeedMultiplier = slowedSpeed;
+	}
 }
 
 

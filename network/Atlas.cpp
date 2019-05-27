@@ -132,6 +132,7 @@ Atlas::Atlas()
 				break;
 			case TileType::JAIL:
 				tileRow.push_back(new JailTile(wall, height));
+				jailLocations.push_back(std::pair<int, int>(row, col));
 				break;
 			case TileType::GATE:
 			{
