@@ -9,88 +9,191 @@
 #include "Item.h"
 #include "Location.h"
 
+#include "GameConfigs.h"
+
 #define NUM_PLAYER_MODEL_TYPES (4)
-enum class ModelType { CHEF = 0, RACOON, CAT, DOG};
+enum class ModelType { DEFAULT = -1, CHEF = 0, RACOON, CAT, DOG};
+enum class Direction {
+	NORTH = 5,
+	SOUTH = -5,
+	EAST = -1,
+	WEST = 1,
+	NORTHEAST = NORTH + EAST,
+	NORTHWEST = NORTH + WEST,
+	SOUTHEAST = SOUTH + EAST,
+	SOUTHWEST = SOUTH + WEST
+};
+
+enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET };
 
 class Player
 {
 public:
 	
+	// Constructors
 	Player();
-	Player(int anID);
 	Player(int anID, Location aLoc);
-	ItemName getInventory() const;
-	void setInventory(ItemName anItem);
+
+	// Getters
+	ItemModelType	getInventory() const;
+	bool		isInteracting() const;
+	Action		getAction() const;
+	//bool		getOpenJail() const;
+	//bool		getOpeningGate() const;
+	Location	getLocation() const;
+	ModelType	getModelType() const;
+	bool		isChef() const;
+	bool		isCaught() const;
+	bool		hasCaughtAnimal() const;
+	int			getCaughtAnimalId() const;
+	ModelType	getCaughtAnimalType() const;
+
+	bool		isReady() const;
+
+	Direction getFacingDirection() const;
+
+	// Setters
+	void setInventory(ItemModelType anItem);
 	void setModelType(ModelType type);
-	Location getLocation() const;
 	void setLocation(float argX, float argY, float argZ);
 	void setLocation(Location aLoc);
 	bool getHidden();
 	void setHidden(bool hide);
-	bool getInteracting();
+
 	void setInteracting(bool interact);
-	bool getOpenJail() const;
-	void setOpenJail(bool interact);
-	bool getOpeningGate() const;
-	void setOpeningGate(bool status);
-	ModelType getModelType() const;
-	bool isChef() const;
-	bool getCaughtAnimal() const;
+	//void setOpenJail(bool interact);
+	//void setOpeningGate(bool status);
+	void setCaughtStatus(bool caught);
 	void setCaughtAnimal(bool caught);
-	bool getIsCaught() const;
-	void setIsCaught(bool caught);
-	int getCaughtAnimalId() const;
 	void setCaughtAnimalId(int id);
+	void setCaughtAnimalType(ModelType type);
+	void setActionStartTime();
+//<<<<<<< HEAD
+	void setUnlockJailStartTime();
+	void setAction(Action anAction);
+	void setFacingDirection(Direction dir);
+//=======
+	void setStartJailTime();
+	void setSpeedStartTime();
+	void setSearchStartTime();
+	void setVisionStartTime();
+	void setSlowStartTime();
+
+	double getSpeedTime();
+	double getSearchTime();
+	double getVisionTime();
+	double getSlowTime();
+	
+	bool getPoweringUp() { return poweringUp; }
+	bool getOpeningBox() { return openingBox; }
+	void setPoweringUp(bool power) { poweringUp = power; }
+	void setOpeningBox(bool interact) { openingBox = interact; }
+
+//>>>>>>> server
+
+	void toggleReady();
+	
 
 	bool inRange(Location & myLoc, Location & theirLoc);
 
-	void setStartTime();
-	void setStartJailTime();
-	double checkProgress(int opt);
+	double getInteractingTime(int opt);
+
+	//chef interaction/power-up methods
+	double chefSpeedMultiplier = 1.0;
+	double slowedSpeed = 0.5;
+	bool slowChef = false;
+	bool getSlowChef() { return slowChef; }
+	void toggleSlowChef() { slowChef = !slowChef; }
+
+	bool blindChef = false;
+	bool getBlindChef() { return blindChef; }
+	void toggleBlindChef() { blindChef = !blindChef; }
+
+	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
+	void updateChefMultiplier(int anger);
+
+	//player interaction/power-up methods
+	bool ghost = false;
+	bool getGhost() { return ghost; }
+	void toggleGhost() { ghost = !ghost; }
+
+	bool instantSearch = false;
+	bool getInstantSearch() { return instantSearch; }
+	void toggleInstantSearch() { instantSearch = !instantSearch; }
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;
-
 	void decodePlayerData(std::string key, std::string value);
 
-	using decodeFunctionType =  void (Player::*)(std::string value);
-	std::map<std::string, decodeFunctionType> decodingFunctions;
-
-	using encodeFunctionType = std::string (Player::*)();
-	std::map<std::string, encodeFunctionType> encodingFunctions;
-	//std::map<std::string, decodeFunctionType> encodingFunctions;
-
-	std::map < std::string, bool> dirtyVariablesMap;
-
+	// Decode functions
 	void addDecodeFunctions();
 	void decodeLocation(std::string value);
 	void decodeInventory(std::string value);
-	void decodeCakeStatus(std::string value);
 	void decodeModelType(std::string value);
 	void decodeHidden(std::string value);
+	void decodeInteractAction(std::string value);
+	void decodeVisionRadius(std::string value);
+	void decodeCaughtStatus(std::string value);
+	void decodeCaughtAnimal(std::string value);
+	void decodeCaughtAnimalType(std::string value);
 
+	// Encode functions
 	void addEncodeFunctions();
 	std::string encodeLocation();
 	std::string encodeInventory();
-	std::string encodeCakeStatus();
 	std::string encodeModelType();
 	std::string encodeHidden();
+	std::string encodeInteractAction();
+	std::string encodeVisionRadius();
+	std::string encodeCaughtStatus();
+	std::string encodeCaughtAnimal();
+	std::string encodeCaughtAnimalType();
 
 protected:
+	Action		action;
 	Location	location;
 	int			playerID;
-	ItemName	inventory;
-	bool		hasCake;
+	ItemModelType	inventory;
 	ModelType	modelType;
 	bool		interacting;
+//<<<<<<< HEAD
+	//bool		openingJail;
+	//bool		openingGate;
+	bool		caughtStatus = false;
+	int			catchRadius = 10;
+//=======
+	bool		poweringUp;
 	bool		openingJail;
 	bool		openingGate;
+	bool		openingBox;
+//>>>>>>> server
 	bool		caughtAnimal = false;
-	bool		isCaught = false;
-	int			radius = 10;
 	int			caughtAnimalId;
+	ModelType	caughtAnimalType;
 	bool		hidden = false;
-	std::chrono::time_point<std::chrono::system_clock> start;
+	float		visionRadius;
+
+	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
+//<<<<<<< HEAD
+	std::chrono::time_point<std::chrono::system_clock> unlockJailStartTime;
+//=======
 	std::chrono::time_point<std::chrono::system_clock> startJail;
 	std::chrono::time_point<std::chrono::system_clock> startGate;
+	std::chrono::time_point<std::chrono::system_clock> speedStartTime;
+	std::chrono::time_point<std::chrono::system_clock> searchStartTime;
+	std::chrono::time_point<std::chrono::system_clock> visionStartTime;
+	std::chrono::time_point<std::chrono::system_clock> slowStartTime;
+//>>>>>>> server
+
+	std::map < std::string, bool> dirtyVariablesMap;
+	using decodeFunctionType = void (Player::*)(std::string value);
+	std::map<std::string, decodeFunctionType> decodingFunctions;
+
+	using encodeFunctionType = std::string(Player::*)();
+	std::map<std::string, encodeFunctionType> encodingFunctions;
+
+
+	bool ready = false;
+
+	Direction facingDirection;
 };

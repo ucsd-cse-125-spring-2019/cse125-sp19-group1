@@ -1,12 +1,18 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * obj_path, const char * texPath, bool attachSkel) {
+FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, bool setupRendering, GLint filtering) {
 	// initialize variables
 	Init(attachSkel);
 	// read in the model and its texture from the given files
-	Parse(obj_path, texPath);
-	// initialize rendering variables
-	RenderingSetup();
+	Parse(path);
+
+	this->texPath = texPath;
+	this->filtering = filtering;
+
+	if (setupRendering) {
+		// initialize rendering variables
+		RenderingSetup();
+	}
 }
 
 void FBXObject::Init(bool attachSkel) {
@@ -16,6 +22,7 @@ void FBXObject::Init(bool attachSkel) {
 	this->specular = default_spec;
 	this->shininess = default_shininess;
 	this->depthTest = true;
+	this->renderingIsSetup = false;
 	skel = NULL;
 	animPlayer = NULL;
 	animTimer = 0.0f;
@@ -23,31 +30,30 @@ void FBXObject::Init(bool attachSkel) {
 		skel = new Skeleton();
 }
 
-void FBXObject::Parse(const char *filepath, const char *texFilepath)
+void FBXObject::Parse(const char *filepath)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data,
 	// and potentially load in a Skeleton (if expecting a Skeleton)
 	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer);
 	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
-	// Load the corresponding model texture
-	texNum = loadTexture(texFilepath);
-	if (animPlayer != NULL) {
+	if (animPlayer != NULL)
 		LoadMatrices(filepath);
-		skel->Update(animPlayer->GetGlobalInverseT());
-	}
 }
 
 FBXObject::~FBXObject()
 {
-	// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a
-	// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
-	glDeleteVertexArrays(1, &(this->VAO));
-	glDeleteBuffers(1, &(this->VBO_V));
-	glDeleteBuffers(1, &(this->VBO_N));
-	glDeleteBuffers(1, &(this->EBO));
-	glDeleteBuffers(1, &(this->VBO_UV));
-	glDeleteBuffers(1, &(this->VBO_WI));
-	glDeleteBuffers(1, &(this->VBO_WV));
+	if (skel) {
+		delete skel;
+	}
+
+	if (renderingIsSetup) {
+		// Delete previously generated buffers. Note that forgetting to do this can waste GPU memory in a
+		// large project! This could crash the graphics driver due to memory leaks, or slow down application performance!
+		glDeleteVertexArrays(1, &(this->VAO));
+		glDeleteBuffers(1, &(this->VBO_V));
+		glDeleteBuffers(1, &(this->VBO_N));
+		glDeleteBuffers(1, &(this->EBO));
+	}
 }
 
 void FBXObject::PrintMatrix(glm::mat4 * matrix) {
@@ -145,8 +151,11 @@ void FBXObject::SetDepthTest(bool depthTestEnabled) {
 }
 
 
-void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::mat4 model)
+void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model)
 {
+	if (!renderingIsSetup)
+		return;
+
 	glUseProgram(shaderProgram);
 	if (depthTest) {
 		glEnable(GL_DEPTH_TEST);
@@ -213,6 +222,8 @@ void FBXObject::Draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::ma
 // initialize all the rendering stuff
 void FBXObject::RenderingSetup() {
 
+	renderingIsSetup = true;
+
 	// Create array object and buffers. Remember to delete your buffers when the object is destroyed!
 	glGenVertexArrays(1, &(this->VAO));
 	glGenBuffers(1, &(this->VBO_V));
@@ -223,9 +234,15 @@ void FBXObject::RenderingSetup() {
 	glGenBuffers(1, &(this->VBO_WV));
 
 	SetBuffers();
+
+	// Load the corresponding model texture
+	texNum = loadTexture(texPath, nullptr, nullptr, filtering);
 }
 
 void FBXObject::UpdateBuffers() {
+	if (!renderingIsSetup)
+		return;
+
 	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
 	// Consider the VAO as a container for all your buffers.
 	glBindVertexArray(this->VAO);
@@ -259,7 +276,7 @@ void FBXObject::UpdateBuffers() {
  * - the sixth paramter tells us the offset of the vertex's first component (0 because we don't pad vertices)
  */
 void FBXObject::SetBuffers() {
-
+	
 	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
 	// Consider the VAO as a container for all your buffers.
 	glBindVertexArray(this->VAO);
@@ -460,4 +477,5 @@ void FBXObject::LoadMatrices(const char * path) {
 		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
 
 	token->Close();
+	delete token;
 }

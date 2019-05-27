@@ -30,9 +30,18 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <vector>
 using namespace std;
 
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <vector>
+
+#define CHEF_NAME_SHORT  "Cheoffrey"
+#define CHEF_NAME_LONG   "Chef Cheoffrey"
+#define GAME_NAME_SHORT  "Restaurant Run"
+#define GAME_NAME_LONG   "Chef Cheoffrey's Restaurant Run"
+
+#define ANIMATIONS_PATH  "../Animations/"
+#define MODELS_PATH      "../Models/"
+#define TEXTURES_PATH    "../Textures/"

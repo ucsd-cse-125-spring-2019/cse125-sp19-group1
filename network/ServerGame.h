@@ -25,6 +25,7 @@ public:
 	void updateCollision(int id);
 	void updatePlayerCollision(int id, int dir);
 	void resetGame();
+	void updateMovement(int dir, int id);
 
 	GameData * gameData;
 private:
@@ -35,10 +36,17 @@ private:
     // The ServerNetwork object 
     ServerNetwork* network;
 
-	Atlas* atlas;
+	//Atlas* atlas;
 
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
 	
 	bool newPlayerInit;
+	bool gameStarted;
+	bool allPlayersReady;
+	bool initCharacters;
+
+	bool moveForward, moveBackward, moveLeft, moveRight;
+	bool chefWin;
+	bool animalWin;
 };

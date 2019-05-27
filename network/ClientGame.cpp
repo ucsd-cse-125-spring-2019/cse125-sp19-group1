@@ -2,6 +2,9 @@
 
 #include <fstream>
 
+// Comment this out to print all messages to stdout, even messages larger than 128 chars
+#define CENSOR_LARGE_MSG 128
+
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
 
@@ -60,7 +63,7 @@ void ClientGame::sendActionPackets()
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
 
-void ClientGame::sendPackets(const int type)
+void ClientGame::sendPackets(const int type, const int selectionNum)
 {
 	// send action packet
 	const unsigned int packet_size = sizeof(Packet);
@@ -69,6 +72,7 @@ void ClientGame::sendPackets(const int type)
 	Packet packet;
 	packet.packet_type = type;
 	packet.id = myID;
+	packet.selectionNum = selectionNum;
 
 	if (myID == -1) {
 		return;
@@ -90,7 +94,14 @@ void ClientGame::update()
 		return;
 	}
 
-	std::cout << "data received on client:\n" << network_data << std::endl;
+#ifdef CENSOR_LARGE_MSG
+	const auto len = strlen(network_data);
+	if (len > CENSOR_LARGE_MSG)
+		std::cout << "data received on client: (censored because it's " << len << " bytes)" << std::endl;
+	else
+#endif
+		std::cout << "data received on client:\n" << network_data << std::endl;
+		
 
 	if (myID == -1)
 	{
@@ -102,10 +113,7 @@ void ClientGame::update()
 		if (key == "init")
 			myID = std::stoi(value);
 	}
-	//else
-	//{
-		gameData->decodeGameData(network_data);
-	//}
+	gameData->decodeGameData(network_data);
 
 	// empties the buffer after parsing
 	memset(network_data, 0, sizeof(network_data)); 

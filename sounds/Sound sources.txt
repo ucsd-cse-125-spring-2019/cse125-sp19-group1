@@ -1,7 +1,7 @@
-catching_animal.mp3: 
+pop.mp3:
 	Pop.mp3 from YouTube Audio Library
 search_item.mp3: 
-	Opening_Plastic_Storage_Container.mp3 from YouTube Audio Library
+	Paper_Bag_Opening.mp3 from YouTube Audio Library
 found_item.mp3:
 	Coins_Shuffling.mp3 from YouTube Audio Library
 	need only a couple seconds from clip
@@ -20,6 +20,8 @@ ventexit_screw.mp3:
 	18V_Cordless_Drill_High_Pitch.mp3 from YouTube Audio Library
 chef_win.mp3:
 	Male_Laugh.mp3 from YouTube Audio Library
+Yay.mp3:
+	Our team's "yay" in unison.
 
 All raccoon sounds are frm Hung's own mouth.
 

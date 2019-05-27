@@ -10,6 +10,8 @@ GameData::GameData(int serverInit)
 {
 	atlas = new Atlas();
 	addDecodeFunctions();
+	beginCountdown = false;
+	countdownCompleted = false;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -21,19 +23,74 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	{
 		encodedData << iter->second->encodePlayerData(newPlayerInit);
 	}
-	encodedData << "client: " << GENERALDATA_ID << std::endl;
-	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
+	encodedData << "client: " << GENERAL_GAME_DATA_ID << std::endl;
 
+	if (beginCountdown)
+	{
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - countdownStartTime;
+		encodedData << "count down: " << 5.0 - elapsed_seconds.count() << std::endl;
+	}
+	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
+	encodedData << "chefAnger: " << getChefAnger() << std::endl;
+	encodedData << "chefVision:" << getChefVision() << std::endl;
+	std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
 
-void GameData::addNewClient(int anID, Location aLoc)
+void GameData::updateGateProgress(int gateNum)
 {
+	getAtlas()->updateGateProgress(gateNum);
+}
+
+void GameData::startCountdown()
+{
+	countdownStartTime = std::chrono::system_clock::now();
+	beginCountdown = true;
+}
+bool GameData::countdownStarted()
+{
+	return beginCountdown;
+}
+bool GameData::countdownDone()
+{
+	if (beginCountdown)
+	{
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - countdownStartTime;
+
+		if (5.0 - elapsed_seconds.count() < 0)
+		{
+			beginCountdown = false;
+			countdownCompleted = true;
+			return true;
+		}
+	}
+	return countdownCompleted;
+}
+void GameData::addNewPlayer(int anID, Location aLoc, ClientType type)
+{
+	if (type == ClientType::SERVER_SIDE)
+	{
+		
+	}
+	else if (type == ClientType::CLIENT_SIDE)
+	{
+
+	}
 	players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 }
 
-void GameData::removeClient(int anID)
+void GameData::removePlayer(int anID, ClientType type)
 {
+	if (type == ClientType::SERVER_SIDE)
+	{
+
+	}
+	else if (type == ClientType::CLIENT_SIDE)
+	{
+
+	}
 	players.erase(anID);
 }
 
@@ -108,8 +165,8 @@ void GameData::decodeTileLayout(std::string value)
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;
-				case TileType::TABLE: // change to ObjectTile
-					tmp = new Tile();
+				case TileType::OBJECT: // change to ObjectTile
+					tmp = new ObjectTile();
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;
@@ -172,14 +229,20 @@ void GameData::decodeGameData(const char * data)
 		if (p.first == "client")
 		{
 			playerID = std::stoi(value);
-			if (players.count(playerID) == 0 && playerID != GENERALDATA_ID)
+			if (players.count(playerID) == 0 && playerID != GENERAL_GAME_DATA_ID)
 			{
-				addNewClient(playerID, Location());
+				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
+		}
+		else if (p.first == "chefAnger") {
+			chefAnger = std::stoi(value);
+		}
+		else if (p.first == "chefVision") {
+			chefVision = std::stoi(value);
 		}
 		else
 		{
-			if (playerID == GENERALDATA_ID)
+			if (playerID == GENERAL_GAME_DATA_ID)
 			{
 				if (decodingFunctions.count(key) > 0)
 					(this->*decodingFunctions[key])(value); // Format for calling the functions from the map
@@ -209,4 +272,157 @@ int GameData::getGameClock()
 void GameData::startGameClock()
 {
 	gameClock = std::chrono::system_clock::now();
+}
+
+// tile getters
+Tile * GameData::getTile(Location loc)
+{
+	if (atlas)
+	{
+		return atlas->getTileAt(loc);
+	}
+	else
+	{
+		int row, col;
+		Atlas::getMapCoords(loc, row, col);
+		if (row >= 0 && row < clientTileLayout.size() && col >= 0 && col < clientTileLayout[row].size())
+			return clientTileLayout[row][col];
+		else
+			return nullptr;
+	}
+}
+GateTile * GameData::getGateTile(Location loc)
+{
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::GATE)
+			return dynamic_cast<GateTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+	
+}
+KeyDropTile * GameData::getKeyDropTile(Location loc)
+{
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::KEY_DROP)
+			return dynamic_cast<KeyDropTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+	
+}
+BoxTile * GameData::getBoxTile(Location loc)
+{
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::BOX)
+			return dynamic_cast<BoxTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+}
+RampTile * GameData::getRampTile(Location loc)
+{
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::RAMP)
+			return dynamic_cast<RampTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+}
+JailTile * GameData::getJailTile(Location loc)
+{
+
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::JAIL)
+			return dynamic_cast<JailTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+}
+
+ObjectTile * GameData::getObjectTile(Location loc)
+{
+
+	if (Tile * tile = getTile(loc))
+	{
+		if (tile->getTileType() == TileType::JAIL)
+			return dynamic_cast<ObjectTile*>(tile);
+		else
+			return nullptr;
+	}
+	return nullptr;
+}
+Tile * GameData::getAdjacentTile(Location loc, Direction dir)
+{
+	float increment = TILE_SIZE / 2;
+	switch (dir)
+	{
+	case Direction::NORTH:
+		loc = Location(loc.getX(), loc.getY(), loc.getZ() + increment);
+		break;
+	case Direction::SOUTH:
+		loc = Location(loc.getX(), loc.getY(), loc.getZ() - increment);
+
+		break;
+	case Direction::EAST:
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ());
+
+		break;
+	case Direction::WEST:
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ());
+
+		break;
+	case Direction::NORTHEAST:
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() + increment);
+
+		break;
+	case Direction::NORTHWEST:
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() + increment);
+
+		break;
+	case Direction::SOUTHEAST:
+		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() - increment);
+
+		break;
+	case Direction::SOUTHWEST:
+		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() - increment);
+
+		break;
+	}
+
+	return getTile(loc);
+}
+
+ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
+{
+	Tile * tile = getAdjacentTile(loc, dir);
+
+	if (tile && tile->getTileType() == TileType::OBJECT)
+	{
+		return dynamic_cast<ObjectTile *>(tile);
+	}
+	else
+		return nullptr;
+}
+
+JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir)
+{
+	Tile * tile = getAdjacentTile(loc, dir);
+
+	if (tile && tile->getTileType() == TileType::JAIL)
+	{
+		return dynamic_cast<JailTile *>(tile);
+	}
+	else
+		return nullptr;
 }
