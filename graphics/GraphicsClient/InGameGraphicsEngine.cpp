@@ -195,7 +195,7 @@ struct PlayerState {
 	glm::vec3 position;         // position, important for faking targetAngle above
 	int id;                     // the player ID from the server
 	unsigned geometryIdx;       // index into playerGeometry
-	bool moving;				// bool indicating whether or not the model should animate
+	char moving;				// bool indicating whether or not the model should animate
 
 	PlayerState() : position(0.f) {
 		angle = targetAngle = 0.f;
@@ -223,7 +223,7 @@ struct PlayerState {
 
 		setGeometryIdx(static_cast<unsigned>(p->getModelType()));
 
-		moving = false;
+		moving = 0;
 	}
 
 	~PlayerState() {
@@ -753,8 +753,8 @@ void MovePlayers()
 		}
 
 		// if the position changed, tell the object that it is indeed moving
-		if (state.position != oldPos)
-			state.moving = true;
+		state.moving <<= 1;
+		state.moving |= (state.position != oldPos);
 
 #ifdef DUMMY_ID
 		else if (state.id == DUMMY_ID) {
@@ -928,7 +928,7 @@ void IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		for (auto &playerState : players) {
-			playerModels[playerState.geometryIdx].object->Update(playerState.moving);
+			playerModels[playerState.geometryIdx].object->Update(playerState.moving != 0);
 		}
 		uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
 		std::map<int, Player*> players = gameData->getAllPlayers();
