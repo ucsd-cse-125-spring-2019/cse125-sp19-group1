@@ -97,7 +97,7 @@ void Init()
 	lobbyEngine = new LobbyGraphicsEngine();
 	currentEngine = lobbyEngine;
 
-	//inGameEngine->StartLoading();
+	inGameEngine->StartLoading();
 	loadingEngine->StartLoading();
 	lobbyEngine->StartLoading();
 }
@@ -279,8 +279,12 @@ int main(void)
 				crossfadeStart = glfwGetTime();
 			}
 		}
+		else if (currentEngine == lobbyEngine & lobbyEngine->quit) {
+			previousEngine = currentEngine;
+			currentEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
+			crossfadeStart = glfwGetTime();
+		}
 
-		
 		if (currentEngine && currentEngine->fullyLoaded) {
 			if (!currentEngine->calledMainLoopBegin) {
 				currentEngine->ResizeCallback(window, windowWidth, windowHeight);
