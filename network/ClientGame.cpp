@@ -3,7 +3,7 @@
 #include <fstream>
 
 // Comment this out to print all messages to stdout, even messages larger than 128 chars
-#define CENSOR_LARGE_MSG 128
+#define CENSOR_LARGE_MSG 256
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);

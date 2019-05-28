@@ -79,11 +79,11 @@ public:
 		ItemModelType::screwdriver1,
 		ItemModelType::screwdriver2,
 		ItemModelType::screwdriver3,
-		ItemModelType::apple,
+		/*ItemModelType::apple,
 		ItemModelType::orange,
 		ItemModelType::bananaGreen,
 		ItemModelType::bananaPerfect,
-		ItemModelType::bananaVeryRipe,
+		ItemModelType::bananaVeryRipe,*/
 		
 	};
 
