@@ -17,7 +17,8 @@
 #define PAW_ANGLE_OFFSET (-0.18f * glm::pi<float>())
 #define PAW_MAX_ALPHA (0.81f)
 
-static const glm::mat4 identifyMat(1.f);
+static glm::mat4 orthoProj;
+static const glm::mat4 identityMat(1.f);
 static GLuint passthroughShaderProgram = 0;
 GLuint uAlpha = 0;
 FBXObject *backgroundObj = nullptr;
@@ -85,6 +86,8 @@ void LoadingGraphicsEngine::MainLoopBegin()
 
 	// Set clear color
 	glClearColor(0.f, 0.f, 0.f, 1.0f);
+
+	orthoProj = glm::ortho(-1.f, 1.f, -1.f, 1.f);
 }
 
 void LoadingGraphicsEngine::MainLoopEnd()
@@ -123,26 +126,26 @@ void LoadingGraphicsEngine::MouseButtonCallback(GLFWwindow * window, int button,
 static glm::mat4 dotTransform(glm::vec3 position)
 {
 #define DOT_SCALE 0.025f
-	return glm::scale(glm::translate(identifyMat, position), glm::vec3((DOT_SCALE * windowHeight) / windowWidth, DOT_SCALE, DOT_SCALE));
+	return glm::scale(glm::translate(identityMat, position), glm::vec3((DOT_SCALE * windowHeight) / windowWidth, DOT_SCALE, DOT_SCALE));
 }
 
 static glm::mat4 pawTransform(glm::vec3 position, float angle)
 {
 #define PAW_SCALE 0.125f
-	glm::mat4 scale = glm::scale(glm::translate(identifyMat, position), glm::vec3((PAW_SCALE * windowHeight) / windowWidth, PAW_SCALE, PAW_SCALE));
+	glm::mat4 scale = glm::scale(glm::translate(identityMat, position), glm::vec3((PAW_SCALE * windowHeight) / windowWidth, PAW_SCALE, PAW_SCALE));
 	return glm::rotate(scale, angle + PAW_ANGLE_OFFSET, glm::vec3(0.f, 0.f, 1.f));
 }
 
 static void drawDot(glm::vec3 position, float alpha)
 {
 	glUniform1f(uAlpha, alpha);
-	dotObj->Draw(passthroughShaderProgram, &identifyMat, &identifyMat, dotTransform(position));
+	dotObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * dotTransform(position));
 }
 
 static void drawPaw(glm::vec3 position, float alpha, float angle)
 {
 	glUniform1f(uAlpha, alpha);
-	pawObj->Draw(passthroughShaderProgram, &identifyMat, &identifyMat, pawTransform(position, angle));
+	pawObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * pawTransform(position, angle));
 }
 
 static bool isOffscreen(glm::vec3 p)
@@ -172,7 +175,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	glUseProgram(passthroughShaderProgram);
 
 	glUniform1f(uAlpha, loadingAlpha);
-	backgroundObj->Draw(passthroughShaderProgram, &identifyMat, &identifyMat, bgMat);
+	backgroundObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * bgMat);
 
 	static const glm::vec3 dotPositions[] = {
 		glm::vec3(0.34125f, 0.072f, 0.f),
