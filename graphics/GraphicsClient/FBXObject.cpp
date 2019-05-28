@@ -36,7 +36,7 @@ void FBXObject::Parse(const char *filepath)
 	// Populate the face indices, vertices, and normals vectors with the object data,
 	// and potentially load in a Skeleton (if expecting a Skeleton)
 	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer);
-	std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
+	//std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	if (animPlayer != NULL)
 		LoadMatrices(filepath);
 }
