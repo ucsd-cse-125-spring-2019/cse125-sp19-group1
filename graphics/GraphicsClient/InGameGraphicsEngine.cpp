@@ -193,7 +193,7 @@ static SoundSystem * soundSystem;
 static Sound * sound_toilet;
 static Sound * sound_search_item;
 
-static ClientGame * client = nullptr;
+extern ClientGame * sharedClient;
 
 static int elapsedTime = 0;
 static int directions = 0;
@@ -327,7 +327,7 @@ PlayerState *getMyState()
 {
 	// linear search is probably faster than binary/tree/whatever for <= 4 elements
 
-	int myId = client->getMyID();
+	int myId = sharedClient->getMyID();
 	for (PlayerState &state : players) {
 		if (state.id == myId)
 			return &state;
@@ -342,15 +342,15 @@ void reloadPlayers()
 
 	cout << "[Re]loading players\n";
 
-	if (!client || !client->getGameData() || client->getGameData()->players.size() <= 0) {
+	if (!sharedClient || !sharedClient->getGameData() || sharedClient->getGameData()->players.size() <= 0) {
 		cout << "WARNING: gameData players map is empty\n";
 		return;
 	}
 
 	allPlayersNode->removeAllChildren();
 
-	const auto &playersMap = client->getGameData()->players;
-	const int myId = client->getMyID();
+	const auto &playersMap = sharedClient->getGameData()->players;
+	const int myId = sharedClient->getMyID();
 
 	for (const auto &pair : playersMap) {
 		const auto id = pair.first;
@@ -372,7 +372,7 @@ void reloadPlayers()
 
 void resetEnvObjs()
 {
-	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
 		cerr << "resetEnvObjs(): map is empty\n";
@@ -492,7 +492,7 @@ void resetEnvObjs()
 
 void resetItems()
 {
-	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
 		cerr << "resetItems(): map is empty\n";
@@ -582,7 +582,10 @@ void resetItems()
 
 void updateBoxVisibility()
 {
-	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	if (!sharedClient || !sharedClient->getGameData())
+		return;
+
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
 		return;
@@ -606,7 +609,10 @@ void reloadMap()
 {
 	deallocFloor();
 
-	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	if (!sharedClient || !sharedClient->getGameData())
+		return;
+
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
 		cerr << "reloadMap(): map is empty\n";
@@ -680,9 +686,9 @@ void reloadMap()
 				// Calculate the altitude of the wall
 				int height = 1;
 				/*if (z == 0 || z != clippedZ) {
-					height = client->heights[clippedZ][x];
+					height = sharedClient->heights[clippedZ][x];
 				} else {
-					height = (client->heights[z - 1][x] + client->heights[z][x]) / 2;
+					height = (sharedClient->heights[z - 1][x] + sharedClient->heights[z][x]) / 2;
 				}*/
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
@@ -709,10 +715,10 @@ void reloadMap()
 				// Calculate the altitude of the wall
 				int height = 1;
 				/*if (x == 0 || x != clippedX) {
-					height = client->heights[z][clippedX];
+					height = sharedClient->heights[z][clippedX];
 				}
 				else {
-					height = (client->heights[z][x - 1] + client->heights[z][x]) / 2;
+					height = (sharedClient->heights[z][x - 1] + sharedClient->heights[z][x]) / 2;
 				}*/
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
@@ -758,20 +764,23 @@ glm::vec3 directionBitmaskToVector(int bitmask) {
 
 void SendPackets()
 {
+	if (!sharedClient)
+		return;
+
 	auto dir = directionBitmaskToVector(directions);
 
 	if (dir.z > 0) {
-		client->sendPackets(FORWARD_EVENT);
+		sharedClient->sendPackets(FORWARD_EVENT);
 	}
 	else if (dir.z < 0) {
-		client->sendPackets(BACKWARD_EVENT);
+		sharedClient->sendPackets(BACKWARD_EVENT);
 	}
 
 	if (dir.x > 0) {
-		client->sendPackets(LEFT_EVENT);
+		sharedClient->sendPackets(LEFT_EVENT);
 	}
 	else if (dir.x < 0) {
-		client->sendPackets(RIGHT_EVENT);
+		sharedClient->sendPackets(RIGHT_EVENT);
 	}
 }
 
@@ -785,8 +794,8 @@ void MovePlayers()
 
 	const auto myOldPos = myState->position;
 
-	const int myID = client->getMyID();
-	const auto &playersMap = client->getGameData()->players;
+	const int myID = sharedClient->getMyID();
+	const auto &playersMap = sharedClient->getGameData()->players;
 	for (auto &state : players) {
 		const auto oldPos = state.position;
 
@@ -912,6 +921,9 @@ void resetIdempotentFlush()
 
 void IdleCallback()
 {
+	if (!sharedClient)
+		return;
+
 	/* TODO: waiting for server implementation */
 
 	if (clock() - elapsedTime > 1000.0 / 60)
@@ -919,8 +931,8 @@ void IdleCallback()
 		elapsedTime = clock();
 		resetIdempotentFlush();
 		SendPackets();
-		client->update();
-		const auto gameData = client->getGameData();
+		sharedClient->update();
+		const auto gameData = sharedClient->getGameData();
 		if (gameData) {
 			updateBoxVisibility();
 
@@ -931,7 +943,7 @@ void IdleCallback()
 #endif
 			const bool tilesChanged = (floorArray.size() != gameData->clientTileLayout.size());
 
-			const auto &playersMap = client->getGameData()->players;
+			const auto &playersMap = sharedClient->getGameData()->players;
 			for (auto &state : players) {
 #ifdef DUMMY_ID
 				if (state.id == DUMMY_ID) {
@@ -1119,9 +1131,8 @@ void LoadModels()
 }
 
 
-InGameGraphicsEngine::InGameGraphicsEngine(ClientGame *newClient)
+InGameGraphicsEngine::InGameGraphicsEngine()
 {
-	client = newClient;
 	calledMainLoopBegin = false;
 	fullyLoaded = false;
 }
@@ -1241,7 +1252,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 	UpdateView();
 	MoveCamera(glm::vec3(0.f));
 
-	const auto gameData = client->getGameData();
+	const auto gameData = sharedClient->getGameData();
 	gameData->startGameClock();
 
 	// Set clear color
@@ -1311,44 +1322,44 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_SPACE) {
 			// interact key press
-			client->sendPackets(INTERACT_EVENT);
+			sharedClient->sendPackets(INTERACT_EVENT);
 		}
 
 		if (key == GLFW_KEY_ENTER) {
 			// interact key press
-			client->sendPackets(READY_EVENT);
+			sharedClient->sendPackets(READY_EVENT);
 		}
 		if (key == GLFW_KEY_O) {
 			// interact key press
-			client->sendPackets(START_EVENT);
+			sharedClient->sendPackets(START_EVENT);
 		}
 		if (key == GLFW_KEY_D) {
-			client->sendPackets(DROP_EVENT);
+			sharedClient->sendPackets(DROP_EVENT);
 		}
 		if (key == GLFW_KEY_F) {
-			client->sendPackets(POWERUP_EVENT);
+			sharedClient->sendPackets(POWERUP_EVENT);
 		}
 		if (key == GLFW_KEY_H) {
 			// interact key press
-			client->sendPackets(HIDE_EVENT);
+			sharedClient->sendPackets(HIDE_EVENT);
 		}
 		if (key == GLFW_KEY_0) {
-			client->sendPackets(SELECT0_EVENT);
+			sharedClient->sendPackets(SELECT0_EVENT);
 		}
 		if (key == GLFW_KEY_1) {
-			client->sendPackets(SELECT1_EVENT);
+			sharedClient->sendPackets(SELECT1_EVENT);
 		}
 		if (key == GLFW_KEY_2) {
-			client->sendPackets(SELECT2_EVENT);
+			sharedClient->sendPackets(SELECT2_EVENT);
 		}
 		if (key == GLFW_KEY_3) {
-			client->sendPackets(SELECT3_EVENT);
+			sharedClient->sendPackets(SELECT3_EVENT);
 		}
 		if (key == GLFW_KEY_4) {
-			client->sendPackets(SELECT4_EVENT);
+			sharedClient->sendPackets(SELECT4_EVENT);
 		}
 		if (key == GLFW_KEY_P) {
-			client->sendPackets(RESET_EVENT);
+			sharedClient->sendPackets(RESET_EVENT);
 		}
 
 	}
@@ -1371,12 +1382,12 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_SPACE) {
 			// interact key release
-			client->sendPackets(RELEASE_EVENT);
+			sharedClient->sendPackets(RELEASE_EVENT);
 		}
 
 		if (key == GLFW_KEY_F) {
 			// interact key release
-			client->sendPackets(RELEASE_EVENT);
+			sharedClient->sendPackets(RELEASE_EVENT);
 		}
 	}
 }

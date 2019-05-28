@@ -6,7 +6,7 @@
 class InGameGraphicsEngine : public AbstractGraphicsEngine
 {
 public:
-	InGameGraphicsEngine(ClientGame *newClient);
+	InGameGraphicsEngine();
 	~InGameGraphicsEngine();
 
 	virtual void StartLoading();  // may launch a thread and return immediately

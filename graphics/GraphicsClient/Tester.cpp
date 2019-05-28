@@ -19,7 +19,7 @@ static InGameGraphicsEngine * inGameEngine = nullptr;
 static LoadingGraphicsEngine * loadingEngine = nullptr;
 static AbstractGraphicsEngine * currentEngine = nullptr;
 static ServerGame * server = nullptr;
-static ClientGame * client = nullptr;
+ClientGame * sharedClient = nullptr;
 
 void ErrorCallback(int error, const char* description)
 {
@@ -83,10 +83,9 @@ void PrintVersions()
 void Init()
 {
 	server = new ServerGame();
-	client = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
 
-	inGameEngine = new InGameGraphicsEngine(client);
+	inGameEngine = new InGameGraphicsEngine();
 	loadingEngine = new LoadingGraphicsEngine();
 	currentEngine = loadingEngine;
 
@@ -238,6 +237,10 @@ int main(void)
 
 		if (currentEngine == loadingEngine) {
 			if (inGameEngine->fullyLoaded) {
+				if (!sharedClient) {
+					sharedClient = new ClientGame();
+				}
+				
 				currentEngine = inGameEngine;
 				loadingFadeoutStart = glfwGetTime();
 			}
@@ -258,6 +261,10 @@ int main(void)
 		
 		if (currentEngine && currentEngine->fullyLoaded) {
 			if (!currentEngine->calledMainLoopBegin) {
+				if (!sharedClient) {
+					sharedClient = new ClientGame();
+				}
+
 				currentEngine->ResizeCallback(window, windowWidth, windowHeight);
 				currentEngine->MainLoopBegin();
 			}
