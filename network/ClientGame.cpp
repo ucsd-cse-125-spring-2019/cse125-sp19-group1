@@ -164,26 +164,51 @@ void ClientGame::update()
 	
 	if (myID != -1 && !soundSystem->shouldIgnoreSound()) {
 		Player * player = gameData->getPlayer(myID);
-		std::cout << "my id: " << myID << std::endl;
+		ModelType model = gameData->getPlayer(myID)->getModelType();
+		WinType wt = gameData->getWT();
+		Location loc = gameData->getPlayer(myID)->getLocation();
+
 		if (player->isChef()) 
 		{
 			if (player->getAction() == Action::SWING_NET) {
 				soundSystem->playSound(sound_net);
 			}
+
+			if (wt == WinType::CHEF_WIN) {
+				soundSystem->playSound(sound_yay);
+			}
 		}
 		else {
 			//opening box
 			if (player->getAction() == Action::OPEN_BOX) {
-				std::cout << "PLAY SEARCH ITEM SOUND" << std::endl;
 				soundSystem->playSound(sound_search_item);
-
 			}
 			if (player->getAction() == Action::CONSTRUCT_GATE) {
-				soundSystem->playSound(sound_door);
+				int gateNum = gameData->getGateTile(loc)->getGateNum();
+				if (gateNum == 1) { //door
+					soundSystem->playSound(sound_door_unlock);
+				}
+				else if (gateNum == 2) { //bathroom
+					soundSystem->playSound(sound_toilet);
+				}
+				else if (gateNum == 3){ //vent
+					soundSystem->playSound(sound_vent_screw);
+				}
 			}
 			if (player->getAction() == Action::UNLOCK_JAIL) {
-				soundSystem->playSound(sound_search_item);
+				soundSystem->playSound(sound_door_unlock);
+			}
 
+			if (wt != WinType::NONE) {
+				if (wt == WinType::DOOR) {
+					soundSystem->playSound(sound_door);
+				}
+				else if (wt == WinType::TOILET) {
+					soundSystem->playSound(sound_window);
+				} 
+				else if (wt == WinType::VENT) {
+					soundSystem->playSound(sound_vent_screw);
+				}
 			}
 		}
 	}
