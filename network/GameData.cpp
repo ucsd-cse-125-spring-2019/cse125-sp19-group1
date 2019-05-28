@@ -146,7 +146,7 @@ void GameData::decodeTileLayout(std::string value)
 					tileRow.push_back(tmp);
 					break;
 				case TileType::JAIL: // change to JailTile
-					tmp = new Tile();
+					tmp = new JailTile();
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;
@@ -161,7 +161,7 @@ void GameData::decodeTileLayout(std::string value)
 					tileRow.push_back(tmp);
 					break;
 				case TileType::KEY_DROP: // change to KeyDropTile
-					tmp = new Tile();
+					tmp = new KeyDropTile();
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;

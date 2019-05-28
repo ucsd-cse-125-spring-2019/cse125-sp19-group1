@@ -370,6 +370,9 @@ void resetEnvObjs()
 		envObjsTransform = new Transform(glm::mat4(1.f));
 		root->addChild(envObjsTransform);
 	}
+	else {
+		envObjsTransform->removeAllChildren();
+	}
 
 	uint8_t objIdx = 0;
 	envObjs.resize(floorArray.size());
@@ -393,6 +396,18 @@ void resetEnvObjs()
 			case TileType::BOX:
 			{
 				objIdx = static_cast<uint8_t>(ItemModelType::box);
+				break;
+			}
+			case TileType::GATE:
+			{
+				GateTile *objTile = (GateTile *)tile;
+				objIdx = static_cast<uint8_t>(objTile->getModel());
+				break;
+			}
+			case TileType::KEY_DROP:
+			{
+				KeyDropTile *objTile = (KeyDropTile *)tile;
+				objIdx = static_cast<uint8_t>(objTile->getModel());
 				break;
 			}
 			case TileType::OBJECT:
@@ -460,6 +475,9 @@ void resetItems()
 	if (allItemsTransform == nullptr) {
 		allItemsTransform = new Transform(glm::mat4(1.f));
 		root->addChild(allItemsTransform);
+	} 
+	else {
+		allItemsTransform->removeAllChildren();
 	}
 
 	itemTransforms.resize(floorArray.size());
@@ -887,6 +905,10 @@ void IdleCallback()
 			if (tilesChanged) {
 				idempotentFlush();
 				reloadMap();
+			}
+			else {
+				idempotentFlush();
+				resetItems();
 			}
 
 			if (playersChanged) {
