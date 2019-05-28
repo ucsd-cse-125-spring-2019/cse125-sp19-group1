@@ -31,7 +31,6 @@ void AnimationPlayer::play() {
 		durationFloat += fs.count();
 		lastTime = Time::now();
 		if (durationFloat > animation->getEndTime()) {
-			std::cerr << "Reset of animation";
 			animation->resetAnimation();
 			durationFloat = 0;
 		}
@@ -57,10 +56,6 @@ void AnimationPlayer::SetBoneChannels() {
 		else
 			std::cout << "ANIMPLAYER: NO BONE MATCHES THIS CHANNEL" << std::endl;
 	}
-}
-
-void AnimationPlayer::ToNextKeyframe() {
-	animation->ToNextKeyframe();
 }
 
 glm::mat4 AnimationPlayer::GetGlobalInverseT() {

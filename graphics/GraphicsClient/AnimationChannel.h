@@ -9,26 +9,20 @@ private:
 	string boneName;
 	//note: setup assumes number of keyframes = 
 	// numPositionKeys = numRotationKeys = numScalingKeys
-	int numKeyframes;
 	int currKeyframe;
 	//keyframes will be in chronological order
-	Keyframe ** keyframes;
-	glm::mat4 transform;
+  std::vector<Keyframe *> keyframes;
 public:
-	AnimationChannel(string boneName, int numKeyframes, Keyframe ** keyframes);
+  AnimationChannel(string boneName, int numKeyframes);
 	~AnimationChannel();
 
 	void resetChannel();
 	string getBoneName();
 	int getNumKeyframes();
-	Keyframe ** getKeyframes();
-	void SetTransform(float currTime);
-	glm::mat4 GetTransform();
-
-	void ToNextKeyframe();
+  std::vector<Keyframe *> * getKeyframes();
+  int GetCurrKeyframe();
+	void SetCurrKeyframe(float currTime);
 	void PrintMatrix(glm::mat4 * matrix);
-
-	int GetCurrKeyframe();
 };
 
 #endif

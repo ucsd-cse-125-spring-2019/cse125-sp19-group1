@@ -11,11 +11,6 @@
 class FBXObject
 {
 private:
-	// TODO: re-enable shader animations
-	bool SHADER_ANIM_ENABLED = true;
-	// this determines whether animations should run on their own
-	bool RUN_ANIM_AUTO = false;
-
 	glm::vec3 ambient, diffuse, specular;
 	float shininess;
 
@@ -76,17 +71,13 @@ public:
 	void SetDiffuse(glm::vec3 newDiff);
 	void SetSpecular(glm::vec3 newSpec);
 	void SetShine(float newShine);
+	void SetDepthTest(bool depthTestEnabled);
 	// rendering
 	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
 	void RenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();
-
-	void SetDepthTest(bool depthTestEnabled);
-
-	void ToNextKeyframe();
-	void UpdateSkin();
-	void UpdateSkin2();
+	void Animate();
 	void LoadMatrices(const char * path);
 };
 

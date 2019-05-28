@@ -1,17 +1,17 @@
 #include "AnimationChannel.h"
-AnimationChannel::AnimationChannel(string boneName, int numKeyframes, Keyframe ** keyframes)
+AnimationChannel::AnimationChannel(string boneName, int numKeyframes)
 {
 	this->boneName = boneName;
-	//std::cerr << "Bone Name" << boneName << "\n";
-	this->numKeyframes = numKeyframes;
-	this->keyframes = keyframes;
+	//this->keyframes = keyframes;
 	this->currKeyframe = 0;
-	this->transform = glm::mat4(1.0f);
+  this->keyframes = std::vector<Keyframe *>();
 }
 
 
 AnimationChannel::~AnimationChannel()
 {
+  for (int i = 0; i < keyframes.size(); i++)
+    delete keyframes[i];
 }
 
 void AnimationChannel::resetChannel() {
@@ -23,46 +23,21 @@ string AnimationChannel::getBoneName() {
 }
 
 int AnimationChannel::getNumKeyframes() {
-	return numKeyframes;
+	return (int)keyframes.size();
 }
 
-Keyframe ** AnimationChannel::getKeyframes() {
-	return keyframes;
+std::vector<Keyframe *> * AnimationChannel::getKeyframes() {
+	return &keyframes;
 }
 
-/**
-* Method to alter the offset matrix of the bone with the same name as this channel.
-* Should somehow interpolate value from Keyframe data.
-**/
-void AnimationChannel::SetTransform(float currTime) {
+int AnimationChannel::GetCurrKeyframe() {
+  return currKeyframe;
+}
+
+void AnimationChannel::SetCurrKeyframe(float currTime) {
 	//switch keyframes if current time surpasses next keyframe
-	if (currTime > keyframes[currKeyframe + 1]->getTime()) {
-		if (currKeyframe + 1 < this->getNumKeyframes()) {
-			currKeyframe += 1;
-			Keyframe * key = keyframes[currKeyframe];
-			glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), key->getScaling());
-			glm::quat rotationQuat = glm::quat(key->getRotation());
-			glm::mat4 rotationMatrix = rotationQuat.operator glm::mat<4, 4, float, glm::packed_highp>();
-			glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), key->getPosition());
-			transform = translationMatrix * rotationMatrix * scalingMatrix;
-		}
-	}
-}
-
-glm::mat4 AnimationChannel::GetTransform() {
-	return transform;
-}
-
-void AnimationChannel::ToNextKeyframe() {
-	if (currKeyframe + 1 < this->getNumKeyframes()) {
-		currKeyframe += 1;
-		/*Keyframe * key = keyframes[currKeyframe];
-		glm::mat4 scalingMatrix = glm::scale(glm::mat4(1.0f), key->getScaling());
-		glm::quat rotationQuat = glm::quat(key->getRotation());
-		glm::mat4 rotationMatrix = rotationQuat.operator glm::mat<4, 4, float, glm::packed_highp>();
-		glm::mat4 translationMatrix = glm::translate(glm::mat4(1.0f), key->getPosition());
-		transform = translationMatrix * rotationMatrix * scalingMatrix;*/
-	}
+	if (currKeyframe + 1 < this->getNumKeyframes() && currTime > keyframes[currKeyframe + 1]->getTime())
+    currKeyframe += 1;
 }
 
 void AnimationChannel::PrintMatrix(glm::mat4 * matrix) {
@@ -73,8 +48,4 @@ void AnimationChannel::PrintMatrix(glm::mat4 * matrix) {
 		std::cerr << std::endl;
 	}
 	std::cerr << std::endl;
-}
-
-int AnimationChannel::GetCurrKeyframe() {
-	return currKeyframe;
 }

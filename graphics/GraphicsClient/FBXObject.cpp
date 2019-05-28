@@ -74,9 +74,7 @@ void FBXObject::PrintSkeleton() {
 void FBXObject::Update() {
 	// This function will handle anything that must continuously occur.
 	// right now trying to handle updating the animation through this function.
-	animTimer++;
-	if (RUN_ANIM_AUTO && fmod(animTimer, 50.0f) == 0.0f)
-		ToNextKeyframe();
+	Animate();
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -156,7 +154,6 @@ void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 
 	if (!renderingIsSetup)
 		return;
 
-	glUseProgram(shaderProgram);
 	if (depthTest) {
 		glEnable(GL_DEPTH_TEST);
 		// Related to shaders and z value comparisons for the depth buffer
@@ -189,14 +186,13 @@ void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 
 	glUniform3f(uMaterialS, (this->specular)[0], (this->specular)[1], (this->specular)[2]);
 	glUniform1f(uShine, (this->shininess));
 
-	if (SHADER_ANIM_ENABLED && (skel != NULL || animPlayer != NULL)) {
+	if (skel != NULL || animPlayer != NULL) {
 		glUniform1i(uIsAnimated, 1);
 		std::vector<glm::mat4> boneTransforms;
 		std::map<string, Bone *> * skelBones = skel->GetBones();
 		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
 			if (it->second->CheckIsBone()) {
 				boneTransforms.push_back(it->second->GetTransform());
-				//boneTransforms.push_back(glm::mat4(1.0f));
 				string boneString = string("bones[");
 				boneString += std::to_string(it->second->GetID());
 				boneString += "]";
@@ -276,7 +272,7 @@ void FBXObject::UpdateBuffers() {
  * - the sixth paramter tells us the offset of the vertex's first component (0 because we don't pad vertices)
  */
 void FBXObject::SetBuffers() {
-	
+
 	// Bind the Vertex Array Object (VAO) first, then bind the associated buffers to it.
 	// Consider the VAO as a container for all your buffers.
 	glBindVertexArray(this->VAO);
@@ -304,13 +300,12 @@ void FBXObject::SetBuffers() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
 	if (animPlayer != NULL) {
-		std::vector<glm::vec4> weightIndices;
+		std::vector<glm::ivec4> weightIndices;
 		std::vector<glm::vec4> weightValues;
 		std::vector<Vertex *> * skelVertices = skel->GetVertices();
-		int highestID = 0;
 		for (int i = 0; i < skelVertices->size(); i++) {
 			std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
-			glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
+			glm::ivec4 currIndices = glm::ivec4(0, 0, 0, 0);
 			glm::vec4 currValues = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 			// number of weights is restricted to a maximum of four
 			for (int j = 0; j < currWeights->size() && j < 4; j++) {
@@ -318,12 +313,11 @@ void FBXObject::SetBuffers() {
 				if (currWeight.first != "") {
 					Bone * currBone = skel->GetBone(currWeight.first);
 					if (currBone != NULL) {
-						currIndices[j] = currBone->GetID();
-						if (currIndices[j] == -1) std::cout << "-1 ID FOR NECESSARY BONE: " << currBone->GetName() << std::endl;
+						if (currBone->GetID() == -1) std::cout << "ID OF -1 ON NECESSARY BONE: " << currBone->GetName() << std::endl;
 						else {
-							if (currIndices[j] > highestID) highestID = currIndices[j];
+							currIndices[j] = currBone->GetID();
+							currValues[j] = currWeight.second;
 						}
-						currValues[j] = currWeight.second;
 					}
 				}
 			}
@@ -335,7 +329,7 @@ void FBXObject::SetBuffers() {
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WI);
 		glBufferData(GL_ARRAY_BUFFER, weightIndices.size() * (4 * sizeof(GLuint)), weightIndices.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_UNSIGNED_INT, GL_FALSE, 4 * sizeof(GLuint), (GLvoid *)0);
+		glVertexAttribIPointer(3, 4, GL_UNSIGNED_INT, 4 * sizeof(GLuint), (GLvoid *)0);
 
 		/* send data about vertex weight values */
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WV);
@@ -357,90 +351,11 @@ void FBXObject::SetBuffers() {
 	glBindVertexArray(0);
 }
 
-void FBXObject::ToNextKeyframe() {
+void FBXObject::Animate() {
 	if (animPlayer != NULL) {
-		std::cout << "TO NEXT KEYFRAME at time " << animTimer << std::endl;
-		animPlayer->ToNextKeyframe();
+		animPlayer->play();
 		skel->Update(animPlayer->GetGlobalInverseT());
-		if (!SHADER_ANIM_ENABLED)
-			UpdateSkin2();
 	}
-}
-
-void FBXObject::UpdateSkin2() {
-	// get the indices and actual weights of the matrices to apply to the vertices
-	std::vector<glm::vec4> weightIndices;
-	std::vector<glm::vec4> weightValues;
-	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	int highestID = 0;
-	for (int i = 0; i < skelVertices->size(); i++) {
-		std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
-		glm::vec4 currIndices = glm::vec4(0, 0, 0, 0);
-		glm::vec4 currValues = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-		// number of weights is restricted to a maximum of four
-		for (int j = 0; j < currWeights->size() && j < 4; j++) {
-			std::pair<string, float> currWeight = (*currWeights)[j];
-			if (currWeight.first != "") {
-				Bone * currBone = skel->GetBone(currWeight.first);
-				if (currBone != NULL) {
-					currIndices[j] = currBone->GetID();
-					if (currIndices[j] == -1) std::cout << "-1 ID FOR NECESSARY BONE: " << currBone->GetName() << std::endl;
-					else {
-						if (currIndices[j] > highestID) highestID = currIndices[j];
-					}
-					currValues[j] = currWeight.second;
-				}
-			}
-		}
-		weightIndices.push_back(currIndices);
-		weightValues.push_back(currValues);
-	}
-
-	// create the array of matrices
-	std::vector<glm::mat4> boneTransforms;
-	std::map<string, Bone *> * skelBones = skel->GetBones();
-
-	std::cout << "HIGHEST ID: " << highestID << " vs NUM BONES: " << skelBones->size() << std::endl;
-
-	for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
-		if (it->second->CheckIsBone())
-			boneTransforms.push_back(it->second->GetTransform());
-	}
-
-	// apply matrices to vertices
-	glm::vec4 currWI;
-	glm::vec4 currWV;
-	glm::mat4 M;
-	for (int vIndex = 0; vIndex < vertices.size(); vIndex++) {
-		currWI = weightIndices[vIndex];
-		currWV = weightValues[vIndex];
-		M = glm::mat4(0.0f);
-		for (int wIndex = 0; wIndex < 4; wIndex++) {
-			M += currWV[wIndex] * boneTransforms[currWI[wIndex]];
-		}
-		vertices[vIndex] = M * glm::vec4((*skelVertices)[vIndex]->GetPos(), 1.0f);
-		normals[vIndex] = M * glm::vec4((*skelVertices)[vIndex]->GetNorm(), 0.0f);
-	}
-
-	UpdateBuffers();
-}
-
-void FBXObject::UpdateSkin() {
-	std::vector<Vertex *> * skelVertices = skel->GetVertices();
-	for (int i = 0; i < skelVertices->size(); i++) {
-		Vertex * currV = (*skelVertices)[i];
-		std::vector<std::pair<string, float>> * currWeights = currV->GetWeights();
-		glm::mat4 M = glm::mat4(0.0f);
-		for (int j = 0; j < currWeights->size(); j++) {
-			Bone * currBone = skel->GetBone((*currWeights)[j].first);
-			if (currBone != NULL)
-				M += ((*currWeights)[j].second) * currBone->GetTransform();
-		}
-		// it looks like we're traversing in order...
-		vertices[currV->GetID()] = M * glm::vec4(currV->GetPos(), 1.0f);
-		normals[currV->GetID()] = M * glm::vec4(currV->GetNorm(), 0.0f);
-	}
-	UpdateBuffers();
 }
 
 void FBXObject::LoadMatrices(const char * path) {
@@ -477,5 +392,4 @@ void FBXObject::LoadMatrices(const char * path) {
 		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
 
 	token->Close();
-	delete token;
 }
