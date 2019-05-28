@@ -222,6 +222,8 @@ struct PlayerState {
 		position.z = location.getZ();
 
 		setGeometryIdx(static_cast<unsigned>(p->getModelType()));
+
+		moving = false;
 	}
 
 	~PlayerState() {
@@ -241,6 +243,7 @@ struct PlayerState {
 		position = other.position;
 		id = other.id;
 		geometryIdx = other.geometryIdx;
+		moving = other.moving;
 	}
 
 	PlayerState &operator=(const PlayerState &other) {
@@ -748,6 +751,11 @@ void MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 		}
+
+		// if the position changed, tell the object that it is indeed moving
+		if (state.position != oldPos)
+			state.moving = true;
+
 #ifdef DUMMY_ID
 		else if (state.id == DUMMY_ID) {
 			state.position = myState->position;
@@ -776,8 +784,6 @@ void MovePlayers()
 				changedTargetAngle = true;
 			}
 		}
-
-		state.moving = changedTargetAngle;
 
 		// Try to find an equivalent (+/- 2pi) target that is closer
 		if (changedTargetAngle) {
