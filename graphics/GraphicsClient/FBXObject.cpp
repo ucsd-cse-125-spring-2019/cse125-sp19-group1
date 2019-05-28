@@ -23,6 +23,7 @@ void FBXObject::Init(bool attachSkel) {
 	this->shininess = default_shininess;
 	this->depthTest = true;
 	this->renderingIsSetup = false;
+	this->shouldAnimate = false;
 	skel = NULL;
 	animPlayer = NULL;
 	animTimer = 0.0f;
@@ -71,10 +72,16 @@ void FBXObject::PrintSkeleton() {
 		skel->PrintBoneStructure();
 }
 
-void FBXObject::Update() {
-	// This function will handle anything that must continuously occur.
-	// right now trying to handle updating the animation through this function.
-	Animate();
+void FBXObject::Update(bool moving) {
+	if (animPlayer != NULL) {
+		// if the model believes it should animate but has actually stopped moving, reset animation
+		if (shouldAnimate && !moving)
+			animPlayer->Reset();
+
+		shouldAnimate = moving;
+		if (shouldAnimate)
+			Animate();
+	}
 }
 
 void FBXObject::MoveTo(float x, float y, float z) {
@@ -186,7 +193,7 @@ void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 
 	glUniform3f(uMaterialS, (this->specular)[0], (this->specular)[1], (this->specular)[2]);
 	glUniform1f(uShine, (this->shininess));
 
-	if (skel != NULL || animPlayer != NULL) {
+	if (shouldAnimate && (skel != NULL || animPlayer != NULL)) {
 		glUniform1i(uIsAnimated, 1);
 		std::vector<glm::mat4> boneTransforms;
 		std::map<string, Bone *> * skelBones = skel->GetBones();
@@ -352,10 +359,8 @@ void FBXObject::SetBuffers() {
 }
 
 void FBXObject::Animate() {
-	if (animPlayer != NULL) {
-		animPlayer->play();
-		skel->Update(animPlayer->GetGlobalInverseT());
-	}
+	animPlayer->play();
+	skel->Update(animPlayer->GetGlobalInverseT());
 }
 
 void FBXObject::LoadMatrices(const char * path) {
