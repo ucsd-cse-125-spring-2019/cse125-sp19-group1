@@ -20,5 +20,6 @@ public:
 	virtual void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset);
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 	virtual void MainLoopCallback(GLFWwindow * window);
+
 };
 
