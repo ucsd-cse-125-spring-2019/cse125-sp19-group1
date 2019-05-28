@@ -61,3 +61,7 @@ void AnimationPlayer::SetBoneChannels() {
 glm::mat4 AnimationPlayer::GetGlobalInverseT() {
 	return animation->GetGlobalInverseT();
 }
+
+void AnimationPlayer::Reset() {
+	this->animation->resetAnimation();
+}

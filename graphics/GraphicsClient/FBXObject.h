@@ -37,6 +37,7 @@ private:
 	bool hasSkel;
 	bool depthTest;
 	bool renderingIsSetup;
+	bool shouldAnimate;
 
 	// Luma values
 	glm::vec3 default_amb = glm::vec3(0.08725f, 0.0795f, 0.0245f);
@@ -55,7 +56,7 @@ public:
 	void PrintMatrix(glm::mat4 * matrix);
 	void PrintSkeleton();
 	// manipulation
-	void Update();
+	void Update(bool move);
 	void MoveTo(float x, float y, float z);
 	void Translate(float x, float y, float z);
 	void Rotate(float angle, float x, float y, float z);

@@ -24,6 +24,7 @@ public:
 	void SetAnimation(Animation * newAnimation);
 	void SetBoneChannels();
 	glm::mat4 GetGlobalInverseT();
+	void Reset();
 };
 
 #endif
