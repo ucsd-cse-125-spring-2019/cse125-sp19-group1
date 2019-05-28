@@ -136,7 +136,7 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f) },
 	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f) },
 	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f) },
-	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.f,   glm::vec3(0.f) },
+	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f) },
 };
 
 struct ItemModel {
@@ -496,6 +496,13 @@ void resetItems()
 			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
 			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
 			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
+
+			if (tile->getTileType() == TileType::OBJECT) {
+				if (((ObjectTile *)tile)->getModel() == ItemModelType::table) {
+					tileTranslate.y += 9.25f;
+				}
+			}
+
 			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
 			glm::vec3 modelTranslate = settings.translate;
 			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
