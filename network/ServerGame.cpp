@@ -188,7 +188,8 @@ void ServerGame::receiveFromClients()
 							{
 								std::cout << "CAUGHT ANIMAL" << std::endl;
 								Direction dir = player->getFacingDirection();
-								JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir);
+								Location jailLoc;
+								JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir, jailLoc);
 
 								//drop off animal
 								if (player->hasCaughtAnimal() && jailTile && jailTile->isJailEmpty())//gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
@@ -201,9 +202,9 @@ void ServerGame::receiveFromClients()
 									player->setCaughtAnimal(false);
 
 									//update animal's location to jail
-									int x = (int)(loc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
-									int y = loc.getY();
-									int z = (int)(loc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+									int x = (int)(jailLoc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+									int y = jailLoc.getY();
+									int z = (int)(jailLoc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
 									gameData->getPlayer(animal)->setLocation(x, y, z);
 
 								}
@@ -291,7 +292,9 @@ void ServerGame::receiveFromClients()
 								Location loc = player->getLocation();
 								ItemModelType item = gameData->getAtlas()->getTileItem(loc);
 								Direction dir = player->getFacingDirection();
-								ObjectTile * objectTile = gameData->getAdjacentObjectTile(loc, dir);
+								Location objectLoc;
+								Location jailLoc;
+								ObjectTile * objectTile = gameData->getAdjacentObjectTile(loc, dir, objectLoc);
 
 								if (player->getInventory() == ItemModelType::EMPTY && (item != ItemModelType::EMPTY || objectTile && objectTile->getItem() == ItemModelType::cake))
 								{
@@ -351,7 +354,7 @@ void ServerGame::receiveFromClients()
 								}
 								//else if (gameData->getAtlas()->hasJail(loc))
 								//else if (JailTile * jailTile = gameData->getJailTile(loc))
-								else if (JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir))
+								else if (JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir, jailLoc))
 								{
 									//JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
 									//player->setOpenJail(true);
