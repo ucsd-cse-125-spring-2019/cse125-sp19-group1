@@ -177,8 +177,9 @@ static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
 static vector<vector<Transform *>> envObjs;
+static vector<vector<Transform *>> itemTransforms;
 
-static vector<vector<uint8_t>> envObjsMap;
+//static vector<vector<uint8_t>> envObjsMap;
 
 static SoundSystem * soundSystem;
 static Sound * sound_toilet;
@@ -283,6 +284,7 @@ Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
 Transform * floorTransform = nullptr;
 Transform * envObjsTransform = nullptr;
+Transform * allItemsTransform = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
@@ -361,7 +363,7 @@ void resetEnvObjs()
 	const auto &tileLayout = client->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
-		cerr << "reloadMap(): map is empty\n";
+		cerr << "resetEnvObjs(): map is empty\n";
 		return;
 	}
 
@@ -394,8 +396,14 @@ void resetEnvObjs()
 				objIdx = static_cast<uint8_t>(ItemModelType::box);
 				break;
 			}
+			case TileType::OBJECT:
+			{
+				ObjectTile *objTile = (ObjectTile *)tile;
+				objIdx = static_cast<uint8_t>(objTile->getModel());
+				break;
+			}
 			default:
-				objIdx = envObjsMap[z][x];
+				objIdx = 0;
 				break;
 			}
 
@@ -437,6 +445,65 @@ void resetEnvObjs()
 			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
 			row[x]->addChild(itemModels[objIdx].geometry);
 			envObjsTransform->addChild(row[x]);
+		}
+	}
+}
+
+void resetItems()
+{
+	const auto &tileLayout = client->getGameData()->clientTileLayout;
+
+	if (!tileLayout.size()) {
+		cerr << "resetItems(): map is empty\n";
+		return;
+	}
+
+	if (allItemsTransform == nullptr) {
+		allItemsTransform = new Transform(glm::mat4(1.f));
+		root->addChild(allItemsTransform);
+	}
+
+	itemTransforms.resize(floorArray.size());
+	for (size_t z = 0; z < itemTransforms.size(); z++) {
+		auto &row = itemTransforms[z];
+		row.resize(floorArray[z].size());
+		for (size_t x = 0; x < row.size(); x++) {
+			const auto tile = tileLayout[z][x];
+
+			ItemModelType modelType = tile->getItem();
+			uint8_t objIdx = static_cast<uint8_t>(modelType);
+			
+			if (modelType == ItemModelType::EMPTY || !itemModels[objIdx].settings) {
+				row[x] = nullptr;
+				continue;
+			}
+
+			// Try to turn the object away from the wall
+			float angle = 0.f;
+			/*auto wall = tile->getWall();
+			if (wall & DirectionBitmask::southSide) {
+				angle = glm::pi<float>();
+			}
+			else if (wall & DirectionBitmask::westSide) {
+				angle = glm::half_pi<float>();
+			}
+			else if (wall & DirectionBitmask::eastSide) {
+				angle = -glm::half_pi<float>();
+			}*/
+
+			const auto &settings = *(itemModels[objIdx].settings);
+			glm::vec3 tileTranslate;
+			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
+			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
+			glm::vec3 modelTranslate = settings.translate;
+			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
+			row[x]->addChild(itemModels[objIdx].geometry);
+			allItemsTransform->addChild(row[x]);
 		}
 	}
 }
@@ -589,6 +656,7 @@ void reloadMap()
 	}
 
 	resetEnvObjs();
+	resetItems();
 }
 
 void deallocFloor()
@@ -1001,7 +1069,7 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
 
-	loadMapArray(envObjsMap, "../../maps/tinytinymap/env_objs.txt");
+	//loadMapArray(envObjsMap, "../../maps/tinytinymap/env_objs.txt");
 
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
