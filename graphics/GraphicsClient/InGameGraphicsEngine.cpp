@@ -28,12 +28,12 @@
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
 
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
-#define TILE_TEX_PATH     (TEXTURES_PATH "tile.ppm")
+#define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
 
 #define CHEF_FOG_DISTANCE 85.0f
 #define RACCOON_FOG_DISTANCE 160
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
-#define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
+#define WALL_TEX_PATH     (TEXTURES_PATH "wall.png")
 
 //#define CANVAS_MDL_PATH   (MODELS_PATH "canvas.fbx")
 //#define CANVAS_TEX_PATH   (TEXTURES_PATH "canvas.ppm");
@@ -93,6 +93,8 @@ static const struct PlayerModelSettings {
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
 #define MDL_SAME_TEX(x) MDL_AND_TEX(x, x)
+#define GLM_H_PI glm::half_pi<float>()
+#define GLM_PI glm::pi<float>()
 
 static const struct ItemModelSettings {
 	const char *modelPath;       // filesystem path to a model geometry file
@@ -101,42 +103,44 @@ static const struct ItemModelSettings {
 	ItemModelType id;            // A unique ID, like ItemModelType::apple
 	float scale;                 // scale adjustment
 	glm::vec3 translate;         // position adjustment
+	glm::vec3 rotation;          // rotation
+	bool wallRotate;             // auto-rotate away from any wall on this tile
 } itemModelSettings[] = {
-	// model and texture paths                      name                    id                               scale  translate
-	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f) },
-	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,   2.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit,  2.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,       2.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f) },
-	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f) },
-	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f) },
-	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f) },
-	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f) },
+	// model and texture paths                      name                    id                               scale  translate                      rotate                            wallRotate
+	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false },
+	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true  },
+	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
+	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
+	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
+	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,  2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
 
 struct ItemModel {
@@ -160,6 +164,12 @@ struct PlayerModel {
 	Transform *transform;
 };
 
+struct AnimatedItem {
+	Transform *transform = nullptr;
+	Geometry *animating = nullptr;
+	ItemModelType type = ItemModelType::EMPTY;
+};
+
 static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 
 static FBXObject * tileModel = nullptr;
@@ -177,7 +187,7 @@ static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
 static vector<vector<Transform *>> envObjs;
-static vector<vector<Transform *>> itemTransforms;
+static vector<vector<AnimatedItem>> itemTransforms;
 
 static SoundSystem * soundSystem;
 static Sound * sound_toilet;
@@ -436,30 +446,44 @@ void resetEnvObjs()
 				continue;
 			}
 
+			const auto &settings = *(itemModels[objIdx].settings);
+
 			// Try to turn the object away from the wall
 			float angle = 0.f;
-			auto wall = tile->getWall();
-			if (wall & DirectionBitmask::southSide) {
-				angle = glm::pi<float>();
-			}
-			else if (wall & DirectionBitmask::westSide) {
-				angle = glm::half_pi<float>();
-			}
-			else if (wall & DirectionBitmask::eastSide) {
-				angle = -glm::half_pi<float>();
+			if (settings.wallRotate) {
+				auto wall = tile->getWall();
+				if (wall & DirectionBitmask::southSide) {
+					angle = glm::pi<float>();
+				}
+				else if (wall & DirectionBitmask::westSide) {
+					angle = glm::half_pi<float>();
+				}
+				else if (wall & DirectionBitmask::eastSide) {
+					angle = -glm::half_pi<float>();
+				}
 			}
 
-			const auto &settings = *(itemModels[objIdx].settings);
 			glm::vec3 tileTranslate;
 			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
 			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
 			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
-			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
+
+			auto tileTranslateMat = glm::translate(glm::mat4(1.f), tileTranslate);
+			auto rotate = glm::rotate(tileTranslateMat, angle, glm::vec3(0.f, 1.f, 0.f));
+
 			glm::vec3 modelTranslate = settings.translate;
 			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
 			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
-			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
+
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+
+			auto modelAngles = settings.rotation;
+			auto modelRotate = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+
+			row[x] = new Transform(modelRotate);
 			row[x]->addChild(itemModels[objIdx].geometry);
 			envObjsTransform->addChild(row[x]);
 		}
@@ -494,24 +518,29 @@ void resetItems()
 			uint8_t objIdx = static_cast<uint8_t>(modelType);
 			
 			if (modelType == ItemModelType::EMPTY || !itemModels[objIdx].settings) {
-				row[x] = nullptr;
+				row[x].transform = nullptr;
+				row[x].animating = nullptr;
+				row[x].type = modelType;
 				continue;
 			}
 
+			const auto &settings = *(itemModels[objIdx].settings);
+
 			// Try to turn the object away from the wall
 			float angle = 0.f;
-			/*auto wall = tile->getWall();
-			if (wall & DirectionBitmask::southSide) {
-				angle = glm::pi<float>();
+			if (settings.wallRotate) {
+				auto wall = tile->getWall();
+				if (wall & DirectionBitmask::southSide) {
+					angle = glm::pi<float>();
+				}
+				else if (wall & DirectionBitmask::westSide) {
+					angle = glm::half_pi<float>();
+				}
+				else if (wall & DirectionBitmask::eastSide) {
+					angle = -glm::half_pi<float>();
+				}
 			}
-			else if (wall & DirectionBitmask::westSide) {
-				angle = glm::half_pi<float>();
-			}
-			else if (wall & DirectionBitmask::eastSide) {
-				angle = -glm::half_pi<float>();
-			}*/
 
-			const auto &settings = *(itemModels[objIdx].settings);
 			glm::vec3 tileTranslate;
 			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
 			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
@@ -523,14 +552,30 @@ void resetItems()
 				}
 			}
 
-			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
+			auto tileTranslateMat = glm::translate(glm::mat4(1.f), tileTranslate);
+			auto rotate = glm::rotate(tileTranslateMat, angle, glm::vec3(0.f, 1.f, 0.f));
+
 			glm::vec3 modelTranslate = settings.translate;
 			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
 			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
-			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
-			row[x]->addChild(itemModels[objIdx].geometry);
-			allItemsTransform->addChild(row[x]);
+
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+
+#define ITEM_ROTATION_PERIOD 5.25
+			auto t = glfwGetTime();
+			float timeAngle = fmod(t, ITEM_ROTATION_PERIOD) * glm::two_pi<double>() / ITEM_ROTATION_PERIOD;
+
+			auto modelAngles = settings.rotation;
+			auto modelRotate = glm::rotate(scale, modelAngles.y + timeAngle, glm::vec3(0.f, 1.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+
+			row[x].animating = nullptr;
+			row[x].type = modelType;
+			row[x].transform = new Transform(modelRotate);
+			row[x].transform->addChild(itemModels[objIdx].geometry);
+			allItemsTransform->addChild(row[x].transform);
 		}
 	}
 }
