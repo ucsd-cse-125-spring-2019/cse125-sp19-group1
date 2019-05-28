@@ -8,7 +8,7 @@ AnimationPlayer::AnimationPlayer(Skeleton * skel, Animation * anim)
 	SetAnimation(anim);
 	lastTime = Time::now();
 	currTime = Time::now();
-	durationFloat = 0;
+	durationFloat = 0.0f;
 	//Debug Messages
 	/*for (int i = 0; i < anim->getNumChannels(); i++) {
 		std::cerr << (anim->getAnimationChannels())[i]->getBoneName() << "\n";
@@ -30,10 +30,8 @@ void AnimationPlayer::play() {
 		fsec fs = currTime - lastTime;
 		durationFloat += fs.count();
 		lastTime = Time::now();
-		if (durationFloat > animation->getEndTime()) {
-			animation->resetAnimation();
-			durationFloat = 0;
-		}
+		if (durationFloat > animation->getEndTime())
+			Reset();
 	}
 }
 
@@ -64,4 +62,5 @@ glm::mat4 AnimationPlayer::GetGlobalInverseT() {
 
 void AnimationPlayer::Reset() {
 	this->animation->resetAnimation();
+	durationFloat = 0.0f;
 }

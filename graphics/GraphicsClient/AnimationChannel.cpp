@@ -37,7 +37,7 @@ int AnimationChannel::GetCurrKeyframe() {
 void AnimationChannel::SetCurrKeyframe(float currTime) {
 	//switch keyframes if current time surpasses next keyframe
 	if (currKeyframe + 1 < this->getNumKeyframes() && currTime > keyframes[currKeyframe + 1]->getTime())
-    currKeyframe += 1;
+		currKeyframe += 1;
 }
 
 void AnimationChannel::PrintMatrix(glm::mat4 * matrix) {
