@@ -10,17 +10,16 @@
 #include "BoxTile.h"
 #include "JailTile.h"
 #include "GateTile.h"
+#include "KeyDropTile.h"
 #include "RampTile.h"
 #include "HideTile.h"
+#include "ObjectTile.h"
+#include "GameConfigs.h"
+
 #include <map>
 #include <ctime>
 
-#define TILE_SIZE 20
-#define TILE_HEIGHT 10
-#define PLAYER_RADIUS 2
-#define WALL_SIZE 2
-#define MAX_ITEMS 9
-#define ITEM_DROP_DURATION 10
+
 
 class Atlas
 {
@@ -30,8 +29,9 @@ public:
 
 	static void getMapCoords(Location & loc, int & row, int & col);
 
-	void detectCollision(Location & loc);
-	ItemName getTileItem(Location & loc);
+	void detectWallCollision(Location & loc);
+	void detectObjectCollision(Location & loc);
+	ItemModelType getTileItem(Location & loc);
 	bool hasGate(Location & loc);
 	bool hasBox(Location & loc);
 	
@@ -46,9 +46,9 @@ public:
 	Tile * getTileAt(Location & loc);
 
 	bool tileHasItem(Location & loc);
-	void updateTileItem(Location & loc, ItemName anItem);
+	void updateTileItem(Location & loc, ItemModelType anItem);
 	void getAdjacentFreeTile(int currRow, int currCol, int & row, int & col);
-	void returnItemToSpawn(ItemName anItem, int currRow, int currCol);
+	void returnItemToSpawn(ItemModelType anItem, int currRow, int currCol);
 
 	std::string encodeTileLayoutData(bool newPlayerInit);
 	bool hasRamp(Location & loc);
@@ -56,56 +56,40 @@ public:
 
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
-	std::map<ItemName, Item> itemsMap;
+	std::vector<std::pair<int, int>> jailLocations;
+	std::map<ItemModelType, Item> itemsMap;
+	std::map <int, GateTile *> gateMap;
 
-	void getItem(ItemName anItem, Item & outputItem);
+	void getItem(ItemModelType anItem, Item & outputItem);
 
 	void checkDroppedItems();
-	void updateDroppedItem(ItemName anItem, Location loc);
+	void updateDroppedItem(ItemModelType anItem, Location loc);
+	void updateGateProgress(int gateNum);
 
-	std::vector<ItemName> itemList = 
+	std::vector<std::vector<Tile *>> getServerTileLayout() { return tileLayout; }
+
+	std::vector<ItemModelType> itemList = 
 	{
-		ItemName::KEY1,
-		ItemName::KEY2,
-		ItemName::KEY3,
-		ItemName::KEY4,
-		ItemName::KEY5,
-		ItemName::KEY6,
-		ItemName::KEY7,
-		ItemName::KEY8,
-		ItemName::KEY9
+		ItemModelType::key1,
+		ItemModelType::key2,
+		ItemModelType::key3,
+		ItemModelType::plunger,
+		ItemModelType::rope,
+		ItemModelType::toiletPaper,
+		ItemModelType::screwdriver1,
+		ItemModelType::screwdriver2,
+		ItemModelType::screwdriver3,
+		ItemModelType::apple,
+		ItemModelType::orange,
+		ItemModelType::bananaGreen,
+		ItemModelType::bananaPerfect,
+		ItemModelType::bananaVeryRipe,
+		
 	};
 
 protected:
 
 	std::vector<std::vector<int>> keyLocations;
 	std::vector<std::vector<Tile *>> tileLayout;
-
-	std::vector<std::vector<int>> jailLayout =
-	{ {0,0,0,0,0,0,0},
-	  {1,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {1,0,0,0,0,0,0},
-	  {1,0,0,0,0,0,0},
-	  {1,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
-
-	std::vector<std::vector<int>> jailEmptyLayout =
-	{ {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
-
-	std::vector<std::vector<int>> jailProgressLayout =
-	{ {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0},
-	  {0,0,0,0,0,0,0} };
 
 };

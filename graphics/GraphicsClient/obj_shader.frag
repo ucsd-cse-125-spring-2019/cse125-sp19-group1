@@ -26,7 +26,6 @@ in float test;
 in vec3 fragNormal;
 in vec3 fragPos;
 in vec3 vecPos;
-in vec3 viewPos;
 in mat4 originalModel;
 in vec3 diffuse;
 in vec3 ambient;
@@ -34,6 +33,7 @@ in vec3 specular;
 in float shininess;
 in vec4 ShadowCoord;
 in vec2 UV;
+in vec4 weights;
 
 // You can output many things. The first vec4 type output determines the color of the fragment
 out vec4 color;
@@ -93,20 +93,15 @@ vec3 CalcFogOfWar(vec3 inputColor) {
    vec3 distanceFromPlayer = vecPos - fog.player_pos;
    float distance = length(distanceFromPlayer);
    if(abs(distance) > fog.fog_distance) {
-      inputColor = inputColor * 0.1;
+      inputColor = inputColor * 0.8;
    }
    else if(abs(distance) > fog.fog_distance - 20) {
-	  inputColor = inputColor * 0.45;
+	  inputColor = inputColor * 0.9;
    }
    return inputColor;
 }
 
-vec3 OverrideUI(vec3 inputColor) {
-   if(viewPos.x > 20) {
-      return vec3(1,0,0);
-   }
-   return inputColor;
-}
+
 
 void main()
 {
@@ -127,7 +122,6 @@ void main()
     res = CalcDirLight(normal, viewDir);
   }
   res = CalcFogOfWar(res);
-  //res = OverrideUI(res);
   // An alpha of 1.0f means it is not transparent.
   //color = vec4(res.xyz * visibility, transparency);
   /*if(fract(fragPos.x / 20)  < 0.1 && fract(fragPos.z / 20) < 0.1) {

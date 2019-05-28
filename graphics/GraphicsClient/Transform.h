@@ -17,6 +17,9 @@
 
 class Transform : public Node
 {
+public:
+	bool hidden;
+
 private:
 	glm::mat4 offset;
 	bool type;
