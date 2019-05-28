@@ -179,8 +179,6 @@ static vector<vector<Transform *>> westWalls;
 static vector<vector<Transform *>> envObjs;
 static vector<vector<Transform *>> itemTransforms;
 
-//static vector<vector<uint8_t>> envObjsMap;
-
 static SoundSystem * soundSystem;
 static Sound * sound_toilet;
 static Sound * sound_search_item;
@@ -1079,8 +1077,6 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	light = new DirLight();
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
-
-	//loadMapArray(envObjsMap, "../../maps/tinytinymap/env_objs.txt");
 
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
