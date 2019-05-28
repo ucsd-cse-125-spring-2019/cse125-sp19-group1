@@ -421,6 +421,46 @@ JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir, Location &
 
 	if (tile && tile->getTileType() == TileType::JAIL)
 	{
+		std::bitset<4> wall(tile->getWall());
+		// 3 EAST
+		// 2 SOUTH
+		// 1 NORTH
+		// 0 WEST
+		switch (dir)
+		{
+		case Direction::NORTH:
+			if (wall[2])
+				return nullptr;
+			break;
+		case Direction::SOUTH:
+			if (wall[1])
+				return nullptr;
+			break;
+		case Direction::EAST:
+			if (wall[0])
+				return nullptr;
+			break;
+		case Direction::WEST:
+			if (wall[3])
+				return nullptr;
+			break;
+		case Direction::NORTHEAST:
+			if (wall[2] && wall[0])
+				return nullptr;
+			break;
+		case Direction::NORTHWEST:
+			if (wall[2] && wall[3])
+				return nullptr;
+			break;
+		case Direction::SOUTHEAST:
+			if (wall[1] && wall[0])
+				return nullptr;
+			break;
+		case Direction::SOUTHWEST:
+			if (wall[1] && wall[3])
+				return nullptr;
+			break;
+		}
 		return dynamic_cast<JailTile *>(tile);
 	}
 	else
