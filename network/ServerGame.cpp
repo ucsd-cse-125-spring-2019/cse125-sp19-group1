@@ -6,9 +6,6 @@
 #include <cstring>
 #include <chrono>
  
-unsigned int ServerGame::client_id; 
-unsigned int SPEED = 2;
-
 
 ServerGame::ServerGame(void)
 {

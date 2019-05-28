@@ -31,12 +31,13 @@ public:
 private:
 
     // IDs for the clients connecting for table in ServerNetwork 
-    static unsigned int client_id;
+    unsigned int client_id;
 
     // The ServerNetwork object 
     ServerNetwork* network;
 
 	//Atlas* atlas;
+	unsigned int SPEED = 2;
 
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];
