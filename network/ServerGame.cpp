@@ -668,6 +668,10 @@ void ServerGame::receiveFromClients()
 		iter++;
 	}
 	gameData->getAtlas()->checkDroppedItems();
+	if (gameData->getAtlas()->checkBoxRespawn())
+	{
+		sendActionPackets();
+	}
 	//sendActionPackets(); // uncomment to always send data from server
 	if (gameData->countdownStarted() && !gameData->countdownDone())
 	{

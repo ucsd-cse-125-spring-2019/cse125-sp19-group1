@@ -125,8 +125,12 @@ Atlas::Atlas()
 			switch (type)
 			{
 			case TileType::BOX:
-				tileRow.push_back(new BoxTile(wall, height));
+			{
+				BoxTile * boxTile = new BoxTile(wall, height);
+				tileRow.push_back(boxTile);
 				boxLocations.push_back(std::pair<int, int>(row, col));
+				boxTiles.push_back(boxTile);
+			}
 				break;
 			case TileType::JAIL:
 				tileRow.push_back(new JailTile(wall, height));
@@ -225,6 +229,7 @@ Atlas::Atlas()
 
 		itemsMap.emplace(randItem, Item(randItem, row, col));
 		keyLocations[row][col] = static_cast<int>(randItem);
+		dynamic_cast<BoxTile*>(tileLayout[row][col])->setKeyBox(true);
 
 		// Removes the item from the item list
 		itemList.erase(std::find(itemList.begin(), itemList.end(), randItem));
@@ -521,28 +526,34 @@ void Atlas::updateBoxLayout(Location & loc)
 
 	if (tileLayout[row][col]->getTileType() == TileType::BOX)
 	{
-		dynamic_cast<BoxTile*>(tileLayout[row][col])->setBoxStatus(false);
-	}
-
-	if (keyLocations[row][col]) {
-		tileLayout[row][col]->setItem(static_cast<ItemModelType>(keyLocations[row][col]));
-	}
-	else // Randomly spawn powerups from boxes if it isnt a key box
-	{
-		int powerups = 5;
-		int randNum = rand() % (powerups * POWERUP_DROP_CHANCE);
-		switch (randNum)
+		BoxTile * boxTile = dynamic_cast<BoxTile*>(tileLayout[row][col]);
+		boxTile->setBoxStatus(false);
+   		if (!boxTile->isKeyBox())
 		{
-		case 0: tileLayout[row][col]->setItem(ItemModelType::apple);
-			break;
-		case 1: tileLayout[row][col]->setItem(ItemModelType::orange);
-			break;
-		case 2: tileLayout[row][col]->setItem(ItemModelType::bananaGreen);
-			break;
-		case 3: tileLayout[row][col]->setItem(ItemModelType::bananaPerfect);
-			break;
-		case 4: tileLayout[row][col]->setItem(ItemModelType::bananaVeryRipe);
-			break;
+			boxTile->setBoxRespawnTimestamp();
+		}
+
+
+		if (keyLocations[row][col]) {
+			tileLayout[row][col]->setItem(static_cast<ItemModelType>(keyLocations[row][col]));
+		}
+		else // Randomly spawn powerups from boxes if it isnt a key box
+		{
+			int powerups = 5;
+			int randNum = rand() % (powerups * POWERUP_DROP_CHANCE);
+			switch (randNum)
+			{
+			case 0: tileLayout[row][col]->setItem(ItemModelType::apple);
+				break;
+			case 1: tileLayout[row][col]->setItem(ItemModelType::orange);
+				break;
+			case 2: tileLayout[row][col]->setItem(ItemModelType::bananaGreen);
+				break;
+			case 3: tileLayout[row][col]->setItem(ItemModelType::bananaPerfect);
+				break;
+			case 4: tileLayout[row][col]->setItem(ItemModelType::bananaVeryRipe);
+				break;
+			}
 		}
 	}
 }
@@ -605,8 +616,9 @@ void Atlas::updateDroppedItem(ItemModelType anItem, Location loc)
 		}
 	}
 }
-void Atlas::checkDroppedItems()
+bool Atlas::checkDroppedItems()
 {
+	bool updateClient = false;
 	for (auto iter = itemsMap.begin(); iter != itemsMap.end(); iter++)
 	{
 		if (iter->second.hasBeenMoved())
@@ -617,11 +629,30 @@ void Atlas::checkDroppedItems()
 				int spawnRow, spawnCol;
 				iter->second.getSpawnLocation(spawnRow, spawnCol);
 				returnItemToSpawn(iter->first, spawnRow, spawnCol);
+				updateClient = true;
 			}
 		}
 	}
+
+	return updateClient;
 }
 
+bool Atlas::checkBoxRespawn()
+{
+	bool updateClient = false;
+	for (BoxTile * boxTile : boxTiles)
+	{
+		if (!boxTile->isKeyBox() && !boxTile->hasBox() && boxTile->getItem() == ItemModelType::EMPTY)
+		{
+			if (boxTile->getBoxRespawnTime() >= TIME_TO_RESPAWN_BOX)
+			{
+				boxTile->setBoxStatus(true);
+				updateClient = true;
+			}
+		}
+	}
+	return updateClient;
+}
 // Recursive function to return items back to spawn if they cannot find an adjacent free tile
 void Atlas::returnItemToSpawn(ItemModelType anItem, int spawnRow, int spawnCol)
 {

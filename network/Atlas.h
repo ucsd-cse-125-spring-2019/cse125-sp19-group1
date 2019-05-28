@@ -62,7 +62,8 @@ public:
 
 	void getItem(ItemModelType anItem, Item & outputItem);
 
-	void checkDroppedItems();
+	bool checkDroppedItems();
+	bool checkBoxRespawn();
 	void updateDroppedItem(ItemModelType anItem, Location loc);
 	void updateGateProgress(int gateNum);
 
@@ -91,5 +92,6 @@ protected:
 
 	std::vector<std::vector<int>> keyLocations;
 	std::vector<std::vector<Tile *>> tileLayout;
+	std::vector<BoxTile*> boxTiles;
 
 };

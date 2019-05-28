@@ -426,6 +426,8 @@ JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir, Location &
 		// 2 SOUTH
 		// 1 NORTH
 		// 0 WEST
+
+		// Check if there is a wall in between the player and jail
 		switch (dir)
 		{
 		case Direction::NORTH:
