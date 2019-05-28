@@ -7,7 +7,7 @@
 #define CENSOR_LARGE_MSG 128
 
 // Paths for sounds
-#define SOUNDS_PATH			"../sounds/"
+#define SOUNDS_PATH			"../../sounds/"
 #define SOUNDS_DOOR			(SOUNDS_PATH "frontexit_door_short.mp3")
 #define SOUNDS_DOOR_UNLOCK	(SOUNDS_PATH "frontexit_unlock_short.mp3")
 #define SOUNDS_FOUND_ITEM	(SOUNDS_PATH "found_item_short.mp3")
@@ -176,6 +176,7 @@ void ClientGame::update()
 			if (player->getAction() == Action::OPEN_BOX) {
 				std::cout << "PLAY SEARCH ITEM SOUND" << std::endl;
 				soundSystem->playSound(sound_search_item);
+
 			}
 			if (player->getAction() == Action::CONSTRUCT_GATE) {
 				soundSystem->playSound(sound_door);
