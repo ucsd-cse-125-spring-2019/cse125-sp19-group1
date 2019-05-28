@@ -103,13 +103,13 @@ static glm::mat4 pawTransform(glm::vec3 position, float angle)
 void LoadingGraphicsEngine::drawDot(glm::vec3 position, float alpha)
 {
 	glUniform1f(uAlpha, alpha);
-	dotObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * dotTransform(position));
+	dotObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, dotTransform(position));
 }
 
 void LoadingGraphicsEngine::drawPaw(glm::vec3 position, float alpha, float angle)
 {
 	glUniform1f(uAlpha, alpha);
-	pawObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * pawTransform(position, angle));
+	pawObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, pawTransform(position, angle));
 }
 
 static bool isOffscreen(glm::vec3 p)

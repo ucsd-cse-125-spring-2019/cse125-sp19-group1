@@ -1,7 +1,6 @@
 #pragma once
 
 #include "AbstractGraphicsEngine.h"
-#include "../../network/ClientGame.h"
 
 class InGameGraphicsEngine : public AbstractGraphicsEngine
 {

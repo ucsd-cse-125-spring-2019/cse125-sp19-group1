@@ -5,6 +5,8 @@
 #include "Tester.h"
 #include "InGameGraphicsEngine.h"
 #include "LoadingGraphicsEngine.h"
+#include "LobbyGraphicsEngine.h"
+
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
@@ -17,7 +19,11 @@ const char* window_title = GAME_NAME_SHORT;
 
 static InGameGraphicsEngine * inGameEngine = nullptr;
 static LoadingGraphicsEngine * loadingEngine = nullptr;
+static LobbyGraphicsEngine * lobbyEngine = nullptr;
+
 static AbstractGraphicsEngine * currentEngine = nullptr;
+static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
+
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
 
@@ -83,14 +89,17 @@ void PrintVersions()
 void Init()
 {
 	server = new ServerGame();
+	sharedClient = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
 
 	inGameEngine = new InGameGraphicsEngine();
 	loadingEngine = new LoadingGraphicsEngine();
-	currentEngine = loadingEngine;
+	lobbyEngine = new LobbyGraphicsEngine();
+	currentEngine = lobbyEngine;
 
-	inGameEngine->StartLoading();
+	//inGameEngine->StartLoading();
 	loadingEngine->StartLoading();
+	lobbyEngine->StartLoading();
 }
 
 void serverLoop(void * args) {
@@ -113,6 +122,12 @@ void CleanUp() {
 		loadingEngine->CleanUp();
 		delete loadingEngine;
 		loadingEngine = nullptr;
+	}
+
+	if (lobbyEngine) {
+		lobbyEngine->CleanUp();
+		delete lobbyEngine;
+		lobbyEngine = nullptr;
 	}
 }
 
@@ -226,7 +241,7 @@ int main(void)
 	// Initialize objects/pointers for rendering
 	Init();
 
-	double loadingFadeoutStart;
+	double crossfadeStart;
 
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
@@ -235,43 +250,51 @@ int main(void)
 
 		auto start = high_resolution_clock::now();
 
-		if (currentEngine == loadingEngine) {
-			if (inGameEngine->fullyLoaded) {
-				if (!sharedClient) {
-					sharedClient = new ClientGame();
+		if (previousEngine) {
+#define CROSSFADE_DURATION 1.35
+			double delta = glfwGetTime() - crossfadeStart;
+			if (delta < CROSSFADE_DURATION) {
+				if (previousEngine != inGameEngine) {
+					previousEngine->screenAlpha = 1.f - delta / CROSSFADE_DURATION;
 				}
-				
-				currentEngine = inGameEngine;
-				loadingFadeoutStart = glfwGetTime();
-			}
-		}
-		else if (loadingEngine) {
-#define LOADING_FADEOUT_TIME 1.35
-			double delta = glfwGetTime() - loadingFadeoutStart;
-			if (delta < LOADING_FADEOUT_TIME) {
-				loadingEngine->screenAlpha = 1.f - delta / LOADING_FADEOUT_TIME;
+				else {
+					currentEngine->screenAlpha = delta / CROSSFADE_DURATION;
+				}
 			}
 			else {
-				loadingEngine->screenAlpha = 0.f;
-				loadingEngine->MainLoopEnd();
-				delete loadingEngine;
-				loadingEngine = nullptr;
+				if (previousEngine != inGameEngine) {
+					previousEngine->screenAlpha = 0.f;
+				}
+				else {
+					currentEngine->screenAlpha = 1.f;
+				}
+				previousEngine->MainLoopEnd();
+				previousEngine = nullptr;
+			}
+		} 
+		else if (currentEngine == loadingEngine) {
+			if (inGameEngine->fullyLoaded) {
+				previousEngine = currentEngine;
+				currentEngine = inGameEngine;
+				crossfadeStart = glfwGetTime();
 			}
 		}
+
 		
 		if (currentEngine && currentEngine->fullyLoaded) {
 			if (!currentEngine->calledMainLoopBegin) {
-				if (!sharedClient) {
-					sharedClient = new ClientGame();
-				}
-
 				currentEngine->ResizeCallback(window, windowWidth, windowHeight);
 				currentEngine->MainLoopBegin();
 			}
+
+			if (previousEngine && previousEngine == inGameEngine) {
+				previousEngine->MainLoopCallback(window);
+			}
+
 			currentEngine->MainLoopCallback(window);
 
-			if (loadingEngine && currentEngine != loadingEngine) {
-				loadingEngine->MainLoopCallback(window);
+			if (previousEngine && previousEngine != inGameEngine) {
+				previousEngine->MainLoopCallback(window);
 			}
 
 			// Swap buffers

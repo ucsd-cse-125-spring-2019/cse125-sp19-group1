@@ -118,6 +118,6 @@ void TwoDeeGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	glUseProgram(passthroughShaderProgram);
 
 	glUniform1f(uAlpha, screenAlpha);
-	backgroundObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * bgMat);
+	backgroundObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, bgMat);
 
 }

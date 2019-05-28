@@ -1,5 +1,7 @@
 #include "InGameGraphicsEngine.h"
 
+#include "../../network/ClientGame.h"
+
 #include "ItemModelType.h"
 
 #include "Transform.h"

@@ -168,6 +168,7 @@
     <ClInclude Include="InGameGraphicsEngine.h" />
     <ClInclude Include="Keyframe.h" />
     <ClInclude Include="LoadingGraphicsEngine.h" />
+    <ClInclude Include="LobbyGraphicsEngine.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="MeshEntry.h" />
     <ClInclude Include="Node.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="InGameGraphicsEngine.cpp" />
     <ClCompile Include="Keyframe.cpp" />
     <ClCompile Include="LoadingGraphicsEngine.cpp" />
+    <ClCompile Include="LobbyGraphicsEngine.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="MeshEntry.cpp" />
     <ClCompile Include="Node.cpp" />

@@ -8,8 +8,6 @@ FBXObject * createObjectForTexture(const char *texturePath);
 class TwoDeeGraphicsEngine : public AbstractGraphicsEngine
 {
 public:
-	float screenAlpha;
-
 	TwoDeeGraphicsEngine();
 	~TwoDeeGraphicsEngine();
 
