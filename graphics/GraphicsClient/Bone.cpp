@@ -1,10 +1,17 @@
 #include "Bone.h"
 
-Bone::Bone(string newName, glm::mat4 * nodeMat, Bone * newParent) {
+Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
+	id = -1; // default ID; should be updated later (if all goes correctly)
 	name = string(newName);
+	// TODO: initializing this matrix to zero affects...the ears and tail?!?!?
+	// joint5 has animation data in the file, but it doesn't have an assimp channel?
+	// note that we are still attaching channel matrix data to it; it just has a null channel
+	// not necessarly problematic because channel has essentially been reduced to a counter
+	// we may just want to change keyframes here as we go through the matrix array
 	transform = glm::mat4(1.0f);
-	offset = glm::mat4(1.0f);
-	nodeTransform = glm::mat4((*nodeMat));
+	// TODO: initializing this to zero is okay?
+	offset = glm::mat4(0.0f);
+	nodeTransform = glm::mat4(nodeMat);
 	parent = newParent;
 	isBone = false;
 }
@@ -25,13 +32,13 @@ glm::mat4 * Bone::GetOffset() {
 	return &offset;
 }
 
-glm::mat4 * Bone::GetTransform() {
-	return &transform;
+glm::mat4 Bone::GetTransform() {
+	return transform;
 }
 
-void Bone::SetOffset(glm::mat4 * newOffset) {
+void Bone::SetOffset(glm::mat4 newOffset) {
 	try {
-		offset = glm::mat4(*newOffset);
+		offset = glm::mat4(newOffset);
 	}
 	catch (exception e) {
 		std::cerr << "Bone's inverse binding matrix could not be set" << std::endl;
@@ -59,24 +66,20 @@ void Bone::Print(string spaces) {
 	}
 }
 
-void Bone::Update(glm::mat4 * globalInverseT, glm::mat4 * parentT) {
+void Bone::Update(glm::mat4 globalInverseT, glm::mat4 parentT) {
 	glm::mat4 globalT;
 
 	if (channel != NULL) {
-		//globalT = parentT * (channel->GetTransform());
-		globalT = (*parentT) * channelMatrices[channel->GetCurrKeyframe()];
-		if (isBone) {
-			// updating the transform matrix, which the vertices will access when updating skin
-			transform = (*globalInverseT) * globalT * offset;
-		}
+		globalT = parentT * channelMatrices[channel->GetCurrKeyframe()];
+		// updating the transform matrix, which the vertices will access when updating skin
+		if (isBone)
+			transform = globalInverseT * globalT * offset;
 	}
-	else {
-		globalT = (*parentT) * nodeTransform;
-	}
+	else
+		globalT = parentT * nodeTransform;
 
-	for (int i = 0; i < children.size(); i++) {
-		children[i]->Update(globalInverseT, &globalT);
-	}
+	for (int i = 0; i < children.size(); i++)
+		children[i]->Update(globalInverseT, globalT);
 }
 
 void Bone::PrintMatrix(glm::mat4 * matrix) {
@@ -109,4 +112,12 @@ void Bone::SetChannelMatrices(float * values, int numValues) {
 		}
 		channelMatrices.push_back(currMat);
 	}
+}
+
+void Bone::SetID(unsigned int newID) {
+	id = newID;
+}
+
+int Bone::GetID() {
+	return id;
 }

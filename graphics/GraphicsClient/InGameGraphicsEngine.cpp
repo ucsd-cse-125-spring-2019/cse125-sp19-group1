@@ -1145,13 +1145,6 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 			uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
 		}
 
-
-		if (key == GLFW_KEY_A) {
-			for (auto &model : playerModels) {
-				model.object->ToNextKeyframe();
-			}
-		}
-
 		if (key == GLFW_KEY_UP) {
 			directions |= DirectionBitmask::northSide;
 		}

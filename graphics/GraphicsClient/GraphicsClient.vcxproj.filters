@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Animation.cpp">
-      <Filter>Source Files\Client Graphics Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationChannel.cpp">
-      <Filter>Source Files\Client Graphics Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="AnimationPlayer.cpp">
-      <Filter>Source Files\Client Graphics Rendering</Filter>
-    </ClCompile>
-    <ClCompile Include="animloader.cpp">
-      <Filter>Source Files\Client Graphics Rendering</Filter>
-    </ClCompile>
     <ClCompile Include="Bone.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
@@ -118,17 +106,20 @@
     <ClCompile Include="Tokenizer.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationChannel.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimationPlayer.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="animloader.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Animation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="animloader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\network\Atlas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -172,9 +163,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\JailTile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AnimationChannel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Keyframe.h">
@@ -274,6 +262,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\network\KeyDropTile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimationPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="animloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -177,7 +177,6 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 }
 
 
-
 void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if (currentEngine && currentEngine->fullyLoaded)

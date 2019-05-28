@@ -15,10 +15,12 @@ private:
 	float shininess;
 
 	// These variables are needed for the shader program
-	GLuint VAO, VBO_V, VBO_N, VBO_UV, EBO;
+	GLuint VAO, VBO_V, VBO_N, VBO_UV, VBO_WI, VBO_WV, EBO;
 	GLuint uProjection, uModelview, uView;
 	GLuint uMaterialD, uMaterialA, uMaterialS, uShine;
 	GLuint texNum;
+	GLuint uIsAnimated;
+	GLuint uBones;
 
 	GLint filtering;
 
@@ -42,6 +44,8 @@ private:
 	glm::vec3 default_spec = glm::vec3(0.118281f, 0.085802f, 0.066065f);
 	float default_shininess =  0.5f;
 
+	float animTimer;
+
 public:
 	// creating. destroying, and debugging
 	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, bool setupRendering = true, GLint filtering = GL_NEAREST);
@@ -52,8 +56,6 @@ public:
 	void PrintSkeleton();
 	// manipulation
 	void Update();
-	void UpdateSkin();
-	void DeformVertex(Vertex * vertex);
 	void MoveTo(float x, float y, float z);
 	void Translate(float x, float y, float z);
 	void Rotate(float angle, float x, float y, float z);
@@ -69,15 +71,13 @@ public:
 	void SetDiffuse(glm::vec3 newDiff);
 	void SetSpecular(glm::vec3 newSpec);
 	void SetShine(float newShine);
+	void SetDepthTest(bool depthTestEnabled);
 	// rendering
 	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
 	void RenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();
-
-	void SetDepthTest(bool depthTestEnabled);
-
-	void ToNextKeyframe();
+	void Animate();
 	void LoadMatrices(const char * path);
 };
 

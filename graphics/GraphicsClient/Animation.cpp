@@ -37,16 +37,10 @@ float Animation::getEndTime() {
 void Animation::evaluateChannels(float currTime) {
 	//std::cerr << "Printing numChannels" << numChannels << "\n";
 	for (int i = 0; i < channels.size(); i++) {
-		channels[i]->SetTransform(currTime);
+		channels[i]->SetCurrKeyframe(currTime);
 	}
 }
 
-glm::mat4 * Animation::GetGlobalInverseT() {
-	return &globalInverseT;
-}
-
-void Animation::ToNextKeyframe() {
-	for (int i = 0; i < channels.size(); i++) {
-		channels[i]->ToNextKeyframe();
-	}
+glm::mat4 Animation::GetGlobalInverseT() {
+	return globalInverseT;
 }
