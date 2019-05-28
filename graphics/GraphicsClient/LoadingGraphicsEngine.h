@@ -1,10 +1,11 @@
 #pragma once
 #include "AbstractGraphicsEngine.h"
+#include "FBXObject.h"
 
 class LoadingGraphicsEngine : public AbstractGraphicsEngine
 {
 public:
-	float loadingAlpha;
+	float screenAlpha;
 
 	LoadingGraphicsEngine();
 	~LoadingGraphicsEngine();
@@ -20,5 +21,17 @@ public:
 	virtual void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset);
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 	virtual void MainLoopCallback(GLFWwindow * window);
+
+protected:
+	void drawDot(glm::vec3 position, float alpha);
+	void drawPaw(glm::vec3 position, float alpha, float angle);
+
+	glm::mat4 orthoProj;
+	GLuint passthroughShaderProgram = 0;
+	GLuint uAlpha = 0;
+	FBXObject *backgroundObj = nullptr;
+
+	FBXObject *dotObj = nullptr;
+	FBXObject *pawObj = nullptr;
 };
 

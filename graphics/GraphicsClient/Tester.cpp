@@ -249,10 +249,10 @@ int main(void)
 #define LOADING_FADEOUT_TIME 1.35
 			double delta = glfwGetTime() - loadingFadeoutStart;
 			if (delta < LOADING_FADEOUT_TIME) {
-				loadingEngine->loadingAlpha = 1.f - delta / LOADING_FADEOUT_TIME;
+				loadingEngine->screenAlpha = 1.f - delta / LOADING_FADEOUT_TIME;
 			}
 			else {
-				loadingEngine->loadingAlpha = 0.f;
+				loadingEngine->screenAlpha = 0.f;
 				loadingEngine->MainLoopEnd();
 				delete loadingEngine;
 				loadingEngine = nullptr;

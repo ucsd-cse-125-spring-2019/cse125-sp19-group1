@@ -17,14 +17,7 @@
 #define PAW_ANGLE_OFFSET (-0.18f * glm::pi<float>())
 #define PAW_MAX_ALPHA (0.81f)
 
-static glm::mat4 orthoProj;
 static const glm::mat4 identityMat(1.f);
-static GLuint passthroughShaderProgram = 0;
-GLuint uAlpha = 0;
-FBXObject *backgroundObj = nullptr;
-FBXObject *dotObj = nullptr;
-FBXObject *pawObj = nullptr;
-
 
 static FBXObject * createObjectForTexture(const char *texturePath)
 {
@@ -38,7 +31,7 @@ LoadingGraphicsEngine::LoadingGraphicsEngine()
 {
 	fullyLoaded = false;
 	calledMainLoopBegin = false;
-	loadingAlpha = 1.f;
+	screenAlpha = 1.f;
 }
 
 LoadingGraphicsEngine::~LoadingGraphicsEngine()
@@ -136,13 +129,13 @@ static glm::mat4 pawTransform(glm::vec3 position, float angle)
 	return glm::rotate(scale, angle + PAW_ANGLE_OFFSET, glm::vec3(0.f, 0.f, 1.f));
 }
 
-static void drawDot(glm::vec3 position, float alpha)
+void LoadingGraphicsEngine::drawDot(glm::vec3 position, float alpha)
 {
 	glUniform1f(uAlpha, alpha);
 	dotObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * dotTransform(position));
 }
 
-static void drawPaw(glm::vec3 position, float alpha, float angle)
+void LoadingGraphicsEngine::drawPaw(glm::vec3 position, float alpha, float angle)
 {
 	glUniform1f(uAlpha, alpha);
 	pawObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * pawTransform(position, angle));
@@ -160,7 +153,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	glViewport(0, 0, windowWidth, windowHeight);
 	// Clear the color and depth buffers
 
-	if (loadingAlpha >= 1.f) {
+	if (screenAlpha >= 1.f) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
 	
@@ -174,7 +167,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	glUseProgram(passthroughShaderProgram);
 
-	glUniform1f(uAlpha, loadingAlpha);
+	glUniform1f(uAlpha, screenAlpha);
 	backgroundObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * bgMat);
 
 	static const glm::vec3 dotPositions[] = {
@@ -218,7 +211,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	}
 
 	for (unsigned i = 0; i < 3; ++i) {
-		drawDot(dotPositions[i], dotAlphas[i] * loadingAlpha);
+		drawDot(dotPositions[i], dotAlphas[i] * screenAlpha);
 	}
 	
 	static float pawAlphas[2] = { PAW_MAX_ALPHA, PAW_MAX_ALPHA };
@@ -288,7 +281,10 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	{
 	case 0:
 		if (pawPreviousPhaseIdx) {
-			pawIdx = !pawIdx;
+			auto paw0Progress = glm::dot(pawPos[0], pawDirection);
+			auto paw1Progress = glm::dot(pawPos[1], pawDirection);
+
+			pawIdx = (paw0Progress < paw1Progress) ? 0 : 1;
 		}
 		break;
 	case 1:
@@ -320,7 +316,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	pawPreviousPhaseIdx = pawPhaseIdx;
 
-	drawPaw(pawPos[0] + pawAnimationOffset[0], pawAlphas[0] * sqrt(loadingAlpha), pawAngle);
-	drawPaw(pawPos[1] + pawAnimationOffset[1], pawAlphas[1] * sqrt(loadingAlpha), pawAngle);
+	drawPaw(pawPos[0] + pawAnimationOffset[0], pawAlphas[0] * sqrt(screenAlpha), pawAngle);
+	drawPaw(pawPos[1] + pawAnimationOffset[1], pawAlphas[1] * sqrt(screenAlpha), pawAngle);
 }
 
