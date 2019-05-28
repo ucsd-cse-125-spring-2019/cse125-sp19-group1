@@ -118,6 +118,7 @@
     <ClCompile Include="animloader.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="TwoDeeGraphicsEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h">
@@ -276,6 +277,7 @@
     <ClInclude Include="animloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TwoDeeGraphicsEngine.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

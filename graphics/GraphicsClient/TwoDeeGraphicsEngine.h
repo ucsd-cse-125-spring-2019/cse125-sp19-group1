@@ -1,13 +1,17 @@
 #pragma once
-#include "TwoDeeGraphicsEngine.h"
+#include "AbstractGraphicsEngine.h"
 
 class FBXObject;
 
-class LoadingGraphicsEngine : public TwoDeeGraphicsEngine
+FBXObject * createObjectForTexture(const char *texturePath);
+
+class TwoDeeGraphicsEngine : public AbstractGraphicsEngine
 {
 public:
-	LoadingGraphicsEngine();
-	~LoadingGraphicsEngine();
+	float screenAlpha;
+
+	TwoDeeGraphicsEngine();
+	~TwoDeeGraphicsEngine();
 
 	virtual void StartLoading();  // may launch a thread and return immediately
 	virtual void CleanUp();
@@ -22,10 +26,11 @@ public:
 	virtual void MainLoopCallback(GLFWwindow * window);
 
 protected:
-	void drawDot(glm::vec3 position, float alpha);
-	void drawPaw(glm::vec3 position, float alpha, float angle);
+	const char * backgroundFilename = nullptr;
 
-	FBXObject *dotObj = nullptr;
-	FBXObject *pawObj = nullptr;
+	glm::mat4 orthoProj;
+	GLuint passthroughShaderProgram = 0;
+	GLuint uAlpha = 0;
+	FBXObject *backgroundObj = nullptr;
 };
 
