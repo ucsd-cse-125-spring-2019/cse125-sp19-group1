@@ -5,6 +5,8 @@
 // Player data
 #define SWING_RADIUS 10
 #define VISION_RADIUS 85.0f
+#define ITEM_SLOWDOWN_MULTIPLIER 0.8
+#define CAKE_SLOWDOWN_MULTIPLIER 0.5
 
 // Tile data
 #define TILE_SIZE 20

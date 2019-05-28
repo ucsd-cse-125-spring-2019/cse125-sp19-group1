@@ -304,12 +304,14 @@ void ServerGame::receiveFromClients()
 										std::cout << "table has cake!" << std::endl;
 										player->setInventory(objectTile->getItem());
 										objectTile->setItem(ItemModelType::EMPTY);
+										player->setSpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
 
 
 									}
 									else if (item != ItemModelType::EMPTY)
 									{
 										player->setInventory(item);
+										player->setSpeedMultiplier(ITEM_SLOWDOWN_MULTIPLIER);
 										gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
 									}
 								}
@@ -322,6 +324,8 @@ void ServerGame::receiveFromClients()
 										keyDropTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
 										gameData->updateGateProgress(keyDropTile->getGateNum());
 										player->setInventory(ItemModelType::EMPTY);
+										player->setSpeedMultiplier(1.0);
+
 									}
 								}
 								else if (GateTile * gateTile = gameData->getGateTile(loc))
@@ -567,6 +571,7 @@ void ServerGame::receiveFromClients()
 							ItemModelType itemName = player->getInventory();
 							gameData->getAtlas()->updateTileItem(loc, itemName);
 							player->setInventory(ItemModelType::EMPTY);
+							player->setSpeedMultiplier(1.0);
 
 							gameData->getAtlas()->updateDroppedItem(itemName, loc);
 
@@ -919,6 +924,8 @@ void ServerGame::receiveFromClients()
 							player->setSearchStartTime();
 						}
 						player->setInventory(ItemModelType::EMPTY);
+						player->setSpeedMultiplier(1.0);
+
 // server
 					}
 			//	}
@@ -1036,11 +1043,11 @@ void ServerGame::updateRightEvent(int id)
 	{
 		if (gameData->getPlayer(id)->getGhost()) 
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
+			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
 		}
 		else 
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED, loc.getY(), loc.getZ());
+			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), loc.getZ());
 		}
 	}
 
@@ -1061,11 +1068,11 @@ void ServerGame::updateBackwardEvent(int id)
 	{
 		if (gameData->getPlayer(id)->getGhost()) 
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED * GHOST_MULTIPLIER);
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER);
 		}
 		else
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED);
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier());
 		}
 	}
 
@@ -1086,11 +1093,11 @@ void ServerGame::updateForwardEvent(int id)
 	{
 		if (gameData->getPlayer(id)->getGhost())
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED * GHOST_MULTIPLIER);
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER);
 		}
 		else
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED);
+			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier());
 		}
 	}
 	updatePlayerCollision(id, 2);
@@ -1112,11 +1119,11 @@ void ServerGame::updateLeftEvent(int id)
 	{
 		if (gameData->getPlayer(id)->getGhost())
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
+			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
 		}
 		else 
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED, loc.getY(), loc.getZ());
+			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), loc.getZ());
 		}
 	}
 

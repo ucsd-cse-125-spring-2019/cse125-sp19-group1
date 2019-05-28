@@ -3,7 +3,7 @@
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 
 Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemModelType::EMPTY),
-	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS)
+	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(1.0)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
@@ -184,6 +184,15 @@ void Player::setStartJailTime()
 {
 	startJail = std::chrono::system_clock::now();
 //>>>>>>> server
+}
+void Player::setSpeedMultiplier(double multiplier)
+{
+	speedMultiplier = multiplier;
+}
+
+double Player::getSpeedMultiplier() const
+{
+	return speedMultiplier;
 }
 
 double Player::getInteractingTime(int opt) 

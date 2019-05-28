@@ -49,6 +49,7 @@ public:
 	ModelType	getCaughtAnimalType() const;
 
 	bool		isReady() const;
+	double		getSpeedMultiplier() const;
 
 	Direction getFacingDirection() const;
 
@@ -59,7 +60,7 @@ public:
 	void setLocation(Location aLoc);
 	bool getHidden();
 	void setHidden(bool hide);
-
+	void setSpeedMultiplier(double multiplier);
 	void setInteracting(bool interact);
 	//void setOpenJail(bool interact);
 	//void setOpeningGate(bool status);
@@ -172,6 +173,7 @@ protected:
 	ModelType	caughtAnimalType;
 	bool		hidden = false;
 	float		visionRadius;
+	double		speedMultiplier;
 
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 //<<<<<<< HEAD
