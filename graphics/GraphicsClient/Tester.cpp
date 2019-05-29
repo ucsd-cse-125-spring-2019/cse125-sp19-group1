@@ -101,6 +101,8 @@ void Init()
 
 #define CUTSCENES_DIR "../2D Elements/"
 #define CUTSCENE_FILE(x) CUTSCENES_DIR "cutscene - " x ".png"
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake1_2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake2_2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("instructions")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 1")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2")));

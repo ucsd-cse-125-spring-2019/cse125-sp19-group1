@@ -124,7 +124,9 @@
     <ClCompile Include="LobbyGraphicsEngine.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="CutsceneGraphicsEngine.cpp" />
+    <ClCompile Include="CutsceneGraphicsEngine.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h">
@@ -289,7 +291,9 @@
     <ClInclude Include="LobbyGraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CutsceneGraphicsEngine.h" />
+    <ClInclude Include="CutsceneGraphicsEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
