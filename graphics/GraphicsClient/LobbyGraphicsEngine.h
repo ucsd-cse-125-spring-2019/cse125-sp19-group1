@@ -11,8 +11,8 @@ public:
 	LobbyGraphicsEngine();
 	~LobbyGraphicsEngine();
 
-	virtual void StartLoading();  // may launch a thread and return immediately
-	virtual void CleanUp();
+	virtual void MainLoopBegin();
+	virtual void MainLoopEnd();
 	virtual void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	virtual void MainLoopCallback(GLFWwindow * window);
 

@@ -3,7 +3,7 @@
 
 
 CutsceneGraphicsEngine::CutsceneGraphicsEngine(const char *textureFilename, double duration) 
-	: duration(duration), startTime(DBL_MAX)
+	: TwoDeeGraphicsEngine(), duration(duration)
 {
 	backgroundFilename = textureFilename;
 }
@@ -13,6 +13,13 @@ CutsceneGraphicsEngine::~CutsceneGraphicsEngine()
 {
 }
 
+
+void CutsceneGraphicsEngine::MainLoopBegin()
+{
+	TwoDeeGraphicsEngine::MainLoopBegin();
+
+	startTime = DBL_MAX;
+}
 
 bool CutsceneGraphicsEngine::ShouldFadeout()
 {

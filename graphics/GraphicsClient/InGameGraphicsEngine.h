@@ -20,5 +20,15 @@ public:
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 	virtual void MainLoopCallback(GLFWwindow * window);
 
+	virtual bool ShouldFadeout();
+
+protected:
+	void MoveCamera(const glm::vec3 &newPlayerPos);
+	void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos);
+	void IdleCallback();
+	void MovePlayers();
+
+	bool quit = false;
+	bool needsRenderingSetup = false;
 };
 

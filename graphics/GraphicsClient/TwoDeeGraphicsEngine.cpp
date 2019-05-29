@@ -23,7 +23,11 @@ TwoDeeGraphicsEngine::TwoDeeGraphicsEngine()
 {
 	fullyLoaded = false;
 	calledMainLoopBegin = false;
-	screenAlpha = 1.f;
+	backgroundFilename = nullptr;
+	backgroundObj = nullptr;
+	passthroughShaderProgram = 0;
+	quit = false;
+	uAlpha = 0;
 }
 
 
@@ -40,6 +44,34 @@ void TwoDeeGraphicsEngine::StartLoading()  // may launch a thread and return imm
 
 void TwoDeeGraphicsEngine::CleanUp()
 {
+}
+
+void TwoDeeGraphicsEngine::MainLoopBegin()
+{
+	calledMainLoopBegin = true;
+	quit = false;
+	screenAlpha = 1.f;
+
+	if (!passthroughShaderProgram) {
+		passthroughShaderProgram = LoadShaders("./passthrough.vert", "./passthrough.frag");
+	}
+
+	if (!backgroundObj) {
+		backgroundObj = createObjectForTexture(backgroundFilename);
+	}
+	
+	// Set clear color
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
+
+	orthoProj = glm::ortho(-1.f, 1.f, -1.f, 1.f);
+}
+
+void TwoDeeGraphicsEngine::MainLoopEnd()
+{
+	calledMainLoopBegin = false;
+	quit = false;
+	screenAlpha = 1.f;
+
 	if (backgroundObj) {
 		delete backgroundObj;
 		backgroundObj = nullptr;
@@ -49,27 +81,6 @@ void TwoDeeGraphicsEngine::CleanUp()
 		glDeleteShader(passthroughShaderProgram);
 		passthroughShaderProgram = 0;
 	}
-}
-
-void TwoDeeGraphicsEngine::MainLoopBegin()
-{
-	calledMainLoopBegin = true;
-
-	passthroughShaderProgram = LoadShaders("./passthrough.vert", "./passthrough.frag");
-
-	backgroundObj = createObjectForTexture(backgroundFilename);
-
-	// Set clear color
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
-
-	orthoProj = glm::ortho(-1.f, 1.f, -1.f, 1.f);
-}
-
-void TwoDeeGraphicsEngine::MainLoopEnd()
-{
-	CleanUp();
-
-	calledMainLoopBegin = false;
 }
 
 void TwoDeeGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -118,7 +129,10 @@ void TwoDeeGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	glUseProgram(passthroughShaderProgram);
 
 	glUniform1f(uAlpha, screenAlpha);
-	backgroundObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, bgMat);
+
+	if (backgroundObj) {
+		backgroundObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, bgMat);
+	}
 
 }
 

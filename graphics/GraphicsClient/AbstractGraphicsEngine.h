@@ -22,5 +22,7 @@ public:
 	virtual void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset) = 0;
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods) = 0;
 	virtual void MainLoopCallback(GLFWwindow * window) = 0;
+
+	virtual bool ShouldFadeout() = 0;
 };
 
