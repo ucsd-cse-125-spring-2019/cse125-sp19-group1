@@ -28,6 +28,11 @@ public:
 	void playSoundEffectNoOverlap(Sound * pSound, bool bLoop = false);
 	void pauseAllSounds();
 	void releaseSound(Sound * pSound);
+
+	// This is integral in actually making the game work even if
+	// there are no audio devices connected. If you don't wrap
+	// sound code with this, it will complain that there aren't 
+	// any audio drivers and crash the game.
 	bool shouldIgnoreSound();
 };
 
