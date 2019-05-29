@@ -74,31 +74,51 @@ void GameData::addNewPlayer(int anID, Location aLoc, ClientType type)
 {
 	if (type == ClientType::SERVER_SIDE)
 	{
-		
+		if (disconnectedPlayers.size() > 0)
+		{
+			players[anID] = disconnectedPlayers.front().second;
+			disconnectedPlayers.pop();
+		}
+		else
+			players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
+		players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 
 	}
-	players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
 }
 
 void GameData::removePlayer(int anID, ClientType type)
 {
 	if (type == ClientType::SERVER_SIDE)
 	{
-
+		disconnectedPlayers.push(std::pair<int, Player *>(anID, players.at(anID)));
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
 
 	}
-	players.erase(anID);
+	if(players.count(anID) > 0)
+		players.erase(anID);
 }
 
 void GameData::addDecodeFunctions()
 {
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
+	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
+}
+
+void GameData::decodeDisconnectedClients(std::string value)
+{
+	std::stringstream valueStream(value);
+	std::string id_str;
+
+	// Get values from the stream
+	while (valueStream >> id_str)
+	{
+		removePlayer(std::stoi(id_str), ClientType::CLIENT_SIDE);
+	}
 }
 void GameData::decodeTileLayout(std::string value)
 {
