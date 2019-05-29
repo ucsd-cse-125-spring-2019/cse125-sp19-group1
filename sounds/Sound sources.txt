@@ -1,29 +1,33 @@
-pop.mp3:
-	Pop.mp3 from YouTube Audio Library
-search_item.mp3: 
-	Paper_Bag_Opening.mp3 from YouTube Audio Library
-found_item.mp3:
-	Coins_Shuffling.mp3 from YouTube Audio Library
-	need only a couple seconds from clip
 bathroom_toilet.mp3:
 	Toilet_Flush_Very_Close.mp3 from YouTube Audio Library
 	need only the first half
 bathroom_window.mp3: 
 	Open_and_Close_Window.mp3 from YouTube Audio Library
-frontexit_unlock.mp3:
-	Key_In_Lock.mp3 from YouTube Audio Library
-	need only first half
+chef_win.mp3:
+	Male_Laugh.mp3 from YouTube Audio Library
+found_item.mp3:
+	Coins_Shuffling.mp3 from YouTube Audio Library
+	need only a couple seconds from clip
 frontexit_door.mp3:
 	Door_Open_Close.mp3 from YouTube Audio Library
 	need only a few seconds
+frontexit_unlock.mp3:
+	Key_In_Lock.mp3 from YouTube Audio Library
+	need only first half
+jail_rattle.mp3:
+	Marble_Drop_and_Roll.mp3 from YouTube Audio Library
+pop.mp3:
+	Pop.mp3 from YouTube Audio Library
+search_item.mp3: 
+	Paper_Bag_Opening.mp3 from YouTube Audio Library
+ventexit_drop.mp3:
+	Metal_Scrap_Rattling.mp3 from YouTube Audio Library
 ventexit_screw.mp3:
 	18V_Cordless_Drill_High_Pitch.mp3 from YouTube Audio Library
-chef_win.mp3:
-	Male_Laugh.mp3 from YouTube Audio Library
 Yay.mp3:
 	Our team's "yay" in unison.
 
-All raccoon sounds are frm Hung's own mouth.
+All raccoon sounds are from Hung's own mouth.
 
 ----- Unused ----
 Suction_Cup_Pull.mp3 from YouTube Audio Library
