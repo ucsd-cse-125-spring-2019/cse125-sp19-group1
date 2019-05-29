@@ -75,6 +75,7 @@ public:
 
 	WinType wt = WinType::NONE;
 	WinType getWT() { return wt; }
+	void setWT(WinType newWT) { wt = newWT; };
 
 	double abilityChargeTime = 0.7;
 	double maxGhostTime = 7;
