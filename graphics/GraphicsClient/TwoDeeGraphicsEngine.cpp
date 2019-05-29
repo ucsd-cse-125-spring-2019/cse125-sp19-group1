@@ -128,6 +128,7 @@ void TwoDeeGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	glUseProgram(passthroughShaderProgram);
 
+	uAlpha = glGetUniformLocation(passthroughShaderProgram, "alpha");
 	glUniform1f(uAlpha, screenAlpha);
 
 	if (backgroundObj) {
