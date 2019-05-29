@@ -26,12 +26,12 @@ public:
 	virtual bool ShouldFadeout();
 
 protected:
-	const char * backgroundFilename = nullptr;
+	const char * backgroundFilename;
 
 	glm::mat4 orthoProj;
-	GLuint passthroughShaderProgram = 0;
-	GLuint uAlpha = 0;
-	FBXObject *backgroundObj = nullptr;
-	bool quit = false;
+	GLuint passthroughShaderProgram;
+	GLuint uAlpha;
+	FBXObject *backgroundObj;
+	bool quit;
 };
 

@@ -326,10 +326,6 @@ float scaleMouseWheel = 1.05f;
 glm::vec3 directionBitmaskToVector(int bitmask);
 void deallocFloor();
 void SendPackets();
-void MovePlayers();
-void MoveCamera(const glm::vec3 &newPlayerPos);
-void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos);
-void IdleCallback();
 void DisplayCallback(GLFWwindow* window);
 void UpdateView();
 glm::vec3 TrackballMapping(double x, double y, int width, int height);
@@ -797,7 +793,7 @@ void SendPackets()
 	}
 }
 
-void MovePlayers()
+void InGameGraphicsEngine::MovePlayers()
 {
 	// Sanity guard condition
 	auto myState = getMyState();
@@ -879,7 +875,7 @@ void MovePlayers()
 	UpdateView();
 }
 
-void MoveCamera(const glm::vec3 &newPlayerPos) {
+void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 	cam_look_at.x = newPlayerPos.x;
 	cam_look_at.z = newPlayerPos.z;
 	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
@@ -889,7 +885,75 @@ void MoveCamera(const glm::vec3 &newPlayerPos) {
 	UpdateView();
 }
 
-void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+ItemModelType ModelTypeForWT(WinType wt) {
+	switch (wt) {
+	case WinType::DOOR:
+		return ItemModelType::door;
+	case WinType::TOILET:
+		return ItemModelType::window;
+	case WinType::VENT:
+		return ItemModelType::vent;
+	default:
+		return ItemModelType::EMPTY;
+	}
+}
+
+static glm::vec3 LookAtForWT(WinType wt) {
+	switch (wt) {
+	case WinType::CHEF_WIN:
+	{
+		for (auto &player : players) {
+			if (player.geometryIdx == static_cast<unsigned>(ModelType::CHEF)) {
+				return player.position;
+			}
+		}
+		break;
+	}
+	case WinType::DOOR:
+	case WinType::TOILET:
+	case WinType::VENT:
+	{
+		const auto modelType = ModelTypeForWT(wt);
+		const auto &tileLayout = sharedClient->getGameData()->getTileLayout();
+
+		for (unsigned z = 0; z < tileLayout.size(); ++z) {
+			const auto &row = tileLayout[z];
+			for (unsigned x = 0; x < row.size(); ++x) {
+				Tile *tile = row[x];
+				if (tile->getTileType() != TileType::GATE) {
+					continue;
+				}
+
+				GateTile *gate = (GateTile *)tile;
+				if (gate->getModel() == modelType) {
+					auto v = glm::vec3(x * TILE_STRIDE, TILE_LEVEL_OFFSET, z * TILE_STRIDE) * TILE_SCALE;
+					return v + glm::vec3(0.5f * TILE_STRIDE * TILE_SCALE, TILE_HEIGHT_ADJUST, 0.5f * TILE_STRIDE * TILE_SCALE);
+				}
+			}
+		}
+		break;
+	}
+	default:
+		return cam_look_at;
+	}
+}
+
+void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+	if (sharedClient && sharedClient->getGameData() && sharedClient->getGameData()->getWT() != WinType::NONE) {
+		auto look_target = LookAtForWT(sharedClient->getGameData()->getWT());
+		cam_look_at += (look_target - cam_look_at) * 0.3f;
+		auto cam_target = look_target + cam_angle;
+		cam_pos += (cam_target - cam_pos) * 0.15f;
+
+		UpdateView();
+
+		if (glm::distance(cam_target, cam_pos) < 0.001f) {
+			quit = true;
+		}
+
+		return;
+	}
+
 	auto screenPos = glm::project(newPlayerPos, glm::mat4(1.f), P * V, glm::vec4(0.f, 0.f, 1.f, 1.f));
 
 	// Make the coordinates range from -1 to 1
@@ -934,7 +998,7 @@ void resetIdempotentFlush()
 
 void updateUIElements(GameData * gameData) {
 
-	uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
+	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
 	std::map<int, Player*> players = gameData->getAllPlayers();
 	//check if animals are caught
 	//activates when animal is first in net.
@@ -1037,7 +1101,7 @@ void updateUIElements(GameData * gameData) {
 	//update Goals
 }
 
-void IdleCallback()
+void InGameGraphicsEngine::IdleCallback()
 {
 	if (!sharedClient)
 		return;
@@ -1223,6 +1287,8 @@ InGameGraphicsEngine::InGameGraphicsEngine()
 {
 	calledMainLoopBegin = false;
 	fullyLoaded = false;
+	quit = false;
+	needsRenderingSetup = true;
 }
 
 
@@ -1255,6 +1321,8 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	root->addChild(allPlayersNode);
 
 	uiCanvas = new UICanvas(uiShaderProgram);
+
+	needsRenderingSetup = true;
 
 	auto finish = [](bool *finishedFlag) {
 		LoadModels();
@@ -1316,26 +1384,31 @@ void InGameGraphicsEngine::CleanUp()
 void InGameGraphicsEngine::MainLoopBegin()
 {
 	calledMainLoopBegin = true;
+	quit = false;
 
-	using namespace std::chrono;
-	auto setupStart = high_resolution_clock::now();
+	if (needsRenderingSetup) {
+		using namespace std::chrono;
+		auto setupStart = high_resolution_clock::now();
 
-	cout << "Calling RenderingSetup() on objects...\n ";
-	
-	tileModel->RenderingSetup();
-	wallModel->RenderingSetup();
-	for (auto &model : playerModels) {
-		if (model.object)
-			model.object->RenderingSetup();
+		cout << "Calling RenderingSetup() on objects...\n ";
+
+		tileModel->RenderingSetup();
+		wallModel->RenderingSetup();
+		for (auto &model : playerModels) {
+			if (model.object)
+				model.object->RenderingSetup();
+		}
+		for (auto &model : itemModels) {
+			if (model.object)
+				model.object->RenderingSetup();
+		}
+
+		auto setupEnd = high_resolution_clock::now();
+		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
+		cout << "\tfinished RenderingSetup() in " << setupDuration.count() << " seconds\n";
+
+		needsRenderingSetup = false;
 	}
-	for (auto &model : itemModels) {
-		if (model.object)
-			model.object->RenderingSetup();
-	}
-
-	auto setupEnd = high_resolution_clock::now();
-	std::chrono::duration<float> setupDuration = setupEnd - setupStart;
-	cout << "\tfinished RenderingSetup() in " << setupDuration.count() << " seconds\n";
 
 	UpdateView();
 	MoveCamera(glm::vec3(0.f));
@@ -1349,7 +1422,8 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 void InGameGraphicsEngine::MainLoopEnd()
 {
-
+	calledMainLoopBegin = false;
+	quit = false;
 }
 
 void InGameGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -1531,3 +1605,7 @@ void InGameGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	IdleCallback();
 }
 
+bool InGameGraphicsEngine::ShouldFadeout()
+{
+	return quit;
+}

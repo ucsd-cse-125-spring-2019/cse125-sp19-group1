@@ -74,7 +74,7 @@ static void freeSprites(LobbySprite *sprites, size_t count)
 }
 
 
-LobbyGraphicsEngine::LobbyGraphicsEngine()
+LobbyGraphicsEngine::LobbyGraphicsEngine() : TwoDeeGraphicsEngine()
 {
 	backgroundFilename = BG_TEX_PATH;
 }
@@ -85,9 +85,9 @@ LobbyGraphicsEngine::~LobbyGraphicsEngine()
 }
 
 
-void LobbyGraphicsEngine::StartLoading()
+void LobbyGraphicsEngine::MainLoopBegin()
 {
-	TwoDeeGraphicsEngine::StartLoading();
+	TwoDeeGraphicsEngine::MainLoopBegin();
 
 	loadSprites(youArePlayerMsg, LOBBY_MAX_PLAYERS);
 	loadSprites(playerMsg, LOBBY_MAX_PLAYERS);
@@ -95,9 +95,9 @@ void LobbyGraphicsEngine::StartLoading()
 	loadSprites(&switchMsg, 1);
 }
 
-void LobbyGraphicsEngine::CleanUp()
+void LobbyGraphicsEngine::MainLoopEnd()
 {
-	TwoDeeGraphicsEngine::CleanUp();
+	TwoDeeGraphicsEngine::MainLoopEnd();
 
 	freeSprites(youArePlayerMsg, LOBBY_MAX_PLAYERS);
 	freeSprites(playerMsg, LOBBY_MAX_PLAYERS);

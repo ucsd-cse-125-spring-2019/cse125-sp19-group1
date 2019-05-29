@@ -7,6 +7,7 @@
 #include "LoadingGraphicsEngine.h"
 #include "LobbyGraphicsEngine.h"
 #include "CutsceneGraphicsEngine.h"
+#include "PlayAgainGraphicsEngine.h"
 
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
@@ -23,6 +24,9 @@ static LoadingGraphicsEngine * loadingEngine = nullptr;
 static LobbyGraphicsEngine * lobbyEngine = nullptr;
 
 vector<CutsceneGraphicsEngine *> startingCutscenes;
+CutsceneGraphicsEngine *chefWinsCutscene = nullptr;
+CutsceneGraphicsEngine *animalsWinCutscene = nullptr;
+PlayAgainGraphicsEngine *playAgainEngine = nullptr;
 
 static AbstractGraphicsEngine * currentEngine = nullptr;
 static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
@@ -109,11 +113,18 @@ void Init()
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 3")));
 
+	chefWinsCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("chef win"));
+	animalsWinCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("animal win"));
+	playAgainEngine = new PlayAgainGraphicsEngine();
+
 	currentEngine = lobbyEngine;
 
 	inGameEngine->StartLoading();
 	loadingEngine->StartLoading();
 	lobbyEngine->StartLoading();
+	chefWinsCutscene->StartLoading();
+	animalsWinCutscene->StartLoading();
+	playAgainEngine->StartLoading();
 
 	for (auto cutscene : startingCutscenes) {
 		cutscene->StartLoading();
@@ -130,11 +141,11 @@ void serverLoop(void * args) {
 void CleanUp() {
 	currentEngine = nullptr;
 
-	if (inGameEngine) {
+	/*if (inGameEngine) {
 		inGameEngine->CleanUp();
 		delete inGameEngine;
 		inGameEngine = nullptr;
-	}
+	}*/
 
 	if (loadingEngine) {
 		loadingEngine->CleanUp();
@@ -146,6 +157,24 @@ void CleanUp() {
 		lobbyEngine->CleanUp();
 		delete lobbyEngine;
 		lobbyEngine = nullptr;
+	}
+
+	if (chefWinsCutscene) {
+		chefWinsCutscene->CleanUp();
+		delete chefWinsCutscene;
+		chefWinsCutscene = nullptr;
+	}
+
+	if (animalsWinCutscene) {
+		animalsWinCutscene->CleanUp();
+		delete animalsWinCutscene;
+		animalsWinCutscene = nullptr;
+	}
+
+	if (playAgainEngine) {
+		playAgainEngine->CleanUp();
+		delete playAgainEngine;
+		playAgainEngine = nullptr;
 	}
 
 	for (auto cutscene : startingCutscenes) {
@@ -290,9 +319,8 @@ int main(void)
 				if (previousEngine != inGameEngine) {
 					previousEngine->screenAlpha = 0.f;
 				}
-				else {
-					currentEngine->screenAlpha = 1.f;
-				}
+				currentEngine->screenAlpha = 1.f;
+
 				previousEngine->MainLoopEnd();
 				previousEngine = nullptr;
 			}
@@ -303,20 +331,40 @@ int main(void)
 			}
 		}
 		
-		if (currentEngine == lobbyEngine && lobbyEngine->ShouldFadeout()) {
-			targetEngine = startingCutscenes[0];
-		}
-		else {
-			for (unsigned i = 0; i < startingCutscenes.size(); ++i) {
-				auto engine = startingCutscenes[i];
-				if (currentEngine == engine && engine->ShouldFadeout()) {
-					if (i + 1 < startingCutscenes.size()) {
-						targetEngine = startingCutscenes[i + 1];
+		if (currentEngine->ShouldFadeout()) {
+			if (currentEngine == lobbyEngine) {
+				targetEngine = startingCutscenes[0];
+			}
+			else if (currentEngine == chefWinsCutscene || currentEngine == animalsWinCutscene) {
+				targetEngine = playAgainEngine;
+			}
+			else if (currentEngine == inGameEngine) {
+				switch (sharedClient->getGameData()->getWT()) {
+				case WinType::CHEF_WIN:
+					targetEngine = chefWinsCutscene;	break;
+				case WinType::DOOR:
+				case WinType::TOILET:
+				case WinType::VENT:
+					targetEngine = animalsWinCutscene;	break;
+				default:
+					targetEngine = playAgainEngine;		break;
+				}
+			}
+			else if (currentEngine == playAgainEngine) {
+				targetEngine = lobbyEngine;
+			}
+			else {
+				for (unsigned i = 0; i < startingCutscenes.size(); ++i) {
+					auto engine = startingCutscenes[i];
+					if (currentEngine == engine) {
+						if (i + 1 < startingCutscenes.size()) {
+							targetEngine = startingCutscenes[i + 1];
+						}
+						else {
+							targetEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
+						}
+						break;
 					}
-					else {
-						targetEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
-					}
-					break;
 				}
 			}
 		}

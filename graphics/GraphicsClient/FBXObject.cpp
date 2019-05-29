@@ -139,6 +139,10 @@ void FBXObject::GetTextureSize(int &width, int &height) {
 	height = texHeight;
 }
 
+bool FBXObject::GetIsRenderingSetup() {
+	return renderingIsSetup;
+}
+
 void FBXObject::SetAmbient(glm::vec3 newAmb) {
 	ambient = glm::vec3(newAmb);
 }

@@ -9,6 +9,7 @@ public:
 
 	virtual bool ShouldFadeout();
 	virtual void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	virtual void MainLoopBegin();
 
 protected:
 	double startTime;

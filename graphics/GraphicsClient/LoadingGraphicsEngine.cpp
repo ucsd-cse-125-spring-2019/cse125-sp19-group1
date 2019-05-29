@@ -36,6 +36,26 @@ void LoadingGraphicsEngine::CleanUp()
 {
 	TwoDeeGraphicsEngine::CleanUp();
 
+}
+
+void LoadingGraphicsEngine::MainLoopBegin()
+{
+	TwoDeeGraphicsEngine::MainLoopBegin();
+
+	if (!dotObj) {
+		dotObj = createObjectForTexture(DOT_TEX_PATH);
+	}
+	
+	if (!pawObj) {
+		pawObj = createObjectForTexture(PAW_TEX_PATH);
+	}
+	
+}
+
+void LoadingGraphicsEngine::MainLoopEnd()
+{
+	TwoDeeGraphicsEngine::MainLoopEnd();
+
 	if (dotObj) {
 		delete dotObj;
 		dotObj = nullptr;
@@ -45,20 +65,6 @@ void LoadingGraphicsEngine::CleanUp()
 		delete pawObj;
 		pawObj = nullptr;
 	}
-}
-
-void LoadingGraphicsEngine::MainLoopBegin()
-{
-	TwoDeeGraphicsEngine::MainLoopBegin();
-
-	dotObj = createObjectForTexture(DOT_TEX_PATH);
-	pawObj = createObjectForTexture(PAW_TEX_PATH);
-}
-
-void LoadingGraphicsEngine::MainLoopEnd()
-{
-	TwoDeeGraphicsEngine::MainLoopEnd();
-
 }
 
 void LoadingGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)

@@ -80,6 +80,7 @@ public:
 	// rendering
 	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
 	void RenderingSetup();
+	bool GetIsRenderingSetup();
 	void UpdateBuffers();
 	void SetBuffers();
 	void Animate();
