@@ -157,7 +157,7 @@ void LobbyGraphicsEngine::DrawSprite(LobbySprite &sprite, int designX, int desig
 	scale.z = 1.f;
 	transform = glm::scale(transform, scale);
 
-	glUniform1f(uAlpha, alpha);
+	glUniform1f(uAlpha, alpha * screenAlpha);
 	sprite.object->Draw(passthroughShaderProgram, &identityMat, &orthoProj, transform);
 }
 
@@ -178,16 +178,46 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 		lastBlah = blah;
 		for (int i = 0; i < LOBBY_MAX_PLAYERS; ++i) {
 			if (i + 1 != myPlayerNum) {
-				playerIsAnimal[i] = rand() & 1;
+				bool newValue = rand() & 1;
+				if (playerIsAnimal[i] != newValue) {
+					playerIsAnimal[i] = newValue;
+				}
 			}
 		}
 	}
 
+#define PLAYER_MARGIN_Y 3.25f
+#define PLAYER_TOP_Y 339.f
+	static const float columnX[2] = {221.f, 572.f};
+
 	int chefCount = 0;
-	float playerY[2] = { 339, 339 };
+	float columnY[2] = { PLAYER_TOP_Y, PLAYER_TOP_Y };
 	for (int i = 0; i < LOBBY_MAX_PLAYERS; ++i) {
-		DrawSprite(playerMsg[i], playerIsAnimal[i] ? 572 : 221, playerY[playerIsAnimal[i]]);
-		playerY[playerIsAnimal[i]] += playerMsg[i].designHeight + 3.25f;
+		targetY[i] = columnY[playerIsAnimal[i]];
+		if (playerY[i] > 1.f) {
+			playerY[i] += (targetY[i] - playerY[i]) * 0.3f;
+
+			if (abs(targetY[i] - playerY[i]) < 0.1) {
+				playerY[i] = targetY[i];
+			}
+		}
+		else {
+			playerY[i] = targetY[i];
+		}
+
+		float targetX = columnX[playerIsAnimal[i]];
+
+		if (playerX[i] < 1.f || abs(targetX - playerX[i]) < 0.1) {
+			playerX[i] = targetX;
+		}
+		else {
+			playerX[i] += (targetX - playerX[i]) * 0.3f;
+		}
+		
+		float playerAlpha = 1.f - sinf(((playerX[i] - columnX[0]) / (columnX[1] - columnX[0])) * glm::pi<float>());
+
+		DrawSprite(playerMsg[i], playerX[i], playerY[i], playerAlpha);
+		columnY[playerIsAnimal[i]] += playerMsg[i].designHeight + PLAYER_MARGIN_Y;
 		chefCount += !playerIsAnimal[i];
 	}
 

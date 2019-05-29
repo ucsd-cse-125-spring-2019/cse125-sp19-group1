@@ -24,5 +24,9 @@ protected:
 	bool startEnabled = false;
 	int myPlayerNum = 1;
 	bool playerIsAnimal[LOBBY_MAX_PLAYERS] = { false };
+
+	float targetY[LOBBY_MAX_PLAYERS] = { 0.f };
+	float playerX[LOBBY_MAX_PLAYERS] = { 0.f };
+	float playerY[LOBBY_MAX_PLAYERS] = { 0.f };
 };
 
