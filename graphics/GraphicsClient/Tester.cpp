@@ -103,6 +103,7 @@ void Init()
 #define CUTSCENE_FILE(x) CUTSCENES_DIR "cutscene - " x ".png"
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake1_2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake2_2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake6_2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("instructions")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 1")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2")));
@@ -272,6 +273,8 @@ int main(void)
 
 		auto start = high_resolution_clock::now();
 
+		AbstractGraphicsEngine *targetEngine = nullptr;
+
 		if (previousEngine) {
 #define CROSSFADE_DURATION 0.5
 			double delta = glfwGetTime() - crossfadeStart;
@@ -296,31 +299,36 @@ int main(void)
 		} 
 		else if (currentEngine == loadingEngine) {
 			if (inGameEngine->fullyLoaded) {
-				previousEngine = currentEngine;
-				currentEngine = inGameEngine;
-				crossfadeStart = glfwGetTime();
+				targetEngine = inGameEngine;
 			}
 		}
 		
 		if (currentEngine == lobbyEngine && lobbyEngine->ShouldFadeout()) {
-			previousEngine = currentEngine;
-			currentEngine = startingCutscenes[0];
-			crossfadeStart = glfwGetTime();
+			targetEngine = startingCutscenes[0];
 		}
 		else {
 			for (unsigned i = 0; i < startingCutscenes.size(); ++i) {
 				auto engine = startingCutscenes[i];
 				if (currentEngine == engine && engine->ShouldFadeout()) {
-					previousEngine = currentEngine;
 					if (i + 1 < startingCutscenes.size()) {
-						currentEngine = startingCutscenes[i + 1];
+						targetEngine = startingCutscenes[i + 1];
 					}
 					else {
-						currentEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
+						targetEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
 					}
-					crossfadeStart = glfwGetTime();
+					break;
 				}
 			}
+		}
+
+		if (targetEngine) {
+			if (previousEngine) {
+				previousEngine->MainLoopEnd();
+			}
+
+			previousEngine = currentEngine;
+			currentEngine = targetEngine;
+			crossfadeStart = glfwGetTime();
 		}
 
 		if (currentEngine && currentEngine->fullyLoaded) {
