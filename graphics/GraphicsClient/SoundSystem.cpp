@@ -154,6 +154,57 @@ void SoundSystem::pauseSoundEffect()
 	}
 }
 
+void SoundSystem::pauseAllSounds()
+{
+	FMOD_RESULT result;
+	bool playing = false;
+	result = channel[0]->isPlaying(&playing);
+
+	if (playing) {
+		result = channel[0]->setPaused(true);
+
+		// TODO: also reset or clear channel
+		if (result != FMOD_OK) {
+			if (result == FMOD_ERR_INVALID_PARAM) {
+				fprintf(stdout, "pauseAllSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
+			}
+			else {
+				fprintf(stdout, "pauseAllSounds ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
+			}
+		}
+	}
+	result = channel[1]->isPlaying(&playing);
+	if (playing) {
+		result = channel[1]->setPaused(true);
+
+		// TODO: also reset or clear channel
+		if (result != FMOD_OK) {
+			if (result == FMOD_ERR_INVALID_PARAM) {
+				fprintf(stdout, "pauseAllSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
+			}
+			else {
+				fprintf(stdout, "pauseAllSounds ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
+			}
+		}
+	}
+	result = channel[2]->isPlaying(&playing);
+	if (playing) {
+		result = channel[2]->setPaused(true);
+
+		// TODO: also reset or clear channel
+		if (result != FMOD_OK) {
+			if (result == FMOD_ERR_INVALID_PARAM) {
+				fprintf(stdout, "pauseAllSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
+			}
+			else {
+				fprintf(stdout, "pauseAllSounds ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
+			}
+		}
+	}
+
+
+}
+
 void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 {
 	FMOD_RESULT result;
