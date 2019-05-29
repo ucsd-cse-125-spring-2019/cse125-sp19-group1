@@ -251,7 +251,7 @@ int main(void)
 		auto start = high_resolution_clock::now();
 
 		if (previousEngine) {
-#define CROSSFADE_DURATION 1.35
+#define CROSSFADE_DURATION 0.75
 			double delta = glfwGetTime() - crossfadeStart;
 			if (delta < CROSSFADE_DURATION) {
 				if (previousEngine != inGameEngine) {
