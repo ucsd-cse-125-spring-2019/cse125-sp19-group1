@@ -19,6 +19,7 @@
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
 #define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
+#define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
 
 static SoundSystem * soundSystem;
 static Sound * sound_door;
@@ -32,6 +33,7 @@ static Sound * sound_toilet;
 static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
+static Sound * background_music;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
@@ -65,17 +67,19 @@ ClientGame::ClientGame(void)
 
 	soundSystem = new SoundSystem();
 	if (!(soundSystem->shouldIgnoreSound())) {
-		soundSystem->createSound(&sound_door, SOUNDS_DOOR);
-		soundSystem->createSound(&sound_door_unlock, SOUNDS_DOOR_UNLOCK);
-		soundSystem->createSound(&sound_found_item, SOUNDS_FOUND_ITEM);
-		soundSystem->createSound(&sound_net, SOUNDS_NET);
-		soundSystem->createSound(&sound_raccoon_up, SOUNDS_RACCOON_UP);
-		soundSystem->createSound(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
-		soundSystem->createSound(&sound_search_item, SOUNDS_SEARCH_ITEM);
-		soundSystem->createSound(&sound_toilet, SOUNDS_TOILET);
-		soundSystem->createSound(&sound_vent_screw, SOUNDS_VENT_SCREW);
-		soundSystem->createSound(&sound_window, SOUNDS_WINDOW);
-		soundSystem->createSound(&sound_yay, SOUNDS_YAY);
+		soundSystem->createSoundEffect(&sound_door, SOUNDS_DOOR);
+		soundSystem->createSoundEffect(&sound_door_unlock, SOUNDS_DOOR_UNLOCK);
+		soundSystem->createSoundEffect(&sound_found_item, SOUNDS_FOUND_ITEM);
+		soundSystem->createSoundEffect(&sound_net, SOUNDS_NET);
+		soundSystem->createSoundEffect(&sound_raccoon_up, SOUNDS_RACCOON_UP);
+		soundSystem->createSoundEffect(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
+		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
+		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
+		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
+		soundSystem->createSoundEffect(&sound_window, SOUNDS_WINDOW);
+		soundSystem->createSoundEffect(&sound_yay, SOUNDS_YAY);
+		soundSystem->createBackgroundMusic(&background_music, BKG_MUSIC);
+		soundSystem->playBackgroundMusic(background_music, true);
 	}
 
 	// send init packet
@@ -171,43 +175,43 @@ void ClientGame::update()
 		if (player->isChef()) 
 		{
 			if (player->getAction() == Action::SWING_NET) {
-				soundSystem->playSound(sound_net);
+				soundSystem->playSoundEffect(sound_net);
 			}
 
 			if (wt == WinType::CHEF_WIN) {
-				soundSystem->playSound(sound_yay);
+				soundSystem->playSoundEffect(sound_yay);
 			}
 		}
 		else {
 			//opening box
 			if (player->getAction() == Action::OPEN_BOX) {
-				soundSystem->playSound(sound_search_item);
+				soundSystem->playSoundEffect(sound_search_item);
 			}
 			if (player->getAction() == Action::CONSTRUCT_GATE) {
 				int gateNum = gameData->getGateTile(loc)->getGateNum();
 				if (gateNum == 1) { //door
-					soundSystem->playSound(sound_door_unlock);
+					soundSystem->playSoundEffect(sound_door_unlock);
 				}
 				else if (gateNum == 2) { //bathroom
-					soundSystem->playSound(sound_toilet);
+					soundSystem->playSoundEffect(sound_toilet);
 				}
 				else if (gateNum == 3){ //vent
-					soundSystem->playSound(sound_vent_screw);
+					soundSystem->playSoundEffect(sound_vent_screw);
 				}
 			}
 			if (player->getAction() == Action::UNLOCK_JAIL) {
-				soundSystem->playSound(sound_door_unlock);
+				soundSystem->playSoundEffect(sound_door_unlock);
 			}
 
 			if (wt != WinType::NONE) {
 				if (wt == WinType::DOOR) {
-					soundSystem->playSound(sound_door);
+					soundSystem->playSoundEffect(sound_door);
 				}
 				else if (wt == WinType::TOILET) {
-					soundSystem->playSound(sound_window);
+					soundSystem->playSoundEffect(sound_window);
 				} 
 				else if (wt == WinType::VENT) {
-					soundSystem->playSound(sound_vent_screw);
+					soundSystem->playSoundEffect(sound_vent_screw);
 				}
 			}
 		}
