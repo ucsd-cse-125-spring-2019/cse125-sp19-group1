@@ -4,7 +4,7 @@
 #include <fstream>
 
 // Comment this out to print all messages to stdout, even messages larger than 128 chars
-#define CENSOR_LARGE_MSG 128
+#define CENSOR_LARGE_MSG 256
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"

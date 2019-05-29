@@ -1,7 +1,7 @@
 // may need #include "stdafx.h" in visual studio
 //#include "stdafx.h"
-#include "../../network/ServerGame.h"
-#include "../../network/ClientGame.h"
+#include "../network/ServerGame.h"
+#include "../network/ClientGame.h"
 // used for multi-threading
 #include <process.h>
 #include <ctime>

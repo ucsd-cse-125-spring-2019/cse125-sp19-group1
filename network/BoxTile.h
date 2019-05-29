@@ -6,12 +6,21 @@ class BoxTile : public Tile
 public:
 	
 	// Default constructor
-	BoxTile(int aWallLayout = 0, int aHeight = 0) : Tile(TileType::BOX, aWallLayout, aHeight), boxStatus(true) {}
+	BoxTile(int aWallLayout = 0, int aHeight = 0) : Tile(TileType::BOX, aWallLayout, aHeight), boxStatus(true), keyBoxStatus(false) {}
 
 	// Getter
 	bool hasBox() { return boxStatus; }
+	bool isKeyBox() { return keyBoxStatus; }
+	double getBoxRespawnTime()
+	{
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - respawnStartTime;
+		return elapsed_seconds.count();
+	}
 	// Setter
 	void setBoxStatus(bool aBoxStatus) { boxStatus = aBoxStatus; setDirty(); }
+	void setBoxRespawnTimestamp() { respawnStartTime = std::chrono::system_clock::now(); }
+	void setKeyBox(bool status) { keyBoxStatus = status; }
 
 	// Encode function
 	virtual std::string encodeTileData()
@@ -45,4 +54,6 @@ public:
 
 protected:
 	bool boxStatus;
+	bool keyBoxStatus;
+	std::chrono::time_point<std::chrono::system_clock> respawnStartTime;
 };
