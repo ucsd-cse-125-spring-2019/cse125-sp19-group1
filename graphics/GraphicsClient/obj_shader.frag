@@ -93,10 +93,10 @@ vec3 CalcFogOfWar(vec3 inputColor) {
    vec3 distanceFromPlayer = vecPos - fog.player_pos;
    float distance = length(distanceFromPlayer);
    if(abs(distance) > fog.fog_distance) {
-      inputColor = inputColor * 0.8;
+      inputColor = inputColor * 0.05;
    }
    else if(abs(distance) > fog.fog_distance - 20) {
-	  inputColor = inputColor * 0.9;
+	  inputColor = inputColor * 0.4;
    }
    return inputColor;
 }
