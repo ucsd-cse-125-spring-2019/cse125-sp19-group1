@@ -133,6 +133,27 @@ void SoundSystem::playSoundEffect(Sound * pSound, bool bLoop)
 	}
 }
 
+void SoundSystem::pauseSoundEffect()
+{
+	FMOD_RESULT result;
+	bool playing = false;
+	result = channel[0]->isPlaying(&playing);
+
+	if (playing) {
+		result = channel[0]->setPaused(true);
+
+		// TODO: also reset or clear channel
+		if (result != FMOD_OK) {
+			if (result == FMOD_ERR_INVALID_PARAM) {
+				fprintf(stdout, "pauseSoundEffect ERROR: FMOD_ERR_INVALID_PARAM\n");
+			}
+			else {
+				fprintf(stdout, "pauseSoundEffect ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
+			}
+		}
+	}
+}
+
 void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 {
 	FMOD_RESULT result;

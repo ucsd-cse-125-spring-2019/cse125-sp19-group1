@@ -24,6 +24,7 @@ public:
 	void playBackgroundMusic(Sound * pSound, bool bLoop = false);
 	void playOtherPlayersSounds(Sound * pSound, bool bLoop = false);
 	void playSoundEffect(Sound * pSound, bool bLoop = false);
+	void pauseSoundEffect();
 	void playSoundEffectNoOverlap(Sound * pSound, bool bLoop = false);
 	void releaseSound(Sound * pSound);
 	bool shouldIgnoreSound();

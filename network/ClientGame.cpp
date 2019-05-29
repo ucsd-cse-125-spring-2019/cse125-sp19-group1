@@ -193,6 +193,7 @@ void ClientGame::update()
 				//soundSystem->releaseSound(sound_toilet);
 				//soundSystem->releaseSound(sound_vent_screw);
 				//soundSystem->releaseSound(sound_jail_unlock);
+				soundSystem->pauseSoundEffect();
 			}
 			else if (player->getAction() == Action::OPEN_BOX) {
 				soundSystem->playSoundEffect(sound_search_item);
