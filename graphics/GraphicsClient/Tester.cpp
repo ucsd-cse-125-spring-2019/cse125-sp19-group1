@@ -289,6 +289,9 @@ int main(void)
 			if (!currentEngine->calledMainLoopBegin) {
 				currentEngine->ResizeCallback(window, windowWidth, windowHeight);
 				currentEngine->MainLoopBegin();
+
+				// start over on the crossfade because MainLoopBeing() may have taken significant time
+				crossfadeStart = glfwGetTime();
 			}
 
 			if (previousEngine && previousEngine == inGameEngine) {
