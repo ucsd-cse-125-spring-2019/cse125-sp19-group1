@@ -26,6 +26,7 @@ public:
 	void playSoundEffect(Sound * pSound, bool bLoop = false);
 	void pauseSoundEffect();
 	void playSoundEffectNoOverlap(Sound * pSound, bool bLoop = false);
+	void pauseAllSounds();
 	void releaseSound(Sound * pSound);
 	bool shouldIgnoreSound();
 };
