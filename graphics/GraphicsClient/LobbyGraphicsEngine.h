@@ -8,8 +8,6 @@ struct LobbySprite;
 class LobbyGraphicsEngine : public TwoDeeGraphicsEngine
 {
 public:
-	bool quit = false;
-
 	LobbyGraphicsEngine();
 	~LobbyGraphicsEngine();
 

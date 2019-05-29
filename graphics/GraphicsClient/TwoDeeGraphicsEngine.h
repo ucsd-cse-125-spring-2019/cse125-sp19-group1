@@ -23,6 +23,8 @@ public:
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 	virtual void MainLoopCallback(GLFWwindow * window);
 
+	virtual bool ShouldFadeout();
+
 protected:
 	const char * backgroundFilename = nullptr;
 
@@ -30,5 +32,6 @@ protected:
 	GLuint passthroughShaderProgram = 0;
 	GLuint uAlpha = 0;
 	FBXObject *backgroundObj = nullptr;
+	bool quit = false;
 };
 

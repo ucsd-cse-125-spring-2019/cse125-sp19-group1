@@ -121,3 +121,8 @@ void TwoDeeGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	backgroundObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, bgMat);
 
 }
+
+bool TwoDeeGraphicsEngine::ShouldFadeout()
+{
+	return quit;
+}
