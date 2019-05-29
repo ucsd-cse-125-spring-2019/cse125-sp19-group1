@@ -934,7 +934,7 @@ void resetIdempotentFlush()
 
 void updateUIElements(GameData * gameData) {
 
-	uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
+	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
 	std::map<int, Player*> players = gameData->getAllPlayers();
 	//check if animals are caught
 	//activates when animal is first in net.
