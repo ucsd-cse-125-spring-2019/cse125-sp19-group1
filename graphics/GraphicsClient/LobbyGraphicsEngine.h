@@ -1,0 +1,30 @@
+#pragma once
+#include "TwoDeeGraphicsEngine.h"
+
+#define LOBBY_MAX_PLAYERS 4
+
+struct LobbySprite;
+
+class LobbyGraphicsEngine : public TwoDeeGraphicsEngine
+{
+public:
+	LobbyGraphicsEngine();
+	~LobbyGraphicsEngine();
+
+	virtual void MainLoopBegin();
+	virtual void MainLoopEnd();
+	virtual void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+	virtual void MainLoopCallback(GLFWwindow * window);
+
+protected:
+	void DrawSprite(LobbySprite &sprite, int designX, int designY, float alpha = 1.f);
+
+	bool startEnabled = false;
+	int myPlayerNum = 1;
+	bool playerIsAnimal[LOBBY_MAX_PLAYERS] = { false };
+
+	float targetY[LOBBY_MAX_PLAYERS] = { 0.f };
+	float playerX[LOBBY_MAX_PLAYERS] = { 0.f };
+	float playerY[LOBBY_MAX_PLAYERS] = { 0.f };
+};
+

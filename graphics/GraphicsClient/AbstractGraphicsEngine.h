@@ -7,8 +7,9 @@ extern int windowWidth, windowHeight;
 class AbstractGraphicsEngine
 {
 public:
-	bool calledMainLoopBegin;
-	bool fullyLoaded;  // true if the engine has finished loading and is ready to render
+	bool calledMainLoopBegin = false;
+	bool fullyLoaded = false;  // true if the engine has finished loading and is ready to render
+	float screenAlpha = 1.0f;
 
 	virtual void StartLoading() = 0;  // may launch a thread and return immediately
 	virtual void CleanUp() = 0;
@@ -21,5 +22,7 @@ public:
 	virtual void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset) = 0;
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods) = 0;
 	virtual void MainLoopCallback(GLFWwindow * window) = 0;
+
+	virtual bool ShouldFadeout() = 0;
 };
 

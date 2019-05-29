@@ -1,5 +1,7 @@
 #include "InGameGraphicsEngine.h"
 
+#include "../../network/ClientGame.h"
+
 #include "ItemModelType.h"
 
 #include "Transform.h"
@@ -28,12 +30,12 @@
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
 
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
-#define TILE_TEX_PATH     (TEXTURES_PATH "tile.ppm")
+#define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
 
 #define CHEF_FOG_DISTANCE 85.0f
 #define RACCOON_FOG_DISTANCE 160
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
-#define WALL_TEX_PATH     (TEXTURES_PATH "wall.ppm")
+#define WALL_TEX_PATH     (TEXTURES_PATH "wall.png")
 
 //#define CANVAS_MDL_PATH   (MODELS_PATH "canvas.fbx")
 //#define CANVAS_TEX_PATH   (TEXTURES_PATH "canvas.ppm");
@@ -57,6 +59,7 @@
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
 #define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
+
 
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
@@ -93,6 +96,8 @@ static const struct PlayerModelSettings {
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
 #define MDL_SAME_TEX(x) MDL_AND_TEX(x, x)
+#define GLM_H_PI glm::half_pi<float>()
+#define GLM_PI glm::pi<float>()
 
 static const struct ItemModelSettings {
 	const char *modelPath;       // filesystem path to a model geometry file
@@ -101,42 +106,44 @@ static const struct ItemModelSettings {
 	ItemModelType id;            // A unique ID, like ItemModelType::apple
 	float scale;                 // scale adjustment
 	glm::vec3 translate;         // position adjustment
+	glm::vec3 rotation;          // rotation
+	bool wallRotate;             // auto-rotate away from any wall on this tile
 } itemModelSettings[] = {
-	// model and texture paths                      name                    id                               scale  translate
-	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f) },
-	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,   2.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit,  2.f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,       2.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f) },
-	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f) },
-	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f) },
-	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f) },
-	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f) },
-	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.f,   glm::vec3(0.f) },
+	// model and texture paths                      name                    id                               scale  translate                      rotate                            wallRotate
+	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false },
+	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true  },
+	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
+	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
+	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
+	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,  2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
 
 struct ItemModel {
@@ -160,6 +167,12 @@ struct PlayerModel {
 	Transform *transform;
 };
 
+struct AnimatedItem {
+	Transform *transform = nullptr;
+	Geometry *animating = nullptr;
+	ItemModelType type = ItemModelType::EMPTY;
+};
+
 static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 
 static FBXObject * tileModel = nullptr;
@@ -177,14 +190,23 @@ static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
 static vector<vector<Transform *>> envObjs;
-
-static vector<vector<uint8_t>> envObjsMap;
+static vector<vector<AnimatedItem>> itemTransforms;
 
 static SoundSystem * soundSystem;
-static Sound * sound_toilet;
+static Sound * sound_door;
+static Sound * sound_door_unlock;
+static Sound * sound_found_item;
+static Sound * sound_net;
+static Sound * sound_raccoon_up;
+static Sound * sound_raccoon_down;
 static Sound * sound_search_item;
+static Sound * sound_toilet;
+static Sound * sound_vent_screw;
+static Sound * sound_window;
+static Sound * sound_yay;
 
-static ClientGame * client = nullptr;
+
+extern ClientGame * sharedClient;
 
 static int elapsedTime = 0;
 static int directions = 0;
@@ -196,6 +218,7 @@ struct PlayerState {
 	glm::vec3 position;         // position, important for faking targetAngle above
 	int id;                     // the player ID from the server
 	unsigned geometryIdx;       // index into playerGeometry
+	char moving;				// bool indicating whether or not the model should animate
 
 	PlayerState() : position(0.f) {
 		angle = targetAngle = 0.f;
@@ -222,6 +245,8 @@ struct PlayerState {
 		position.z = location.getZ();
 
 		setGeometryIdx(static_cast<unsigned>(p->getModelType()));
+
+		moving = 0;
 	}
 
 	~PlayerState() {
@@ -241,6 +266,7 @@ struct PlayerState {
 		position = other.position;
 		id = other.id;
 		geometryIdx = other.geometryIdx;
+		moving = other.moving;
 	}
 
 	PlayerState &operator=(const PlayerState &other) {
@@ -283,6 +309,7 @@ Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
 Transform * floorTransform = nullptr;
 Transform * envObjsTransform = nullptr;
+Transform * allItemsTransform = nullptr;
 
 // Default camera parameters
 glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
@@ -299,10 +326,6 @@ float scaleMouseWheel = 1.05f;
 glm::vec3 directionBitmaskToVector(int bitmask);
 void deallocFloor();
 void SendPackets();
-void MovePlayers();
-void MoveCamera(const glm::vec3 &newPlayerPos);
-void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos);
-void IdleCallback();
 void DisplayCallback(GLFWwindow* window);
 void UpdateView();
 glm::vec3 TrackballMapping(double x, double y, int width, int height);
@@ -313,7 +336,7 @@ PlayerState *getMyState()
 {
 	// linear search is probably faster than binary/tree/whatever for <= 4 elements
 
-	int myId = client->getMyID();
+	int myId = sharedClient->getMyID();
 	for (PlayerState &state : players) {
 		if (state.id == myId)
 			return &state;
@@ -328,15 +351,15 @@ void reloadPlayers()
 
 	cout << "[Re]loading players\n";
 
-	if (!client || !client->getGameData() || client->getGameData()->players.size() <= 0) {
+	if (!sharedClient || !sharedClient->getGameData() || sharedClient->getGameData()->players.size() <= 0) {
 		cout << "WARNING: gameData players map is empty\n";
 		return;
 	}
 
 	allPlayersNode->removeAllChildren();
 
-	const auto &playersMap = client->getGameData()->players;
-	const int myId = client->getMyID();
+	const auto &playersMap = sharedClient->getGameData()->players;
+	const int myId = sharedClient->getMyID();
 
 	for (const auto &pair : playersMap) {
 		const auto id = pair.first;
@@ -358,16 +381,19 @@ void reloadPlayers()
 
 void resetEnvObjs()
 {
-	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
-		cerr << "reloadMap(): map is empty\n";
+		cerr << "resetEnvObjs(): map is empty\n";
 		return;
 	}
 
 	if (envObjsTransform == nullptr) {
 		envObjsTransform = new Transform(glm::mat4(1.f));
 		root->addChild(envObjsTransform);
+	}
+	else {
+		envObjsTransform->removeAllChildren();
 	}
 
 	uint8_t objIdx = 0;
@@ -394,8 +420,26 @@ void resetEnvObjs()
 				objIdx = static_cast<uint8_t>(ItemModelType::box);
 				break;
 			}
+			case TileType::GATE:
+			{
+				GateTile *objTile = (GateTile *)tile;
+				objIdx = static_cast<uint8_t>(objTile->getModel());
+				break;
+			}
+			case TileType::KEY_DROP:
+			{
+				KeyDropTile *objTile = (KeyDropTile *)tile;
+				objIdx = static_cast<uint8_t>(objTile->getModel());
+				break;
+			}
+			case TileType::OBJECT:
+			{
+				ObjectTile *objTile = (ObjectTile *)tile;
+				objIdx = static_cast<uint8_t>(objTile->getModel());
+				break;
+			}
 			default:
-				objIdx = envObjsMap[z][x];
+				objIdx = 0;
 				break;
 			}
 
@@ -411,39 +455,146 @@ void resetEnvObjs()
 				continue;
 			}
 
+			const auto &settings = *(itemModels[objIdx].settings);
+
 			// Try to turn the object away from the wall
 			float angle = 0.f;
-			auto wall = tile->getWall();
-			if (wall & DirectionBitmask::southSide) {
-				angle = glm::pi<float>();
-			}
-			else if (wall & DirectionBitmask::westSide) {
-				angle = glm::half_pi<float>();
-			}
-			else if (wall & DirectionBitmask::eastSide) {
-				angle = -glm::half_pi<float>();
+			if (settings.wallRotate) {
+				auto wall = tile->getWall();
+				if (wall & DirectionBitmask::southSide) {
+					angle = glm::pi<float>();
+				}
+				else if (wall & DirectionBitmask::westSide) {
+					angle = glm::half_pi<float>();
+				}
+				else if (wall & DirectionBitmask::eastSide) {
+					angle = -glm::half_pi<float>();
+				}
 			}
 
-			const auto &settings = *(itemModels[objIdx].settings);
 			glm::vec3 tileTranslate;
 			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
 			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
 			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
-			auto rotate = glm::rotate(glm::translate(glm::mat4(1.f), tileTranslate), angle, glm::vec3(0.f, 1.f, 0.f));
+
+			auto tileTranslateMat = glm::translate(glm::mat4(1.f), tileTranslate);
+			auto rotate = glm::rotate(tileTranslateMat, angle, glm::vec3(0.f, 1.f, 0.f));
+
 			glm::vec3 modelTranslate = settings.translate;
 			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
 			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
-			row[x] = new Transform(glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale)));
+
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+
+			auto modelAngles = settings.rotation;
+			auto modelRotate = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+
+			row[x] = new Transform(modelRotate);
 			row[x]->addChild(itemModels[objIdx].geometry);
 			envObjsTransform->addChild(row[x]);
 		}
 	}
 }
 
+void resetItems()
+{
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
+
+	if (!tileLayout.size()) {
+		cerr << "resetItems(): map is empty\n";
+		return;
+	}
+
+	if (allItemsTransform == nullptr) {
+		allItemsTransform = new Transform(glm::mat4(1.f));
+		root->addChild(allItemsTransform);
+	} 
+	else {
+		allItemsTransform->removeAllChildren();
+	}
+
+	itemTransforms.resize(floorArray.size());
+	for (size_t z = 0; z < itemTransforms.size(); z++) {
+		auto &row = itemTransforms[z];
+		row.resize(floorArray[z].size());
+		for (size_t x = 0; x < row.size(); x++) {
+			const auto tile = tileLayout[z][x];
+
+			ItemModelType modelType = tile->getItem();
+			uint8_t objIdx = static_cast<uint8_t>(modelType);
+			
+			if (modelType == ItemModelType::EMPTY || !itemModels[objIdx].settings) {
+				row[x].transform = nullptr;
+				row[x].animating = nullptr;
+				row[x].type = modelType;
+				continue;
+			}
+
+			const auto &settings = *(itemModels[objIdx].settings);
+
+			// Try to turn the object away from the wall
+			float angle = 0.f;
+			if (settings.wallRotate) {
+				auto wall = tile->getWall();
+				if (wall & DirectionBitmask::southSide) {
+					angle = glm::pi<float>();
+				}
+				else if (wall & DirectionBitmask::westSide) {
+					angle = glm::half_pi<float>();
+				}
+				else if (wall & DirectionBitmask::eastSide) {
+					angle = -glm::half_pi<float>();
+				}
+			}
+
+			glm::vec3 tileTranslate;
+			tileTranslate.x = (x + 0.5f) * TILE_STRIDE * TILE_SCALE;
+			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
+			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
+
+			if (tile->getTileType() == TileType::OBJECT) {
+				if (((ObjectTile *)tile)->getModel() == ItemModelType::table) {
+					tileTranslate.y += 9.25f;
+				}
+			}
+
+			auto tileTranslateMat = glm::translate(glm::mat4(1.f), tileTranslate);
+			auto rotate = glm::rotate(tileTranslateMat, angle, glm::vec3(0.f, 1.f, 0.f));
+
+			glm::vec3 modelTranslate = settings.translate;
+			modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+
+#define ITEM_ROTATION_PERIOD 5.25
+			auto t = glfwGetTime();
+			float timeAngle = fmod(t, ITEM_ROTATION_PERIOD) * glm::two_pi<double>() / ITEM_ROTATION_PERIOD;
+
+			auto modelAngles = settings.rotation;
+			auto modelRotate = glm::rotate(scale, modelAngles.y + timeAngle, glm::vec3(0.f, 1.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+			modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+
+			row[x].animating = nullptr;
+			row[x].type = modelType;
+			row[x].transform = new Transform(modelRotate);
+			row[x].transform->addChild(itemModels[objIdx].geometry);
+			allItemsTransform->addChild(row[x].transform);
+		}
+	}
+}
+
 void updateBoxVisibility()
 {
-	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	if (!sharedClient || !sharedClient->getGameData())
+		return;
+
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
 		return;
@@ -467,7 +618,10 @@ void reloadMap()
 {
 	deallocFloor();
 
-	const auto &tileLayout = client->getGameData()->clientTileLayout;
+	if (!sharedClient || !sharedClient->getGameData())
+		return;
+
+	const auto &tileLayout = sharedClient->getGameData()->clientTileLayout;
 
 	if (!tileLayout.size()) {
 		cerr << "reloadMap(): map is empty\n";
@@ -541,9 +695,9 @@ void reloadMap()
 				// Calculate the altitude of the wall
 				int height = 1;
 				/*if (z == 0 || z != clippedZ) {
-					height = client->heights[clippedZ][x];
+					height = sharedClient->heights[clippedZ][x];
 				} else {
-					height = (client->heights[z - 1][x] + client->heights[z][x]) / 2;
+					height = (sharedClient->heights[z - 1][x] + sharedClient->heights[z][x]) / 2;
 				}*/
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
@@ -570,10 +724,10 @@ void reloadMap()
 				// Calculate the altitude of the wall
 				int height = 1;
 				/*if (x == 0 || x != clippedX) {
-					height = client->heights[z][clippedX];
+					height = sharedClient->heights[z][clippedX];
 				}
 				else {
-					height = (client->heights[z][x - 1] + client->heights[z][x]) / 2;
+					height = (sharedClient->heights[z][x - 1] + sharedClient->heights[z][x]) / 2;
 				}*/
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
@@ -589,6 +743,7 @@ void reloadMap()
 	}
 
 	resetEnvObjs();
+	resetItems();
 }
 
 void deallocFloor()
@@ -618,24 +773,27 @@ glm::vec3 directionBitmaskToVector(int bitmask) {
 
 void SendPackets()
 {
+	if (!sharedClient)
+		return;
+
 	auto dir = directionBitmaskToVector(directions);
 
 	if (dir.z > 0) {
-		client->sendPackets(FORWARD_EVENT);
+		sharedClient->sendPackets(FORWARD_EVENT);
 	}
 	else if (dir.z < 0) {
-		client->sendPackets(BACKWARD_EVENT);
+		sharedClient->sendPackets(BACKWARD_EVENT);
 	}
 
 	if (dir.x > 0) {
-		client->sendPackets(LEFT_EVENT);
+		sharedClient->sendPackets(LEFT_EVENT);
 	}
 	else if (dir.x < 0) {
-		client->sendPackets(RIGHT_EVENT);
+		sharedClient->sendPackets(RIGHT_EVENT);
 	}
 }
 
-void MovePlayers()
+void InGameGraphicsEngine::MovePlayers()
 {
 	// Sanity guard condition
 	auto myState = getMyState();
@@ -645,8 +803,8 @@ void MovePlayers()
 
 	const auto myOldPos = myState->position;
 
-	const int myID = client->getMyID();
-	const auto &playersMap = client->getGameData()->players;
+	const int myID = sharedClient->getMyID();
+	const auto &playersMap = sharedClient->getGameData()->players;
 	for (auto &state : players) {
 		const auto oldPos = state.position;
 
@@ -656,6 +814,11 @@ void MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 		}
+
+		// if the position changed, tell the object that it is indeed moving
+		state.moving <<= 1;
+		state.moving |= (state.position != oldPos);
+
 #ifdef DUMMY_ID
 		else if (state.id == DUMMY_ID) {
 			state.position = myState->position;
@@ -671,6 +834,7 @@ void MovePlayers()
 		bool changedTargetAngle = false;
 		if (state.id != myID) {
 			const auto delta = state.position - oldPos;
+
 			if (abs(delta.x) > 0.0001 || abs(delta.z) > 0.0001) {
 				state.targetAngle = glm::atan(delta.x, delta.z);
 				changedTargetAngle = true;
@@ -711,7 +875,7 @@ void MovePlayers()
 	UpdateView();
 }
 
-void MoveCamera(const glm::vec3 &newPlayerPos) {
+void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 	cam_look_at.x = newPlayerPos.x;
 	cam_look_at.z = newPlayerPos.z;
 	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
@@ -721,7 +885,75 @@ void MoveCamera(const glm::vec3 &newPlayerPos) {
 	UpdateView();
 }
 
-void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+ItemModelType ModelTypeForWT(WinType wt) {
+	switch (wt) {
+	case WinType::DOOR:
+		return ItemModelType::door;
+	case WinType::TOILET:
+		return ItemModelType::window;
+	case WinType::VENT:
+		return ItemModelType::vent;
+	default:
+		return ItemModelType::EMPTY;
+	}
+}
+
+static glm::vec3 LookAtForWT(WinType wt) {
+	switch (wt) {
+	case WinType::CHEF_WIN:
+	{
+		for (auto &player : players) {
+			if (player.geometryIdx == static_cast<unsigned>(ModelType::CHEF)) {
+				return player.position;
+			}
+		}
+		break;
+	}
+	case WinType::DOOR:
+	case WinType::TOILET:
+	case WinType::VENT:
+	{
+		const auto modelType = ModelTypeForWT(wt);
+		const auto &tileLayout = sharedClient->getGameData()->getTileLayout();
+
+		for (unsigned z = 0; z < tileLayout.size(); ++z) {
+			const auto &row = tileLayout[z];
+			for (unsigned x = 0; x < row.size(); ++x) {
+				Tile *tile = row[x];
+				if (tile->getTileType() != TileType::GATE) {
+					continue;
+				}
+
+				GateTile *gate = (GateTile *)tile;
+				if (gate->getModel() == modelType) {
+					auto v = glm::vec3(x * TILE_STRIDE, TILE_LEVEL_OFFSET, z * TILE_STRIDE) * TILE_SCALE;
+					return v + glm::vec3(0.5f * TILE_STRIDE * TILE_SCALE, TILE_HEIGHT_ADJUST, 0.5f * TILE_STRIDE * TILE_SCALE);
+				}
+			}
+		}
+		break;
+	}
+	default:
+		return cam_look_at;
+	}
+}
+
+void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+	if (sharedClient && sharedClient->getGameData() && sharedClient->getGameData()->getWT() != WinType::NONE) {
+		auto look_target = LookAtForWT(sharedClient->getGameData()->getWT());
+		cam_look_at += (look_target - cam_look_at) * 0.3f;
+		auto cam_target = look_target + cam_angle;
+		cam_pos += (cam_target - cam_pos) * 0.15f;
+
+		UpdateView();
+
+		if (glm::distance(cam_target, cam_pos) < 0.001f) {
+			quit = true;
+		}
+
+		return;
+	}
+
 	auto screenPos = glm::project(newPlayerPos, glm::mat4(1.f), P * V, glm::vec4(0.f, 0.f, 1.f, 1.f));
 
 	// Make the coordinates range from -1 to 1
@@ -764,8 +996,116 @@ void resetIdempotentFlush()
 	alreadyFlushed = false;
 }
 
-void IdleCallback()
+void updateUIElements(GameData * gameData) {
+
+	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
+	std::map<int, Player*> players = gameData->getAllPlayers();
+	//check if animals are caught
+	//activates when animal is first in net.
+	for (auto it = players.begin(); it != players.end(); ++it) {
+		//std::cerr << "In caught loop" << "\n";
+		Player * currPlayer = it->second;
+		if (currPlayer->isCaught()) {
+			if (currPlayer->getModelType() == ModelType::CAT) {
+				uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
+			}
+			if (currPlayer->getModelType() == ModelType::DOG) {
+				uiCanvas->setVisible(uiCanvas->DOG_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->DOG_JAIL, true);
+			}
+			if (currPlayer->getModelType() == ModelType::RACOON) {
+				uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
+			}
+		}
+		else {
+			if (currPlayer->getModelType() == ModelType::CAT) {
+				uiCanvas->setVisible(uiCanvas->CAT_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->CAT_JAIL, false);
+			}
+			if (currPlayer->getModelType() == ModelType::DOG) {
+				uiCanvas->setVisible(uiCanvas->DOG_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->DOG_JAIL, false);
+			}
+			if (currPlayer->getModelType() == ModelType::RACOON) {
+				uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, false);
+			}
+		}
+	}
+
+	//check if current user is holding item
+	PlayerState * currState = getMyState();
+	Player * currPlayer = players[currState->id];
+	//items held by chef are the icons for animals
+	if (currPlayer->isChef()) {
+		if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
+			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::CAT) {
+			uiCanvas->setItem(UICanvas::CAT_ITEM);
+		}
+		else if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
+			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::DOG) {
+			uiCanvas->setItem(UICanvas::DOG_ITEM);
+		}
+		else if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
+			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::RACOON) {
+			uiCanvas->setItem(UICanvas::RACCOON_ITEM);
+		}
+	}
+	else {
+		if (currPlayer->getInventory() == ItemModelType::toiletPaper) {
+			uiCanvas->setItem(UICanvas::TOILET_PAPER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::rope) {
+			uiCanvas->setItem(UICanvas::ROPE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::plunger) {
+			uiCanvas->setItem(UICanvas::PLUNGER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::key1) {
+			uiCanvas->setItem(UICanvas::YELLOW_KEY_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::key2) {
+			uiCanvas->setItem(UICanvas::BLUE_KEY_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::key3) {
+			uiCanvas->setItem(UICanvas::GREEN_KEY_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::screwdriver1) {
+			uiCanvas->setItem(UICanvas::YELLOW_SCREWDRIVER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::screwdriver2) {
+			uiCanvas->setItem(UICanvas::GREEN_SCREWDRIVER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::screwdriver3) {
+			uiCanvas->setItem(UICanvas::RED_SCREWDRIVER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::cake) {
+			uiCanvas->setItem(UICanvas::CAKE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::apple) {
+			uiCanvas->setItem(UICanvas::APPLE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::orange) {
+			uiCanvas->setItem(UICanvas::ORANGE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::bananaPerfect) {
+			uiCanvas->setItem(UICanvas::BANANA_ITEM);
+		}
+		else {
+			uiCanvas->removeItems();
+		}
+	}
+
+	//update Goals
+}
+
+void InGameGraphicsEngine::IdleCallback()
 {
+	if (!sharedClient)
+		return;
+
 	/* TODO: waiting for server implementation */
 
 	if (clock() - elapsedTime > 1000.0 / 60)
@@ -773,8 +1113,8 @@ void IdleCallback()
 		elapsedTime = clock();
 		resetIdempotentFlush();
 		SendPackets();
-		client->update();
-		const auto gameData = client->getGameData();
+		sharedClient->update();
+		const auto gameData = sharedClient->getGameData();
 		if (gameData) {
 			updateBoxVisibility();
 
@@ -785,7 +1125,7 @@ void IdleCallback()
 #endif
 			const bool tilesChanged = (floorArray.size() != gameData->clientTileLayout.size());
 
-			const auto &playersMap = client->getGameData()->players;
+			const auto &playersMap = sharedClient->getGameData()->players;
 			for (auto &state : players) {
 #ifdef DUMMY_ID
 				if (state.id == DUMMY_ID) {
@@ -811,6 +1151,10 @@ void IdleCallback()
 				idempotentFlush();
 				reloadMap();
 			}
+			else {
+				idempotentFlush();
+				resetItems();
+			}
 
 			if (playersChanged) {
 				idempotentFlush();
@@ -822,47 +1166,17 @@ void IdleCallback()
 		//server->update();
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
-		for (auto &model : playerModels) {
-			model.object->Update();
+		for (auto &playerState : players) {
+			playerModels[playerState.geometryIdx].object->Update(playerState.moving != 0);
 		}
-		uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
-		std::map<int, Player*> players = gameData->getAllPlayers();
-		//check if animals are caught
-		for (auto it = players.begin(); it != players.end(); ++it) {
-			//std::cerr << "In caught loop" << "\n";
-			Player * currPlayer = it->second;
-			if (currPlayer->isCaught()) {
-				if (currPlayer->getModelType() == ModelType::CAT) {
-					uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
-					uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
-				}
-				if (currPlayer->getModelType() == ModelType::DOG) {
-					uiCanvas->setVisible(uiCanvas->DOG_HAPPY, false);
-					uiCanvas->setVisible(uiCanvas->DOG_JAIL, true);
-				}
-				if (currPlayer->getModelType() == ModelType::RACOON) {
-					uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
-					uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
-				}
-			}
-			else {
-				if (currPlayer->getModelType() == ModelType::CAT) {
-					uiCanvas->setVisible(uiCanvas->CAT_HAPPY, true);
-					uiCanvas->setVisible(uiCanvas->CAT_JAIL, false);
-				}
-				if (currPlayer->getModelType() == ModelType::DOG) {
-					uiCanvas->setVisible(uiCanvas->DOG_HAPPY, true);
-					uiCanvas->setVisible(uiCanvas->DOG_JAIL, false);
-				}
-				if (currPlayer->getModelType() == ModelType::RACOON) {
-					uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, true);
-					uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, false);
-				}
-			}
-		}
+
+		updateUIElements(gameData);
+
 	}
 
 }
+
+
 
 void DisplayCallback(GLFWwindow* window)
 {
@@ -969,11 +1283,12 @@ void LoadModels()
 }
 
 
-InGameGraphicsEngine::InGameGraphicsEngine(ClientGame *newClient)
+InGameGraphicsEngine::InGameGraphicsEngine()
 {
-	client = newClient;
 	calledMainLoopBegin = false;
 	fullyLoaded = false;
+	quit = false;
+	needsRenderingSetup = true;
 }
 
 
@@ -1001,13 +1316,13 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	//light->toggleNormalShading();
 
-	loadMapArray(envObjsMap, "../../maps/tinytinymap/env_objs.txt");
-
 	root = new Transform(glm::mat4(1.0));
 	allPlayersNode = new Transform(glm::mat4(1.0));
 	root->addChild(allPlayersNode);
 
 	uiCanvas = new UICanvas(uiShaderProgram);
+
+	needsRenderingSetup = true;
 
 	auto finish = [](bool *finishedFlag) {
 		LoadModels();
@@ -1069,31 +1384,36 @@ void InGameGraphicsEngine::CleanUp()
 void InGameGraphicsEngine::MainLoopBegin()
 {
 	calledMainLoopBegin = true;
+	quit = false;
 
-	using namespace std::chrono;
-	auto setupStart = high_resolution_clock::now();
+	if (needsRenderingSetup) {
+		using namespace std::chrono;
+		auto setupStart = high_resolution_clock::now();
 
-	cout << "Calling RenderingSetup() on objects...\n ";
-	
-	tileModel->RenderingSetup();
-	wallModel->RenderingSetup();
-	for (auto &model : playerModels) {
-		if (model.object)
-			model.object->RenderingSetup();
+		cout << "Calling RenderingSetup() on objects...\n ";
+
+		tileModel->RenderingSetup();
+		wallModel->RenderingSetup();
+		for (auto &model : playerModels) {
+			if (model.object)
+				model.object->RenderingSetup();
+		}
+		for (auto &model : itemModels) {
+			if (model.object)
+				model.object->RenderingSetup();
+		}
+
+		auto setupEnd = high_resolution_clock::now();
+		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
+		cout << "\tfinished RenderingSetup() in " << setupDuration.count() << " seconds\n";
+
+		needsRenderingSetup = false;
 	}
-	for (auto &model : itemModels) {
-		if (model.object)
-			model.object->RenderingSetup();
-	}
-
-	auto setupEnd = high_resolution_clock::now();
-	std::chrono::duration<float> setupDuration = setupEnd - setupStart;
-	cout << "\tfinished RenderingSetup() in " << setupDuration.count() << " seconds\n";
 
 	UpdateView();
 	MoveCamera(glm::vec3(0.f));
 
-	const auto gameData = client->getGameData();
+	const auto gameData = sharedClient->getGameData();
 	gameData->startGameClock();
 
 	// Set clear color
@@ -1102,7 +1422,8 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 void InGameGraphicsEngine::MainLoopEnd()
 {
-
+	calledMainLoopBegin = false;
+	quit = false;
 }
 
 void InGameGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -1126,11 +1447,11 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 	{
 		// TODO: Remove the following if block; meant just to test sound
 		// and show how to use the soundSystem
-		if (!(soundSystem->shouldIgnoreSound())) {
+		/*if (!(soundSystem->shouldIgnoreSound())) {
 			fprintf(stdout, "before playSound: %d\n", sound_toilet);
 			// soundSystem->playSound(sound_toilet);
 			soundSystem->playSoundNoOverlap(sound_toilet);
-		}
+		}*/
 
 		// Check if escape was pressed
 		if (key == GLFW_KEY_ESCAPE)
@@ -1139,18 +1460,6 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
-		if (key == GLFW_KEY_M) {
-			uiCanvas->setAngerRatio(1.0f);
-			uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
-			uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
-		}
-
-
-		if (key == GLFW_KEY_A) {
-			for (auto &model : playerModels) {
-				model.object->ToNextKeyframe();
-			}
-		}
 
 		if (key == GLFW_KEY_UP) {
 			directions |= DirectionBitmask::northSide;
@@ -1170,44 +1479,44 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_SPACE) {
 			// interact key press
-			client->sendPackets(INTERACT_EVENT);
+			sharedClient->sendPackets(INTERACT_EVENT);
 		}
 
 		if (key == GLFW_KEY_ENTER) {
 			// interact key press
-			client->sendPackets(READY_EVENT);
+			sharedClient->sendPackets(READY_EVENT);
 		}
 		if (key == GLFW_KEY_O) {
 			// interact key press
-			client->sendPackets(START_EVENT);
+			sharedClient->sendPackets(START_EVENT);
 		}
 		if (key == GLFW_KEY_D) {
-			client->sendPackets(DROP_EVENT);
+			sharedClient->sendPackets(DROP_EVENT);
 		}
 		if (key == GLFW_KEY_F) {
-			client->sendPackets(POWERUP_EVENT);
+			sharedClient->sendPackets(POWERUP_EVENT);
 		}
 		if (key == GLFW_KEY_H) {
 			// interact key press
-			client->sendPackets(HIDE_EVENT);
+			sharedClient->sendPackets(HIDE_EVENT);
 		}
 		if (key == GLFW_KEY_0) {
-			client->sendPackets(SELECT0_EVENT);
+			sharedClient->sendPackets(SELECT0_EVENT);
 		}
 		if (key == GLFW_KEY_1) {
-			client->sendPackets(SELECT1_EVENT);
+			sharedClient->sendPackets(SELECT1_EVENT);
 		}
 		if (key == GLFW_KEY_2) {
-			client->sendPackets(SELECT2_EVENT);
+			sharedClient->sendPackets(SELECT2_EVENT);
 		}
 		if (key == GLFW_KEY_3) {
-			client->sendPackets(SELECT3_EVENT);
+			sharedClient->sendPackets(SELECT3_EVENT);
 		}
 		if (key == GLFW_KEY_4) {
-			client->sendPackets(SELECT4_EVENT);
+			sharedClient->sendPackets(SELECT4_EVENT);
 		}
 		if (key == GLFW_KEY_P) {
-			client->sendPackets(RESET_EVENT);
+			sharedClient->sendPackets(RESET_EVENT);
 		}
 
 	}
@@ -1230,12 +1539,12 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_SPACE) {
 			// interact key release
-			client->sendPackets(RELEASE_EVENT);
+			sharedClient->sendPackets(RELEASE_EVENT);
 		}
 
 		if (key == GLFW_KEY_F) {
 			// interact key release
-			client->sendPackets(RELEASE_EVENT);
+			sharedClient->sendPackets(RELEASE_EVENT);
 		}
 	}
 }
@@ -1296,3 +1605,7 @@ void InGameGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	IdleCallback();
 }
 
+bool InGameGraphicsEngine::ShouldFadeout()
+{
+	return quit;
+}

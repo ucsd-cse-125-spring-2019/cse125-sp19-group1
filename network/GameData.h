@@ -24,6 +24,8 @@
 
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
 
+enum class WinType { NONE = 0, DOOR = 1, TOILET = 2, VENT = 3, CHEF_WIN = 4 };
+
 class GameData
 {
 public:
@@ -71,6 +73,9 @@ public:
 	//double timeToSwingNet = 0.5;
 	//double timeToOpenJail = 1.5;
 
+	WinType wt = WinType::NONE;
+	WinType getWT() { return wt; }
+	void setWT(WinType newWT) { wt = newWT; };
 
 	double abilityChargeTime = 0.7;
 	double maxGhostTime = 7;
@@ -118,6 +123,7 @@ public:
 	Tile * getAdjacentTile(Location loc, Direction dir, Location & tileLoc);
 	JailTile * getAdjacentJailTile(Location loc, Direction dir, Location & tileLoc);
 	ObjectTile * getObjectTile(Location loc);
+
 protected:
 	bool beginCountdown;
 	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;

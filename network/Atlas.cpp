@@ -158,9 +158,9 @@ Atlas::Atlas()
 			case TileType::KEY_DROP: 
 			{
 				int num = std::stoi(keyDepositNum);
-				Key key1 = static_cast<Key>(num * 1);
-				Key key2 = static_cast<Key>(num * 2);
-				Key key3 = static_cast<Key>(num * 3);
+				Key key1 = static_cast<Key>((num - 1) * 3 + 1);
+				Key key2 = static_cast<Key>((num - 1) * 3 + 2);
+				Key key3 = static_cast<Key>((num - 1) * 3 + 3);
 				ItemModelType model = ItemModelType::apple;
 				switch (num)
 				{

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\graphics\GraphicsClient\ItemModelType.h" />
+	<ClInclude Include="..\..\graphics\GraphicsClient\SoundSystem.h" />
     <ClInclude Include="..\..\network\Atlas.h" />
     <ClInclude Include="..\..\network\BoxTile.h" />
     <ClInclude Include="..\..\network\Chef.h" />
@@ -46,6 +47,7 @@
     <ClInclude Include="..\..\network\Walls.h" />
   </ItemGroup>
   <ItemGroup>
+      <ClCompile Include="..\..\graphics\GraphicsClient\SoundSystem.cpp" />
     <ClCompile Include="..\..\network\Atlas.cpp" />
     <ClCompile Include="..\..\network\ClientGame.cpp" />
     <ClCompile Include="..\..\network\ClientNetwork.cpp" />

@@ -34,6 +34,8 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
+	encodedData << "winType: " << (int) getWT() << std::endl;
+	
 	//std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
@@ -146,7 +148,7 @@ void GameData::decodeTileLayout(std::string value)
 					tileRow.push_back(tmp);
 					break;
 				case TileType::JAIL: // change to JailTile
-					tmp = new Tile();
+					tmp = new JailTile();
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;
@@ -161,7 +163,7 @@ void GameData::decodeTileLayout(std::string value)
 					tileRow.push_back(tmp);
 					break;
 				case TileType::KEY_DROP: // change to KeyDropTile
-					tmp = new Tile();
+					tmp = new KeyDropTile();
 					tmp->decodeTileData(p.second);
 					tileRow.push_back(tmp);
 					break;
@@ -239,6 +241,9 @@ void GameData::decodeGameData(const char * data)
 		}
 		else if (p.first == "chefVision") {
 			chefVision = std::stoi(value);
+		}
+		else if (p.first == "winType") {
+			wt = (WinType)std::stoi(value);
 		}
 		else
 		{

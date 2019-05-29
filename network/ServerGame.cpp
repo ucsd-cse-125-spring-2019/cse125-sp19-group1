@@ -283,6 +283,7 @@ void ServerGame::receiveFromClients()
 									}
 									if (chefWin)
 									{
+										gameData->setWT(WinType::CHEF_WIN);
 										std::cout << "CHEF WIN" << std::endl;
 									}
 								}
@@ -350,6 +351,17 @@ void ServerGame::receiveFromClients()
 									{
 										if (player->getInventory() == ItemModelType::cake)
 										{
+											int gateNum = gameData->getGateTile(loc)->getGateNum();
+											if (gateNum == 1) { //door
+												gameData->setWT(WinType::DOOR);
+											}
+											else if (gateNum == 2) { //bathroom
+												gameData->setWT(WinType::TOILET);
+											}
+											else if (gateNum == 3) { //vent
+												gameData->setWT(WinType::VENT);
+											}
+
 											animalWin = true;
 											std::cout << "ANIMAL WIN" << std::endl;
 										}
@@ -631,6 +643,7 @@ void ServerGame::receiveFromClients()
 					std::cout << "CALLING RESET" << std::endl;
 					chefWin = false;
 					animalWin = false;
+					gameData->setWT(WinType::NONE);
 					resetGame();
 				}
 				break;

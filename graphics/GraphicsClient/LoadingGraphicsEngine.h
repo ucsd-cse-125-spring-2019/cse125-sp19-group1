@@ -1,11 +1,11 @@
 #pragma once
-#include "AbstractGraphicsEngine.h"
+#include "TwoDeeGraphicsEngine.h"
 
-class LoadingGraphicsEngine : public AbstractGraphicsEngine
+class FBXObject;
+
+class LoadingGraphicsEngine : public TwoDeeGraphicsEngine
 {
 public:
-	float loadingAlpha;
-
 	LoadingGraphicsEngine();
 	~LoadingGraphicsEngine();
 
@@ -20,5 +20,12 @@ public:
 	virtual void MouseWheelCallback(GLFWwindow * window, double xoffset, double yoffset);
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 	virtual void MainLoopCallback(GLFWwindow * window);
+
+protected:
+	void drawDot(glm::vec3 position, float alpha);
+	void drawPaw(glm::vec3 position, float alpha, float angle);
+
+	FBXObject *dotObj = nullptr;
+	FBXObject *pawObj = nullptr;
 };
 
