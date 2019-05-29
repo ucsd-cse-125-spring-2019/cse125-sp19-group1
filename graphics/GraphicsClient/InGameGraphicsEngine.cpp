@@ -995,6 +995,112 @@ void resetIdempotentFlush()
 {
 	alreadyFlushed = false;
 }
+
+void updateUIElements(GameData * gameData) {
+
+	uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
+	std::map<int, Player*> players = gameData->getAllPlayers();
+	//check if animals are caught
+	//activates when animal is first in net.
+	for (auto it = players.begin(); it != players.end(); ++it) {
+		//std::cerr << "In caught loop" << "\n";
+		Player * currPlayer = it->second;
+		if (currPlayer->isCaught()) {
+			if (currPlayer->getModelType() == ModelType::CAT) {
+				uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
+			}
+			if (currPlayer->getModelType() == ModelType::DOG) {
+				uiCanvas->setVisible(uiCanvas->DOG_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->DOG_JAIL, true);
+			}
+			if (currPlayer->getModelType() == ModelType::RACOON) {
+				uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
+				uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
+			}
+		}
+		else {
+			if (currPlayer->getModelType() == ModelType::CAT) {
+				uiCanvas->setVisible(uiCanvas->CAT_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->CAT_JAIL, false);
+			}
+			if (currPlayer->getModelType() == ModelType::DOG) {
+				uiCanvas->setVisible(uiCanvas->DOG_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->DOG_JAIL, false);
+			}
+			if (currPlayer->getModelType() == ModelType::RACOON) {
+				uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, true);
+				uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, false);
+			}
+		}
+	}
+
+	//check if current user is holding item
+	PlayerState * currState = getMyState();
+	Player * currPlayer = players[currState->id];
+	//items held by chef are the icons for animals
+	if (currPlayer->isChef()) {
+		if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
+			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::CAT) {
+			uiCanvas->setItem(UICanvas::CAT_ITEM);
+		}
+		else if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
+			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::DOG) {
+			uiCanvas->setItem(UICanvas::DOG_ITEM);
+		}
+		else if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
+			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::RACOON) {
+			uiCanvas->setItem(UICanvas::RACCOON_ITEM);
+		}
+	}
+	else {
+		if (currPlayer->getInventory() == ItemModelType::toiletPaper) {
+			uiCanvas->setItem(UICanvas::TOILET_PAPER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::rope) {
+			uiCanvas->setItem(UICanvas::ROPE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::plunger) {
+			uiCanvas->setItem(UICanvas::PLUNGER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::key1) {
+			uiCanvas->setItem(UICanvas::YELLOW_KEY_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::key2) {
+			uiCanvas->setItem(UICanvas::BLUE_KEY_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::key3) {
+			uiCanvas->setItem(UICanvas::GREEN_KEY_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::screwdriver1) {
+			uiCanvas->setItem(UICanvas::YELLOW_SCREWDRIVER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::screwdriver2) {
+			uiCanvas->setItem(UICanvas::GREEN_SCREWDRIVER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::screwdriver3) {
+			uiCanvas->setItem(UICanvas::RED_SCREWDRIVER_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::cake) {
+			uiCanvas->setItem(UICanvas::CAKE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::apple) {
+			uiCanvas->setItem(UICanvas::APPLE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::orange) {
+			uiCanvas->setItem(UICanvas::ORANGE_ITEM);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::bananaPerfect) {
+			uiCanvas->setItem(UICanvas::BANANA_ITEM);
+		}
+		else {
+			uiCanvas->removeItems();
+		}
+	}
+
+	//update Goals
+}
+
 void InGameGraphicsEngine::IdleCallback()
 {
 	if (!sharedClient)
@@ -1063,44 +1169,14 @@ void InGameGraphicsEngine::IdleCallback()
 		for (auto &playerState : players) {
 			playerModels[playerState.geometryIdx].object->Update(playerState.moving != 0);
 		}
-		uiCanvas->setAngerRatio((float)gameData->getGameClock() / 100.0f);
-		std::map<int, Player*> players = gameData->getAllPlayers();
-		//check if animals are caught
-		for (auto it = players.begin(); it != players.end(); ++it) {
-			//std::cerr << "In caught loop" << "\n";
-			Player * currPlayer = it->second;
-			if (currPlayer->isCaught()) {
-				if (currPlayer->getModelType() == ModelType::CAT) {
-					uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
-					uiCanvas->setVisible(uiCanvas->CAT_JAIL, true);
-				}
-				if (currPlayer->getModelType() == ModelType::DOG) {
-					uiCanvas->setVisible(uiCanvas->DOG_HAPPY, false);
-					uiCanvas->setVisible(uiCanvas->DOG_JAIL, true);
-				}
-				if (currPlayer->getModelType() == ModelType::RACOON) {
-					uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
-					uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
-				}
-			}
-			else {
-				if (currPlayer->getModelType() == ModelType::CAT) {
-					uiCanvas->setVisible(uiCanvas->CAT_HAPPY, true);
-					uiCanvas->setVisible(uiCanvas->CAT_JAIL, false);
-				}
-				if (currPlayer->getModelType() == ModelType::DOG) {
-					uiCanvas->setVisible(uiCanvas->DOG_HAPPY, true);
-					uiCanvas->setVisible(uiCanvas->DOG_JAIL, false);
-				}
-				if (currPlayer->getModelType() == ModelType::RACOON) {
-					uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, true);
-					uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, false);
-				}
-			}
-		}
+
+		updateUIElements(gameData);
+
 	}
 
 }
+
+
 
 void DisplayCallback(GLFWwindow* window)
 {
@@ -1384,11 +1460,6 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
-		if (key == GLFW_KEY_M) {
-			uiCanvas->setAngerRatio(1.0f);
-			uiCanvas->setVisible(uiCanvas->RACCOON_HAPPY, false);
-			uiCanvas->setVisible(uiCanvas->RACCOON_JAIL, true);
-		}
 
 		if (key == GLFW_KEY_UP) {
 			directions |= DirectionBitmask::northSide;
