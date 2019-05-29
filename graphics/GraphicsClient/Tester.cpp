@@ -273,14 +273,14 @@ int main(void)
 		auto start = high_resolution_clock::now();
 
 		if (previousEngine) {
-#define CROSSFADE_DURATION 0.75
+#define CROSSFADE_DURATION 0.5
 			double delta = glfwGetTime() - crossfadeStart;
 			if (delta < CROSSFADE_DURATION) {
 				if (previousEngine != inGameEngine) {
-					previousEngine->screenAlpha = 1.f - delta / CROSSFADE_DURATION;
+					previousEngine->screenAlpha = tanh((1.0 - delta / CROSSFADE_DURATION) * 5.0 - 2.5) * 0.5 + 0.5;
 				}
 				else {
-					currentEngine->screenAlpha = delta / CROSSFADE_DURATION;
+					currentEngine->screenAlpha = tanh((delta / CROSSFADE_DURATION) * 5.0 - 2.5) * 0.5 + 0.5;
 				}
 			}
 			else {
@@ -301,7 +301,8 @@ int main(void)
 				crossfadeStart = glfwGetTime();
 			}
 		}
-		else if (currentEngine == lobbyEngine && lobbyEngine->ShouldFadeout()) {
+		
+		if (currentEngine == lobbyEngine && lobbyEngine->ShouldFadeout()) {
 			previousEngine = currentEngine;
 			currentEngine = startingCutscenes[0];
 			crossfadeStart = glfwGetTime();
