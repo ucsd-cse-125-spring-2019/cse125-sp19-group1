@@ -121,7 +121,9 @@
     <ClCompile Include="TwoDeeGraphicsEngine.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="LobbyGraphicsEngine.cpp" />
+    <ClCompile Include="LobbyGraphicsEngine.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h">
@@ -283,7 +285,9 @@
     <ClInclude Include="TwoDeeGraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LobbyGraphicsEngine.h" />
+    <ClInclude Include="LobbyGraphicsEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
