@@ -146,7 +146,7 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 	}
 
 	result = system->playSound(pSound, 0, false, &channel[2]);
-	channel[2]->setVolume(0.1f);
+	channel[2]->setVolume(0.05f);
 
 	if (result != FMOD_OK) {
 		if (result == FMOD_ERR_INVALID_PARAM) {

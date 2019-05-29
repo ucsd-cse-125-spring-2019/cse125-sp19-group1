@@ -19,6 +19,7 @@
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
 #define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
+#define SOUNDS_JAIL_UNLOCK	(SOUNDS_PATH "jail_rattle.mp3")
 #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
 
 static SoundSystem * soundSystem;
@@ -33,6 +34,7 @@ static Sound * sound_toilet;
 static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
+static Sound * sound_jail_unlock;
 static Sound * background_music;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
@@ -78,6 +80,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
 		soundSystem->createSoundEffect(&sound_window, SOUNDS_WINDOW);
 		soundSystem->createSoundEffect(&sound_yay, SOUNDS_YAY);
+		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
 		soundSystem->createBackgroundMusic(&background_music, BKG_MUSIC);
 		soundSystem->playBackgroundMusic(background_music, true);
 	}
@@ -184,10 +187,17 @@ void ClientGame::update()
 		}
 		else {
 			//opening box
-			if (player->getAction() == Action::OPEN_BOX) {
+			if (player->getAction() == Action::NONE) {
+				//soundSystem->releaseSound(sound_search_item);
+				//soundSystem->releaseSound(sound_door_unlock);
+				//soundSystem->releaseSound(sound_toilet);
+				//soundSystem->releaseSound(sound_vent_screw);
+				//soundSystem->releaseSound(sound_jail_unlock);
+			}
+			else if (player->getAction() == Action::OPEN_BOX) {
 				soundSystem->playSoundEffect(sound_search_item);
 			}
-			if (player->getAction() == Action::CONSTRUCT_GATE) {
+			else if (player->getAction() == Action::CONSTRUCT_GATE) {
 				int gateNum = gameData->getGateTile(loc)->getGateNum();
 				if (gateNum == 1) { //door
 					soundSystem->playSoundEffect(sound_door_unlock);
@@ -199,8 +209,8 @@ void ClientGame::update()
 					soundSystem->playSoundEffect(sound_vent_screw);
 				}
 			}
-			if (player->getAction() == Action::UNLOCK_JAIL) {
-				soundSystem->playSoundEffect(sound_door_unlock);
+			else if (player->getAction() == Action::UNLOCK_JAIL) {
+				soundSystem->playSoundEffect(sound_jail_unlock);
 			}
 
 			if (wt != WinType::NONE) {
