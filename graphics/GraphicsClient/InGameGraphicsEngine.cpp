@@ -1,5 +1,7 @@
 #include "InGameGraphicsEngine.h"
 
+#include "../../network/ClientGame.h"
+
 #include "ItemModelType.h"
 
 #include "Transform.h"
@@ -57,6 +59,7 @@
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
 #define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
+
 
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
@@ -190,8 +193,18 @@ static vector<vector<Transform *>> envObjs;
 static vector<vector<AnimatedItem>> itemTransforms;
 
 static SoundSystem * soundSystem;
-static Sound * sound_toilet;
+static Sound * sound_door;
+static Sound * sound_door_unlock;
+static Sound * sound_found_item;
+static Sound * sound_net;
+static Sound * sound_raccoon_up;
+static Sound * sound_raccoon_down;
 static Sound * sound_search_item;
+static Sound * sound_toilet;
+static Sound * sound_vent_screw;
+static Sound * sound_window;
+static Sound * sound_yay;
+
 
 extern ClientGame * sharedClient;
 
@@ -1360,11 +1373,11 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 	{
 		// TODO: Remove the following if block; meant just to test sound
 		// and show how to use the soundSystem
-		if (!(soundSystem->shouldIgnoreSound())) {
+		/*if (!(soundSystem->shouldIgnoreSound())) {
 			fprintf(stdout, "before playSound: %d\n", sound_toilet);
 			// soundSystem->playSound(sound_toilet);
 			soundSystem->playSoundNoOverlap(sound_toilet);
-		}
+		}*/
 
 		// Check if escape was pressed
 		if (key == GLFW_KEY_ESCAPE)

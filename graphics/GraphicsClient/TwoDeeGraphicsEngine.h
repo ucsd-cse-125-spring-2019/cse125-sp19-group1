@@ -1,12 +1,15 @@
 #pragma once
-
 #include "AbstractGraphicsEngine.h"
 
-class InGameGraphicsEngine : public AbstractGraphicsEngine
+class FBXObject;
+
+FBXObject * createObjectForTexture(const char *texturePath);
+
+class TwoDeeGraphicsEngine : public AbstractGraphicsEngine
 {
 public:
-	InGameGraphicsEngine();
-	~InGameGraphicsEngine();
+	TwoDeeGraphicsEngine();
+	~TwoDeeGraphicsEngine();
 
 	virtual void StartLoading();  // may launch a thread and return immediately
 	virtual void CleanUp();
@@ -20,5 +23,15 @@ public:
 	virtual void MouseButtonCallback(GLFWwindow * window, int button, int action, int mods);
 	virtual void MainLoopCallback(GLFWwindow * window);
 
+	virtual bool ShouldFadeout();
+
+protected:
+	const char * backgroundFilename = nullptr;
+
+	glm::mat4 orthoProj;
+	GLuint passthroughShaderProgram = 0;
+	GLuint uAlpha = 0;
+	FBXObject *backgroundObj = nullptr;
+	bool quit = false;
 };
 

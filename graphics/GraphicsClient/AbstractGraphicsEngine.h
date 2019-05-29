@@ -7,8 +7,9 @@ extern int windowWidth, windowHeight;
 class AbstractGraphicsEngine
 {
 public:
-	bool calledMainLoopBegin;
-	bool fullyLoaded;  // true if the engine has finished loading and is ready to render
+	bool calledMainLoopBegin = false;
+	bool fullyLoaded = false;  // true if the engine has finished loading and is ready to render
+	float screenAlpha = 1.0f;
 
 	virtual void StartLoading() = 0;  // may launch a thread and return immediately
 	virtual void CleanUp() = 0;

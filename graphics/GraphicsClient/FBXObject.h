@@ -39,6 +39,9 @@ private:
 	bool renderingIsSetup;
 	bool shouldAnimate;
 
+	int texWidth;
+	int texHeight;
+
 	// Luma values
 	glm::vec3 default_amb = glm::vec3(0.08725f, 0.0795f, 0.0245f);
 	glm::vec3 default_diff = glm::vec3(0.12164f, 0.10648f, 0.034648f);
@@ -67,6 +70,7 @@ public:
 	std::vector<glm::vec3> * GetNormals();
 	std::vector<unsigned int> * GetIndices();
 	std::vector<glm::vec2> * GetUVs();
+	void GetTextureSize(int &width, int &height);
 	// setters
 	void SetAmbient(glm::vec3 newAmb);
 	void SetDiffuse(glm::vec3 newDiff);

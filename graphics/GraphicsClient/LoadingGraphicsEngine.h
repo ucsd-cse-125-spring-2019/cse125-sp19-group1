@@ -1,12 +1,11 @@
 #pragma once
-#include "AbstractGraphicsEngine.h"
-#include "FBXObject.h"
+#include "TwoDeeGraphicsEngine.h"
 
-class LoadingGraphicsEngine : public AbstractGraphicsEngine
+class FBXObject;
+
+class LoadingGraphicsEngine : public TwoDeeGraphicsEngine
 {
 public:
-	float screenAlpha;
-
 	LoadingGraphicsEngine();
 	~LoadingGraphicsEngine();
 
@@ -25,11 +24,6 @@ public:
 protected:
 	void drawDot(glm::vec3 position, float alpha);
 	void drawPaw(glm::vec3 position, float alpha, float angle);
-
-	glm::mat4 orthoProj;
-	GLuint passthroughShaderProgram = 0;
-	GLuint uAlpha = 0;
-	FBXObject *backgroundObj = nullptr;
 
 	FBXObject *dotObj = nullptr;
 	FBXObject *pawObj = nullptr;

@@ -11,27 +11,14 @@
 #define DOT_TEX_PATH (TEXTURE_PATH "loadingscreen_dot.png")
 #define PAW_TEX_PATH (TEXTURE_PATH "loadingscreen_paw.png")
 
-#define CANVAS_PATH      "../Canvas/"
-#define CANVAS_MDL_PATH  (CANVAS_PATH "canvas2.fbx")
-
 #define PAW_ANGLE_OFFSET (-0.18f * glm::pi<float>())
 #define PAW_MAX_ALPHA (0.81f)
 
 static const glm::mat4 identityMat(1.f);
 
-static FBXObject * createObjectForTexture(const char *texturePath)
+LoadingGraphicsEngine::LoadingGraphicsEngine() : TwoDeeGraphicsEngine()
 {
-	auto obj = new FBXObject(CANVAS_MDL_PATH, texturePath, false, GL_LINEAR);
-	obj->SetDepthTest(false);
-
-	return obj;
-}
-
-LoadingGraphicsEngine::LoadingGraphicsEngine()
-{
-	fullyLoaded = false;
-	calledMainLoopBegin = false;
-	screenAlpha = 1.f;
+	backgroundFilename = BG_TEX_PATH;
 }
 
 LoadingGraphicsEngine::~LoadingGraphicsEngine()
@@ -41,15 +28,13 @@ LoadingGraphicsEngine::~LoadingGraphicsEngine()
 
 void LoadingGraphicsEngine::StartLoading()  // may launch a thread and return immediately
 {
-	fullyLoaded = true;
+	TwoDeeGraphicsEngine::StartLoading();
+
 }
 
 void LoadingGraphicsEngine::CleanUp()
 {
-	if (backgroundObj) {
-		delete backgroundObj;
-		backgroundObj = nullptr;
-	}
+	TwoDeeGraphicsEngine::CleanUp();
 
 	if (dotObj) {
 		delete dotObj;
@@ -60,34 +45,20 @@ void LoadingGraphicsEngine::CleanUp()
 		delete pawObj;
 		pawObj = nullptr;
 	}
-
-	if (passthroughShaderProgram) {
-		glDeleteShader(passthroughShaderProgram);
-		passthroughShaderProgram = 0;
-	}
 }
 
 void LoadingGraphicsEngine::MainLoopBegin()
 {
-	calledMainLoopBegin = true;
+	TwoDeeGraphicsEngine::MainLoopBegin();
 
-	passthroughShaderProgram = LoadShaders("./passthrough.vert", "./passthrough.frag");
-
-	backgroundObj = createObjectForTexture(BG_TEX_PATH);
 	dotObj = createObjectForTexture(DOT_TEX_PATH);
 	pawObj = createObjectForTexture(PAW_TEX_PATH);
-
-	// Set clear color
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
-
-	orthoProj = glm::ortho(-1.f, 1.f, -1.f, 1.f);
 }
 
 void LoadingGraphicsEngine::MainLoopEnd()
 {
-	CleanUp();
+	TwoDeeGraphicsEngine::MainLoopEnd();
 
-	calledMainLoopBegin = false;
 }
 
 void LoadingGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -132,13 +103,13 @@ static glm::mat4 pawTransform(glm::vec3 position, float angle)
 void LoadingGraphicsEngine::drawDot(glm::vec3 position, float alpha)
 {
 	glUniform1f(uAlpha, alpha);
-	dotObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * dotTransform(position));
+	dotObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, dotTransform(position));
 }
 
 void LoadingGraphicsEngine::drawPaw(glm::vec3 position, float alpha, float angle)
 {
 	glUniform1f(uAlpha, alpha);
-	pawObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * pawTransform(position, angle));
+	pawObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, pawTransform(position, angle));
 }
 
 static bool isOffscreen(glm::vec3 p)
@@ -150,25 +121,7 @@ static bool isOffscreen(glm::vec3 p)
 
 void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 {
-	glViewport(0, 0, windowWidth, windowHeight);
-	// Clear the color and depth buffers
-
-	if (screenAlpha >= 1.f) {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	}
-	
-	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-
-	glm::mat4 bgMat = glm::mat4(1.f);
-
-	glUseProgram(passthroughShaderProgram);
-
-	glUniform1f(uAlpha, screenAlpha);
-	backgroundObj->Draw(passthroughShaderProgram, &identityMat, &identityMat, orthoProj * bgMat);
+	TwoDeeGraphicsEngine::MainLoopCallback(window);
 
 	static const glm::vec3 dotPositions[] = {
 		glm::vec3(0.34125f, 0.072f, 0.f),

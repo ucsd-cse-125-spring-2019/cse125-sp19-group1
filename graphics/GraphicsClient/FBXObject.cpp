@@ -134,6 +134,10 @@ std::vector<glm::vec2> * FBXObject::GetUVs() {
 	return &uvs;
 }
 
+void FBXObject::GetTextureSize(int &width, int &height) {
+	width = texWidth;
+	height = texHeight;
+}
 
 void FBXObject::SetAmbient(glm::vec3 newAmb) {
 	ambient = glm::vec3(newAmb);
@@ -239,7 +243,7 @@ void FBXObject::RenderingSetup() {
 	SetBuffers();
 
 	// Load the corresponding model texture
-	texNum = loadTexture(texPath, nullptr, nullptr, filtering);
+	texNum = loadTexture(texPath, &texWidth, &texHeight, filtering);
 }
 
 void FBXObject::UpdateBuffers() {

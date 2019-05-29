@@ -5,6 +5,9 @@
 #include "Tester.h"
 #include "InGameGraphicsEngine.h"
 #include "LoadingGraphicsEngine.h"
+#include "LobbyGraphicsEngine.h"
+#include "CutsceneGraphicsEngine.h"
+
 #include "../../network/ServerGame.h"
 #include "../../network/ClientGame.h"
 
@@ -17,7 +20,13 @@ const char* window_title = GAME_NAME_SHORT;
 
 static InGameGraphicsEngine * inGameEngine = nullptr;
 static LoadingGraphicsEngine * loadingEngine = nullptr;
+static LobbyGraphicsEngine * lobbyEngine = nullptr;
+
+vector<CutsceneGraphicsEngine *> startingCutscenes;
+
 static AbstractGraphicsEngine * currentEngine = nullptr;
+static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
+
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
 
@@ -83,14 +92,32 @@ void PrintVersions()
 void Init()
 {
 	server = new ServerGame();
+	sharedClient = new ClientGame();
 	//_beginthread(serverLoop, 0, (void*)12);
 
 	inGameEngine = new InGameGraphicsEngine();
 	loadingEngine = new LoadingGraphicsEngine();
-	currentEngine = loadingEngine;
+	lobbyEngine = new LobbyGraphicsEngine();
+
+#define CUTSCENES_DIR "../2D Elements/"
+#define CUTSCENE_FILE(x) CUTSCENES_DIR "cutscene - " x ".png"
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake1_2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake2_2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake6_2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("instructions")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 1")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 3")));
+
+	currentEngine = lobbyEngine;
 
 	inGameEngine->StartLoading();
 	loadingEngine->StartLoading();
+	lobbyEngine->StartLoading();
+
+	for (auto cutscene : startingCutscenes) {
+		cutscene->StartLoading();
+	}
 }
 
 void serverLoop(void * args) {
@@ -114,6 +141,17 @@ void CleanUp() {
 		delete loadingEngine;
 		loadingEngine = nullptr;
 	}
+
+	if (lobbyEngine) {
+		lobbyEngine->CleanUp();
+		delete lobbyEngine;
+		lobbyEngine = nullptr;
+	}
+
+	for (auto cutscene : startingCutscenes) {
+		delete cutscene;
+	}
+	startingCutscenes.clear();
 }
 
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -226,7 +264,7 @@ int main(void)
 	// Initialize objects/pointers for rendering
 	Init();
 
-	double loadingFadeoutStart;
+	double crossfadeStart;
 
 	// Loop while GLFW window should stay open
 	while (!glfwWindowShouldClose(window))
@@ -235,43 +273,81 @@ int main(void)
 
 		auto start = high_resolution_clock::now();
 
-		if (currentEngine == loadingEngine) {
-			if (inGameEngine->fullyLoaded) {
-				if (!sharedClient) {
-					sharedClient = new ClientGame();
+		AbstractGraphicsEngine *targetEngine = nullptr;
+
+		if (previousEngine) {
+#define CROSSFADE_DURATION 0.5
+			double delta = glfwGetTime() - crossfadeStart;
+			if (delta < CROSSFADE_DURATION) {
+				if (previousEngine != inGameEngine) {
+					previousEngine->screenAlpha = tanh((1.0 - delta / CROSSFADE_DURATION) * 5.0 - 2.5) * 0.5 + 0.5;
 				}
-				
-				currentEngine = inGameEngine;
-				loadingFadeoutStart = glfwGetTime();
-			}
-		}
-		else if (loadingEngine) {
-#define LOADING_FADEOUT_TIME 1.35
-			double delta = glfwGetTime() - loadingFadeoutStart;
-			if (delta < LOADING_FADEOUT_TIME) {
-				loadingEngine->screenAlpha = 1.f - delta / LOADING_FADEOUT_TIME;
+				else {
+					currentEngine->screenAlpha = tanh((delta / CROSSFADE_DURATION) * 5.0 - 2.5) * 0.5 + 0.5;
+				}
 			}
 			else {
-				loadingEngine->screenAlpha = 0.f;
-				loadingEngine->MainLoopEnd();
-				delete loadingEngine;
-				loadingEngine = nullptr;
+				if (previousEngine != inGameEngine) {
+					previousEngine->screenAlpha = 0.f;
+				}
+				else {
+					currentEngine->screenAlpha = 1.f;
+				}
+				previousEngine->MainLoopEnd();
+				previousEngine = nullptr;
+			}
+		} 
+		else if (currentEngine == loadingEngine) {
+			if (inGameEngine->fullyLoaded) {
+				targetEngine = inGameEngine;
 			}
 		}
 		
+		if (currentEngine == lobbyEngine && lobbyEngine->ShouldFadeout()) {
+			targetEngine = startingCutscenes[0];
+		}
+		else {
+			for (unsigned i = 0; i < startingCutscenes.size(); ++i) {
+				auto engine = startingCutscenes[i];
+				if (currentEngine == engine && engine->ShouldFadeout()) {
+					if (i + 1 < startingCutscenes.size()) {
+						targetEngine = startingCutscenes[i + 1];
+					}
+					else {
+						targetEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
+					}
+					break;
+				}
+			}
+		}
+
+		if (targetEngine) {
+			if (previousEngine) {
+				previousEngine->MainLoopEnd();
+			}
+
+			previousEngine = currentEngine;
+			currentEngine = targetEngine;
+			crossfadeStart = glfwGetTime();
+		}
+
 		if (currentEngine && currentEngine->fullyLoaded) {
 			if (!currentEngine->calledMainLoopBegin) {
-				if (!sharedClient) {
-					sharedClient = new ClientGame();
-				}
-
 				currentEngine->ResizeCallback(window, windowWidth, windowHeight);
 				currentEngine->MainLoopBegin();
+
+				// start over on the crossfade because MainLoopBeing() may have taken significant time
+				crossfadeStart = glfwGetTime();
 			}
+
+			if (previousEngine && previousEngine == inGameEngine) {
+				previousEngine->MainLoopCallback(window);
+			}
+
 			currentEngine->MainLoopCallback(window);
 
-			if (loadingEngine && currentEngine != loadingEngine) {
-				loadingEngine->MainLoopCallback(window);
+			if (previousEngine && previousEngine != inGameEngine) {
+				previousEngine->MainLoopCallback(window);
 			}
 
 			// Swap buffers

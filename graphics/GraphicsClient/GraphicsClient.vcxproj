@@ -159,6 +159,7 @@
     <ClInclude Include="AnimationPlayer.h" />
     <ClInclude Include="animloader.h" />
     <ClInclude Include="Core.h" />
+    <ClInclude Include="CutsceneGraphicsEngine.h" />
     <ClInclude Include="DirLight.h" />
     <ClInclude Include="FBXObject.h" />
     <ClInclude Include="Bone.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="InGameGraphicsEngine.h" />
     <ClInclude Include="Keyframe.h" />
     <ClInclude Include="LoadingGraphicsEngine.h" />
+    <ClInclude Include="LobbyGraphicsEngine.h" />
     <ClInclude Include="lodepng.h" />
     <ClInclude Include="MeshEntry.h" />
     <ClInclude Include="Node.h" />
@@ -179,6 +181,7 @@
     <ClInclude Include="textureloader.h" />
     <ClInclude Include="Tokenizer.h" />
     <ClInclude Include="Transform.h" />
+    <ClInclude Include="TwoDeeGraphicsEngine.h" />
     <ClInclude Include="UICanvas.h" />
     <ClInclude Include="UIObject.h" />
     <ClInclude Include="Vertex.h" />
@@ -201,6 +204,7 @@
     <ClCompile Include="AnimationChannel.cpp" />
     <ClCompile Include="AnimationPlayer.cpp" />
     <ClCompile Include="animloader.cpp" />
+    <ClCompile Include="CutsceneGraphicsEngine.cpp" />
     <ClCompile Include="DirLight.cpp" />
     <ClCompile Include="FBXObject.cpp" />
     <ClCompile Include="Bone.cpp" />
@@ -209,6 +213,7 @@
     <ClCompile Include="InGameGraphicsEngine.cpp" />
     <ClCompile Include="Keyframe.cpp" />
     <ClCompile Include="LoadingGraphicsEngine.cpp" />
+    <ClCompile Include="LobbyGraphicsEngine.cpp" />
     <ClCompile Include="lodepng.cpp" />
     <ClCompile Include="MeshEntry.cpp" />
     <ClCompile Include="Node.cpp" />
@@ -220,6 +225,7 @@
     <ClCompile Include="textureloader.cpp" />
     <ClCompile Include="Tokenizer.cpp" />
     <ClCompile Include="Transform.cpp" />
+    <ClCompile Include="TwoDeeGraphicsEngine.cpp" />
     <ClCompile Include="UICanvas.cpp" />
     <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="Vertex.cpp" />

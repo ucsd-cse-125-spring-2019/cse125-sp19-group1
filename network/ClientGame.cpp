@@ -1,9 +1,37 @@
 #include "ClientGame.h"
+#include "../graphics/GraphicsClient/SoundSystem.h"
 
 #include <fstream>
 
 // Comment this out to print all messages to stdout, even messages larger than 128 chars
 #define CENSOR_LARGE_MSG 128
+
+// Paths for sounds
+#define SOUNDS_PATH			"../../sounds/"
+#define SOUNDS_DOOR			(SOUNDS_PATH "frontexit_door_short.mp3")
+#define SOUNDS_DOOR_UNLOCK	(SOUNDS_PATH "frontexit_unlock_short.mp3")
+#define SOUNDS_FOUND_ITEM	(SOUNDS_PATH "found_item_short.mp3")
+#define SOUNDS_NET			(SOUNDS_PATH "pop.mp3")	// FIXME placeholder for swoosh
+#define SOUNDS_RACCOON_UP	(SOUNDS_PATH "RaccoonDownUp.mp3")
+#define SOUNDS_RACCOON_DOWN	(SOUNDS_PATH "RaccoonUpDown.mp3")
+#define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
+#define SOUNDS_TOILET		(SOUNDS_PATH "bathroom_toilet.mp3")
+#define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
+#define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
+#define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
+
+static SoundSystem * soundSystem;
+static Sound * sound_door;
+static Sound * sound_door_unlock;
+static Sound * sound_found_item;
+static Sound * sound_net;
+static Sound * sound_raccoon_up;
+static Sound * sound_raccoon_down;
+static Sound * sound_search_item;
+static Sound * sound_toilet;
+static Sound * sound_vent_screw;
+static Sound * sound_window;
+static Sound * sound_yay;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
@@ -34,6 +62,21 @@ ClientGame::ClientGame(void)
 {
 	gameData = new GameData();
 	network = new ClientNetwork();
+
+	soundSystem = new SoundSystem();
+	if (!(soundSystem->shouldIgnoreSound())) {
+		soundSystem->createSound(&sound_door, SOUNDS_DOOR);
+		soundSystem->createSound(&sound_door_unlock, SOUNDS_DOOR_UNLOCK);
+		soundSystem->createSound(&sound_found_item, SOUNDS_FOUND_ITEM);
+		soundSystem->createSound(&sound_net, SOUNDS_NET);
+		soundSystem->createSound(&sound_raccoon_up, SOUNDS_RACCOON_UP);
+		soundSystem->createSound(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
+		soundSystem->createSound(&sound_search_item, SOUNDS_SEARCH_ITEM);
+		soundSystem->createSound(&sound_toilet, SOUNDS_TOILET);
+		soundSystem->createSound(&sound_vent_screw, SOUNDS_VENT_SCREW);
+		soundSystem->createSound(&sound_window, SOUNDS_WINDOW);
+		soundSystem->createSound(&sound_yay, SOUNDS_YAY);
+	}
 
 	// send init packet
 	const unsigned int packet_size = sizeof(Packet);
@@ -102,7 +145,6 @@ void ClientGame::update()
 #endif
 		std::cout << "data received on client:\n" << network_data << std::endl;
 		
-
 	if (myID == -1)
 	{
 		std::vector<std::pair<std::string, std::string>> keyValuePairs;
@@ -117,6 +159,59 @@ void ClientGame::update()
 
 	// empties the buffer after parsing
 	memset(network_data, 0, sizeof(network_data)); 
+
+	//update sound 
+	
+	if (myID != -1 && !soundSystem->shouldIgnoreSound()) {
+		Player * player = gameData->getPlayer(myID);
+		ModelType model = gameData->getPlayer(myID)->getModelType();
+		WinType wt = gameData->getWT();
+		Location loc = gameData->getPlayer(myID)->getLocation();
+
+		if (player->isChef()) 
+		{
+			if (player->getAction() == Action::SWING_NET) {
+				soundSystem->playSound(sound_net);
+			}
+
+			if (wt == WinType::CHEF_WIN) {
+				soundSystem->playSound(sound_yay);
+			}
+		}
+		else {
+			//opening box
+			if (player->getAction() == Action::OPEN_BOX) {
+				soundSystem->playSound(sound_search_item);
+			}
+			if (player->getAction() == Action::CONSTRUCT_GATE) {
+				int gateNum = gameData->getGateTile(loc)->getGateNum();
+				if (gateNum == 1) { //door
+					soundSystem->playSound(sound_door_unlock);
+				}
+				else if (gateNum == 2) { //bathroom
+					soundSystem->playSound(sound_toilet);
+				}
+				else if (gateNum == 3){ //vent
+					soundSystem->playSound(sound_vent_screw);
+				}
+			}
+			if (player->getAction() == Action::UNLOCK_JAIL) {
+				soundSystem->playSound(sound_door_unlock);
+			}
+
+			if (wt != WinType::NONE) {
+				if (wt == WinType::DOOR) {
+					soundSystem->playSound(sound_door);
+				}
+				else if (wt == WinType::TOILET) {
+					soundSystem->playSound(sound_window);
+				} 
+				else if (wt == WinType::VENT) {
+					soundSystem->playSound(sound_vent_screw);
+				}
+			}
+		}
+	}
 }
 
 GameData * ClientGame::getGameData()

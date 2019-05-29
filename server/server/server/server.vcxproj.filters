@@ -37,6 +37,7 @@
     <ClCompile Include="..\..\..\network\Tile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\graphics\GraphicsClient\SoundSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\network\ClientGame.h">
@@ -99,6 +100,7 @@
     <ClInclude Include="..\..\..\network\HideTile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\graphics\GraphicsClient\SoundSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
