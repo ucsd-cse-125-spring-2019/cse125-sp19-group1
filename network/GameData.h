@@ -8,7 +8,7 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
-
+#include <queue>
 #include "GameConfigs.h"
 //#include "Gate.h"
 
@@ -41,11 +41,12 @@ public:
 	};
 	int initIndex = 0;
 
+	std::vector<std::pair<int, Player *>> disconnectedPlayers;
 	std::map < int, Player * > players;
 	Atlas * atlas;
 
 	std::vector<std::vector<Tile *>> clientTileLayout;
-	void addNewPlayer(int anID, Location aLoc, ClientType type);
+	void addNewPlayer(unsigned int anID, Location aLoc, ClientType type);
 	void removePlayer(int anID, ClientType type);
 
 	using decodeFunctionType = void (GameData::*)(std::string value);
@@ -54,8 +55,8 @@ public:
 	std::string encodeGameData(bool newPlayerInit);
 	void decodeGameData(const char * data);
 	void addDecodeFunctions();
-
 	void decodeTileLayout(std::string value);
+	void decodeDisconnectedClients(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();

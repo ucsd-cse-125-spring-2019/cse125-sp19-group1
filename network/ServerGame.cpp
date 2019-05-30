@@ -14,7 +14,7 @@ ServerGame::ServerGame(void)
 	newPlayerInit = false;
 	allPlayersReady = false;
     // id's to assign clients for our table
-    client_id = 0;
+    client_id = 1;
  
 	bool chefWin = false;
 	bool animalWin = false;
@@ -67,6 +67,7 @@ void ServerGame::receiveFromClients()
 				closesocket(iter->second);
 				gameData->removePlayer(iter->first, ClientType::SERVER_SIDE);
 				network->sessions.erase(iter++);
+				sendActionPackets();
 			}
 			else
 			{
@@ -77,6 +78,7 @@ void ServerGame::receiveFromClients()
 		}
 		moveForward = moveBackward = moveLeft = moveRight = false;
 
+		bool disconnectedClient = false;
 		unsigned int i = 0;
 		while (i < (unsigned int)data_length)
 		{
@@ -115,9 +117,16 @@ void ServerGame::receiveFromClients()
 				printf("server received SELECT event packet from client\n");
 				break;
 			case SELECT0_EVENT:
+			{
 				printf("server received SELECT0 event packet from client\n");
 				//gameData->getPlayer(iter->first)->setModelType(ModelType::DEFAULT);
-
+				auto iResult = shutdown(iter->second, SD_SEND);
+				if (iResult == SOCKET_ERROR)
+					closesocket(iter->second);
+				gameData->removePlayer(iter->first, ClientType::SERVER_SIDE);
+				network->sessions.erase(iter++);
+				disconnectedClient = true;
+			}
 				break;
 			case SELECT1_EVENT:
 				printf("server received SELECT1 event packet from client\n");
@@ -647,7 +656,14 @@ void ServerGame::receiveFromClients()
 				printf("error in packet types\n");
 				break;
 			}
+
+			if (disconnectedClient)
+			{
+				break;
+			}
 		}
+		if (disconnectedClient)
+			continue;
 		if (Player * player = gameData->getPlayer(iter->first))
 		{
 			int sum = 0;
@@ -1277,8 +1293,9 @@ void ServerGame::resetGame()
 	std::map<unsigned int, SOCKET>::iterator iter;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
+		unsigned int id = iter->first;
 		Location loc = gameData->initLocs[count];
-		gameData->addNewPlayer(iter->first, loc, ClientType::SERVER_SIDE);
+		gameData->addNewPlayer(id, loc, ClientType::SERVER_SIDE);
 		count++;
 	}
 	std::cout << "GAME RESET" << std::endl;

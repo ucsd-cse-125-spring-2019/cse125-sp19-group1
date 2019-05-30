@@ -19,8 +19,6 @@
 #include <map>
 #include <ctime>
 
-
-
 class Atlas
 {
 public:
@@ -54,12 +52,14 @@ public:
 	bool hasRamp(Location & loc);
 	bool hasHide(Location & loc);
 
+	std::vector<Location> playerSpawnLocations;
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
 	std::vector<std::pair<int, int>> jailLocations;
 	std::map<ItemModelType, Item> itemsMap;
 	std::map <int, GateTile *> gateMap;
 
+	Location & getPlayerSpawnLocation(int id);
 	void getItem(ItemModelType anItem, Item & outputItem);
 
 	bool checkDroppedItems();

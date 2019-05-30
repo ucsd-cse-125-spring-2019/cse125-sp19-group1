@@ -95,6 +95,16 @@ bool ServerNetwork::acceptNewClient(unsigned int & id)
         char value = 1;
         setsockopt( ClientSocket, IPPROTO_TCP, TCP_NODELAY, &value, sizeof( value ) );
  
+		// Do not allow more than MAX_CLIENTS users to connect to the server
+		if (sessions.size() >= MAX_CLIENTS)
+		{
+			std::cout << "There are " << MAX_CLIENTS << " clients connected already!" << std::endl;
+			auto iResult = shutdown(ClientSocket, SD_SEND);
+			if (iResult == SOCKET_ERROR)
+				closesocket(ClientSocket);
+			return false;
+		}
+
         // insert new client into session id table
         sessions.insert( pair<unsigned int, SOCKET>(id, ClientSocket) );
  
