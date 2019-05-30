@@ -1300,8 +1300,9 @@ void ServerGame::resetGame()
 	std::map<unsigned int, SOCKET>::iterator iter;
 	for (iter = network->sessions.begin(); iter != network->sessions.end(); iter++)
 	{
+		unsigned int id = iter->first;
 		Location loc = gameData->initLocs[count];
-		gameData->addNewPlayer(iter->first, loc, ClientType::SERVER_SIDE);
+		gameData->addNewPlayer(id, loc, ClientType::SERVER_SIDE);
 		count++;
 	}
 	std::cout << "GAME RESET" << std::endl;

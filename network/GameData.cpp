@@ -260,7 +260,8 @@ void GameData::decodeGameData(const char * data)
 			playerID = std::stoi(value);
 			if (players.count(playerID) == 0 && playerID != GENERAL_GAME_DATA_ID)
 			{
-				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
+				unsigned int id = static_cast<unsigned int>(playerID);
+				addNewPlayer(id, Location(), ClientType::CLIENT_SIDE);
 			}
 		}
 		else if (p.first == "chefAnger") {
