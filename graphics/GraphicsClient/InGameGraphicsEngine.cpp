@@ -878,7 +878,6 @@ void InGameGraphicsEngine::MovePlayers()
 		state.transform->setOffset(transformMat);
 	}
 
-	light_center = myState->position;
 	MoveCamera(myState->position, myOldPos);
 	UpdateView();
 }
@@ -982,6 +981,9 @@ static bool iAmCaught()
 }
 
 void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+	
+	light_center = newPlayerPos;
+	
 	if (sharedClient && sharedClient->getGameData()) {
 		auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
 		bool forceCamera = false;
@@ -990,10 +992,6 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::
 		float look_speed, cam_speed;
 
 		if (sharedClient->getGameData()->getWT() != WinType::NONE) {
-			if (glm::distance(cam_target, cam_pos) < 0.001f) {
-				quit = true;
-			}
-
 			light_center = LookAtForWT(sharedClient->getGameData()->getWT());
 
 			forceCamera = true;
@@ -1001,6 +999,10 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::
 			cam_target = look_target + cam_angle;
 			look_speed = 0.3f;
 			cam_speed = 0.15f;
+
+			if (glm::distance(cam_target, cam_pos) < 0.001f) {
+				quit = true;
+			}
 		}
 		else if (iAmCaught()) {
 			for (auto &player : players) {
@@ -1021,6 +1023,7 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::
 					&& !allPlayers.at(player.id)->isCaught()) {
 
 					forceCamera = true;
+					light_center = player.position;
 					look_target = limitLookAt(player.position);
 					cam_target = look_target + cam_angle;
 					look_speed = 0.3f;
@@ -1033,7 +1036,9 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::
 
 		if (forceCamera) {
 			cam_look_at += (look_target - cam_look_at) * look_speed;
-			cam_pos += (cam_target - cam_pos) * cam_speed;
+			if (!mouseRotation) {
+				cam_pos += (cam_target - cam_pos) * cam_speed;
+			}
 			UpdateView();
 			return;
 		}
