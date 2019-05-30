@@ -64,9 +64,6 @@ void TwoDeeGraphicsEngine::MainLoopBegin()
 		backgroundObj = createObjectForTexture(backgroundFilename);
 	}
 	
-	// Set clear color
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
-
 	orthoProj = glm::ortho(-1.f, 1.f, -1.f, 1.f);
 }
 
