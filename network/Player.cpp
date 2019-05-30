@@ -240,7 +240,7 @@ void Player::updateChefMultiplier(int anger)
 {
 	if (anger < 12) 
 	{
-		chefSpeedMultiplier = 0.8;
+		chefSpeedMultiplier = 1;
 		catchRadius = 10;
 	}
 	else if (anger < 24) 

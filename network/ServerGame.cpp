@@ -868,7 +868,7 @@ void ServerGame::receiveFromClients()
 						else if (it == ItemModelType::bananaGreen)
 						{
 							std::cout << "POWER: ghost" << std::endl;
-
+							player->toggleGhost();
 							//call ghost because green means go 
 							player->setSpeedStartTime();
 						}
@@ -932,7 +932,7 @@ void ServerGame::receiveFromClients()
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
 							std::cout << "POWER: search" << std::endl;
-
+							player->toggleInstantSearch();
 							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
 							player->setSearchStartTime();
 						}
@@ -1050,7 +1050,7 @@ void ServerGame::updateRightEvent(int id)
 	if (gameData->getPlayer(id)->isChef()) 
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX() + (int)(SPEED*multiplier), loc.getY(), loc.getZ());
+		gameData->getPlayer(id)->setLocation(loc.getX() + (SPEED*multiplier), loc.getY(), loc.getZ());
 	}
 	else 
 	{
@@ -1075,7 +1075,7 @@ void ServerGame::updateBackwardEvent(int id)
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - (int)(SPEED*multiplier));
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - (SPEED*multiplier));
 	}
 	else
 	{
@@ -1100,7 +1100,7 @@ void ServerGame::updateForwardEvent(int id)
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + (int)(SPEED*multiplier));
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + (SPEED*multiplier));
 	}
 	else
 	{
@@ -1126,7 +1126,7 @@ void ServerGame::updateLeftEvent(int id)
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX() - (int)(SPEED*multiplier), loc.getY(), loc.getZ());
+		gameData->getPlayer(id)->setLocation(loc.getX() - (SPEED*multiplier), loc.getY(), loc.getZ());
 	}
 	else
 	{
