@@ -14,7 +14,7 @@ ServerGame::ServerGame(void)
 	newPlayerInit = false;
 	allPlayersReady = false;
     // id's to assign clients for our table
-    client_id = 0;
+    client_id = 1;
  
 	bool chefWin = false;
 	bool animalWin = false;
@@ -93,7 +93,6 @@ void ServerGame::receiveFromClients()
 			case INIT_CONNECTION:
 				newPlayerInit = true;
 				printf("server received init packet from client\n");
-				initNewClient();
 				sendInitPackets();
 				break;
 
@@ -992,8 +991,16 @@ void ServerGame::receiveFromClients()
 
 void ServerGame::sendInitPackets()
 {
+	unsigned int temp = client_id;
+	initNewClient();
 	std::string msg_string = "init: " + std::to_string(client_id) + "\n";
-	client_id++;
+
+	if (temp != client_id)
+	{
+		client_id = temp;
+	}
+	else
+		client_id++;
 
 	int packet_size = msg_string.length();
 	char * msg = new char[packet_size];

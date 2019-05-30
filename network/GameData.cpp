@@ -76,12 +76,13 @@ bool GameData::countdownDone()
 	}
 	return countdownCompleted;
 }
-void GameData::addNewPlayer(int anID, Location aLoc, ClientType type)
+void GameData::addNewPlayer(unsigned int & anID, Location aLoc, ClientType type)
 {
 	if (type == ClientType::SERVER_SIDE)
 	{
 		if (disconnectedPlayers.size() > 0)
 		{
+			anID = disconnectedPlayers.front().first;
 			players[anID] = disconnectedPlayers.front().second;
 			disconnectedPlayers.pop_back();
 		}
