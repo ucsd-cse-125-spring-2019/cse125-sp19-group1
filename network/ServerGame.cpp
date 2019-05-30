@@ -236,6 +236,7 @@ void ServerGame::receiveFromClients()
 //=
 											if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
 											{
+												bool animalCaught = false;
 												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5) 
 												{
 													//get random jail
@@ -253,9 +254,13 @@ void ServerGame::receiveFromClients()
 															if (jailTile->isJailEmpty()) {
 																iter2->second->setLocation(jLoc.getX(), jLoc.getY(), jLoc.getZ());
 																gameData->getAtlas()->placeInJail(jLoc, iter2->first);
+																animalCaught = true;
 																break;
 															}
 														}
+													}
+													if (animalCaught) {
+														break;
 													}
 												}
 												else
