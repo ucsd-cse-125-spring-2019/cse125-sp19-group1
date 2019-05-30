@@ -1175,6 +1175,14 @@ void updateUIElements(GameData * gameData) {
 		}
 	}
 	else {
+		//disable prompts unless item is held
+		uiCanvas->setVisible(UICanvas::PROMPT_GREEN_BANANA, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_YELLOW_BANANA, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_BLACK_BANANA, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_APPLE, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_ORANGE, false);
+
+
 		if (currPlayer->getInventory() == ItemModelType::toiletPaper) {
 			uiCanvas->setItem(UICanvas::TOILET_PAPER_ITEM);
 		}
@@ -1207,19 +1215,57 @@ void updateUIElements(GameData * gameData) {
 		}
 		else if (currPlayer->getInventory() == ItemModelType::apple) {
 			uiCanvas->setItem(UICanvas::APPLE_ITEM);
+
+			uiCanvas->setVisible(UICanvas::PROMPT_APPLE, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::orange) {
 			uiCanvas->setItem(UICanvas::ORANGE_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_ORANGE, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::bananaPerfect) {
-			uiCanvas->setItem(UICanvas::BANANA_ITEM);
+			uiCanvas->setItem(UICanvas::BANANA_YELLOW_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_YELLOW_BANANA, true);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::bananaGreen) {
+			uiCanvas->setItem(UICanvas::BANANA_GREEN_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_GREEN_BANANA, true);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::bananaVeryRipe) {
+			uiCanvas->setItem(UICanvas::BANANA_BLACK_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_BLACK_BANANA, true);
 		}
 		else {
 			uiCanvas->removeItems();
 		}
+
+		//set goals
+
+		//set prompts
+		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::JAIL && 
+			gameData->getJailTile(currPlayer->getLocation())->getCapturedAnimal() != -1) {
+			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, false);
+		}
+
+		if (currPlayer->isChef()) {
+			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
+		}
+
+		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::BOX){
+			uiCanvas->setVisible(UICanvas::PROMPT_BOX_SEARCH, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_BOX_SEARCH, false);
+		}
+
 	}
 
-	//update Goals
+
 }
 
 void InGameGraphicsEngine::IdleCallback()
