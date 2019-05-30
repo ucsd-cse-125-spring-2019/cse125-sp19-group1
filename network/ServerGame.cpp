@@ -248,11 +248,11 @@ void ServerGame::receiveFromClients()
 													{
 														Location jLoc = Location(it->second, 0, it->first);
 														if (gameData->getAtlas()->hasJail(jLoc)) {
-															JailTile * jailTile = gameData->getJailTile(loc);
+															JailTile * jailTile = gameData->getJailTile(jLoc);
 															jLoc.update(it->second, (float)jailTile->getHeight(), it->first);
 															if (jailTile->isJailEmpty()) {
 																iter2->second->setLocation(jLoc.getX(), jLoc.getY(), jLoc.getZ());
-																gameData->getAtlas()->placeInJail(loc, iter2->first);
+																gameData->getAtlas()->placeInJail(jLoc, iter2->first);
 																break;
 															}
 														}
