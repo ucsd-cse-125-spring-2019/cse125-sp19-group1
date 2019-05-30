@@ -250,11 +250,16 @@ void ServerGame::receiveFromClients()
 														Location jLoc = Location(it->second, 0, it->first);
 														if (gameData->getAtlas()->hasJail(jLoc)) {
 															JailTile * jailTile = gameData->getJailTile(jLoc);
+															if (!jailTile->isJailEmpty()) continue;
 															jLoc.update(it->second, (float)jailTile->getHeight(), it->first);
 															if (jailTile->isJailEmpty()) {
-																iter2->second->setLocation(jLoc.getX(), jLoc.getY(), jLoc.getZ());
+																iter2->second->setCaughtStatus(true);
+																iter2->second->setLocation(jLoc.getX()+TILE_SIZE/2, jLoc.getY(), jLoc.getZ()+TILE_SIZE/2);
+																jailTile->placeAnimalInJail(iter2->first);
 																gameData->getAtlas()->placeInJail(jLoc, iter2->first);
 																animalCaught = true;
+																player->setInteracting(false);
+																player->setAction(Action::NONE);
 																break;
 															}
 														}
@@ -267,16 +272,9 @@ void ServerGame::receiveFromClients()
 												{
 													player->setCaughtAnimal(true);
 													player->setCaughtAnimalId(iter2->first);
-													//iter2->second->setLocation(-100, -100, -100);
 													iter2->second->setLocation(player->getLocation());
-
+													iter2->second->setCaughtStatus(true);
 												}
-												//iter2->second->setIsCaught(true);
-												iter2->second->setCaughtStatus(true);
-//>>>>>>> server
-
-												//update animal's location to chef's location
-												//iter2->second->setLocation(player->getLocation());
 											}
 
 											if (!iter2->second->isChef() && !iter2->second->isCaught())

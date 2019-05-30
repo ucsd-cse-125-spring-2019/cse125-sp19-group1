@@ -95,14 +95,17 @@ bool Player::isChef() const
 void Player::setCaughtAnimal(bool caught) 
 {
 	caughtAnimal = caught;
+	dirtyVariablesMap["caughtAnimal"] = true;
 }
 void Player::setCaughtAnimalType(ModelType type) {
 	caughtAnimalType = type;
+	dirtyVariablesMap["caughtAnimalType"] = true;
 }
 
 //<<<<<<< HEAD
 void Player::setCaughtStatus(bool caught) {
 	caughtStatus = caught;
+	dirtyVariablesMap["caughtStatus"] = true;
 }
 
 bool Player::hasCaughtAnimal() const {
@@ -344,6 +347,7 @@ void Player::decodeVisionRadius(std::string value)
 
 void Player::decodeCaughtStatus(std::string value)
 {
+	std::cout << "decoding caught status " << value << std::endl;
 	caughtStatus = value == "1";
 }
 void Player::decodeCaughtAnimal(std::string value)
@@ -435,13 +439,13 @@ std::string Player::encodeVisionRadius() {
 }
 std::string Player::encodeCaughtStatus() {
 	std::stringstream encodedData;
-	encodedData << "caughtStatus: " << caughtStatus << std::endl;
+	encodedData << "caughtStatus: " << (int)caughtStatus << std::endl;
 
 	return encodedData.str();
 }
 std::string Player::encodeCaughtAnimal() {
 	std::stringstream encodedData;
-	encodedData << "caughtAnimal: " << caughtAnimal << std::endl;
+	encodedData << "caughtAnimal: " << (int)caughtAnimal << std::endl;
 
 	return encodedData.str();
 }

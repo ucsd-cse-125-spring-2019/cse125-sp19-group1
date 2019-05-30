@@ -87,9 +87,9 @@ public:
 	double getMaxChefLimitTime() { return maxChefLimitTime; }
 
 	int	chefAnger = 0;
-	int maxChefAnger = 10;
+	int maxChefAnger = 60;
 	int currentTime = -1;
-	int chefAngerInterval = 2;
+	int chefAngerInterval = 1;
 	double chefVision = 40;
 	double chefMaxVision = 100;
 
