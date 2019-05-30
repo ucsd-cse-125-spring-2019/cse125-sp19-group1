@@ -8,7 +8,7 @@ class CutsceneGraphicsEngine : public TwoDeeGraphicsEngine
 public:
 	bool showSkippableMsg;
 
-	CutsceneGraphicsEngine(const char *textureFilename, double duration = 7.0);
+	CutsceneGraphicsEngine(const char *textureFilename, double duration = 3.0);
 	~CutsceneGraphicsEngine();
 
 	virtual bool ShouldFadeout();
