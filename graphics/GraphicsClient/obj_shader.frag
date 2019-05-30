@@ -63,10 +63,10 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
 	intensity = dot(normalize(-light.light_dir),normalize(normal));
 	float viewAngle = dot(normalize(viewDir), normalize(normal));
 
-	if(abs(viewAngle) < 0.5f) { //outline
-		toonColor = vec3(0,0,0);
-	}
-	else if (intensity > 0.95){//otherwise, intensities
+	//if(abs(viewAngle) < 0.5f) { //outline
+	//	toonColor = vec3(0,0,0);
+	//}
+	if (intensity > 0.95){//otherwise, intensities
 		//toonColor = vec4(1.0,0.5,0.5,1.0);
 		toonColor = toonColor * 0.95;
 	}
