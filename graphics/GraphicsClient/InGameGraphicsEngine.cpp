@@ -965,21 +965,48 @@ static glm::vec3 limitLookAt(glm::vec3 lookAt) {
 }
 
 void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
-	if (sharedClient && sharedClient->getGameData() && sharedClient->getGameData()->getWT() != WinType::NONE) {
-		auto look_target = limitLookAt(LookAtForWT(sharedClient->getGameData()->getWT()));
-		cam_look_at += (look_target - cam_look_at) * 0.3f;
-		auto cam_target = look_target + cam_angle;
-		cam_pos += (cam_target - cam_pos) * 0.15f;
+	if (sharedClient && sharedClient->getGameData()) {
+		auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
+		bool forceCamera = false;
 
-		UpdateView();
+		glm::vec3 look_target, cam_target;
+		float look_speed, cam_speed;
 
-		if (glm::distance(cam_target, cam_pos) < 0.001f) {
-			quit = true;
+		if (sharedClient->getGameData()->getWT() != WinType::NONE) {
+			if (glm::distance(cam_target, cam_pos) < 0.001f) {
+				quit = true;
+			}
+
+			forceCamera = true;
+			look_target = limitLookAt(LookAtForWT(sharedClient->getGameData()->getWT()));
+			cam_target = look_target + cam_angle;
+			look_speed = 0.3f;
+			cam_speed = 0.15f;
+		}
+		else if (allPlayers.count(sharedClient->getMyID()) && allPlayers.at(sharedClient->getMyID())->isCaught()) {
+			for (auto &player : players) {
+				if (player.geometryIdx != static_cast<unsigned>(ModelType::CHEF) 
+					&& allPlayers.count(player.id)
+					&& !allPlayers.at(player.id)->isCaught()) {
+
+					forceCamera = true;
+					look_target = limitLookAt(player.position);
+					cam_target = look_target + cam_angle;
+					look_speed = 0.3f;
+					cam_speed = 0.15f;
+					break;
+				}
+			}
 		}
 
-		return;
+		if (forceCamera) {
+			cam_look_at += (look_target - cam_look_at) * look_speed;
+			cam_pos += (cam_target - cam_pos) * cam_speed;
+			UpdateView();
+			return;
+		}
 	}
-
+	
 	auto viewport = glm::vec4(0.f, 0.f, 1.f, 1.f);
 	auto position = glm::project(newPlayerPos, glm::mat4(1.f), P * V, viewport);
 	static const auto screenCenter = glm::vec3(0.5f, 0.5f, 0.f);
