@@ -235,14 +235,13 @@ void ServerGame::receiveFromClients()
 												player->setCaughtAnimalId(iter2->first);
 												iter2->second->setCaughtStatus(true);*/
 //=
-											if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !animalCaught)
+											if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
 											{
-												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5) 
+												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5 && !animalCaught) 
 												{
 													//get random jail
 													//deploy animal in random jail
 													auto jailLocations = gameData->getAtlas()->jailLocations;
-													Location jloc = Location();
 													for (auto it = jailLocations.begin();
 														it != jailLocations.end();  // Use (), and assuming itt was a typo
 														it++)
@@ -258,9 +257,6 @@ void ServerGame::receiveFromClients()
 																break;
 															}
 														}
-													}
-													if (animalCaught) {
-														break;
 													}
 												}
 												else
