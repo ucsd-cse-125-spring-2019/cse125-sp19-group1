@@ -1360,9 +1360,9 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	// If no audio device is plugged in, sound system will refuse to create sounds
 	if (!(soundSystem->shouldIgnoreSound())) {
 		fprintf(stdout, "createSound before: sound_toilet=%d\n", sound_toilet);
-		soundSystem->createSound(&sound_toilet, SOUNDS_TOILET);
+		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		fprintf(stdout, "createSound after: sound_toilet=%d\n", sound_toilet);
-		soundSystem->createSound(&sound_search_item, SOUNDS_SEARCH_ITEM);
+		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 	}
 
 	// load the shader program
