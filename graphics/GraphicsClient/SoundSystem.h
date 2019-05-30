@@ -5,19 +5,34 @@
 
 typedef FMOD::Sound Sound;
 
+/*
+ * Channel 0: sound effects specific to yourself
+ * Channel 1: sound effects specific to other players (3D)
+ * Channel 2: background music
+ */
 class SoundSystem
 {
 public:
 	FMOD::System * system;
-	FMOD::Channel * channel;
+	FMOD::Channel * channel[3];
 	bool hasAudioDriver;
 	SoundSystem();
 	~SoundSystem();
 
-	void createSound(Sound ** pSound, const char* pFile);
-	void playSound(Sound * pSound, bool bLoop = false);
-	void playSoundNoOverlap(Sound * pSound, bool bLoop = false);
+	void createSoundEffect(Sound ** pSound, const char* pFile);
+	void createBackgroundMusic(Sound ** pSound, const char* pFile);
+	void playBackgroundMusic(Sound * pSound, bool bLoop = false);
+	void playOtherPlayersSounds(Sound * pSound, bool bLoop = false);
+	void playSoundEffect(Sound * pSound, bool bLoop = false);
+	void pauseSoundEffect();
+	void playSoundEffectNoOverlap(Sound * pSound, bool bLoop = false);
+	void pauseAllSounds();
 	void releaseSound(Sound * pSound);
+
+	// This is integral in actually making the game work even if
+	// there are no audio devices connected. If you don't wrap
+	// sound code with this, it will complain that there aren't 
+	// any audio drivers and crash the game.
 	bool shouldIgnoreSound();
 };
 

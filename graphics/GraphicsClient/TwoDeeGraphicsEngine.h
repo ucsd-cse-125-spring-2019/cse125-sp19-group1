@@ -28,8 +28,10 @@ public:
 protected:
 	const char * backgroundFilename;
 
+	static GLuint passthroughShaderProgram;
+	static int passthroughShaderRefCount;
+
 	glm::mat4 orthoProj;
-	GLuint passthroughShaderProgram;
 	GLuint uAlpha;
 	FBXObject *backgroundObj;
 	bool quit;

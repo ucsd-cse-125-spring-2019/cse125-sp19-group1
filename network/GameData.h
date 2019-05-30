@@ -89,9 +89,9 @@ public:
 	int	chefAnger = 0;
 	int maxChefAnger = 60;
 	int currentTime = -1;
-	int chefAngerInterval = 10;
-	double chefVision = 85;
-	double chefMaxVision = 160;
+	int chefAngerInterval = 2;
+	double chefVision = 40;
+	double chefMaxVision = 100;
 
 	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
 	double getChefVision() { return chefVision * limitChefVision; }
@@ -119,9 +119,9 @@ public:
 	BoxTile * getBoxTile(Location loc);
 	RampTile * getRampTile(Location loc);
 	JailTile * getJailTile(Location loc);
-	ObjectTile * getAdjacentObjectTile(Location loc, Direction dir);
-	Tile * getAdjacentTile(Location loc, Direction dir);
-	JailTile * getAdjacentJailTile(Location loc, Direction dir);
+	ObjectTile * getAdjacentObjectTile(Location loc, Direction dir, Location & tileLoc);
+	Tile * getAdjacentTile(Location loc, Direction dir, Location & tileLoc);
+	JailTile * getAdjacentJailTile(Location loc, Direction dir, Location & tileLoc);
 	ObjectTile * getObjectTile(Location loc);
 
 protected:

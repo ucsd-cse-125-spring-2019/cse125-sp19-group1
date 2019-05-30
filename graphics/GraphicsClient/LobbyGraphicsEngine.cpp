@@ -121,6 +121,26 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 		cout << "Lobby got SPACE" << endl;
 		break;
 	}
+	case GLFW_KEY_LEFT:
+	{
+		if (playerIsAnimal[myPlayerNum - 1]) {
+			// TODO: send a packet to the server
+			playerIsAnimal[myPlayerNum - 1] = false;
+		}
+
+		cout << "Lobby got LEFT" << endl;
+		break;
+	}
+	case GLFW_KEY_RIGHT:
+	{
+		if (!playerIsAnimal[myPlayerNum - 1]) {
+			// TODO: send a packet to the server
+			playerIsAnimal[myPlayerNum - 1] = true;
+		}
+
+		cout << "Lobby got RIGHT" << endl;
+		break;
+	}
 	case GLFW_KEY_ENTER:
 	{
 		if (startEnabled) {

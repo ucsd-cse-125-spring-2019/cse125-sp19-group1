@@ -35,7 +35,8 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
-	std::cout << encodedData.str() << std::endl;
+	
+	//std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
 
@@ -366,50 +367,50 @@ ObjectTile * GameData::getObjectTile(Location loc)
 	}
 	return nullptr;
 }
-Tile * GameData::getAdjacentTile(Location loc, Direction dir)
+Tile * GameData::getAdjacentTile(Location loc, Direction dir, Location & tileLoc)
 {
 	float increment = TILE_SIZE / 2;
 	switch (dir)
 	{
 	case Direction::NORTH:
-		loc = Location(loc.getX(), loc.getY(), loc.getZ() + increment);
+		tileLoc = Location(loc.getX(), loc.getY(), loc.getZ() + increment);
 		break;
 	case Direction::SOUTH:
-		loc = Location(loc.getX(), loc.getY(), loc.getZ() - increment);
+		tileLoc = Location(loc.getX(), loc.getY(), loc.getZ() - increment);
 
 		break;
 	case Direction::EAST:
-		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ());
+		tileLoc = Location(loc.getX() - increment, loc.getY(), loc.getZ());
 
 		break;
 	case Direction::WEST:
-		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ());
+		tileLoc = Location(loc.getX() + increment, loc.getY(), loc.getZ());
 
 		break;
 	case Direction::NORTHEAST:
-		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() + increment);
+		tileLoc = Location(loc.getX() - increment, loc.getY(), loc.getZ() + increment);
 
 		break;
 	case Direction::NORTHWEST:
-		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() + increment);
+		tileLoc = Location(loc.getX() + increment, loc.getY(), loc.getZ() + increment);
 
 		break;
 	case Direction::SOUTHEAST:
-		loc = Location(loc.getX() - increment, loc.getY(), loc.getZ() - increment);
+		tileLoc = Location(loc.getX() - increment, loc.getY(), loc.getZ() - increment);
 
 		break;
 	case Direction::SOUTHWEST:
-		loc = Location(loc.getX() + increment, loc.getY(), loc.getZ() - increment);
+		tileLoc = Location(loc.getX() + increment, loc.getY(), loc.getZ() - increment);
 
 		break;
 	}
 
-	return getTile(loc);
+	return getTile(tileLoc);
 }
 
-ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
+ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir, Location & tileLoc)
 {
-	Tile * tile = getAdjacentTile(loc, dir);
+	Tile * tile = getAdjacentTile(loc, dir, tileLoc);
 
 	if (tile && tile->getTileType() == TileType::OBJECT)
 	{
@@ -419,12 +420,54 @@ ObjectTile * GameData::getAdjacentObjectTile(Location loc, Direction dir)
 		return nullptr;
 }
 
-JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir)
+JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir, Location & tileLoc)
 {
-	Tile * tile = getAdjacentTile(loc, dir);
+	Tile * tile = getAdjacentTile(loc, dir, tileLoc);
 
 	if (tile && tile->getTileType() == TileType::JAIL)
 	{
+		std::bitset<4> wall(tile->getWall());
+		// 3 EAST
+		// 2 SOUTH
+		// 1 NORTH
+		// 0 WEST
+
+		// Check if there is a wall in between the player and jail
+		switch (dir)
+		{
+		case Direction::NORTH:
+			if (wall[2])
+				return nullptr;
+			break;
+		case Direction::SOUTH:
+			if (wall[1])
+				return nullptr;
+			break;
+		case Direction::EAST:
+			if (wall[0])
+				return nullptr;
+			break;
+		case Direction::WEST:
+			if (wall[3])
+				return nullptr;
+			break;
+		case Direction::NORTHEAST:
+			if (wall[2] && wall[0])
+				return nullptr;
+			break;
+		case Direction::NORTHWEST:
+			if (wall[2] && wall[3])
+				return nullptr;
+			break;
+		case Direction::SOUTHEAST:
+			if (wall[1] && wall[0])
+				return nullptr;
+			break;
+		case Direction::SOUTHWEST:
+			if (wall[1] && wall[3])
+				return nullptr;
+			break;
+		}
 		return dynamic_cast<JailTile *>(tile);
 	}
 	else
