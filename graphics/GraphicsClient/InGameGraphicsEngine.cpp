@@ -74,6 +74,9 @@
 // Uncomment to render an additional dummy Chef that mirrors the player's movements
 // #define DUMMY_ID -4000
 
+// Uncomment to force the camera to any other player
+// #define DEBUG_CAUGHT
+
 #define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
@@ -318,6 +321,8 @@ glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camer
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
 const glm::vec3 cam_angle(-10.f, 50.f, -30.f);  // camera's preferred offset from cam_look_at
 
+glm::vec3 light_center = glm::vec3(0.f);
+
 bool mouseRotation = false;
 glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
 float scaleDownMouseOps = 30.0f;
@@ -331,9 +336,10 @@ void DisplayCallback(GLFWwindow* window);
 void UpdateView();
 glm::vec3 TrackballMapping(double x, double y, int width, int height);
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis);
+bool iAmCaught();
 
 
-PlayerState *getMyState()
+static PlayerState *getMyState()
 {
 	// linear search is probably faster than binary/tree/whatever for <= 4 elements
 
@@ -815,11 +821,6 @@ void InGameGraphicsEngine::MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 		}
-
-		// if the position changed, tell the object that it is indeed moving
-		state.moving <<= 1;
-		state.moving |= (state.position != oldPos);
-
 #ifdef DUMMY_ID
 		else if (state.id == DUMMY_ID) {
 			state.position = myState->position;
@@ -828,6 +829,11 @@ void InGameGraphicsEngine::MovePlayers()
 			}
 		}
 #endif
+
+		// if the position changed, tell the object that it is indeed moving
+		state.moving <<= 1;
+		state.moving |= (state.position != oldPos);
+
 
 		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
 
@@ -872,6 +878,7 @@ void InGameGraphicsEngine::MovePlayers()
 		state.transform->setOffset(transformMat);
 	}
 
+	light_center = myState->position;
 	MoveCamera(myState->position, myOldPos);
 	UpdateView();
 }
@@ -964,6 +971,16 @@ static glm::vec3 limitLookAt(glm::vec3 lookAt) {
 	return lookAt;
 }
 
+static bool iAmCaught()
+{
+#ifdef DEBUG_CAUGHT
+	return true;
+#else
+	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
+	return allPlayers.count(sharedClient->getMyID()) && allPlayers.at(sharedClient->getMyID())->isCaught();
+#endif
+}
+
 void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
 	if (sharedClient && sharedClient->getGameData()) {
 		auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
@@ -977,14 +994,28 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::
 				quit = true;
 			}
 
+			light_center = LookAtForWT(sharedClient->getGameData()->getWT());
+
 			forceCamera = true;
-			look_target = limitLookAt(LookAtForWT(sharedClient->getGameData()->getWT()));
+			look_target = limitLookAt(light_center);
 			cam_target = look_target + cam_angle;
 			look_speed = 0.3f;
 			cam_speed = 0.15f;
 		}
-		else if (allPlayers.count(sharedClient->getMyID()) && allPlayers.at(sharedClient->getMyID())->isCaught()) {
+		else if (iAmCaught()) {
 			for (auto &player : players) {
+#ifdef DEBUG_CAUGHT
+				if (player.id != sharedClient->getMyID()) {
+
+					forceCamera = true;
+					light_center = player.position;
+					look_target = limitLookAt(player.position);
+					cam_target = look_target + cam_angle;
+					look_speed = 0.3f;
+					cam_speed = 0.15f;
+					break;
+				}
+#else
 				if (player.geometryIdx != static_cast<unsigned>(ModelType::CHEF) 
 					&& allPlayers.count(player.id)
 					&& !allPlayers.at(player.id)->isCaught()) {
@@ -996,6 +1027,7 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::
 					cam_speed = 0.15f;
 					break;
 				}
+#endif
 			}
 		}
 
@@ -1274,10 +1306,7 @@ void DisplayCallback(GLFWwindow* window)
 
 	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	auto myState = getMyState();
-	if (myState) {
-		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
-	}
+	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
 
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
