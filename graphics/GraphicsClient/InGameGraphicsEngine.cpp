@@ -46,6 +46,9 @@
 #define UI_VERT_SHADER_PATH "./ui_shader.vert"
 #define UI_FRAG_SHADER_PATH "./ui_shader.frag"
 
+#define PARTICLE_VERT_SHADER_PATH "./Particle.vertexshader"
+#define PARTICLE_FRAG_SHADER_PATH "./Particle.fragmentshader"
+
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
 #define SOUNDS_DOOR			(SOUNDS_PATH "frontexit_door_short.mp3")
@@ -181,6 +184,7 @@ static FBXObject * wallModel = nullptr;
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
 static GLuint uiShaderProgram;
+static GLuint particleShaderProgram;
 
 static GLuint uiTexture;
 
@@ -1311,6 +1315,7 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	// load the shader program
 	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
 	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	particleShaderProgram = LoadShaders(PARTICLE_VERT_SHADER_PATH, PARTICLE_FRAG_SHADER_PATH);
 
 	light = new DirLight();
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
