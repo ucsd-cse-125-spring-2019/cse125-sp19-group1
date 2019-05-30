@@ -110,8 +110,8 @@ Atlas::Atlas()
 			if (playerSpawnNum != "0")
 			{
 				int y = height / 2 * TILE_HEIGHT;
-				playerSpawnLocations.push_back(Location(TILE_SIZE/2 + TILE_SIZE * row, height, TILE_SIZE/2 + TILE_SIZE * col));
-
+				playerSpawnLocations.push_back(Location(TILE_SIZE/2 + TILE_SIZE * col, height, TILE_SIZE/2 + TILE_SIZE * row));
+				std::cout << "player spawn: " << row << ", " << col << std::endl;
 			}
 
 			if (boxNum != "0")

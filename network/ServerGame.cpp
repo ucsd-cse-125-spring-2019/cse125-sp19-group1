@@ -67,6 +67,7 @@ void ServerGame::receiveFromClients()
 				closesocket(iter->second);
 				gameData->removePlayer(iter->first, ClientType::SERVER_SIDE);
 				network->sessions.erase(iter++);
+				sendActionPackets();
 			}
 			else
 			{
