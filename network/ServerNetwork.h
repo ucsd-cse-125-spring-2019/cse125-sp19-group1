@@ -11,6 +11,7 @@ using namespace std;
 #define DEFAULT_PORT "6881" 
 #define CONNECTION_RESET_ERROR 10054
 #define CONNECTION_ABORT_ERROR 10053
+#define MAX_CLIENTS 4
 
 class ServerNetwork
 {

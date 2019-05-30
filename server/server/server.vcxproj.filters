@@ -21,12 +21,6 @@
     <ClInclude Include="..\..\network\Chef.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\network\ClientGame.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\network\ClientNetwork.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\network\GameConfigs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -87,18 +81,9 @@
     <ClInclude Include="..\..\graphics\GraphicsClient\ItemModelType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\graphics\GraphicsClient\SoundSystem.h" />
-	  <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\network\Atlas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ClientGame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\network\ClientNetwork.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\network\GameData.cpp">
@@ -126,9 +111,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-	<ClCompile Include="..\..\graphics\GraphicsClient\SoundSystem.cpp" />
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

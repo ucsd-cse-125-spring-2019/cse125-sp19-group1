@@ -54,6 +54,7 @@ public:
 	Direction getFacingDirection() const;
 
 	// Setters
+	void setPlayerID(int id);
 	void setInventory(ItemModelType anItem);
 	void setModelType(ModelType type);
 	void setLocation(float argX, float argY, float argZ);
