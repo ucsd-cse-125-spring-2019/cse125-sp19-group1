@@ -82,8 +82,9 @@ void CutsceneGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	double now = glfwGetTime();
 
-#define START_PERIOD 0.8
-	float alpha = sinf((now / START_PERIOD) * glm::pi<double>()) * 0.5f + 0.5f;
+//#define START_PERIOD 0.8
+//	float alpha = sinf((now / START_PERIOD) * glm::pi<double>()) * 0.5f + 0.5f;
+	float alpha = 0.8f;
 
 	if (showSkippableMsg && foregroundObj) {
 		glUniform1f(uAlpha, alpha * screenAlpha);

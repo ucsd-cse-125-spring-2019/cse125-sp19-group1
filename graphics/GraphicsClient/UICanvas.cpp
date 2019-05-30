@@ -47,8 +47,12 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	visibleItems[APPLE_ITEM] = false;
 	uiItems[ORANGE_ITEM] = new UIObject(ORANGE_ITEM_TEX);
 	visibleItems[ORANGE_ITEM] = false;
-	uiItems[BANANA_ITEM] = new UIObject(BANANA_ITEM_TEX);
-	visibleItems[BANANA_ITEM] = false;
+	uiItems[BANANA_YELLOW_ITEM] = new UIObject(BANANA_YELLOW_ITEM_TEX);
+	visibleItems[BANANA_YELLOW_ITEM] = false;
+	uiItems[BANANA_GREEN_ITEM] = new UIObject(BANANA_GREEN_ITEM_TEX);
+	visibleItems[BANANA_GREEN_ITEM] = false;
+	uiItems[BANANA_BLACK_ITEM] = new UIObject(BANANA_BLACK_ITEM_TEX);
+	visibleItems[BANANA_BLACK_ITEM] = false;
 	uiItems[GOALS] = new UIObject(GOALS_TEX);
 	visibleItems[GOALS] = false;
 	uiItems[YELLOW_KEY_GOAL_INCOMPLETE] = new UIObject(YELLOW_KEY_GOAL_INCOMPLETE_TEX);
@@ -87,7 +91,22 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	visibleItems[TOILET_PAPER_GOAL_INCOMPLETE] = true;
 	uiItems[TOILET_PAPER_GOAL_COMPLETE] = new UIObject(TOILET_PAPER_GOAL_COMPLETE_TEX);
 	visibleItems[TOILET_PAPER_GOAL_COMPLETE] = false;
-
+	uiItems[PROMPT_JAIL_RESCUE] = new UIObject(PROMPT_JAIL_RESCUE_TEX);
+	visibleItems[PROMPT_JAIL_RESCUE] = false;
+	uiItems[PROMPT_SWING_NET] = new UIObject(PROMPT_SWING_NET_TEX);
+	visibleItems[PROMPT_SWING_NET] = false;
+	uiItems[PROMPT_BOX_SEARCH] = new UIObject(PROMPT_BOX_SEARCH_TEX);
+	visibleItems[PROMPT_BOX_SEARCH] = false;
+	uiItems[PROMPT_GREEN_BANANA] = new UIObject(PROMPT_GREEN_BANANA_TEX);
+	visibleItems[PROMPT_GREEN_BANANA] = false;
+	uiItems[PROMPT_YELLOW_BANANA] = new UIObject(PROMPT_YELLOW_BANANA_TEX);
+	visibleItems[PROMPT_YELLOW_BANANA] = false;
+	uiItems[PROMPT_BLACK_BANANA] = new UIObject(PROMPT_BLACK_BANANA_TEX);
+	visibleItems[PROMPT_BLACK_BANANA] = false;
+	uiItems[PROMPT_ORANGE] = new UIObject(PROMPT_ORANGE_TEX);
+	visibleItems[PROMPT_ORANGE] = false;
+	uiItems[PROMPT_APPLE] = new UIObject(PROMPT_APPLE_TEX);
+	visibleItems[PROMPT_APPLE] = false;
 }
 
 void UICanvas::setItem(UIType item) {
@@ -111,7 +130,9 @@ void UICanvas::removeItems() {
 	visibleItems[YELLOW_SCREWDRIVER_ITEM] = false;
 	visibleItems[APPLE_ITEM] = false;
 	visibleItems[ORANGE_ITEM] = false;
-	visibleItems[BANANA_ITEM] = false;
+	visibleItems[BANANA_GREEN_ITEM] = false;
+	visibleItems[BANANA_YELLOW_ITEM] = false;
+	visibleItems[BANANA_BLACK_ITEM] = false;
 }
 
 UICanvas::~UICanvas() {

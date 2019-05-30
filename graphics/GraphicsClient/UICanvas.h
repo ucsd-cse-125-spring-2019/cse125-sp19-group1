@@ -1,7 +1,7 @@
 
 #include "UIObject.h"
 
-#define NUM_ITEMS 42
+#define NUM_ITEMS 52
 #define CANVAS_PATH    "../Canvas/"
 
 #define CANVAS_MDL_PATH		(CANVAS_PATH "canvas.fbx")
@@ -27,7 +27,9 @@
 #define YELLOW_SCREWDRIVER_ITEM_TEX (CANVAS_PATH "yellowScrewdriverItem.png")
 #define APPLE_ITEM_TEX (CANVAS_PATH "appleItem.png")
 #define ORANGE_ITEM_TEX (CANVAS_PATH "orangeItem.png")
-#define BANANA_ITEM_TEX (CANVAS_PATH "bananaItem.png")
+#define BANANA_YELLOW_ITEM_TEX (CANVAS_PATH "bananaItemYellow.png")
+#define BANANA_GREEN_ITEM_TEX (CANVAS_PATH "bananaItemGreen.png")
+#define BANANA_BLACK_ITEM_TEX (CANVAS_PATH "bananaItemBlack.png")
 #define GOALS_TEX (CANVAS_PATH "goals.png")
 #define YELLOW_KEY_GOAL_INCOMPLETE_TEX (CANVAS_PATH "yellowKeyGoalIncomplete.png")
 #define BLUE_KEY_GOAL_INCOMPLETE_TEX (CANVAS_PATH "blueKeyGoalIncomplete.png")
@@ -47,6 +49,15 @@
 #define PLUNGER_GOAL_COMPLETE_TEX (CANVAS_PATH "plungerGoalComplete.png")
 #define ROPE_GOAL_COMPLETE_TEX (CANVAS_PATH "ropeGoalComplete.png")
 #define TOILET_PAPER_GOAL_COMPLETE_TEX (CANVAS_PATH "toiletPaperGoalComplete.png")
+#define PROMPT_JAIL_RESCUE_TEX (CANVAS_PATH "promptRescueMate.png")
+#define PROMPT_SWING_NET_TEX (CANVAS_PATH "promptSwingNet.png")
+#define PROMPT_BOX_SEARCH_TEX (CANVAS_PATH "promptSearchItem.png")
+#define PROMPT_GREEN_BANANA_TEX (CANVAS_PATH "powerup_greenbanana.png")
+#define PROMPT_YELLOW_BANANA_TEX (CANVAS_PATH "powerup_yellowbanana.png")
+#define PROMPT_BLACK_BANANA_TEX (CANVAS_PATH "powerup_blackbanana.png")
+#define PROMPT_APPLE_TEX (CANVAS_PATH "powerup_apple.png")
+#define PROMPT_ORANGE_TEX (CANVAS_PATH "powerup_orange.png")
+
 
 #ifndef UICANVAS_H
 #define UICANVAS_H
@@ -75,7 +86,7 @@ public:
 		YELLOW_SCREWDRIVER_ITEM = 19,
 		APPLE_ITEM = 20,
 		ORANGE_ITEM = 21,
-		BANANA_ITEM = 22,
+		BANANA_YELLOW_ITEM = 22,
 		GOALS = 23,
 		YELLOW_KEY_GOAL_INCOMPLETE = 24,
 		BLUE_KEY_GOAL_INCOMPLETE = 25,
@@ -94,8 +105,17 @@ public:
         TOILET_PAPER_GOAL_INCOMPLETE = 38,
         PLUNGER_GOAL_COMPLETE = 39,
         ROPE_GOAL_COMPLETE = 40,
-        TOILET_PAPER_GOAL_COMPLETE = 41
-
+        TOILET_PAPER_GOAL_COMPLETE = 41,
+		PROMPT_JAIL_RESCUE = 42,
+		PROMPT_SWING_NET = 43,
+		PROMPT_BOX_SEARCH = 44,
+		PROMPT_GREEN_BANANA = 45,
+		PROMPT_YELLOW_BANANA = 46,
+		PROMPT_BLACK_BANANA = 47,
+		PROMPT_ORANGE = 48,
+		PROMPT_APPLE = 49,
+		BANANA_GREEN_ITEM = 50,
+		BANANA_BLACK_ITEM = 51,
 	};
 	void draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
 	void setAngerRatio(float newAngerRatio);
