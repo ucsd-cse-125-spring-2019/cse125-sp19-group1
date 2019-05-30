@@ -76,14 +76,14 @@ bool GameData::countdownDone()
 	}
 	return countdownCompleted;
 }
-void GameData::addNewPlayer(unsigned int & anID, Location aLoc, ClientType type)
+void GameData::addNewPlayer(unsigned int anID, Location aLoc, ClientType type)
 {
 	if (type == ClientType::SERVER_SIDE)
 	{
 		if (disconnectedPlayers.size() > 0)
 		{
-			anID = disconnectedPlayers.front().first;
 			players[anID] = disconnectedPlayers.front().second;
+			disconnectedPlayers.front().second->setPlayerID(anID);
 			disconnectedPlayers.pop_back();
 		}
 		else
@@ -260,8 +260,7 @@ void GameData::decodeGameData(const char * data)
 			playerID = std::stoi(value);
 			if (players.count(playerID) == 0 && playerID != GENERAL_GAME_DATA_ID)
 			{
-				unsigned int id = static_cast<unsigned int>(playerID);
-				addNewPlayer(id, Location(), ClientType::CLIENT_SIDE);
+				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
 		}
 		else if (p.first == "chefAnger") {

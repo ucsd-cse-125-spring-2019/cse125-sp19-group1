@@ -33,6 +33,10 @@ Action Player::getAction() const { return action; }
 Direction Player::getFacingDirection() const { return facingDirection; }
 void Player::setFacingDirection(Direction dir) { facingDirection = dir; }
 
+void Player::setPlayerID(int id)
+{
+	playerID = id;
+}
 void Player::setModelType(ModelType type)
 {
 	modelType = type;

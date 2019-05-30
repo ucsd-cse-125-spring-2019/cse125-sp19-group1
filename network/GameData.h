@@ -46,7 +46,7 @@ public:
 	Atlas * atlas;
 
 	std::vector<std::vector<Tile *>> clientTileLayout;
-	void addNewPlayer(unsigned int & anID, Location aLoc, ClientType type);
+	void addNewPlayer(unsigned int anID, Location aLoc, ClientType type);
 	void removePlayer(int anID, ClientType type);
 
 	using decodeFunctionType = void (GameData::*)(std::string value);
