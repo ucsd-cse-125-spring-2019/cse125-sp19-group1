@@ -11,6 +11,7 @@
 #include "FogGenerator.h"
 #include "FBXObject.h"
 #include "UIObject.h"
+#include "ParticleSpawner.h"
 
 #include <thread>
 
@@ -208,6 +209,8 @@ static Sound * sound_toilet;
 static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
+
+ParticleSpawner * particleSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -1192,15 +1195,15 @@ void DisplayCallback(GLFWwindow* window)
 	//glDepthMask(GL_TRUE);
 
 	//glUseProgram(objShaderProgram);
-	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	auto myState = getMyState();
-	if (myState) {
-		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
-	}
-	root->draw(V, P, glm::mat4(1.0));
+	//light->draw(objShaderProgram, &cam_pos, cam_look_at);
+	//auto myState = getMyState();
+	//if (myState) {
+	//	fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
+	//}
+	//root->draw(V, P, glm::mat4(1.0));
 
-	uiCanvas->draw(&V, &P, glm::mat4(1.0));
-
+	//uiCanvas->draw(&V, &P, glm::mat4(1.0));
+	particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos);
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 }
@@ -1319,6 +1322,7 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 
 	light = new DirLight();
 	fog = new FogGenerator(CHEF_FOG_DISTANCE);
+	particleSpawner = new ParticleSpawner(DOG_HAPPY_TEX);
 	//light->toggleNormalShading();
 
 	root = new Transform(glm::mat4(1.0));

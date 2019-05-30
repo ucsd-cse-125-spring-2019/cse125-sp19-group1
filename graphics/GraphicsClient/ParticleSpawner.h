@@ -28,14 +28,24 @@ struct Particle {
 
 class ParticleSpawner {
 public:
-	void draw(GLuint shaderProgram);
+	void draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition);
 	ParticleSpawner(const char * texPath);
+	~ParticleSpawner();
+	int FindUnusedParticle();
+	void SortParticles();
 private:
+	double lastTime;
 	GLuint texNum;
 	GLuint VertexArrayID;
 	GLuint billboard_vertex_buffer;
 	GLuint particles_position_buffer;
 	GLuint particles_color_buffer;
+	GLfloat* g_particule_position_size_data;
+	GLubyte* g_particule_color_data;
+	const int MaxParticles = 100000;
+	Particle ParticlesContainer[100000]; 
+	int LastUsedParticle = 0;
+	int ParticlesCount = 0;
 
 };
 
