@@ -93,9 +93,9 @@ static const struct PlayerModelSettings {
 } playerModelSettings[] = {
 	// modelPath         texturePath        name              modelType        attachSkel scale   translate
 	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  false,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
+	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  false,  0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
 	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,  1.f,    glm::vec3(0.f) },
+	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,   1.f,    glm::vec3(0.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -145,7 +145,7 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
