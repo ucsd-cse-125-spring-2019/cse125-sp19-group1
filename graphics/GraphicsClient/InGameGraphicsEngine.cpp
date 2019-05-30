@@ -23,6 +23,7 @@
 #define CAT_TEX_PATH      (TEXTURES_PATH "cat.ppm")
 
 #define DOG_MDL_PATH      (MODELS_PATH "doggo.fbx")
+#define DOG_DAE_PATH	  (ANIMATIONS_PATH "dogWalk.dae")
 #define DOG_TEX_PATH      (TEXTURES_PATH "doggo.ppm")
 
 #define CHEF_DAE_PATH     (ANIMATIONS_PATH "chefWalk.dae")
@@ -89,9 +90,9 @@ static const struct PlayerModelSettings {
 } playerModelSettings[] = {
 	// modelPath         texturePath        name              modelType        attachSkel scale   translate
 	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
+	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  false,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
 	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_MDL_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     false,  1.f,    glm::vec3(0.f) },
+	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,  1.f,    glm::vec3(0.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
