@@ -68,11 +68,9 @@ ParticleSpawner::ParticleSpawner(const char * texPath) {
 
 }
 
-void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition) {
+void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition, glm::vec3 spawnerPos) {
 
-	// Clear the screen
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+	glDisable(GL_DEPTH_TEST);
 	double currentTime = glfwGetTime();
 	double delta = currentTime - lastTime;
 	lastTime = currentTime;
@@ -92,14 +90,14 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 	// Generate 10 new particule each millisecond,
 	// but limit this to 16 ms (60 fps), or if you have 1 long frame (1sec),
 	// newparticles will be huge and the next frame even longer.
-	int newparticles = (int)(delta*10000.0);
+	int newparticles = (int)(delta*100.0);
 	if (newparticles > (int)(0.016f*10000.0))
 		newparticles = (int)(0.016f*10000.0);
 
 	for (int i = 0; i < newparticles; i++) {
 		int particleIndex = FindUnusedParticle();
-		ParticlesContainer[particleIndex].life = 5.0f; // This particle will live 5 seconds.
-		ParticlesContainer[particleIndex].pos = glm::vec3(0, 0, -20.0f);
+		ParticlesContainer[particleIndex].life = 1.0f; // This particle will live 5 seconds.
+		ParticlesContainer[particleIndex].pos = spawnerPos;
 
 		float spread = 1.5f;
 		glm::vec3 maindir = glm::vec3(0.0f, 10.0f, 0.0f);
@@ -116,12 +114,12 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 
 
 		// Very bad way to generate a random color
-		ParticlesContainer[particleIndex].r = rand() % 256;
-		ParticlesContainer[particleIndex].g = rand() % 256;
-		ParticlesContainer[particleIndex].b = rand() % 256;
-		ParticlesContainer[particleIndex].a = (rand() % 256) / 3;
+		ParticlesContainer[particleIndex].r = 255.0f;
+		ParticlesContainer[particleIndex].g = 255.0f;
+		ParticlesContainer[particleIndex].b = 255.0f;
+		ParticlesContainer[particleIndex].a = 255.0f;
 
-		ParticlesContainer[particleIndex].size = (rand() % 1000) / 2000.0f + 0.1f;
+		ParticlesContainer[particleIndex].size = 20.0f;
 
 	}
 
@@ -140,7 +138,7 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 			if (p.life > 0.0f) {
 
 				// Simulate simple physics : gravity only, no collisions
-				p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 0.5f;
+				p.speed += glm::vec3(0.0f, 9.81f, 0.0f) * (float)delta * 0.5f;
 				p.pos += p.speed * (float)delta;
 				p.cameradistance = glm::length2(p.pos - CameraPosition);
 				//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;

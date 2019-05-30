@@ -1195,17 +1195,28 @@ void DisplayCallback(GLFWwindow* window)
 	//glDepthMask(GL_TRUE);
 
 	//glUseProgram(objShaderProgram);
-	//light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	//auto myState = getMyState();
-	//if (myState) {
-	//	fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
-	//}
-	//root->draw(V, P, glm::mat4(1.0));
+	auto myState = getMyState();
 
-	//uiCanvas->draw(&V, &P, glm::mat4(1.0));
-	particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos);
+	//draw all particle effects
+
+	light->draw(objShaderProgram, &cam_pos, cam_look_at);
+	if (myState) {
+		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
+	}
+	root->draw(V, P, glm::mat4(1.0));
+	uiCanvas->draw(&V, &P, glm::mat4(1.0));
+	if (myState) {
+		particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, myState->position - glm::vec3(0,12.0f,0));
+	}
+	else {
+		particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, glm::vec3(0, 0, 0));
+	}
+
+
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
+		//playerModels[RACCOON_IDX].geometry->draw(V, P, glm::mat4(1.0));
+
 }
 
 void UpdateView() {

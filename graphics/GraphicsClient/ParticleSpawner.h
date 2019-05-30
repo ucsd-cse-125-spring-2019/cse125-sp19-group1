@@ -28,7 +28,7 @@ struct Particle {
 
 class ParticleSpawner {
 public:
-	void draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition);
+	void draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition, glm::vec3 spawnerPos);
 	ParticleSpawner(const char * texPath);
 	~ParticleSpawner();
 	int FindUnusedParticle();
@@ -42,8 +42,8 @@ private:
 	GLuint particles_color_buffer;
 	GLfloat* g_particule_position_size_data;
 	GLubyte* g_particule_color_data;
-	const int MaxParticles = 100000;
-	Particle ParticlesContainer[100000]; 
+	const int MaxParticles = 100;
+	Particle ParticlesContainer[100]; 
 	int LastUsedParticle = 0;
 	int ParticlesCount = 0;
 
