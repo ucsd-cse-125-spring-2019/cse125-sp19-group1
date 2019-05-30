@@ -217,6 +217,7 @@ void ServerGame::receiveFromClients()
 										player->setInteracting(true);
 										player->setAction(Action::SWING_NET);
 										player->setActionStartTime();
+										bool animalCaught = false;
 
 										chefWin = true;
 										for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
@@ -234,9 +235,8 @@ void ServerGame::receiveFromClients()
 												player->setCaughtAnimalId(iter2->first);
 												iter2->second->setCaughtStatus(true);*/
 //=
-											if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
+											if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !animalCaught)
 											{
-												bool animalCaught = false;
 												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5) 
 												{
 													//get random jail
@@ -250,16 +250,11 @@ void ServerGame::receiveFromClients()
 														Location jLoc = Location(it->second, 0, it->first);
 														if (gameData->getAtlas()->hasJail(jLoc)) {
 															JailTile * jailTile = gameData->getJailTile(jLoc);
-															if (!jailTile->isJailEmpty()) continue;
-															jLoc.update(it->second, (float)jailTile->getHeight(), it->first);
 															if (jailTile->isJailEmpty()) {
 																iter2->second->setCaughtStatus(true);
-																iter2->second->setLocation(jLoc.getX()+TILE_SIZE/2, jLoc.getY(), jLoc.getZ()+TILE_SIZE/2);
+																iter2->second->setLocation(jLoc.getX()+TILE_SIZE/2, (float)jailTile->getHeight(), jLoc.getZ()+TILE_SIZE/2);
 																jailTile->placeAnimalInJail(iter2->first);
-																gameData->getAtlas()->placeInJail(jLoc, iter2->first);
 																animalCaught = true;
-																player->setInteracting(false);
-																player->setAction(Action::NONE);
 																break;
 															}
 														}
