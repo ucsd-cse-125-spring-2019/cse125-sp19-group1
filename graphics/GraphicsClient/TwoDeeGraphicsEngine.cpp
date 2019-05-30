@@ -9,6 +9,10 @@
 
 static const glm::mat4 identityMat(1.f);
 
+GLuint TwoDeeGraphicsEngine::passthroughShaderProgram = 0;
+int TwoDeeGraphicsEngine::passthroughShaderRefCount = 0;
+
+
 
 FBXObject * createObjectForTexture(const char *texturePath)
 {
@@ -25,7 +29,6 @@ TwoDeeGraphicsEngine::TwoDeeGraphicsEngine()
 	calledMainLoopBegin = false;
 	backgroundFilename = nullptr;
 	backgroundObj = nullptr;
-	passthroughShaderProgram = 0;
 	quit = false;
 	uAlpha = 0;
 }
@@ -52,17 +55,15 @@ void TwoDeeGraphicsEngine::MainLoopBegin()
 	quit = false;
 	screenAlpha = 1.f;
 
-	if (!passthroughShaderProgram) {
+	if (passthroughShaderRefCount++ <= 0) {
 		passthroughShaderProgram = LoadShaders("./passthrough.vert", "./passthrough.frag");
+		passthroughShaderRefCount = 1;
 	}
 
 	if (!backgroundObj) {
 		backgroundObj = createObjectForTexture(backgroundFilename);
 	}
 	
-	// Set clear color
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
-
 	orthoProj = glm::ortho(-1.f, 1.f, -1.f, 1.f);
 }
 
@@ -77,7 +78,7 @@ void TwoDeeGraphicsEngine::MainLoopEnd()
 		backgroundObj = nullptr;
 	}
 
-	if (passthroughShaderProgram) {
+	if (--passthroughShaderRefCount <= 0 && passthroughShaderProgram) {
 		glDeleteShader(passthroughShaderProgram);
 		passthroughShaderProgram = 0;
 	}

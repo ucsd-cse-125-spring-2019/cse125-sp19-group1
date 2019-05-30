@@ -23,6 +23,7 @@
 #define CAT_TEX_PATH      (TEXTURES_PATH "cat.ppm")
 
 #define DOG_MDL_PATH      (MODELS_PATH "doggo.fbx")
+#define DOG_DAE_PATH	  (ANIMATIONS_PATH "dogWalk.dae")
 #define DOG_TEX_PATH      (TEXTURES_PATH "doggo.ppm")
 
 #define CHEF_DAE_PATH     (ANIMATIONS_PATH "chefWalk.dae")
@@ -73,6 +74,9 @@
 // Uncomment to render an additional dummy Chef that mirrors the player's movements
 // #define DUMMY_ID -4000
 
+// Uncomment to force the camera to any other player
+// #define DEBUG_CAUGHT
+
 #define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
@@ -89,9 +93,9 @@ static const struct PlayerModelSettings {
 } playerModelSettings[] = {
 	// modelPath         texturePath        name              modelType        attachSkel scale   translate
 	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
+	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  false,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
 	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_MDL_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     false,  1.f,    glm::vec3(0.f) },
+	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,  1.f,    glm::vec3(0.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -317,6 +321,8 @@ glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camer
 glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
 const glm::vec3 cam_angle(-10.f, 50.f, -30.f);  // camera's preferred offset from cam_look_at
 
+glm::vec3 light_center = glm::vec3(0.f);
+
 bool mouseRotation = false;
 glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
 float scaleDownMouseOps = 30.0f;
@@ -330,9 +336,10 @@ void DisplayCallback(GLFWwindow* window);
 void UpdateView();
 glm::vec3 TrackballMapping(double x, double y, int width, int height);
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis);
+bool iAmCaught();
 
 
-PlayerState *getMyState()
+static PlayerState *getMyState()
 {
 	// linear search is probably faster than binary/tree/whatever for <= 4 elements
 
@@ -814,11 +821,6 @@ void InGameGraphicsEngine::MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 		}
-
-		// if the position changed, tell the object that it is indeed moving
-		state.moving <<= 1;
-		state.moving |= (state.position != oldPos);
-
 #ifdef DUMMY_ID
 		else if (state.id == DUMMY_ID) {
 			state.position = myState->position;
@@ -827,6 +829,11 @@ void InGameGraphicsEngine::MovePlayers()
 			}
 		}
 #endif
+
+		// if the position changed, tell the object that it is indeed moving
+		state.moving <<= 1;
+		state.moving |= (state.position != oldPos);
+
 
 		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
 
@@ -938,45 +945,159 @@ static glm::vec3 LookAtForWT(WinType wt) {
 	}
 }
 
+static glm::vec3 limitLookAt(glm::vec3 lookAt) {
+	if (!floorArray.size()) {
+		return lookAt;
+	}
+
+#define LOOKAT_X_PADDING (TILE_SCALE * TILE_STRIDE * 1.75f)
+#define LOOKAT_Z_PADDING (TILE_SCALE * TILE_STRIDE * 1.0f)
+
+	if (lookAt.x < LOOKAT_X_PADDING) {
+		lookAt.x = LOOKAT_X_PADDING;
+	}
+	else if (lookAt.x > floorArray[0].size() * TILE_SCALE * TILE_STRIDE - LOOKAT_X_PADDING) {
+		lookAt.x = floorArray[0].size() * TILE_SCALE * TILE_STRIDE - LOOKAT_X_PADDING;
+	}
+
+	if (lookAt.z < LOOKAT_Z_PADDING) {
+		lookAt.z = LOOKAT_Z_PADDING;
+	}
+	else if (lookAt.z > floorArray.size() * TILE_SCALE * TILE_STRIDE - LOOKAT_Z_PADDING) {
+		lookAt.z = floorArray.size() * TILE_SCALE * TILE_STRIDE - LOOKAT_Z_PADDING;
+	}
+
+	return lookAt;
+}
+
+static bool iAmCaught()
+{
+#ifdef DEBUG_CAUGHT
+	return true;
+#else
+	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
+	return allPlayers.count(sharedClient->getMyID()) && allPlayers.at(sharedClient->getMyID())->isCaught();
+#endif
+}
+
 void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
-	if (sharedClient && sharedClient->getGameData() && sharedClient->getGameData()->getWT() != WinType::NONE) {
-		auto look_target = LookAtForWT(sharedClient->getGameData()->getWT());
-		cam_look_at += (look_target - cam_look_at) * 0.3f;
-		auto cam_target = look_target + cam_angle;
-		cam_pos += (cam_target - cam_pos) * 0.15f;
+	
+	light_center = newPlayerPos;
+	
+	if (sharedClient && sharedClient->getGameData()) {
+		auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
+		bool forceCamera = false;
 
-		UpdateView();
+		glm::vec3 look_target, cam_target;
+		float look_speed, cam_speed;
 
-		if (glm::distance(cam_target, cam_pos) < 0.001f) {
-			quit = true;
+		if (sharedClient->getGameData()->getWT() != WinType::NONE) {
+			light_center = LookAtForWT(sharedClient->getGameData()->getWT());
+
+			forceCamera = true;
+			look_target = limitLookAt(light_center);
+			cam_target = look_target + cam_angle;
+			look_speed = 0.3f;
+			cam_speed = 0.15f;
+
+			if (glm::distance(cam_target, cam_pos) < 0.001f) {
+				quit = true;
+			}
+		}
+		else if (iAmCaught()) {
+			for (auto &player : players) {
+#ifdef DEBUG_CAUGHT
+				if (player.id != sharedClient->getMyID()) {
+
+					forceCamera = true;
+					light_center = player.position;
+					look_target = limitLookAt(player.position);
+					cam_target = look_target + cam_angle;
+					look_speed = 0.3f;
+					cam_speed = 0.15f;
+					break;
+				}
+#else
+				if (player.geometryIdx != static_cast<unsigned>(ModelType::CHEF) 
+					&& allPlayers.count(player.id)
+					&& !allPlayers.at(player.id)->isCaught()) {
+
+					forceCamera = true;
+					light_center = player.position;
+					look_target = limitLookAt(player.position);
+					cam_target = look_target + cam_angle;
+					look_speed = 0.3f;
+					cam_speed = 0.15f;
+					break;
+				}
+#endif
+			}
 		}
 
-		return;
+		if (forceCamera) {
+			cam_look_at += (look_target - cam_look_at) * look_speed;
+			if (!mouseRotation) {
+				cam_pos += (cam_target - cam_pos) * cam_speed;
+			}
+			UpdateView();
+			return;
+		}
 	}
-
-	auto screenPos = glm::project(newPlayerPos, glm::mat4(1.f), P * V, glm::vec4(0.f, 0.f, 1.f, 1.f));
+	
+	auto viewport = glm::vec4(0.f, 0.f, 1.f, 1.f);
+	auto position = glm::project(newPlayerPos, glm::mat4(1.f), P * V, viewport);
+	static const auto screenCenter = glm::vec3(0.5f, 0.5f, 0.f);
 
 	// Make the coordinates range from -1 to 1
-	screenPos = (screenPos - glm::vec3(0.5f, 0.5f, 0.f)) * 2.f;
+	auto unitSquarePos = (position - screenCenter) * 2.f;
 
+	static bool followMode = false;
+	static glm::vec3 followMoveDir = glm::vec3(0.f);
+
+/*#define CAMERA_TOLERANCE 0.45f
 	// If the player is outside a circle of radius 0.3, then move camera
-	if (screenPos.x * screenPos.x + screenPos.y * screenPos.y > 0.3f * 0.3f) {
-		const auto offsetX = newPlayerPos.x - oldPlayerPos.x;
-		cam_look_at.x += offsetX;
-		cam_pos.x += offsetX;
+	if (!followMode && unitSquarePos.x * unitSquarePos.x + unitSquarePos.y * unitSquarePos.y > CAMERA_TOLERANCE * CAMERA_TOLERANCE) {
+		followMode = true;
+	}*/
 
-		const auto offsetZ = newPlayerPos.z - oldPlayerPos.z;
-		cam_look_at.z += offsetZ;
-		cam_pos.z += offsetZ;
+	//cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
+
+	if (mouseRotation) {
+		followMode = false;
 	}
 
-	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
+	if (followMode || directions) {
+		auto dir = directionBitmaskToVector(directions);
+		if (dir != glm::vec3(0.f)) {
+			followMode = true;
+			dir.x = -dir.x;
+			followMoveDir = dir;
+		}
 
-	// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
-	if (directions && !mouseRotation) {
-		const auto desired = cam_look_at + cam_angle;
-		cam_pos += (desired - cam_pos) * 0.225f;
+		const auto desiredLookAt = limitLookAt(newPlayerPos + followMoveDir * (TILE_SCALE * TILE_STRIDE * 1.f));
+		glm::vec3 desiredCamPos = desiredLookAt + cam_angle;
+
+		const auto old_look_at = cam_look_at;
+		cam_look_at += (desiredLookAt - cam_look_at) * 0.11f;
+		
+		if (!mouseRotation) {
+			cam_pos += (desiredCamPos - cam_pos) * 0.11f;
+		}
+		else {
+			cam_pos += (cam_look_at - old_look_at);
+		}
+
+		if (!directions && glm::distance(cam_look_at, desiredLookAt) < 1.f) {
+			followMode = false;
+		}
 	}
+	/*else {
+		// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
+		if (directions && !mouseRotation) {
+			const auto desired = cam_look_at + cam_angle;
+			cam_pos += (desired - cam_pos) * 0.225f;
+		}
+	}*/
 
 	UpdateView();
 }
@@ -1171,6 +1292,7 @@ void InGameGraphicsEngine::IdleCallback()
 		}
 
 		updateUIElements(gameData);
+		fog->setFogDistance(gameData->chefVision);
 
 	}
 
@@ -1189,10 +1311,7 @@ void DisplayCallback(GLFWwindow* window)
 
 	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	auto myState = getMyState();
-	if (myState) {
-		fog->draw(objShaderProgram, P * V * glm::vec4(myState->position, 1.0f));
-	}
+	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
 
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
@@ -1303,9 +1422,9 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	// If no audio device is plugged in, sound system will refuse to create sounds
 	if (!(soundSystem->shouldIgnoreSound())) {
 		fprintf(stdout, "createSound before: sound_toilet=%d\n", sound_toilet);
-		soundSystem->createSound(&sound_toilet, SOUNDS_TOILET);
+		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		fprintf(stdout, "createSound after: sound_toilet=%d\n", sound_toilet);
-		soundSystem->createSound(&sound_search_item, SOUNDS_SEARCH_ITEM);
+		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 	}
 
 	// load the shader program

@@ -58,7 +58,7 @@ public:
 	}
 
 protected:
-	bool jailStatus;
-	int capturedAnimal;
-	int progress;
+	bool jailStatus = false;
+	int capturedAnimal = -1;
+	int progress = 0;
 };

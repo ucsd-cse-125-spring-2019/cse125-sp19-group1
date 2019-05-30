@@ -90,9 +90,9 @@ public:
 	int	chefAnger = 0;
 	int maxChefAnger = 60;
 	int currentTime = -1;
-	int chefAngerInterval = 10;
-	double chefVision = 85;
-	double chefMaxVision = 160;
+	int chefAngerInterval = 1;
+	double chefVision = 40;
+	double chefMaxVision = 100;
 
 	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
 	double getChefVision() { return chefVision * limitChefVision; }

@@ -50,7 +50,7 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	uiItems[BANANA_ITEM] = new UIObject(BANANA_ITEM_TEX);
 	visibleItems[BANANA_ITEM] = false;
 	uiItems[GOALS] = new UIObject(GOALS_TEX);
-	visibleItems[GOALS] = true;
+	visibleItems[GOALS] = false;
 	uiItems[YELLOW_KEY_GOAL_INCOMPLETE] = new UIObject(YELLOW_KEY_GOAL_INCOMPLETE_TEX);
 	visibleItems[YELLOW_KEY_GOAL_INCOMPLETE] = true;
 	uiItems[YELLOW_KEY_GOAL_COMPLETE] = new UIObject(YELLOW_KEY_GOAL_COMPLETE_TEX);

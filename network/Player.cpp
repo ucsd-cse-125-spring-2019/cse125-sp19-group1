@@ -95,14 +95,17 @@ bool Player::isChef() const
 void Player::setCaughtAnimal(bool caught) 
 {
 	caughtAnimal = caught;
+	dirtyVariablesMap["caughtAnimal"] = true;
 }
 void Player::setCaughtAnimalType(ModelType type) {
 	caughtAnimalType = type;
+	dirtyVariablesMap["caughtAnimalType"] = true;
 }
 
 //<<<<<<< HEAD
 void Player::setCaughtStatus(bool caught) {
 	caughtStatus = caught;
+	dirtyVariablesMap["caughtStatus"] = true;
 }
 
 bool Player::hasCaughtAnimal() const {
@@ -240,32 +243,32 @@ void Player::updateChefMultiplier(int anger)
 {
 	if (anger < 12) 
 	{
-		chefSpeedMultiplier = 1.0;
+		chefSpeedMultiplier = 1;
 		catchRadius = 10;
 	}
 	else if (anger < 24) 
 	{
-		chefSpeedMultiplier = 1.3;
+		chefSpeedMultiplier = 1;
 		catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
-		chefSpeedMultiplier = 1.6;
+		chefSpeedMultiplier = 1.15;
 		catchRadius = 14;
 	}
 	else if (anger < 48) 
 	{
-		chefSpeedMultiplier = 1.9;
+		chefSpeedMultiplier = 1.25;
 		catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
-		chefSpeedMultiplier = 2.2;
+		chefSpeedMultiplier = 1.3;
 		catchRadius = 18;
 	}
 	else 
 	{
-		chefSpeedMultiplier = 2.5;
+		chefSpeedMultiplier = 1.35;
 		catchRadius = 20;
 	}
 
@@ -344,6 +347,7 @@ void Player::decodeVisionRadius(std::string value)
 
 void Player::decodeCaughtStatus(std::string value)
 {
+	std::cout << "decoding caught status " << value << std::endl;
 	caughtStatus = value == "1";
 }
 void Player::decodeCaughtAnimal(std::string value)
@@ -435,13 +439,13 @@ std::string Player::encodeVisionRadius() {
 }
 std::string Player::encodeCaughtStatus() {
 	std::stringstream encodedData;
-	encodedData << "caughtStatus: " << caughtStatus << std::endl;
+	encodedData << "caughtStatus: " << (int)caughtStatus << std::endl;
 
 	return encodedData.str();
 }
 std::string Player::encodeCaughtAnimal() {
 	std::stringstream encodedData;
-	encodedData << "caughtAnimal: " << caughtAnimal << std::endl;
+	encodedData << "caughtAnimal: " << (int)caughtAnimal << std::endl;
 
 	return encodedData.str();
 }

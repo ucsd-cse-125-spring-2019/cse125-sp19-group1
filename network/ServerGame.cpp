@@ -225,6 +225,7 @@ void ServerGame::receiveFromClients()
 										player->setInteracting(true);
 										player->setAction(Action::SWING_NET);
 										player->setActionStartTime();
+										bool animalCaught = false;
 
 										chefWin = true;
 										for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
@@ -244,23 +245,23 @@ void ServerGame::receiveFromClients()
 //=
 											if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
 											{
-												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5) 
+												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5 && !animalCaught) 
 												{
 													//get random jail
 													//deploy animal in random jail
 													auto jailLocations = gameData->getAtlas()->jailLocations;
-													Location jloc = Location();
 													for (auto it = jailLocations.begin();
 														it != jailLocations.end();  // Use (), and assuming itt was a typo
 														it++)
 													{
 														Location jLoc = Location(it->second, 0, it->first);
 														if (gameData->getAtlas()->hasJail(jLoc)) {
-															JailTile * jailTile = gameData->getJailTile(loc);
-															jLoc.update(it->second, (float)jailTile->getHeight(), it->first);
+															JailTile * jailTile = gameData->getJailTile(jLoc);
 															if (jailTile->isJailEmpty()) {
-																iter2->second->setLocation(jLoc.getX(), jLoc.getY(), jLoc.getZ());
-																gameData->getAtlas()->placeInJail(loc, iter2->first);
+																iter2->second->setCaughtStatus(true);
+																iter2->second->setLocation(jLoc.getX()+TILE_SIZE/2, (float)jailTile->getHeight(), jLoc.getZ()+TILE_SIZE/2);
+																jailTile->placeAnimalInJail(iter2->first);
+																animalCaught = true;
 																break;
 															}
 														}
@@ -270,16 +271,9 @@ void ServerGame::receiveFromClients()
 												{
 													player->setCaughtAnimal(true);
 													player->setCaughtAnimalId(iter2->first);
-													//iter2->second->setLocation(-100, -100, -100);
 													iter2->second->setLocation(player->getLocation());
-
+													iter2->second->setCaughtStatus(true);
 												}
-												//iter2->second->setIsCaught(true);
-												iter2->second->setCaughtStatus(true);
-//>>>>>>> server
-
-												//update animal's location to chef's location
-												//iter2->second->setLocation(player->getLocation());
 											}
 
 											if (!iter2->second->isChef() && !iter2->second->isCaught())
@@ -883,7 +877,7 @@ void ServerGame::receiveFromClients()
 						else if (it == ItemModelType::bananaGreen)
 						{
 							std::cout << "POWER: ghost" << std::endl;
-
+							player->toggleGhost();
 							//call ghost because green means go 
 							player->setSpeedStartTime();
 						}
@@ -947,7 +941,7 @@ void ServerGame::receiveFromClients()
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
 							std::cout << "POWER: search" << std::endl;
-
+							player->toggleInstantSearch();
 							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
 							player->setSearchStartTime();
 						}
@@ -1065,7 +1059,7 @@ void ServerGame::updateRightEvent(int id)
 	if (gameData->getPlayer(id)->isChef()) 
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX() + (int)(SPEED*multiplier), loc.getY(), loc.getZ());
+		gameData->getPlayer(id)->setLocation(loc.getX() + (SPEED*multiplier), loc.getY(), loc.getZ());
 	}
 	else 
 	{
@@ -1090,7 +1084,7 @@ void ServerGame::updateBackwardEvent(int id)
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - (int)(SPEED*multiplier));
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - (SPEED*multiplier));
 	}
 	else
 	{
@@ -1115,7 +1109,7 @@ void ServerGame::updateForwardEvent(int id)
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + (int)(SPEED*multiplier));
+		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + (SPEED*multiplier));
 	}
 	else
 	{
@@ -1141,7 +1135,7 @@ void ServerGame::updateLeftEvent(int id)
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX() - (int)(SPEED*multiplier), loc.getY(), loc.getZ());
+		gameData->getPlayer(id)->setLocation(loc.getX() - (SPEED*multiplier), loc.getY(), loc.getZ());
 	}
 	else
 	{
