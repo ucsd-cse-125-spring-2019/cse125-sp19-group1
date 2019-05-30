@@ -14,6 +14,7 @@ Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
 	nodeTransform = glm::mat4(nodeMat);
 	parent = newParent;
 	isBone = false;
+	channel = NULL;
 }
 
 Bone::~Bone() {
@@ -59,7 +60,7 @@ void Bone::SetChannel(AnimationChannel * newChannel) {
 }
 
 void Bone::Print(string spaces) {
-	std::cout << spaces << name << std::endl;
+	std::cout << spaces << name << ": " << isBone << " and " << (channel != NULL) << std::endl;
 	for (int i = 0; i < children.size(); i++) {
 		if (children[i])
 			children[i]->Print(spaces + " ");
@@ -69,14 +70,21 @@ void Bone::Print(string spaces) {
 void Bone::Update(glm::mat4 globalInverseT, glm::mat4 parentT) {
 	glm::mat4 globalT;
 
-	if (channel != NULL) {
-		globalT = parentT * channelMatrices[channel->GetCurrKeyframe()];
-		// updating the transform matrix, which the vertices will access when updating skin
-		if (isBone)
-			transform = globalInverseT * globalT * offset;
+	if (channel != NULL && channelMatrices.size() > 0) {
+		if (channel->GetCurrKeyframe() < channelMatrices.size()) {
+			globalT = parentT * channelMatrices[channel->GetCurrKeyframe()];
+			// updating the transform matrix, which the vertices will access when updating skin
+			if (isBone)
+				transform = globalInverseT * globalT * offset;
+		}
 	}
+
 	else
 		globalT = parentT * nodeTransform;
+
+	if (channel != NULL && channelMatrices.size() < 1)
+		std::cout << "lol";
+
 
 	for (int i = 0; i < children.size(); i++)
 		children[i]->Update(globalInverseT, globalT);
@@ -120,4 +128,8 @@ void Bone::SetID(unsigned int newID) {
 
 int Bone::GetID() {
 	return id;
+}
+
+AnimationChannel * Bone::GetChannel() {
+	return channel;
 }

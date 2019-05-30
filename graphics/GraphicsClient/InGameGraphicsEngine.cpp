@@ -18,7 +18,7 @@
 #define RACCOON_MDL_PATH  (MODELS_PATH "raccoon.fbx")
 #define RACCOON_TEX_PATH  (TEXTURES_PATH "raccoon.ppm")
 
-#define CAT_DAE_PATH      (ANIMATIONS_PATH "catWalk.dae")
+#define CAT_DAE_PATH      (ANIMATIONS_PATH "catSearch.dae")
 #define CAT_MDL_PATH      (MODELS_PATH "cat.fbx")
 #define CAT_TEX_PATH      (TEXTURES_PATH "cat.ppm")
 
@@ -88,14 +88,15 @@ static const struct PlayerModelSettings {
 	const char *name;            // name for use in debug messages, maybe user-visible too
 	ModelType modelType;         // A unique ID, like ModelType::CHEF
 	bool attachSkel;             // true if animated with a skeleton
+	int animIndex;				 // index of the preferred animation (optional specification for weird cases)
 	float scale;                 // scale adjustment
 	glm::vec3 translate;         // position adjustment
 } playerModelSettings[] = {
-	// modelPath         texturePath        name              modelType        attachSkel scale   translate
-	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  false,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
-	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,  1.f,    glm::vec3(0.f) },
+	// modelPath         texturePath        name              modelType        attachSkel animIndex	scale   translate
+	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,		-1,		1.f,    glm::vec3(0.f) },
+	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  true,		-1,		0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
+	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,		-1,		1.f,    glm::vec3(0.f) },
+	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,		-1,		1.f,    glm::vec3(0.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -1360,7 +1361,7 @@ void LoadModels()
 		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
 		model.settings = &setting;
-		model.object = new FBXObject(setting.modelPath, setting.texturePath, setting.attachSkel, false);
+		model.object = new FBXObject(setting.modelPath, setting.texturePath, setting.attachSkel, setting.animIndex, false);
 		model.geometry = new Geometry(model.object, objShaderProgram);
 		model.transform = new Transform(transform);
 
