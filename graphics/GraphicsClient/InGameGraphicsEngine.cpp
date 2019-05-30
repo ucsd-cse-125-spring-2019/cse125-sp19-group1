@@ -938,9 +938,34 @@ static glm::vec3 LookAtForWT(WinType wt) {
 	}
 }
 
+static glm::vec3 limitLookAt(glm::vec3 lookAt) {
+	if (!floorArray.size()) {
+		return lookAt;
+	}
+
+#define LOOKAT_X_PADDING (TILE_SCALE * TILE_STRIDE * 1.75f)
+#define LOOKAT_Z_PADDING (TILE_SCALE * TILE_STRIDE * 1.0f)
+
+	if (lookAt.x < LOOKAT_X_PADDING) {
+		lookAt.x = LOOKAT_X_PADDING;
+	}
+	else if (lookAt.x > floorArray[0].size() * TILE_SCALE * TILE_STRIDE - LOOKAT_X_PADDING) {
+		lookAt.x = floorArray[0].size() * TILE_SCALE * TILE_STRIDE - LOOKAT_X_PADDING;
+	}
+
+	if (lookAt.z < LOOKAT_Z_PADDING) {
+		lookAt.z = LOOKAT_Z_PADDING;
+	}
+	else if (lookAt.z > floorArray.size() * TILE_SCALE * TILE_STRIDE - LOOKAT_Z_PADDING) {
+		lookAt.z = floorArray.size() * TILE_SCALE * TILE_STRIDE - LOOKAT_Z_PADDING;
+	}
+
+	return lookAt;
+}
+
 void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
 	if (sharedClient && sharedClient->getGameData() && sharedClient->getGameData()->getWT() != WinType::NONE) {
-		auto look_target = LookAtForWT(sharedClient->getGameData()->getWT());
+		auto look_target = limitLookAt(LookAtForWT(sharedClient->getGameData()->getWT()));
 		cam_look_at += (look_target - cam_look_at) * 0.3f;
 		auto cam_target = look_target + cam_angle;
 		cam_pos += (cam_target - cam_pos) * 0.15f;
@@ -954,29 +979,60 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::
 		return;
 	}
 
-	auto screenPos = glm::project(newPlayerPos, glm::mat4(1.f), P * V, glm::vec4(0.f, 0.f, 1.f, 1.f));
+	auto viewport = glm::vec4(0.f, 0.f, 1.f, 1.f);
+	auto position = glm::project(newPlayerPos, glm::mat4(1.f), P * V, viewport);
+	static const auto screenCenter = glm::vec3(0.5f, 0.5f, 0.f);
 
 	// Make the coordinates range from -1 to 1
-	screenPos = (screenPos - glm::vec3(0.5f, 0.5f, 0.f)) * 2.f;
+	auto unitSquarePos = (position - screenCenter) * 2.f;
 
+	static bool followMode = false;
+	static glm::vec3 followMoveDir = glm::vec3(0.f);
+
+/*#define CAMERA_TOLERANCE 0.45f
 	// If the player is outside a circle of radius 0.3, then move camera
-	if (screenPos.x * screenPos.x + screenPos.y * screenPos.y > 0.3f * 0.3f) {
-		const auto offsetX = newPlayerPos.x - oldPlayerPos.x;
-		cam_look_at.x += offsetX;
-		cam_pos.x += offsetX;
+	if (!followMode && unitSquarePos.x * unitSquarePos.x + unitSquarePos.y * unitSquarePos.y > CAMERA_TOLERANCE * CAMERA_TOLERANCE) {
+		followMode = true;
+	}*/
 
-		const auto offsetZ = newPlayerPos.z - oldPlayerPos.z;
-		cam_look_at.z += offsetZ;
-		cam_pos.z += offsetZ;
+	//cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
+
+	if (mouseRotation) {
+		followMode = false;
 	}
 
-	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
+	if (followMode || directions) {
+		auto dir = directionBitmaskToVector(directions);
+		if (dir != glm::vec3(0.f)) {
+			followMode = true;
+			dir.x = -dir.x;
+			followMoveDir = dir;
+		}
 
-	// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
-	if (directions && !mouseRotation) {
-		const auto desired = cam_look_at + cam_angle;
-		cam_pos += (desired - cam_pos) * 0.225f;
+		const auto desiredLookAt = limitLookAt(newPlayerPos + followMoveDir * (TILE_SCALE * TILE_STRIDE * 1.f));
+		glm::vec3 desiredCamPos = desiredLookAt + cam_angle;
+
+		const auto old_look_at = cam_look_at;
+		cam_look_at += (desiredLookAt - cam_look_at) * 0.11f;
+		
+		if (!mouseRotation) {
+			cam_pos += (desiredCamPos - cam_pos) * 0.11f;
+		}
+		else {
+			cam_pos += (cam_look_at - old_look_at);
+		}
+
+		if (!directions && glm::distance(cam_look_at, desiredLookAt) < 1.f) {
+			followMode = false;
+		}
 	}
+	/*else {
+		// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
+		if (directions && !mouseRotation) {
+			const auto desired = cam_look_at + cam_angle;
+			cam_pos += (desired - cam_pos) * 0.225f;
+		}
+	}*/
 
 	UpdateView();
 }
