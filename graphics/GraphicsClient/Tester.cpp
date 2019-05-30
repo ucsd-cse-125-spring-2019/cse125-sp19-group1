@@ -386,6 +386,11 @@ int main(void)
 
 				// start over on the crossfade because MainLoopBeing() may have taken significant time
 				crossfadeStart = glfwGetTime();
+				if (previousEngine) 
+				{
+					previousEngine->screenAlpha = 1.f;
+					currentEngine->screenAlpha = (float)(previousEngine != inGameEngine);
+				}
 			}
 
 			if (previousEngine && previousEngine == inGameEngine) {
