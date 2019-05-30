@@ -231,32 +231,32 @@ void Player::updateChefMultiplier(int anger)
 {
 	if (anger < 12) 
 	{
-		chefSpeedMultiplier = 1.0;
+		chefSpeedMultiplier = 0.8;
 		catchRadius = 10;
 	}
 	else if (anger < 24) 
 	{
-		chefSpeedMultiplier = 1.3;
+		chefSpeedMultiplier = 1;
 		catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
-		chefSpeedMultiplier = 1.6;
+		chefSpeedMultiplier = 1.15;
 		catchRadius = 14;
 	}
 	else if (anger < 48) 
 	{
-		chefSpeedMultiplier = 1.9;
+		chefSpeedMultiplier = 1.25;
 		catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
-		chefSpeedMultiplier = 2.2;
+		chefSpeedMultiplier = 1.3;
 		catchRadius = 18;
 	}
 	else 
 	{
-		chefSpeedMultiplier = 2.5;
+		chefSpeedMultiplier = 1.35;
 		catchRadius = 20;
 	}
 
