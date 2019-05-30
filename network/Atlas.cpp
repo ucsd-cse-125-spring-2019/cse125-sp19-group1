@@ -27,6 +27,7 @@ Atlas::Atlas()
 	std::ifstream keyDepositFile("../../maps/tinytinymap/key_deposit.txt");
 	std::ifstream objectFile("../../maps/tinytinymap/table.txt");
 	std::ifstream objectFile2("../../maps/tinytinymap/env_objs.txt");
+	std::ifstream playerSpawnFile("../../maps/tinytinymap/player_spawn.txt");
 
 	std::string wallLine;
 	std::string boxLine;
@@ -37,6 +38,7 @@ Atlas::Atlas()
 	std::string keyDepositLine;
 	std::string objectLine;
 	std::string objectLine2;
+	std::string playerSpawnLine;
 
 	std::pair<int, int> tableLoc;
 
@@ -49,6 +51,7 @@ Atlas::Atlas()
 	std::getline(keyDepositFile, keyDepositLine); // removes first line from file
 	std::getline(objectFile, objectLine); // removes first line from file
 	std::getline(objectFile2, objectLine2); // removes first line from file
+	std::getline(playerSpawnFile, playerSpawnLine); // removes first line from file
 	int row = 0;
 	while (std::getline(wallFile, wallLine))
 	{
@@ -61,6 +64,7 @@ Atlas::Atlas()
 		std::getline(keyDepositFile, keyDepositLine);
 		std::getline(objectFile, objectLine);
 		std::getline(objectFile2, objectLine2);
+		std::getline(playerSpawnFile, playerSpawnLine);
 		std::stringstream wallStream(wallLine);
 		std::stringstream boxStream(boxLine);
 		std::stringstream gateStream(gateLine);
@@ -70,6 +74,7 @@ Atlas::Atlas()
 		std::stringstream keyDepositStream(keyDepositLine);
 		std::stringstream objectStream(objectLine);
 		std::stringstream objectStream2(objectLine2);
+		std::stringstream playerSpawnStream(playerSpawnLine);
 		std::string wallNum;
 		std::string boxNum;
 		std::string gateNum;
@@ -79,6 +84,7 @@ Atlas::Atlas()
 		std::string keyDepositNum;
 		std::string objectNum;
 		std::string objectNum2;
+		std::string playerSpawnNum;
 		std::vector<Tile *> tileRow;
 		std::vector<int> keyLocationsRow;
 		while (wallStream >> wallNum)
@@ -92,11 +98,21 @@ Atlas::Atlas()
 			keyDepositStream >> keyDepositNum;
 			objectStream >> objectNum;
 			objectStream2 >> objectNum2;
+			playerSpawnStream >> playerSpawnNum;
+
+			
 
 			// Initialize default variables for a tile
 			TileType type(TileType::DEFAULT);
 			int wall = std::stoi(wallNum);
 			int height = std::stoi(heightNum);
+
+			if (playerSpawnNum != "0")
+			{
+				int y = height / 2 * TILE_HEIGHT;
+				playerSpawnLocations.push_back(Location(TILE_SIZE/2 + TILE_SIZE * row, height, TILE_SIZE/2 + TILE_SIZE * col));
+
+			}
 
 			if (boxNum != "0")
 			{
@@ -752,6 +768,10 @@ void Atlas::getAdjacentFreeTile(int currRow, int currCol, int & destRow, int & d
 	}
 }
 
+Location & Atlas::getPlayerSpawnLocation(int id)
+{
+	return playerSpawnLocations[id % playerSpawnLocations.size()];
+}
 bool Atlas::hasRamp(Location & loc)
 {
 	// find which tile player is in

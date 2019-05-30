@@ -80,11 +80,11 @@ void GameData::addNewPlayer(int anID, Location aLoc, ClientType type)
 			disconnectedPlayers.pop();
 		}
 		else
-			players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
+			players[anID] = new Player(anID, atlas->getPlayerSpawnLocation(anID));
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
-		players[anID] = new Player(anID, initLocs[anID % initLocs.size()]);
+		players[anID] = new Player(anID, Location());
 
 	}
 }
