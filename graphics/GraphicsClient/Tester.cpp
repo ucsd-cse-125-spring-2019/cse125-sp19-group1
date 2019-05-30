@@ -115,6 +115,10 @@ void Init()
 
 	chefWinsCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("chef win"));
 	animalsWinCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("animal win"));
+	
+	chefWinsCutscene->showSkippableMsg = false;
+	animalsWinCutscene->showSkippableMsg = false;
+	
 	playAgainEngine = new PlayAgainGraphicsEngine();
 
 	currentEngine = lobbyEngine;
@@ -357,7 +361,7 @@ int main(void)
 				for (unsigned i = 0; i < startingCutscenes.size(); ++i) {
 					auto engine = startingCutscenes[i];
 					if (currentEngine == engine) {
-						if (i + 1 < startingCutscenes.size()) {
+						if (i + 1 < startingCutscenes.size() && !engine->shouldSkipTheRest()) {
 							targetEngine = startingCutscenes[i + 1];
 						}
 						else {
