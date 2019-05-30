@@ -36,7 +36,6 @@ static Sound * sound_window;
 static Sound * sound_yay;
 static Sound * sound_jail_unlock;
 static Sound * background_music;
-bool isDoingSomething = false;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
@@ -194,16 +193,10 @@ void ClientGame::update()
 				//soundSystem->releaseSound(sound_toilet);
 				//soundSystem->releaseSound(sound_vent_screw);
 				//soundSystem->releaseSound(sound_jail_unlock);
-				if (isDoingSomething) { 
-					// FIXME: adding this if statement makes things
-					// incredibly laggy
-					soundSystem->pauseSoundEffect();
-					isDoingSomething = false;
-				}
+				soundSystem->pauseSoundEffect();
 			}
 			else if (player->getAction() == Action::OPEN_BOX) {
 				soundSystem->playSoundEffect(sound_search_item);
-				isDoingSomething = true;
 			}
 			else if (player->getAction() == Action::CONSTRUCT_GATE) {
 				int gateNum = gameData->getGateTile(loc)->getGateNum();
