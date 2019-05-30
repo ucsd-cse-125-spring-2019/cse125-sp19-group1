@@ -1228,6 +1228,7 @@ void InGameGraphicsEngine::IdleCallback()
 		}
 
 		updateUIElements(gameData);
+		fog->setFogDistance(gameData->chefVision);
 
 	}
 
