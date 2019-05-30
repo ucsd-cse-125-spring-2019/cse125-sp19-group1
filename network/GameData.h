@@ -41,7 +41,7 @@ public:
 	};
 	int initIndex = 0;
 
-	std::queue<std::pair<int, Player *>> disconnectedPlayers;
+	std::vector<std::pair<int, Player *>> disconnectedPlayers;
 	std::map < int, Player * > players;
 	Atlas * atlas;
 

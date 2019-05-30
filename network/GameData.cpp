@@ -35,7 +35,13 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
+	encodedData << "disconnectedClients:";
 	
+	for (auto p : disconnectedPlayers)
+	{
+		encodedData << " " << p.first;
+	}
+	encodedData << std::endl;
 	//std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
@@ -77,7 +83,7 @@ void GameData::addNewPlayer(int anID, Location aLoc, ClientType type)
 		if (disconnectedPlayers.size() > 0)
 		{
 			players[anID] = disconnectedPlayers.front().second;
-			disconnectedPlayers.pop();
+			disconnectedPlayers.pop_back();
 		}
 		else
 			players[anID] = new Player(anID, atlas->getPlayerSpawnLocation(anID));
@@ -93,7 +99,7 @@ void GameData::removePlayer(int anID, ClientType type)
 {
 	if (type == ClientType::SERVER_SIDE)
 	{
-		disconnectedPlayers.push(std::pair<int, Player *>(anID, players.at(anID)));
+		disconnectedPlayers.push_back(std::pair<int, Player *>(anID, players.at(anID)));
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
