@@ -29,7 +29,7 @@ struct Particle {
 class ParticleSpawner {
 public:
 	void draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition, glm::vec3 spawnerPos, bool spawning = true);
-	ParticleSpawner(const char * texPath);
+	ParticleSpawner(const char * texPath, glm::vec3 particleSpeed = glm::vec3(0));
 	~ParticleSpawner();
 	int FindUnusedParticle();
 	void SortParticles();
@@ -47,6 +47,7 @@ private:
 	int LastUsedParticle = 0;
 	int ParticlesCount = 0;
 	float timeSinceLastSpawn = 0.0f;
+	glm::vec3 particleSpeed;
 
 };
 

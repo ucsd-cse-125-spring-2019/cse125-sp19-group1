@@ -291,7 +291,10 @@ static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
 
-ParticleSpawner * particleSpawner;
+ParticleSpawner * dustSpawner;
+ParticleSpawner * flashSpawner;
+ParticleSpawner * speedSpawner;
+ParticleSpawner * slowSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -1439,11 +1442,11 @@ void DisplayCallback(GLFWwindow* window)
 
 			//particle effects
 			if (state.moving) {
-				particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+				dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 					state.position - glm::vec3(0, 3.0f, 0), true);
 			}
 			else {
-				particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+				dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 					state.position - glm::vec3(0, 3.0f, 0), false);
 			}
 			/*if (inventory != ItemModelType::EMPTY) {
@@ -1717,7 +1720,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 		}
 
 		//particle setup
-		particleSpawner = new ParticleSpawner(DUST_PARTICLE_TEX);
+		dustSpawner = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0,1.0f,0));
 
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;

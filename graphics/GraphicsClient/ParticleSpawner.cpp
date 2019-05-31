@@ -34,7 +34,7 @@ ParticleSpawner::~ParticleSpawner() {
 	delete[] g_particule_color_data;
 }
 
-ParticleSpawner::ParticleSpawner(const char * texPath) {
+ParticleSpawner::ParticleSpawner(const char * texPath, glm::vec3 particleSpeed) {
 
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
@@ -65,6 +65,7 @@ ParticleSpawner::ParticleSpawner(const char * texPath) {
 	glBufferData(GL_ARRAY_BUFFER, MaxParticles * 4 * sizeof(GLubyte), NULL, GL_STREAM_DRAW);
 
 	lastTime = glfwGetTime();
+	this->particleSpeed = particleSpeed;
 
 }
 
@@ -107,7 +108,7 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 			ParticlesContainer[particleIndex].pos = spawnerPos;
 
 			float spread = 1.5f;
-			glm::vec3 maindir = glm::vec3(0.0f, 1.0f, 0.0f);
+			glm::vec3 maindir = particleSpeed;
 			// Very bad way to generate a random direction; 
 			// See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
 			// combined with some user-controlled parameters (main direction, spread, etc)
