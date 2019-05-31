@@ -51,11 +51,14 @@ public:
 	bool		hasSelectedAnimal() const;
 	bool		isReady() const;
 	double		getSpeedMultiplier() const;
+	float		getVisionRadius() { return visionRadius; }
+
+
 
 	Direction getFacingDirection() const;
-
 	// Setters
 	void setPlayerID(int id);
+	void setVisionRadius(float vr);
 	void toggleAnimalSelection();
 	void setInventory(ItemModelType anItem);
 	void setModelType(ModelType type);
@@ -72,11 +75,10 @@ public:
 	void setCaughtAnimalId(int id);
 	void setCaughtAnimalType(ModelType type);
 	void setActionStartTime();
-//<<<<<<< HEAD
 	void setUnlockJailStartTime();
 	void setAction(Action anAction);
 	void setFacingDirection(Direction dir);
-//=======
+
 	void setStartJailTime();
 	void setSpeedStartTime();
 	void setSearchStartTime();
@@ -92,8 +94,6 @@ public:
 	bool getOpeningBox() { return openingBox; }
 	void setPoweringUp(bool power) { poweringUp = power; }
 	void setOpeningBox(bool interact) { openingBox = interact; }
-
-//>>>>>>> server
 
 	void toggleReady();
 	

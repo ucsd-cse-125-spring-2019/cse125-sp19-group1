@@ -20,6 +20,7 @@
 #define MAX_ANIMAL_GHOST_TIME 5
 #define MAX_ANIMAL_SEARCH_TIME 5
 #define FLASH_DISTANCE 14
+#define DEFAULT_VISION 50
 
 
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
@@ -91,11 +92,9 @@ public:
 	int chefAngerInterval = 3;
 	double chefVision = 40;
 	double chefMaxVision = 100;
-	double vision = 60;
 
 	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
 	double getChefVision() { return chefVision * limitChefVision; }
-	double getVision() { return vision; }
 	double getChefMaxVision() { return chefMaxVision; }
 	void incrementChefVision() { chefVision++; }
 	void incrementChefAnger() { chefAnger++; }

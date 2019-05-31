@@ -955,8 +955,11 @@ void ServerGame::receiveFromClients()
 							}
 							if (x < 0) x = TILE_SIZE / 2;
 							if (z < 0) z = TILE_SIZE / 2;
-							player->setLocation(x, y, z);
-							sendActionPackets();
+
+							Location tileLoc = Location();
+							tileLoc.update(x, y, z);
+							Tile * tile = gameData->getAtlas()->getTileAt(tileLoc);
+							player->setLocation(x, tile->getHeight()/2 * TILE_HEIGHT, z);
 						}
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
@@ -1191,25 +1194,29 @@ void ServerGame::updateHeight(int id)
 		/*y = (int) (TILE_SIZE - z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE) 
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight()/2 +1);*/
 		
-		y = (int) (TILE_SIZE - (z - (int)(z / TILE_SIZE) * TILE_SIZE)) * ((double) TILE_HEIGHT / TILE_SIZE) 
+		y = (TILE_SIZE - (z - (int)(z / TILE_SIZE) * TILE_SIZE)) * ((double) TILE_HEIGHT / TILE_SIZE) 
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight()/2 +1);
 	}
 	else if (rampTile->getRampDirection() == Orientation::SOUTH)
 	{
-		y = (int)(z - (int)(z / TILE_SIZE) * TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+		y = (z - (int)(z / TILE_SIZE) * TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	else if (rampTile->getRampDirection() == Orientation::EAST)
 	{
-		y = (int)((x - (int)(x / TILE_SIZE) * TILE_SIZE)) * ((double)TILE_HEIGHT / TILE_SIZE)
+		y = ((x - (int)(x / TILE_SIZE) * TILE_SIZE)) * ((double)TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	else if (rampTile->getRampDirection() == Orientation::WEST)
 	{
-		y = (int)(TILE_SIZE - (x - (int)(x / TILE_SIZE) * TILE_SIZE)) * ((double)TILE_HEIGHT / TILE_SIZE)
+		y = (TILE_SIZE - (x - (int)(x / TILE_SIZE) * TILE_SIZE)) * ((double)TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	gameData->getPlayer(id)->setLocation(x, y, z);
+
+	if (!gameData->getPlayer(id)->isChef()) {
+		gameData->getPlayer(id)->setVisionRadius(y*2 + DEFAULT_VISION);
+	}
 
 	// Update location of captured animal to the chef's location
 	if (gameData->getPlayer(id)->isChef())

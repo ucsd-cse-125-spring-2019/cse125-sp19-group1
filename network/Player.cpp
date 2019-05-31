@@ -56,6 +56,12 @@ void Player::setLocation(float argX, float argY, float argZ)
 	dirtyVariablesMap["location"] = true;
 
 }
+void Player::setVisionRadius(float vr) 
+{ 
+	visionRadius = vr; 
+	dirtyVariablesMap["visionRadius"] = true; 
+}
+
 
 void Player::setLocation(Location aLoc)
 {
@@ -251,32 +257,32 @@ void Player::updateChefMultiplier(int anger)
 	if (anger < 12) 
 	{
 		chefSpeedMultiplier = 1;
-		catchRadius = 10;
+		catchRadius = 12;
 	}
 	else if (anger < 24) 
 	{
 		chefSpeedMultiplier = 1;
-		catchRadius = 12;
+		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
 		chefSpeedMultiplier = 1.15;
-		catchRadius = 14;
+		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
 		chefSpeedMultiplier = 1.25;
-		catchRadius = 16;
+		//catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
 		chefSpeedMultiplier = 1.3;
-		catchRadius = 18;
+		//catchRadius = 18;
 	}
 	else 
 	{
 		chefSpeedMultiplier = 1.35;
-		catchRadius = 20;
+		//catchRadius = 20;
 	}
 
 	if (getSlowChef())
