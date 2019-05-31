@@ -1437,6 +1437,15 @@ void DisplayCallback(GLFWwindow* window)
 
 			playerGeometry->draw(V, P, state.transform);
 
+			//particle effects
+			if (state.moving) {
+				particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+					state.position - glm::vec3(0, 3.0f, 0), true);
+			}
+			else {
+				particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+					state.position - glm::vec3(0, 3.0f, 0), false);
+			}
 			/*if (inventory != ItemModelType::EMPTY) {
 				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
 
@@ -1458,21 +1467,8 @@ void DisplayCallback(GLFWwindow* window)
 			}*/
 		}
 	}
-
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
-	if (myState) {
-		if (directions != 0) {
-			particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, 
-				myState->position - glm::vec3(0, 3.0f, 0), true);
-		}
-		else {
-			particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, 
-				myState->position - glm::vec3(0, 3.0f, 0), false);
-		}
-	}
-	else {
-		particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, glm::vec3(0, 0, 0));
-	}
+
 
 
 
