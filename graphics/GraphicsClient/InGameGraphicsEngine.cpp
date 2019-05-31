@@ -91,6 +91,13 @@
 // Uncomment to force the camera to any other player
 // #define DEBUG_CAUGHT
 
+// Uncomment to force carrying
+// #define DEBUG_CARRY
+
+#ifdef DEBUG_CARRY
+unsigned fake_carried_idx = 1;
+#endif
+
 #define DELETE_IF_NEEDED(x) \
 	if (x) {\
 		delete x;\
@@ -169,12 +176,12 @@ static const struct ItemModelSettings {
 	glm::vec3 carryRotate;       // rotation while being carried
 } itemModelSettings[] = {
 	// model and texture paths                      name                    id                               scale  translate                      rotate                            wallRotate  carryTranslate               carryRotate
-	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
 	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
 	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
 	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
 	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
 	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
@@ -187,13 +194,13 @@ static const struct ItemModelSettings {
 	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
 	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
-	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
+	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
 	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
 	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
-	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 0.f) },
+	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
 	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
 	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
 	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
@@ -1421,6 +1428,10 @@ void DisplayCallback(GLFWwindow* window)
 			auto inventory = networkPlayer->getInventory();
 			Geometry *playerGeometry = nullptr;
 
+#ifdef DEBUG_CARRY
+			inventory = static_cast<ItemModelType>(fake_carried_idx);
+#endif
+
 			switch (action) {
 			case Action::CONSTRUCT_GATE:
 			case Action::OPEN_BOX:
@@ -1844,6 +1855,17 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		}
 		if (key == GLFW_KEY_P) {
 			sharedClient->sendPackets(RESET_EVENT);
+		}
+		if (key == GLFW_KEY_I) {
+#ifdef DEBUG_CARRY
+			fake_carried_idx++;
+			if (fake_carried_idx >= itemModels.size()) {
+				fake_carried_idx = 0;
+			}
+			if (!itemModels[fake_carried_idx].settings) {
+				fake_carried_idx++;
+			}
+#endif
 		}
 
 	}
