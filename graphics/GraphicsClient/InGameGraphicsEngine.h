@@ -23,10 +23,11 @@ public:
 	virtual bool ShouldFadeout();
 
 protected:
+	void InitCamera(const glm::vec3 &newPlayerPos);
 	void MoveCamera(const glm::vec3 &newPlayerPos);
-	void MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos);
 	void IdleCallback();
 	void MovePlayers();
+	void ReloadPlayers();
 
 	bool quit = false;
 	bool needsRenderingSetup = false;

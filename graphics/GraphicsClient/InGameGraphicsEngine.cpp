@@ -14,19 +14,25 @@
 
 #include <thread>
 
-#define RACCOON_DAE_PATH  (ANIMATIONS_PATH "raccoonWalk.dae")
-#define RACCOON_MDL_PATH  (MODELS_PATH "raccoon.fbx")
-#define RACCOON_TEX_PATH  (TEXTURES_PATH "raccoon.ppm")
+#define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonWalk.dae")
+#define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonWalkWithItem.dae")
+#define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearch.dae")
+#define RACCOON_MDL_PATH        (MODELS_PATH "raccoon.fbx")
+#define RACCOON_TEX_PATH        (TEXTURES_PATH "raccoon.ppm")
 
-#define CAT_DAE_PATH      (ANIMATIONS_PATH "catWalk.dae")
-#define CAT_MDL_PATH      (MODELS_PATH "cat.fbx")
-#define CAT_TEX_PATH      (TEXTURES_PATH "cat.ppm")
+#define CAT_WALK_MDL_PATH       (ANIMATIONS_PATH "catWalk.dae")
+#define CAT_CARRY_MDL_PATH      (ANIMATIONS_PATH "catWalkWithItem.dae")
+#define CAT_SEARCH_MDL_PATH     (ANIMATIONS_PATH "catSearch.dae")
+#define CAT_MDL_PATH            (MODELS_PATH "cat.fbx")
+#define CAT_TEX_PATH            (TEXTURES_PATH "cat.ppm")
 
-#define DOG_MDL_PATH      (MODELS_PATH "doggo.fbx")
-#define DOG_DAE_PATH	  (ANIMATIONS_PATH "dogWalk.dae")
-#define DOG_TEX_PATH      (TEXTURES_PATH "doggo.ppm")
+#define DOG_WALK_MDL_PATH       (ANIMATIONS_PATH "dogWalk.dae")
+#define DOG_CARRY_MDL_PATH      (ANIMATIONS_PATH "dogWalkWithItem.dae")
+#define DOG_SEARCH_MDL_PATH     (ANIMATIONS_PATH "dogSearch.dae")
+#define DOG_MDL_PATH            (MODELS_PATH "doggo.fbx")
+#define DOG_TEX_PATH            (TEXTURES_PATH "doggo.ppm")
 
-#define CHEF_DAE_PATH     (ANIMATIONS_PATH "chefWalk.dae")
+#define CHEF_WALK_PATH    (ANIMATIONS_PATH "chefWalk.dae")
 #define CHEF_MDL_PATH     (MODELS_PATH "chef.fbx")
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
 
@@ -77,25 +83,63 @@
 // Uncomment to force the camera to any other player
 // #define DEBUG_CAUGHT
 
+#define DELETE_IF_NEEDED(x) \
+	if (x) {\
+		delete x;\
+		x = nullptr;\
+	}
+
 #define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
 
 static const struct PlayerModelSettings {
-	const char *modelPath;       // filesystem path to a model geometry file
-	const char *texturePath;     // filesystem path to a texture file
-	const char *name;            // name for use in debug messages, maybe user-visible too
-	ModelType modelType;         // A unique ID, like ModelType::CHEF
-	bool attachSkel;             // true if animated with a skeleton
-	float scale;                 // scale adjustment
-	glm::vec3 translate;         // position adjustment
+	const char *walkModelPath;     // filesystem path to a model geometry file
+	const char *walkTexturePath;   // filesystem path to a texture file
+	int walkAnimIndex;             // index of the preferred animation (optional specification for weird cases)
+	const char *carryModelPath;    // filesystem path to a model geometry file
+	const char *carryTexturePath;  // filesystem path to a texture file
+	int carryAnimIndex;            // index of the preferred animation (optional specification for weird cases)
+	const char *actionModelPath;   // filesystem path to a model geometry file
+	const char *actionTexturePath; // filesystem path to a texture file
+	int actionAnimIndex;           // index of the preferred animation (optional specification for weird cases)
+	const char *title;             // name for use in debug messages, maybe user-visible too
+	const char *name;              // name for use in debug messages, maybe user-visible too
+	ModelType modelType;           // A unique ID, like ModelType::CHEF
+	bool attachSkel;               // true if animated with a skeleton
+	float scale;                   // scale adjustment
+	glm::vec3 translate;           // position adjustment
+
+	inline const char * getWalkModelPath() const {
+		return walkModelPath;
+	}
+
+	inline const char * getCarryModelPath() const {
+		return carryModelPath ? carryModelPath : walkModelPath;
+	}
+
+	inline const char * getActionModelPath() const {
+		return actionModelPath ? actionModelPath : walkModelPath;
+	}
+
+	inline const char * getwalkTexturePath() const {
+		return walkTexturePath;
+	}
+
+	inline const char * getCarryTexturePath() const {
+		return carryTexturePath ? carryTexturePath : walkTexturePath;
+	}
+
+	inline const char * getActionTexturePath() const {
+		return actionTexturePath ? actionTexturePath : walkTexturePath;
+	}
 } playerModelSettings[] = {
-	// modelPath         texturePath        name              modelType        attachSkel scale   translate
-	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  false,   0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
-	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,  1.f,    glm::vec3(0.f) },
+	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -145,7 +189,7 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.47f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
@@ -166,9 +210,42 @@ static FogGenerator * fog = nullptr;
 
 struct PlayerModel {
 	const PlayerModelSettings *settings;
-	FBXObject *object;
-	Geometry *geometry;
+	FBXObject *walkObject;
+	FBXObject *carryObject;
+	FBXObject *actionObject;
+	Geometry *walkGeometry;
+	Geometry *carryGeometry;
+	Geometry *actionGeometry;
 	Transform *transform;
+
+	inline FBXObject * getWalkObject() {
+		return walkObject;
+	}
+	inline FBXObject * getCarryObject() {
+		return carryObject ? carryObject : walkObject;
+	}
+	inline FBXObject * getActionObject() {
+		return actionObject ? actionObject : walkObject;
+	}
+	inline Geometry * getwalkGeometry() {
+		return walkGeometry;
+	}
+	inline Geometry * getCarryGeometry() {
+		return carryGeometry ? carryGeometry : walkGeometry;
+	}
+	inline Geometry * getActionGeometry() {
+		return actionGeometry ? actionGeometry : walkGeometry;
+	}
+
+	void deallocMembers() {
+		DELETE_IF_NEEDED(walkObject);
+		DELETE_IF_NEEDED(carryObject);
+		DELETE_IF_NEEDED(actionObject);
+		DELETE_IF_NEEDED(walkGeometry);
+		DELETE_IF_NEEDED(carryGeometry);
+		DELETE_IF_NEEDED(actionGeometry);
+		DELETE_IF_NEEDED(transform);
+	}
 };
 
 struct AnimatedItem {
@@ -352,7 +429,7 @@ static PlayerState *getMyState()
 	return nullptr;
 }
 
-void reloadPlayers()
+void InGameGraphicsEngine::ReloadPlayers()
 {
 	players.clear();
 
@@ -384,6 +461,11 @@ void reloadPlayers()
 	const auto state = &players[players.size() - 1];
 	allPlayersNode->addChild(state->transform);
 #endif
+
+	auto myState = getMyState();
+	if (myState) {
+		InitCamera(myState->position);
+	}
 }
 
 void resetEnvObjs()
@@ -755,10 +837,7 @@ void reloadMap()
 
 void deallocFloor()
 {
-	if (floorTransform) {
-		delete floorTransform;
-		floorTransform = nullptr;
-	}
+	DELETE_IF_NEEDED(floorTransform);
 
 	for (size_t z = 0; z < floorArray.size(); z++) {
 		auto &row = floorArray[z];
@@ -808,8 +887,6 @@ void InGameGraphicsEngine::MovePlayers()
 		return;
 	}
 
-	const auto myOldPos = myState->position;
-
 	const int myID = sharedClient->getMyID();
 	const auto &playersMap = sharedClient->getGameData()->players;
 	for (auto &state : players) {
@@ -832,7 +909,7 @@ void InGameGraphicsEngine::MovePlayers()
 
 		// if the position changed, tell the object that it is indeed moving
 		state.moving <<= 1;
-		state.moving |= (state.position != oldPos);
+		state.moving |= (char)(state.position != oldPos);
 
 
 		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
@@ -878,11 +955,11 @@ void InGameGraphicsEngine::MovePlayers()
 		state.transform->setOffset(transformMat);
 	}
 
-	MoveCamera(myState->position, myOldPos);
+	MoveCamera(myState->position);
 	UpdateView();
 }
 
-void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
+void InGameGraphicsEngine::InitCamera(const glm::vec3 &newPlayerPos) {
 	cam_look_at.x = newPlayerPos.x;
 	cam_look_at.z = newPlayerPos.z;
 	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
@@ -980,125 +1057,63 @@ static bool iAmCaught()
 #endif
 }
 
-void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos, const glm::vec3 &oldPlayerPos) {
+void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 	
 	light_center = newPlayerPos;
 	
-	if (sharedClient && sharedClient->getGameData()) {
-		auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
-		bool forceCamera = false;
+	if (!sharedClient || !sharedClient->getGameData())
+		return;
 
-		glm::vec3 look_target, cam_target;
-		float look_speed, cam_speed;
+	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
 
-		if (sharedClient->getGameData()->getWT() != WinType::NONE) {
-			light_center = LookAtForWT(sharedClient->getGameData()->getWT());
+	glm::vec3 look_target = limitLookAt(newPlayerPos);
+	glm::vec3 cam_target = look_target + cam_angle;
+	float look_speed = 0.3f, cam_speed = 0.3f;
 
-			forceCamera = true;
-			look_target = limitLookAt(light_center);
-			cam_target = look_target + cam_angle;
-			look_speed = 0.3f;
-			cam_speed = 0.15f;
+	if (sharedClient->getGameData()->getWT() != WinType::NONE) {
+		light_center = LookAtForWT(sharedClient->getGameData()->getWT());
 
-			if (glm::distance(cam_target, cam_pos) < 0.001f) {
-				quit = true;
-			}
+		look_target = limitLookAt(light_center);
+		cam_target = look_target + cam_angle;
+		look_speed = 0.3f;
+		cam_speed = 0.15f;
+
+		if (glm::distance(cam_target, cam_pos) < 0.001f) {
+			quit = true;
 		}
-		else if (iAmCaught()) {
-			for (auto &player : players) {
+	}
+	else if (iAmCaught()) {
+		for (auto &player : players) {
 #ifdef DEBUG_CAUGHT
-				if (player.id != sharedClient->getMyID()) {
+			if (player.id != sharedClient->getMyID()) {
 
-					forceCamera = true;
-					light_center = player.position;
-					look_target = limitLookAt(player.position);
-					cam_target = look_target + cam_angle;
-					look_speed = 0.3f;
-					cam_speed = 0.15f;
-					break;
-				}
+				light_center = player.position;
+				look_target = limitLookAt(player.position);
+				cam_target = look_target + cam_angle;
+				look_speed = 0.3f;
+				cam_speed = 0.15f;
+				break;
+			}
 #else
-				if (player.geometryIdx != static_cast<unsigned>(ModelType::CHEF) 
-					&& allPlayers.count(player.id)
-					&& !allPlayers.at(player.id)->isCaught()) {
+			if (player.geometryIdx != static_cast<unsigned>(ModelType::CHEF) 
+				&& allPlayers.count(player.id)
+				&& !allPlayers.at(player.id)->isCaught()) {
 
-					forceCamera = true;
-					light_center = player.position;
-					look_target = limitLookAt(player.position);
-					cam_target = look_target + cam_angle;
-					look_speed = 0.3f;
-					cam_speed = 0.15f;
-					break;
-				}
+				light_center = player.position;
+				look_target = limitLookAt(player.position);
+				cam_target = look_target + cam_angle;
+				look_speed = 0.3f;
+				cam_speed = 0.15f;
+				break;
+			}
 #endif
-			}
-		}
-
-		if (forceCamera) {
-			cam_look_at += (look_target - cam_look_at) * look_speed;
-			if (!mouseRotation) {
-				cam_pos += (cam_target - cam_pos) * cam_speed;
-			}
-			UpdateView();
-			return;
 		}
 	}
-	
-	auto viewport = glm::vec4(0.f, 0.f, 1.f, 1.f);
-	auto position = glm::project(newPlayerPos, glm::mat4(1.f), P * V, viewport);
-	static const auto screenCenter = glm::vec3(0.5f, 0.5f, 0.f);
 
-	// Make the coordinates range from -1 to 1
-	auto unitSquarePos = (position - screenCenter) * 2.f;
-
-	static bool followMode = false;
-	static glm::vec3 followMoveDir = glm::vec3(0.f);
-
-/*#define CAMERA_TOLERANCE 0.45f
-	// If the player is outside a circle of radius 0.3, then move camera
-	if (!followMode && unitSquarePos.x * unitSquarePos.x + unitSquarePos.y * unitSquarePos.y > CAMERA_TOLERANCE * CAMERA_TOLERANCE) {
-		followMode = true;
-	}*/
-
-	//cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
-
-	if (mouseRotation) {
-		followMode = false;
+	cam_look_at += (look_target - cam_look_at) * look_speed;
+	if (!mouseRotation) {
+		cam_pos += (cam_target - cam_pos) * cam_speed;
 	}
-
-	if (followMode || directions) {
-		auto dir = directionBitmaskToVector(directions);
-		if (dir != glm::vec3(0.f)) {
-			followMode = true;
-			dir.x = -dir.x;
-			followMoveDir = dir;
-		}
-
-		const auto desiredLookAt = limitLookAt(newPlayerPos + followMoveDir * (TILE_SCALE * TILE_STRIDE * 1.f));
-		glm::vec3 desiredCamPos = desiredLookAt + cam_angle;
-
-		const auto old_look_at = cam_look_at;
-		cam_look_at += (desiredLookAt - cam_look_at) * 0.11f;
-		
-		if (!mouseRotation) {
-			cam_pos += (desiredCamPos - cam_pos) * 0.11f;
-		}
-		else {
-			cam_pos += (cam_look_at - old_look_at);
-		}
-
-		if (!directions && glm::distance(cam_look_at, desiredLookAt) < 1.f) {
-			followMode = false;
-		}
-	}
-	/*else {
-		// Smoothly move camera to default angle, but only if keyboard is active and mouse rotation isn't
-		if (directions && !mouseRotation) {
-			const auto desired = cam_look_at + cam_angle;
-			cam_pos += (desired - cam_pos) * 0.225f;
-		}
-	}*/
-
 	UpdateView();
 }
 
@@ -1175,6 +1190,14 @@ void updateUIElements(GameData * gameData) {
 		}
 	}
 	else {
+		//disable prompts unless item is held
+		uiCanvas->setVisible(UICanvas::PROMPT_GREEN_BANANA, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_YELLOW_BANANA, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_BLACK_BANANA, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_APPLE, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_ORANGE, false);
+
+
 		if (currPlayer->getInventory() == ItemModelType::toiletPaper) {
 			uiCanvas->setItem(UICanvas::TOILET_PAPER_ITEM);
 		}
@@ -1207,19 +1230,57 @@ void updateUIElements(GameData * gameData) {
 		}
 		else if (currPlayer->getInventory() == ItemModelType::apple) {
 			uiCanvas->setItem(UICanvas::APPLE_ITEM);
+
+			uiCanvas->setVisible(UICanvas::PROMPT_APPLE, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::orange) {
 			uiCanvas->setItem(UICanvas::ORANGE_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_ORANGE, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::bananaPerfect) {
-			uiCanvas->setItem(UICanvas::BANANA_ITEM);
+			uiCanvas->setItem(UICanvas::BANANA_YELLOW_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_YELLOW_BANANA, true);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::bananaGreen) {
+			uiCanvas->setItem(UICanvas::BANANA_GREEN_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_GREEN_BANANA, true);
+		}
+		else if (currPlayer->getInventory() == ItemModelType::bananaVeryRipe) {
+			uiCanvas->setItem(UICanvas::BANANA_BLACK_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_BLACK_BANANA, true);
 		}
 		else {
 			uiCanvas->removeItems();
 		}
+
+		//set goals
+
+		//set prompts
+		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::JAIL && 
+			gameData->getJailTile(currPlayer->getLocation())->getCapturedAnimal() != -1) {
+			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, false);
+		}
+
+		if (currPlayer->isChef()) {
+			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
+		}
+
+		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::BOX){
+			uiCanvas->setVisible(UICanvas::PROMPT_BOX_SEARCH, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_BOX_SEARCH, false);
+		}
+
 	}
 
-	//update Goals
+
 }
 
 void InGameGraphicsEngine::IdleCallback()
@@ -1279,7 +1340,7 @@ void InGameGraphicsEngine::IdleCallback()
 
 			if (playersChanged) {
 				idempotentFlush();
-				reloadPlayers();
+				ReloadPlayers();
 			}
 		}
 		MovePlayers();
@@ -1288,7 +1349,7 @@ void InGameGraphicsEngine::IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		for (auto &playerState : players) {
-			playerModels[playerState.geometryIdx].object->Update(playerState.moving != 0);
+			playerModels[playerState.geometryIdx].walkObject->Update(playerState.moving != 0);
 		}
 
 		updateUIElements(gameData);
@@ -1360,11 +1421,19 @@ void LoadModels()
 		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
 		model.settings = &setting;
-		model.object = new FBXObject(setting.modelPath, setting.texturePath, setting.attachSkel, false);
-		model.geometry = new Geometry(model.object, objShaderProgram);
+		model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
+		model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
+		if (setting.carryModelPath || setting.carryTexturePath) {
+			model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
+			model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
+		}
+		if (setting.actionModelPath || setting.actionTexturePath) {
+			model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
+			model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
+		}
 		model.transform = new Transform(transform);
 
-		model.transform->addChild(model.geometry);
+		model.transform->addChild(model.walkGeometry);
 	}
 
 	cout << "\tloading " << "tile" << endl;
@@ -1421,9 +1490,9 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 
 	// If no audio device is plugged in, sound system will refuse to create sounds
 	if (!(soundSystem->shouldIgnoreSound())) {
-		fprintf(stdout, "createSound before: sound_toilet=%d\n", sound_toilet);
+		fprintf(stdout, "createSound before: sound_toilet=%p\n", sound_toilet);
 		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
-		fprintf(stdout, "createSound after: sound_toilet=%d\n", sound_toilet);
+		fprintf(stdout, "createSound after: sound_toilet=%p\n", sound_toilet);
 		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 	}
 
@@ -1472,18 +1541,7 @@ void InGameGraphicsEngine::CleanUp()
 	itemModels.clear();
 
 	for (auto &model : playerModels) {
-		if (model.transform) {
-			delete model.transform;
-			model.transform = nullptr;
-		}
-		if (model.geometry) {
-			delete model.geometry;
-			model.geometry = nullptr;
-		}
-		if (model.object) {
-			delete model.object;
-			model.object = nullptr;
-		}
+		model.deallocMembers();
 	}
 
 	if (tileModel)        delete tileModel;
@@ -1514,8 +1572,12 @@ void InGameGraphicsEngine::MainLoopBegin()
 		tileModel->RenderingSetup();
 		wallModel->RenderingSetup();
 		for (auto &model : playerModels) {
-			if (model.object)
-				model.object->RenderingSetup();
+			if (model.walkObject)
+				model.walkObject->RenderingSetup();
+			if (model.carryObject)
+				model.carryObject->RenderingSetup();
+			if (model.actionObject)
+				model.actionObject->RenderingSetup();
 		}
 		for (auto &model : itemModels) {
 			if (model.object)
@@ -1529,8 +1591,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 		needsRenderingSetup = false;
 	}
 
-	UpdateView();
-	MoveCamera(glm::vec3(0.f));
+	InitCamera(glm::vec3(0.f));
 
 	const auto gameData = sharedClient->getGameData();
 	gameData->startGameClock();

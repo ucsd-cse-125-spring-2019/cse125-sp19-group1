@@ -52,9 +52,9 @@ private:
 
 public:
 	// creating. destroying, and debugging
-	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, bool setupRendering = true, GLint filtering = GL_NEAREST);
+	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, int animIndex = -1, bool setupRendering = true, GLint filtering = GL_NEAREST);
 	void Init(bool attachSkel);
-	void Parse(const char* filepath);
+	void Parse(const char* filepath, int animIndex);
 	~FBXObject();
 	void PrintMatrix(glm::mat4 * matrix);
 	void PrintSkeleton();

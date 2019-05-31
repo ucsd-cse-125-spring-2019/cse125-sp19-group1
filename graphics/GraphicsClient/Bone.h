@@ -25,6 +25,7 @@ public:
 	void SetChannelMatrices(float * values, int numValues);
 	void SetID(unsigned int newID);
 	int GetID();
+	AnimationChannel * GetChannel();
 
 private:
 	Bone * parent;

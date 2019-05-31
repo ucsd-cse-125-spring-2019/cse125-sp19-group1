@@ -1,10 +1,10 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, bool setupRendering, GLint filtering) {
+FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, int animIndex, bool setupRendering, GLint filtering) {
 	// initialize variables
 	Init(attachSkel);
 	// read in the model and its texture from the given files
-	Parse(path);
+	Parse(path, animIndex);
 
 	this->texPath = texPath;
 	this->filtering = filtering;
@@ -31,11 +31,11 @@ void FBXObject::Init(bool attachSkel) {
 		skel = new Skeleton();
 }
 
-void FBXObject::Parse(const char *filepath)
+void FBXObject::Parse(const char *filepath, int animIndex)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data,
 	// and potentially load in a Skeleton (if expecting a Skeleton)
-	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer);
+	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer, animIndex);
 	//std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	if (animPlayer != NULL)
 		LoadMatrices(filepath);
@@ -375,6 +375,13 @@ void FBXObject::LoadMatrices(const char * path) {
 	int bufsize = 128;
 	Tokenizer * token = new Tokenizer();
 	token->Open(path);
+	bool print = false;
+	if (path == "../Animations/catSearch.dae")
+		print = true;
+	if (print) {
+		std::cout << "LOADING MATS FROM PATH: " << path << std::endl; 
+		skel->PrintBoneStructure();
+	}
 	if (token->FindToken("<library_animations>")) {
 		while (token->FindToken("<animation id=\"")) {
 			char * out = new char[bufsize];
@@ -394,6 +401,7 @@ void FBXObject::LoadMatrices(const char * path) {
 						for (int i = 0; i < numValues; i++)
 							values[i] = token->GetFloat();
 						currBone->SetChannelMatrices(values, numValues);
+						if (print) std::cout << "ADDING MAT TO " << boneName << std::endl;
 					}
 					else
 						std::cout << "ERROR READING FLOATS FOR " << boneName << std::endl;

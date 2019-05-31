@@ -1,6 +1,6 @@
 #include "animloader.h"
 
-bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer) {
+bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer, int animIndex) {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
 
@@ -19,9 +19,13 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 		return false;
 	}
 
-	aiAnimation * anim = scene->mAnimations[0];
-	if (scene->mNumAnimations > 1)
+	aiAnimation * anim;
+	if (animIndex > -1 && animIndex < scene->mNumAnimations)
+		anim = scene->mAnimations[animIndex];
+	else if (scene->mNumAnimations > 1)
 		anim = scene->mAnimations[1];
+	else
+		anim = scene->mAnimations[0];
 
 	if (anim == nullptr || anim->mNumChannels == 0) {
 		return false;
@@ -46,29 +50,29 @@ void convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * chann
 	for (int i = 0; i < anim->mNumChannels; i++) {
 		aiNodeAnim * currChannel = anim->mChannels[i];
 		//have to map the channels while building them, mold all keyframes together.
-    AnimationChannel * newChannel = new AnimationChannel((char*)(currChannel->mNodeName.C_Str()), currChannel->mNumPositionKeys);
-    std::vector<Keyframe *> * keyframes = newChannel->getKeyframes();
-    channels->push_back(newChannel);
-    for (int j = 0; j < currChannel->mNumPositionKeys; j++) {
-      aiVectorKey positionKey = currChannel->mPositionKeys[j];
-      float keyTime = positionKey.mTime;
-      glm::vec3 positionVec = glm::vec3();
-      positionVec.x = positionKey.mValue.x;
-      positionVec.y = positionKey.mValue.y;
-      positionVec.z = positionKey.mValue.z;
-      aiQuatKey rotationKey = currChannel->mRotationKeys[j];
-      glm::vec4 rotationVec = glm::vec4();
-      rotationVec.x = rotationKey.mValue.x;
-      rotationVec.y = rotationKey.mValue.y;
-      rotationVec.z = rotationKey.mValue.z;
-      rotationVec.w = rotationKey.mValue.w;
-      aiVectorKey scalingKey = currChannel->mScalingKeys[j];
-      glm::vec3 scalingVec = glm::vec3();
-      scalingVec.x = scalingKey.mValue.x;
-      scalingVec.y = scalingKey.mValue.y;
-      scalingVec.z = scalingKey.mValue.z;
-      keyframes->push_back(new Keyframe(keyTime, positionVec, rotationVec, scalingVec));
-    }
+		AnimationChannel * newChannel = new AnimationChannel((char*)(currChannel->mNodeName.C_Str()), currChannel->mNumPositionKeys);
+		std::vector<Keyframe *> * keyframes = newChannel->getKeyframes();
+		channels->push_back(newChannel);
+		for (int j = 0; j < currChannel->mNumPositionKeys; j++) {
+			aiVectorKey positionKey = currChannel->mPositionKeys[j];
+			float keyTime = positionKey.mTime;
+			glm::vec3 positionVec = glm::vec3();
+			positionVec.x = positionKey.mValue.x;
+			positionVec.y = positionKey.mValue.y;
+			positionVec.z = positionKey.mValue.z;
+			aiQuatKey rotationKey = currChannel->mRotationKeys[j];
+			glm::vec4 rotationVec = glm::vec4();
+			rotationVec.x = rotationKey.mValue.x;
+			rotationVec.y = rotationKey.mValue.y;
+			rotationVec.z = rotationKey.mValue.z;
+			rotationVec.w = rotationKey.mValue.w;
+			aiVectorKey scalingKey = currChannel->mScalingKeys[j];
+			glm::vec3 scalingVec = glm::vec3();
+			scalingVec.x = scalingKey.mValue.x;
+			scalingVec.y = scalingKey.mValue.y;
+			scalingVec.z = scalingKey.mValue.z;
+			keyframes->push_back(new Keyframe(keyTime, positionVec, rotationVec, scalingVec));
+		}
 	}
 }
 
