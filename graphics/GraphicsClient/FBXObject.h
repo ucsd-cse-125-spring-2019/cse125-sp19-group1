@@ -83,6 +83,7 @@ public:
 	void SetDepthTest(bool depthTestEnabled);
 	// rendering
 	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
+	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model, GLuint textureOverride);
 	void RenderingSetup();
 	bool GetIsRenderingSetup();
 	void UpdateBuffers();

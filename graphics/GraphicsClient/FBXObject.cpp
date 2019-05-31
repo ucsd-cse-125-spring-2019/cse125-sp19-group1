@@ -27,6 +27,7 @@ void FBXObject::Init(bool attachSkel) {
 	skel = NULL;
 	animPlayer = NULL;
 	animTimer = 0.0f;
+	texNum = 0;
 	if (attachSkel)
 		skel = new Skeleton();
 }
@@ -80,6 +81,10 @@ FBXObject::~FBXObject()
 		glDeleteBuffers(1, &(this->VBO_V));
 		glDeleteBuffers(1, &(this->VBO_N));
 		glDeleteBuffers(1, &(this->EBO));
+
+		if (texNum) {
+			glDeleteTextures(1, &texNum);
+		}
 	}
 }
 
@@ -192,6 +197,11 @@ void FBXObject::SetDepthTest(bool depthTestEnabled) {
 
 void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model)
 {
+	Draw(shaderProgram, V, P, model, texNum);
+}
+
+void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model, GLuint textureOverride)
+{
 	if (!renderingIsSetup)
 		return;
 
@@ -206,7 +216,7 @@ void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 
 	// Calculate the combination of the model and view (camera inverse) matrices
 	glm::mat4 modelview = (*V) * model;
 
-	glBindTexture(GL_TEXTURE_2D, texNum);
+	glBindTexture(GL_TEXTURE_2D, textureOverride);
 
 	// We need to calculate this because modern OpenGL does not keep track of any matrix other than the viewport (D)
 	// Consequently, we need to forward the projection, view, and model matrices to the shader programs
@@ -272,8 +282,10 @@ void FBXObject::RenderingSetup() {
 
 	SetBuffers();
 
-	// Load the corresponding model texture
-	texNum = loadTexture(texPath, &texWidth, &texHeight, filtering);
+	if (texPath) {
+		// Load the corresponding model texture
+		texNum = loadTexture(texPath, &texWidth, &texHeight, filtering);
+	}
 }
 
 void FBXObject::UpdateBuffers() {
