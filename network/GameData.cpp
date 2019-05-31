@@ -12,7 +12,7 @@ GameData::GameData(int serverInit)
 	addDecodeFunctions();
 	beginCountdown = false;
 	countdownCompleted = false;
-	playerNum = 3;
+	playerNum = 1;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)

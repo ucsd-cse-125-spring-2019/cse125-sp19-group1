@@ -198,11 +198,14 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	if(sharedClient->getGameData()->getPlayer(sharedClient->getMyID()))
 		myPlayerNum = sharedClient->getGameData()->getPlayer(sharedClient->getMyID())->getPlayerNum();
 
+	// update playerIsAnimal using server values
 	for (auto iter = players.begin(); iter != players.end(); iter++)
 	{
 		Player * player = iter->second;
-		playerIsAnimal[player->getPlayerNum() - 1] = player->hasSelectedAnimal();
+		playerIsAnimal[(player->getPlayerNum() - 1) % LOBBY_MAX_PLAYERS] = player->hasSelectedAnimal();
 	}
+
+	// Randomize the players (remove if above code works after testing)
 	int blah = (int)(now / 2.75);
 	static int lastBlah = -1;
 	if (blah != lastBlah) {
