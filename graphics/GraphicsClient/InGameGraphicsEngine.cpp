@@ -45,6 +45,7 @@
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.png")
 
+#define BOX_SEARCH_MDL_PATH     (ANIMATIONS_PATH "box_search.dae")
 
 //particle effects
 #define DUST_PARTICLE_TEX (PARTICLES_PATH "dust.png")
@@ -76,6 +77,8 @@
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
 
 
+#define MAX_PLAYERS 4
+
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
 //#define ENV_OBJS_DEMO
@@ -95,7 +98,7 @@
 // #define DEBUG_CARRY
 
 // Uncomment to skip loading player animations
-#define DEBUG_LOAD_LESS
+// #define DEBUG_LOAD_LESS
 
 // Uncomment to skip loading UI
 #define DEBUG_NO_UI
@@ -288,6 +291,7 @@ static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 
 static FBXObject * tileModel = nullptr;
 static FBXObject * wallModel = nullptr;
+static FBXObject * animatedBoxObjects[MAX_PLAYERS] = {nullptr};
 
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
@@ -382,6 +386,20 @@ struct PlayerState {
 		auto translate = glm::translate(glm::mat4(1.f), position);
 		transform = glm::rotate(translate, angle, glm::vec3(0.f, 1.f, 0.f));
 	}
+
+	void setTargetAngle(float newTargetAngle) {
+		// Try to find an equivalent (+/- 2pi) target that is closer
+		float alternateTarget = newTargetAngle - glm::two_pi<float>();
+		if (abs(newTargetAngle - angle) > abs(alternateTarget - angle)) {
+			newTargetAngle = alternateTarget;
+		}
+		alternateTarget = newTargetAngle + glm::two_pi<float>();
+		if (abs(newTargetAngle - angle) > abs(alternateTarget - angle)) {
+			newTargetAngle = alternateTarget;
+		}
+
+		targetAngle = newTargetAngle;
+	}
 };
 
 Transform * root = nullptr;
@@ -471,7 +489,6 @@ void resetEnvObjs()
 
 	if (envObjsTransform == nullptr) {
 		envObjsTransform = new Transform(glm::mat4(1.f));
-		root->addChild(envObjsTransform);
 	}
 	else {
 		envObjsTransform->removeAllChildren();
@@ -591,7 +608,6 @@ void resetItems()
 
 	if (allItemsTransform == nullptr) {
 		allItemsTransform = new Transform(glm::mat4(1.f));
-		root->addChild(allItemsTransform);
 	} 
 	else {
 		allItemsTransform->removeAllChildren();
@@ -989,32 +1005,16 @@ void InGameGraphicsEngine::MovePlayers()
 		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
 
 		// Set targetAngle based on keyboard for me, based on movement for others
-		bool changedTargetAngle = false;
 		if (state.id != myID) {
 			const auto delta = state.position - oldPos;
-
 			if (abs(delta.x) > 0.0001 || abs(delta.z) > 0.0001) {
-				state.targetAngle = glm::atan(delta.x, delta.z);
-				changedTargetAngle = true;
+				state.setTargetAngle(glm::atan(delta.x, delta.z));
 			}
 		}
 		else {
-			auto dir = directionBitmaskToVector(directions);
+			const auto dir = directionBitmaskToVector(directions);
 			if (dir.x != 0.f || dir.z != 0.f) {
-				state.targetAngle = glm::atan(-dir.x, dir.z);
-				changedTargetAngle = true;
-			}
-		}
-
-		// Try to find an equivalent (+/- 2pi) target that is closer
-		if (changedTargetAngle) {
-			float alternateTarget = state.targetAngle - glm::two_pi<float>();
-			if (abs(state.targetAngle - state.angle) > abs(alternateTarget - state.angle)) {
-				state.targetAngle = alternateTarget;
-			}
-			alternateTarget = state.targetAngle + glm::two_pi<float>();
-			if (abs(state.targetAngle - state.angle) > abs(alternateTarget - state.angle)) {
-				state.targetAngle = alternateTarget;
+				state.setTargetAngle(glm::atan(-dir.x, dir.z));
 			}
 		}
 
@@ -1464,8 +1464,28 @@ void DisplayCallback(GLFWwindow* window)
 #endif
 
 			switch (action) {
-			case Action::CONSTRUCT_GATE:
 			case Action::OPEN_BOX:
+			{
+				// hide the un-animated box
+				int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
+				int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
+				auto transform = envObjs[z][x];
+				transform->hidden = true;
+
+				// show the animated box
+				auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
+				unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
+				animatedBoxObjects[boxIdx]->Update(true);
+				animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
+
+				// Turn towards the box
+				float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
+				float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
+				state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
+
+				// fall through on purpose (missing break is not a mistake)
+			}
+			case Action::CONSTRUCT_GATE:
 			case Action::UNLOCK_JAIL:
 			case Action::SWING_NET:
 				model.getActionObject()->Update(true);
@@ -1491,10 +1511,13 @@ void DisplayCallback(GLFWwindow* window)
 
 			playerGeometry->draw(V, P, state.transform);
 
+			// Prepare to draw a special copy of an item (either carried or thrown)
 			Geometry *inventoryGeometry = nullptr;
 			glm::mat4 inventoryMat;
 
 			if (inventory != ItemModelType::EMPTY) {
+				// Prepare to draw a carried item
+
 				auto playerSettings = playerModels[state.geometryIdx].settings;
 				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
 
@@ -1512,23 +1535,28 @@ void DisplayCallback(GLFWwindow* window)
 				inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
 				inventoryGeometry = itemModel.geometry;
 
+				// The thrown item code will need this later
 				state.previousInventory = inventory;
 				state.inventoryTransform = inventoryMat;
-
 			}
 			else if (state.previousInventory != ItemModelType::EMPTY) {
+				// Prepare to draw a thrown item
+
+				// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
+				// depending on if the item actually was just thrown
 #define INVENTORY_ANIMATION_DURATION 0.275
 #define INVENTORY_GRAVITY 85
 				if (!state.animatingInventory) {
 					state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
 					state.carryStopTime = glfwGetTime();
 					auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
-					state.animatingInventory = (tile != nullptr);
-					if (!tile) {
+					state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory);
+					if (!state.animatingInventory) {
 						state.previousInventory = ItemModelType::EMPTY;
 					}
 				}
 
+				// If the animation wasn't cancelled, calculate projectile position
 				if (state.animatingInventory) {
 					int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
 					int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
@@ -1546,6 +1574,7 @@ void DisplayCallback(GLFWwindow* window)
 					inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
 				}
 
+				// Check if the animation has finished
 				if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
 					state.animatingInventory = false;
 					state.previousInventory = ItemModelType::EMPTY;
@@ -1555,12 +1584,21 @@ void DisplayCallback(GLFWwindow* window)
 			if (inventoryGeometry) {
 				inventoryGeometry->draw(V, P, inventoryMat);
 			}
-
-			//particle effects
-			dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-				state.position - glm::vec3(0, 3.0f, 0), state.moving);
-
 		}
+	}
+
+	if (envObjsTransform) {
+		envObjsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	if (allItemsTransform) {
+		allItemsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	for (auto &state : players) {
+		//particle effects
+		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), state.moving);
 	}
 
 	if (uiCanvas) {
@@ -1610,7 +1648,7 @@ void LoadModels()
 	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
 		playerLoadingThreads[threadIdx] = thread([&]() {
-			cout << "\tloading " << setting.name << endl;
+			cout << "\tloading " << setting.title << endl;
 
 			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
 
@@ -1666,6 +1704,11 @@ void LoadModels()
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
+	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
+	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, -1, false);
+	}
 
 	itemLoadingThread.join();
 	for (auto &t : playerLoadingThreads) {
@@ -1804,6 +1847,13 @@ void InGameGraphicsEngine::MainLoopBegin()
 				model.carryObject->RenderingSetup();
 			if (model.actionObject)
 				model.actionObject->RenderingSetup();
+		}
+		cout << "done\n";
+
+		cout << "\tanimated boxes... ";
+		for (auto box : animatedBoxObjects) {
+			if (box)
+				box->RenderingSetup();
 		}
 		cout << "done\n";
 
