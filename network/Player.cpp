@@ -32,6 +32,8 @@ bool Player::isInteracting() const { return interacting; }
 //bool Player::getOpeningGate() const { return openingGate; }
 bool Player::getHidden() { return hidden; }
 Action Player::getAction() const { return action; }
+PowerUp Player::getPowerUp() const { return powerUp; }
+
 
 Direction Player::getFacingDirection() const { return facingDirection; }
 void Player::setFacingDirection(Direction dir) { facingDirection = dir; }
@@ -49,6 +51,11 @@ void Player::setAction(Action anAction)
 {
 	action = anAction;
 	dirtyVariablesMap["interactAction"] = true;
+}
+void Player::setPowerUp(PowerUp aPowerUp)
+{
+	powerUp = aPowerUp;
+	dirtyVariablesMap["interactPowerUp"] = true;
 }
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -362,6 +369,11 @@ void Player::decodeInteractAction(std::string value)
 	action = static_cast<Action>(std::stoi(value));
 }
 
+void Player::decodeInteractPowerUp(std::string value)
+{
+	powerUp = static_cast<PowerUp>(std::stoi(value));
+}
+
 void Player::decodeVisionRadius(std::string value)
 {
 	visionRadius = std::stof(value);
@@ -390,6 +402,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["inventory"] = &Player::decodeInventory;
 	decodingFunctions["hidden"] = &Player::decodeHidden;
 	decodingFunctions["interactAction"] = &Player::decodeInteractAction;
+	decodingFunctions["interactPowerUp"] = &Player::decodeInteractPowerUp;
 	decodingFunctions["visionRadius"] = &Player::decodeVisionRadius;
 	decodingFunctions["caughtStatus"] = &Player::decodeCaughtStatus;
 	decodingFunctions["caughtAnimal"] = &Player::decodeCaughtAnimal;
@@ -406,6 +419,7 @@ void Player::addEncodeFunctions()
 	encodingFunctions["inventory"] = &Player::encodeInventory;
 	encodingFunctions["hidden"] = &Player::encodeHidden;
 	encodingFunctions["interactAction"] = &Player::encodeInteractAction;
+	encodingFunctions["interactPowerUp"] = &Player::encodeInteractPowerUp;
 	encodingFunctions["visionRadius"] = &Player::encodeVisionRadius;
 	encodingFunctions["caughtStatus"] = &Player::encodeCaughtStatus;
 	encodingFunctions["caughtAnimal"] = &Player::encodeCaughtAnimal;
@@ -419,6 +433,7 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["model"] = true;
 	dirtyVariablesMap["hidden"] = true;
 	dirtyVariablesMap["interactAction"] = true;
+	dirtyVariablesMap["interactPowerUp"] = true;
 	dirtyVariablesMap["visionRadius"] = true;
 	dirtyVariablesMap["caughtStatus"] = true;
 	dirtyVariablesMap["caughtAnimal"] = true;
@@ -468,6 +483,13 @@ std::string Player::encodeHidden() {
 std::string Player::encodeInteractAction() {
 	std::stringstream encodedData;
 	encodedData << "interactAction: " << static_cast<int>(action) << std::endl;
+
+	return encodedData.str();
+}
+
+std::string Player::encodeInteractPowerUp() {
+	std::stringstream encodedData;
+	encodedData << "interactPowerUp: " << static_cast<int>(powerUp) << std::endl;
 
 	return encodedData.str();
 }

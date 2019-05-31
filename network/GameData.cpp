@@ -149,6 +149,24 @@ void GameData::addDecodeFunctions()
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
 	decodingFunctions["gameData"] = &GameData::decodeGameState;
+	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;
+	decodingFunctions["chefVision"] = &GameData::decodeChefVision;
+	decodingFunctions["winType"] = &GameData::decodeWinType;
+
+}
+
+
+void GameData::decodeChefAnger(std::string value) 
+{
+	chefAnger = std::stoi(value);
+}
+void GameData::decodeChefVision(std::string value) 
+{
+	chefVision = std::stoi(value);
+}
+void GameData::decodeWinType(std::string value) 
+{
+	wt = (WinType)std::stoi(value);
 }
 
 void GameData::decodeDisconnectedClients(std::string value)
@@ -301,15 +319,6 @@ void GameData::decodeGameData(const char * data)
 				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
 		}
-		else if (p.first == "chefAnger") {
-			chefAnger = std::stoi(value);
-		}
-		else if (p.first == "chefVision") {
-			chefVision = std::stoi(value);
-		}
-		else if (p.first == "winType") {
-			wt = (WinType)std::stoi(value);
-		}
 		else
 		{
 			if (playerID == GENERAL_GAME_DATA_ID)
@@ -330,6 +339,15 @@ void GameData::decodeGameData(const char * data)
 		}
 	}
 }
+
+double GameData::getChefVision() {
+	if (getBlindChef())
+	{
+		return (chefVision + getChefRampVision()) * LIMIT_CHEF_VISION_MULT;
+	}
+	return chefVision + getChefRampVision();
+}
+
 
 int GameData::getGameClock()
 {

@@ -21,6 +21,8 @@
 #define MAX_ANIMAL_SEARCH_TIME 5
 #define FLASH_DISTANCE 14
 #define DEFAULT_VISION 60
+#define DEFAULT_CHEF_VISION_MULT 1
+#define LIMIT_CHEF_VISION_MULT 0.4
 
 
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
@@ -62,6 +64,9 @@ public:
 	void decodeTileLayout(std::string value);
 	void decodeDisconnectedClients(std::string value);
 	void decodeGameState(std::string value);
+	void decodeChefAnger(std::string value);
+	void decodeChefVision(std::string value);
+	void decodeWinType(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
@@ -87,7 +92,6 @@ public:
 	double abilityChargeTime = 0.0f;
 
 	double maxGhostTime = 7;
-	double limitChefVision = 1;
 
 	double getAbilityChargeTime() { return abilityChargeTime; }
 	double getMaxGhostTime() { return maxGhostTime; }
@@ -98,9 +102,17 @@ public:
 	int chefAngerInterval = 3;
 	double chefVision = 40;
 	double chefMaxVision = 100;
+	bool blindChef = false;
+	double chefRampVision = 0;
+	
+	void setChefRampVision(double crv) { chefRampVision = crv; }
+	double getChefRampVision() { return chefRampVision; }
 
-	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
-	double getChefVision() { return chefVision * limitChefVision; }
+	bool getBlindChef() { return blindChef; }
+	void setBlindChef(bool aBlindChef) { blindChef = aBlindChef; }
+
+	double getChefVision();
+
 	double getChefMaxVision() { return chefMaxVision; }
 	void incrementChefVision() { chefVision++; }
 	void incrementChefAnger() { chefAnger++; }

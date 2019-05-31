@@ -26,6 +26,8 @@ enum class Direction {
 
 enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET, KEY_DROP };
 
+enum class PowerUp {NONE, FLASH, GHOST, INSTA_SEARCH, CHEF_BLIND, CHEF_SLOW};
+
 class Player
 {
 public:
@@ -39,6 +41,7 @@ public:
 	ItemModelType	getInventory() const;
 	bool		isInteracting() const;
 	Action		getAction() const;
+	PowerUp		getPowerUp() const;
 	//bool		getOpenJail() const;
 	//bool		getOpeningGate() const;
 	Location	getLocation() const;
@@ -77,6 +80,7 @@ public:
 	void setActionStartTime();
 	void setUnlockJailStartTime();
 	void setAction(Action anAction);
+	void setPowerUp(PowerUp aPowerUp);
 	void setFacingDirection(Direction dir);
 
 	void setStartJailTime();
@@ -138,6 +142,7 @@ public:
 	void decodeModelType(std::string value);
 	void decodeHidden(std::string value);
 	void decodeInteractAction(std::string value);
+	void decodeInteractPowerUp(std::string value);
 	void decodeVisionRadius(std::string value);
 	void decodeCaughtStatus(std::string value);
 	void decodeCaughtAnimal(std::string value);
@@ -152,6 +157,7 @@ public:
 	std::string encodeModelType();
 	std::string encodeHidden();
 	std::string encodeInteractAction();
+	std::string encodeInteractPowerUp();
 	std::string encodeVisionRadius();
 	std::string encodeCaughtStatus();
 	std::string encodeCaughtAnimal();
@@ -159,6 +165,7 @@ public:
 
 protected:
 	Action		action;
+	PowerUp		powerUp;
 	Location	location;
 	int			playerID;
 	int			playerNum;
