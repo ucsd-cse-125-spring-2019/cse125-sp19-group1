@@ -8,6 +8,9 @@ SoundSystem::SoundSystem()
 {
 	FMOD_RESULT result;
 
+	hasAudioDriver = false;
+	continueQueue = false;
+
 	if (FMOD::System_Create(&system) != FMOD_OK) {
 		// Report Error
 		return;
@@ -298,4 +301,90 @@ void SoundSystem::releaseSound(Sound * pSound)
 bool SoundSystem::shouldIgnoreSound()
 {
 	return !hasAudioDriver;
+}
+
+void SoundSystem::pushSoundQueue(Sound * pSound)
+{
+	soundQueue.push(pSound);
+}
+
+void SoundSystem::playSoundsInQueueThread()
+{
+	FMOD_RESULT result;
+	bool playing = false;
+	bool paused = true;
+	Sound * currSound;
+
+	result = channel[0]->isPlaying(&playing);
+
+	fprintf(stdout, "playSoundsInQueueThread: I'm %d\n", std::this_thread::get_id());
+	fprintf(stdout, "playSoundsInQueueThread: num in queue: %d, playing=%d\n", soundQueue.size(), playing);
+
+	while ((!soundQueue.empty()) && (continueQueue)) {
+		result = channel[0]->isPlaying(&playing);
+		result = channel[0]->getPaused(&paused);
+		
+		// double check if queue is empty due to multithreading
+		if ((!playing || paused) && !soundQueue.empty()) {
+			currSound = soundQueue.front();
+			soundQueue.pop();
+
+			result = system->playSound(currSound, 0, false, &channel[0]);
+
+			if (result != FMOD_OK) {
+				if (result == FMOD_ERR_INVALID_PARAM) {
+					fprintf(stdout, "playSoundsInQueueThread ERROR: pSound=%d\n", currSound);
+					fprintf(stdout, "playSoundsInQueueThread ERROR: FMOD_ERR_INVALID_PARAM\n");
+				}
+				else {
+					fprintf(stdout, "playSoundsInQueueThread ERROR %d: COULD NOT PLAY SOUND\n", result);
+				}
+			}
+		}
+	}
+	fprintf(stdout, "playSoundsInQueueThread: stopping now\n");
+}
+
+void SoundSystem::playSoundsInQueue()
+{
+	if (!continueQueue) {
+		fprintf(stdout, "playSoundsInQueue: spawning thread\n");
+		continueQueue = true;
+		std::thread (&SoundSystem::playSoundsInQueueThread, this).detach();
+	}
+}
+
+void SoundSystem::pauseSoundQueue()
+{
+	FMOD_RESULT result;
+	bool playing = false;
+	bool paused = true;
+
+	result = channel[0]->isPlaying(&playing);
+	result = channel[0]->getPaused(&paused);
+
+	if (playing || continueQueue || !paused) {
+		fprintf(stdout, "pauseSoundQueue: pausing and emptying queue\n");
+
+		std::lock_guard<std::mutex> lock(m);
+		continueQueue = false;
+
+		if (playing) {
+			result = channel[0]->setPaused(true);
+
+			while (!soundQueue.empty()) {
+				soundQueue.pop();
+			}
+
+			// TODO: also reset or clear channel
+			if (result != FMOD_OK) {
+				if (result == FMOD_ERR_INVALID_PARAM) {
+					fprintf(stdout, "pauseSoundQueue ERROR: FMOD_ERR_INVALID_PARAM\n");
+				}
+				else {
+					fprintf(stdout, "pauseSoundQueue ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
+				}
+			}
+		}
+	}
 }
