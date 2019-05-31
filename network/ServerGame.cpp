@@ -107,21 +107,18 @@ void ServerGame::receiveFromClients()
 				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
-				if (!gameStarted && allPlayersReady)
 				{
-					initCharacters = true;
-					gameData->startCountdown();
-				}
-				{
-					std::vector<ModelType> characters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
+					//std::vector<ModelType> characters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
 					for (auto iter = gameData->getAllPlayers().begin(); iter != gameData->getAllPlayers().end(); iter++)
 					{
 						Player * player = iter->second;
 						if (player->hasSelectedAnimal())
 						{
-							int randChoice = rand() % characters.size();
-							player->setModelType(characters.at(randChoice));
-							characters.erase(characters.begin() + randChoice);
+							//int randChoice = rand() % characters.size();
+							//player->setModelType(characters.at(randChoice));
+							//characters.erase(characters.begin() + randChoice);
+							player->setModelType(gameData->getAvailableCharacter());
+
 						}
 						else
 							player->setModelType(ModelType::CHEF);

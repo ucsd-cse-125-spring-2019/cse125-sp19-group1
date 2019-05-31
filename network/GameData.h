@@ -66,6 +66,7 @@ public:
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
 	Atlas * getAtlas();
+	ModelType getAvailableCharacter();
 
 	void updateGateProgress(int gateNum);
 
@@ -137,6 +138,7 @@ protected:
 	bool beginCountdown;
 	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;
 	bool countdownCompleted;
+	std::vector<ModelType> availableCharacters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
 
 	int playerNum;
 private:

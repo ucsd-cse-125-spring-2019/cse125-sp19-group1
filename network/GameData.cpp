@@ -58,6 +58,17 @@ void GameData::setGameState(GameState state)
 	gameState = state;
 }
 
+ModelType GameData::getAvailableCharacter()
+{
+	if (availableCharacters.size() > 0)
+	{
+		int randChoice = rand() % availableCharacters.size();
+		ModelType character = availableCharacters.at(randChoice);
+		availableCharacters.erase(availableCharacters.begin() + randChoice);
+		return character;
+	}
+	return ModelType::CHEF;
+}
 
 void GameData::updateGateProgress(int gateNum)
 {
@@ -100,7 +111,17 @@ void GameData::addNewPlayer(unsigned int anID, Location aLoc, ClientType type)
 			disconnectedPlayers.pop_back();
 		}
 		else
+		{
+
+
 			players[anID] = new Player(anID, playerNum++, atlas->getPlayerSpawnLocation(anID));
+
+			// Assign model for a new player joining the game
+			if (gameState == GameState::IN_GAME)
+			{
+				players[anID]->setModelType(getAvailableCharacter());
+			}
+		}
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
