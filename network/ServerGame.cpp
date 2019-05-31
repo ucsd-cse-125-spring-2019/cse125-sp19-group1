@@ -341,7 +341,6 @@ void ServerGame::receiveFromClients()
 								{
 									if (keyDropTile->isValidKey(player->getInventory()))
 									{
-
 										keyDropTile->updateKeyProgress(player->getInventory());
 										gameData->updateGateProgress(keyDropTile->getGateNum());
 										player->setInventory(ItemModelType::EMPTY);
@@ -782,22 +781,26 @@ void ServerGame::receiveFromClients()
 			{
 				player->setBlindChef(false);
 				gameData->setChefVisionLimit(1);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
 			if (player->getSlowChef() && player->getSlowTime() > MAX_CHEF_TIME)
 			{
 				player->setSlowChef(false);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
 			if (player->getGhost() && player->getSpeedTime() > MAX_ANIMAL_GHOST_TIME)
 			{
 
 				player->setGhost(false);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
 			if (player->getInstantSearch() && player->getSearchTime() > MAX_ANIMAL_SEARCH_TIME)
 			{
 				player->setInstantSearch(false);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
 			//if (player->getInteracting())
@@ -886,6 +889,7 @@ void ServerGame::receiveFromClients()
 							player->setBlindChef(true);
 							player->setVisionStartTime();
 							gameData->setChefVisionLimit(0.5);
+							player->setPowerUp(PowerUp::CHEF_BLIND);
 						}
 						else if (it == ItemModelType::orange)
 						{
@@ -893,6 +897,7 @@ void ServerGame::receiveFromClients()
 							//call limit chef speed 
 							player->setSlowChef(true);
 							player->setSlowStartTime();
+							player->setPowerUp(PowerUp::CHEF_SLOW);
 						}
 						else if (it == ItemModelType::bananaGreen)
 						{
@@ -900,6 +905,7 @@ void ServerGame::receiveFromClients()
 							player->setGhost(true);
 							//call ghost because green means go 
 							player->setSpeedStartTime();
+							player->setPowerUp(PowerUp::GHOST);
 						}
 						else if (it == ItemModelType::bananaPerfect)
 						{
@@ -960,6 +966,9 @@ void ServerGame::receiveFromClients()
 							tileLoc.update(x, y, z);
 							Tile * tile = gameData->getAtlas()->getTileAt(tileLoc);
 							player->setLocation(x, tile->getHeight()/2 * TILE_HEIGHT, z);
+							player->setPowerUp(PowerUp::FLASH);
+							sendActionPackets();
+							player->setPowerUp(PowerUp::NONE);
 						}
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
@@ -967,6 +976,7 @@ void ServerGame::receiveFromClients()
 							player->setInstantSearch(true);
 							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
 							player->setSearchStartTime();
+							player->setPowerUp(PowerUp::INSTA_SEARCH);
 						}
 						else {
 							powerUp = false;
@@ -1220,7 +1230,8 @@ void ServerGame::updateHeight(int id)
 	}
 	else
 	{
-		gameData->setChefVisionLimit(y*1.2 + );;
+		std::cout << y << " " << gameData->getLimitChefVision() << std::endl;
+		gameData->setChefVisionLimit(y/TILE_HEIGHT*1.2 + 1);
 	}
 
 	// Update location of captured animal to the chef's location

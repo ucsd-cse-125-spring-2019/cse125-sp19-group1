@@ -21,6 +21,8 @@
 #define MAX_ANIMAL_SEARCH_TIME 5
 #define FLASH_DISTANCE 14
 #define DEFAULT_VISION 60
+#define DEFAULT_CHEF_VISION_MULT 1
+#define LIMIT_CHEF_VISION_MULT 0.4
 
 
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
@@ -85,7 +87,6 @@ public:
 	double abilityChargeTime = 0.0f;
 
 	double maxGhostTime = 7;
-	double limitChefVision = 1;
 
 	double getAbilityChargeTime() { return abilityChargeTime; }
 	double getMaxGhostTime() { return maxGhostTime; }
@@ -96,6 +97,9 @@ public:
 	int chefAngerInterval = 3;
 	double chefVision = 40;
 	double chefMaxVision = 100;
+	bool blindChef = false;
+
+	void setBlindChef(bool aBlindChef) { blindChef = aBlindChef; }
 
 	double getLimitChefVision() { return limitChefVision; }
 	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
