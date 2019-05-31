@@ -30,6 +30,10 @@ private:
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
+	// Temporaries that are deallocated in RenderingSetup
+	std::vector<glm::ivec4> weightIndices;
+	std::vector<glm::vec4> weightValues;
+
 	const char * texPath;
 
 	Skeleton * skel;

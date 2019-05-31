@@ -1835,8 +1835,12 @@ void InGameGraphicsEngine::MainLoopBegin()
 #ifndef DEBUG_NO_UI
 	if (!uiCanvas) {
 		cout << "Loading UICanvas... ";
+		using namespace std::chrono;
+		auto setupStart = high_resolution_clock::now();
 		uiCanvas = new UICanvas(uiShaderProgram);
-		cout << "done.\n";
+		auto setupEnd = high_resolution_clock::now();
+		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
+		cout << "done constructing UICanvas in " << setupDuration.count() << " seconds\n";
 	}
 #endif
 

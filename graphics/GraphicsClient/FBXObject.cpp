@@ -37,8 +37,34 @@ void FBXObject::Parse(const char *filepath, int animIndex)
 	// and potentially load in a Skeleton (if expecting a Skeleton)
 	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer, animIndex);
 	//std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
-	if (animPlayer != NULL)
+	if (animPlayer != NULL) {
 		LoadMatrices(filepath);
+
+		const std::vector<Vertex *> * skelVertices = skel->GetVertices();
+
+		weightIndices.resize(skelVertices->size(), glm::ivec4(0, 0, 0, 0));
+		weightValues.resize(skelVertices->size(), glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+
+		for (int i = 0; i < skelVertices->size(); i++) {
+			const std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
+			glm::ivec4 &currIndices = weightIndices[i];
+			glm::vec4 &currValues = weightValues[i];
+			// number of weights is restricted to a maximum of four
+			for (int j = 0; j < currWeights->size() && j < 4; j++) {
+				const std::pair<string, float> currWeight = (*currWeights)[j];
+				if (currWeight.first.size() != 0) {
+					Bone * currBone = skel->GetBone(currWeight.first);
+					if (currBone != NULL) {
+						if (currBone->GetID() == -1) std::cout << "ID OF -1 ON NECESSARY BONE: " << currBone->GetName() << std::endl;
+						else {
+							currIndices[j] = currBone->GetID();
+							currValues[j] = currWeight.second;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 FBXObject::~FBXObject()
@@ -315,31 +341,6 @@ void FBXObject::SetBuffers() {
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (GLvoid*)0);
 
 	if (animPlayer != NULL) {
-		std::vector<glm::ivec4> weightIndices;
-		std::vector<glm::vec4> weightValues;
-		std::vector<Vertex *> * skelVertices = skel->GetVertices();
-		for (int i = 0; i < skelVertices->size(); i++) {
-			std::vector<std::pair<string, float>> * currWeights = (*skelVertices)[i]->GetWeights();
-			glm::ivec4 currIndices = glm::ivec4(0, 0, 0, 0);
-			glm::vec4 currValues = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-			// number of weights is restricted to a maximum of four
-			for (int j = 0; j < currWeights->size() && j < 4; j++) {
-				std::pair<string, float> currWeight = (*currWeights)[j];
-				if (currWeight.first != "") {
-					Bone * currBone = skel->GetBone(currWeight.first);
-					if (currBone != NULL) {
-						if (currBone->GetID() == -1) std::cout << "ID OF -1 ON NECESSARY BONE: " << currBone->GetName() << std::endl;
-						else {
-							currIndices[j] = currBone->GetID();
-							currValues[j] = currWeight.second;
-						}
-					}
-				}
-			}
-			weightIndices.push_back(currIndices);
-			weightValues.push_back(currValues);
-		}
-
 		/* send data about vertex weight indices */
 		glBindBuffer(GL_ARRAY_BUFFER, this->VBO_WI);
 		glBufferData(GL_ARRAY_BUFFER, weightIndices.size() * (4 * sizeof(GLuint)), weightIndices.data(), GL_STATIC_DRAW);
@@ -352,6 +353,11 @@ void FBXObject::SetBuffers() {
 		glEnableVertexAttribArray(4);
 		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid *)0);
 
+		weightIndices.clear();
+		weightIndices.shrink_to_fit();
+
+		weightValues.clear();
+		weightValues.shrink_to_fit();
 	}
 
 	// tell the shader in what order it should draw the vertices
