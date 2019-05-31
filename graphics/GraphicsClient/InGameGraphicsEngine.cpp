@@ -52,6 +52,7 @@
 #define FLASH_PARTICLE_TEX (PARTICLES_PATH "flash.png")
 #define SPEED_PARTICLE_TEX (PARTICLES_PATH "speed.png")
 #define SLOW_PARTICLE_TEX (PARTICLES_PATH "slow.png")
+#define BUILD_PARTICLE_TEX (PARTICLES_PATH "build.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -325,6 +326,7 @@ ParticleSpawner * dustSpawner;
 ParticleSpawner * flashSpawner;
 ParticleSpawner * speedSpawner;
 ParticleSpawner * slowSpawner;
+ParticleSpawner * buildSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -340,6 +342,9 @@ struct PlayerState {
 	int id;                     // the player ID from the server
 	unsigned geometryIdx;       // index into playerGeometry
 	char moving;				// bool indicating whether or not the model should animate
+	char building;				// bool indicating whether or not model is doing iteraction animation
+	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
+	int movingSpeed;			// -1 = slow, 0 = normal, 1 = fast
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
@@ -1462,7 +1467,7 @@ void DisplayCallback(GLFWwindow* window)
 #ifdef DEBUG_CARRY
 			inventory = static_cast<ItemModelType>(fake_carried_idx);
 #endif
-
+			state.building = false;
 			switch (action) {
 			case Action::OPEN_BOX:
 			{
@@ -1483,10 +1488,17 @@ void DisplayCallback(GLFWwindow* window)
 				float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
 				state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
 
+				//for particle effects
+				state.building = true;
+				state.buildPosition = transform->getOffset() * glm::vec4(0, 0, 0, 1);
+
 				// fall through on purpose (missing break is not a mistake)
 			}
-			case Action::CONSTRUCT_GATE:
+			case Action::CONSTRUCT_GATE: {
+			}
 			case Action::UNLOCK_JAIL:
+			{
+			}
 			case Action::SWING_NET:
 				model.getActionObject()->Update(true);
 				playerGeometry = model.getActionGeometry();
@@ -1580,11 +1592,13 @@ void DisplayCallback(GLFWwindow* window)
 					state.previousInventory = ItemModelType::EMPTY;
 				}
 			}
-
 			if (inventoryGeometry) {
 				inventoryGeometry->draw(V, P, inventoryMat);
 			}
+
 		}
+		//particleEffects for powerups
+
 	}
 
 	if (envObjsTransform) {
@@ -1595,14 +1609,17 @@ void DisplayCallback(GLFWwindow* window)
 		allItemsTransform->draw(V, P, glm::mat4(1.0));
 	}
 
-	for (auto &state : players) {
-		//particle effects
-		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), state.moving);
-	}
 
 	if (uiCanvas) {
 		uiCanvas->draw(&V, &P, glm::mat4(1.0));
+	}
+
+	for (auto state: players) {
+		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), state.moving);
+		buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) * 
+									glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f,1,3), state.building);
 	}
 
 
@@ -1870,6 +1887,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, -1.0f, 0));
 		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
+		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 
 
 		auto setupEnd = high_resolution_clock::now();
