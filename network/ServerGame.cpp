@@ -322,10 +322,10 @@ void ServerGame::receiveFromClients()
 								//else if (gameData->getAtlas()->hasGate(loc))
 								else if (KeyDropTile * keyDropTile = gameData->getKeyDropTile(loc))
 								{
-									if (keyDropTile->isValidKey(static_cast<Key>(player->getInventory())))
+									if (keyDropTile->isValidKey(player->getInventory()))
 									{
 
-										keyDropTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
+										keyDropTile->updateKeyProgress(player->getInventory());
 										gameData->updateGateProgress(keyDropTile->getGateNum());
 										player->setInventory(ItemModelType::EMPTY);
 										player->setSpeedMultiplier(1.0);
@@ -1177,30 +1177,33 @@ void ServerGame::updateHeight(int id)
 
 	//std::cout << "THERES A RAMP" << std::endl;
 
-	int x = loc.getX();
-	int y;
-	int z = loc.getZ();
+	float x = loc.getX();
+	float y;
+	float z = loc.getZ();
 
 	RampTile * rampTile = (RampTile *)(gameData->getAtlas()->getTileAt(loc));
 
 	if (rampTile->getRampDirection() == Orientation::NORTH)
 	{
-		y = (int) (TILE_SIZE - z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE) 
+		/*y = (int) (TILE_SIZE - z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE) 
+			* (gameData->getAtlas()->getTileAt(loc)->getHeight()/2 +1);*/
+		
+		y = (int) (TILE_SIZE - (z - (int)(z / TILE_SIZE) * TILE_SIZE)) * ((double) TILE_HEIGHT / TILE_SIZE) 
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight()/2 +1);
 	}
 	else if (rampTile->getRampDirection() == Orientation::SOUTH)
 	{
-		y = (int)(z % TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
+		y = (int)(z - (int)(z / TILE_SIZE) * TILE_SIZE) * ((double) TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	else if (rampTile->getRampDirection() == Orientation::EAST)
 	{
-		y = (int)(x % TILE_SIZE) * ((double)TILE_HEIGHT / TILE_SIZE)
+		y = (int)((x - (int)(x / TILE_SIZE) * TILE_SIZE)) * ((double)TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	else if (rampTile->getRampDirection() == Orientation::WEST)
 	{
-		y = (int)(TILE_SIZE - x % TILE_SIZE) * ((double)TILE_HEIGHT / TILE_SIZE)
+		y = (int)(TILE_SIZE - (x - (int)(x / TILE_SIZE) * TILE_SIZE)) * ((double)TILE_HEIGHT / TILE_SIZE)
 			* (gameData->getAtlas()->getTileAt(loc)->getHeight() / 2 + 1);
 	}
 	gameData->getPlayer(id)->setLocation(x, y, z);
