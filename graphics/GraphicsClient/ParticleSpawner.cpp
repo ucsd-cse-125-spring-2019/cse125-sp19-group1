@@ -72,7 +72,7 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 
 	glDisable(GL_DEPTH_TEST);
 	double currentTime = glfwGetTime();
-	double delta = currentTime - lastTime;
+	double delta = currentTime - lastTime + timeSinceLastSpawn;
 	lastTime = currentTime;
 
 
@@ -90,7 +90,13 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 	// Generate 10 new particule each millisecond,
 	// but limit this to 16 ms (60 fps), or if you have 1 long frame (1sec),
 	// newparticles will be huge and the next frame even longer.
-	int newparticles = (int)(delta*100.0);
+	int newparticles = (int)(delta*10.0);
+	if (newparticles == 0) {
+		timeSinceLastSpawn += delta;
+	}
+	else {
+		timeSinceLastSpawn = 0;
+	}
 	if (newparticles > (int)(0.016f*10000.0))
 		newparticles = (int)(0.016f*10000.0);
 
@@ -119,7 +125,7 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 		ParticlesContainer[particleIndex].b = 255.0f;
 		ParticlesContainer[particleIndex].a = 255.0f;
 
-		ParticlesContainer[particleIndex].size = 20.0f;
+		ParticlesContainer[particleIndex].size = 5.0f;
 
 	}
 
@@ -138,7 +144,7 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 			if (p.life > 0.0f) {
 
 				// Simulate simple physics : gravity only, no collisions
-				p.speed += glm::vec3(0.0f, 9.81f, 0.0f) * (float)delta * 0.5f;
+				p.speed += glm::vec3(0.0f, 2.3f, 0.0f) * (float)delta * 0.5f;
 				p.pos += p.speed * (float)delta;
 				p.cameradistance = glm::length2(p.pos - CameraPosition);
 				//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;

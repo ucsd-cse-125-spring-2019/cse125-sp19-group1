@@ -46,6 +46,7 @@ private:
 	Particle ParticlesContainer[100]; 
 	int LastUsedParticle = 0;
 	int ParticlesCount = 0;
+	float timeSinceLastSpawn = 0.0f;
 
 };
 
