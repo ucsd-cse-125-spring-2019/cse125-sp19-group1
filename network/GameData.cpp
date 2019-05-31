@@ -13,6 +13,7 @@ GameData::GameData(int serverInit)
 	beginCountdown = false;
 	countdownCompleted = false;
 	playerNum = 1;
+	gameState = GameState::IN_LOBBY;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -36,6 +37,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
+	encodedData << "gameState: " << static_cast<int>(gameState) << std::endl;
 	encodedData << "disconnectedClients:";
 	
 	for (auto p : disconnectedPlayers)
@@ -46,6 +48,16 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	//std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
+
+GameState GameData::getGameState()
+{
+	return gameState;
+}
+void GameData::setGameState(GameState state)
+{
+	gameState = state;
+}
+
 
 void GameData::updateGateProgress(int gateNum)
 {
@@ -115,6 +127,7 @@ void GameData::addDecodeFunctions()
 {
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
+	decodingFunctions["gameData"] = &GameData::decodeGameState;
 }
 
 void GameData::decodeDisconnectedClients(std::string value)
@@ -231,6 +244,9 @@ void GameData::decodeTileLayout(std::string value)
 		}
 		std::cout << std::endl;
 	}*/
+}
+void GameData::decodeGameState(std::string value) {
+	gameState = static_cast<GameState>(std::stoi(value));
 }
 
 Player * GameData::getPlayer(int anID)

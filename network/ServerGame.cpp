@@ -124,6 +124,7 @@ void ServerGame::receiveFromClients()
 							characters.erase(characters.begin() + randChoice);
 						}
 					}
+					gameData->setGameState(GameState::IN_GAME);
 				}
 				break;
 			case SELECT_EVENT:
@@ -663,6 +664,7 @@ void ServerGame::receiveFromClients()
 					gameData->setWT(WinType::NONE);
 					resetGame();
 				}
+				gameData->setGameState(GameState::IN_LOBBY);
 				break;
 			}
 

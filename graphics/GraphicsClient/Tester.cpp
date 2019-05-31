@@ -122,8 +122,12 @@ void Init()
 	
 	playAgainEngine = new PlayAgainGraphicsEngine();
 
-	currentEngine = lobbyEngine;
-
+	sharedClient->update();
+	if(sharedClient->getGameData()->getGameState() == GameState::IN_GAME)
+		currentEngine = loadingEngine;
+	else
+		currentEngine = lobbyEngine;
+	
 	inGameEngine->StartLoading();
 	loadingEngine->StartLoading();
 	lobbyEngine->StartLoading();
