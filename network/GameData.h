@@ -78,7 +78,7 @@ public:
 	WinType getWT() { return wt; }
 	void setWT(WinType newWT) { wt = newWT; };
 
-	double abilityChargeTime = 0.7;
+	double abilityChargeTime = 0.0f;
 	double maxGhostTime = 7;
 	double limitChefVision = 1;
 	double maxChefLimitTime = 7;

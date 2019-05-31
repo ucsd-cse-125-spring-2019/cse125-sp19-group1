@@ -1188,6 +1188,10 @@ void updateUIElements(GameData * gameData) {
 			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::RACOON) {
 			uiCanvas->setItem(UICanvas::RACCOON_ITEM);
 		}
+
+		if (currPlayer->isChef()) {
+			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, true);
+		}
 	}
 	else {
 		//disable prompts unless item is held
@@ -1256,22 +1260,17 @@ void updateUIElements(GameData * gameData) {
 		//set goals
 
 		//set prompts
-		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::JAIL && 
-			gameData->getJailTile(currPlayer->getLocation())->getCapturedAnimal() != -1) {
+		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::JAIL &&
+			gameData->getJailTile(currPlayer->getLocation())->getCapturedAnimal() != -1 && !currPlayer->isChef()) {
 			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, true);
 		}
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, false);
 		}
-
-		if (currPlayer->isChef()) {
-			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, true);
-		}
-		else {
-			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
-		}
-
-		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::BOX){
+		uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
+		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::BOX && !currPlayer->isChef() &&
+			gameData->getBoxTile(currPlayer->getLocation())->hasBox())
+		{
 			uiCanvas->setVisible(UICanvas::PROMPT_BOX_SEARCH, true);
 		}
 		else {
