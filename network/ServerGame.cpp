@@ -344,6 +344,7 @@ void ServerGame::receiveFromClients()
 
 										keyDropTile->updateKeyProgress(player->getInventory());
 										gameData->updateGateProgress(keyDropTile->getGateNum());
+										player->setAction(Action::KEY_DROP);
 										player->setInventory(ItemModelType::EMPTY);
 										player->setSpeedMultiplier(1.0);
 

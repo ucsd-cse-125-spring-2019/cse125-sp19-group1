@@ -24,7 +24,7 @@ enum class Direction {
 	SOUTHWEST = SOUTH + WEST
 };
 
-enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET };
+enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET, KEY_DROP };
 
 class Player
 {
