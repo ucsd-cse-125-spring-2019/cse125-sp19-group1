@@ -32,9 +32,10 @@ public:
 	
 	// Constructors
 	Player();
-	Player(int anID, Location aLoc);
+	Player(int anID, int aPlayerNum, Location aLoc);
 
 	// Getters
+	int			getPlayerNum() const;
 	ItemModelType	getInventory() const;
 	bool		isInteracting() const;
 	Action		getAction() const;
@@ -47,7 +48,7 @@ public:
 	bool		hasCaughtAnimal() const;
 	int			getCaughtAnimalId() const;
 	ModelType	getCaughtAnimalType() const;
-
+	bool		hasSelectedAnimal() const;
 	bool		isReady() const;
 	double		getSpeedMultiplier() const;
 
@@ -55,6 +56,7 @@ public:
 
 	// Setters
 	void setPlayerID(int id);
+	void toggleAnimalSelection();
 	void setInventory(ItemModelType anItem);
 	void setModelType(ModelType type);
 	void setLocation(float argX, float argY, float argZ);
@@ -129,6 +131,8 @@ public:
 
 	// Decode functions
 	void addDecodeFunctions();
+	void decodePlayerNum(std::string value);
+	void decodeAnimalSelection(std::string value);
 	void decodeLocation(std::string value);
 	void decodeInventory(std::string value);
 	void decodeModelType(std::string value);
@@ -141,6 +145,8 @@ public:
 
 	// Encode functions
 	void addEncodeFunctions();
+	std::string encodePlayerNum();
+	std::string encodeAnimalSelection();
 	std::string encodeLocation();
 	std::string encodeInventory();
 	std::string encodeModelType();
@@ -155,6 +161,8 @@ protected:
 	Action		action;
 	Location	location;
 	int			playerID;
+	int			playerNum;
+	bool		selectedAnimal;
 	ItemModelType	inventory;
 	ModelType	modelType;
 	bool		interacting;
