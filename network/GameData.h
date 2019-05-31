@@ -15,11 +15,12 @@
 #define GENERAL_GAME_DATA_ID -999
 #define SERVER_GAMEDATA 123
 
-#define GHOST_MULTIPLIER 2
+#define GHOST_MULTIPLIER 1.6
 #define MAX_CHEF_TIME 7
-#define MAX_ANIMAL_GHOST_TIME 7
-#define MAX_ANIMAL_SEARCH_TIME 7
+#define MAX_ANIMAL_GHOST_TIME 5
+#define MAX_ANIMAL_SEARCH_TIME 5
 #define FLASH_DISTANCE 14
+#define DEFAULT_VISION 60
 
 
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
@@ -83,18 +84,17 @@ public:
 	void setWT(WinType newWT) { wt = newWT; };
 
 	double abilityChargeTime = 0.0f;
+
 	double maxGhostTime = 7;
 	double limitChefVision = 1;
-	double maxChefLimitTime = 7;
 
 	double getAbilityChargeTime() { return abilityChargeTime; }
 	double getMaxGhostTime() { return maxGhostTime; }
-	double getMaxChefLimitTime() { return maxChefLimitTime; }
 
 	int	chefAnger = 0;
 	int maxChefAnger = 60;
 	int currentTime = -1;
-	int chefAngerInterval = 1;
+	int chefAngerInterval = 3;
 	double chefVision = 40;
 	double chefMaxVision = 100;
 

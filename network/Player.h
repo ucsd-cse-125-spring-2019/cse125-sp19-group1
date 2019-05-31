@@ -24,7 +24,7 @@ enum class Direction {
 	SOUTHWEST = SOUTH + WEST
 };
 
-enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET };
+enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET, KEY_DROP };
 
 class Player
 {
@@ -51,11 +51,14 @@ public:
 	bool		hasSelectedAnimal() const;
 	bool		isReady() const;
 	double		getSpeedMultiplier() const;
+	float		getVisionRadius() { return visionRadius; }
+
+
 
 	Direction getFacingDirection() const;
-
 	// Setters
 	void setPlayerID(int id);
+	void setVisionRadius(float vr);
 	void toggleAnimalSelection();
 	void setInventory(ItemModelType anItem);
 	void setModelType(ModelType type);
@@ -72,11 +75,10 @@ public:
 	void setCaughtAnimalId(int id);
 	void setCaughtAnimalType(ModelType type);
 	void setActionStartTime();
-//<<<<<<< HEAD
 	void setUnlockJailStartTime();
 	void setAction(Action anAction);
 	void setFacingDirection(Direction dir);
-//=======
+
 	void setStartJailTime();
 	void setSpeedStartTime();
 	void setSearchStartTime();
@@ -93,8 +95,6 @@ public:
 	void setPoweringUp(bool power) { poweringUp = power; }
 	void setOpeningBox(bool interact) { openingBox = interact; }
 
-//>>>>>>> server
-
 	void toggleReady();
 	
 
@@ -107,11 +107,11 @@ public:
 	double slowedSpeed = 0.5;
 	bool slowChef = false;
 	bool getSlowChef() { return slowChef; }
-	void toggleSlowChef() { slowChef = !slowChef; }
+	void setSlowChef(bool slow) { slowChef = slow; }
 
 	bool blindChef = false;
 	bool getBlindChef() { return blindChef; }
-	void toggleBlindChef() { blindChef = !blindChef; }
+	void setBlindChef(bool blind) { blindChef = blind; }
 
 	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
 	void updateChefMultiplier(int anger);
@@ -119,11 +119,11 @@ public:
 	//player interaction/power-up methods
 	bool ghost = false;
 	bool getGhost() { return ghost; }
-	void toggleGhost() { ghost = !ghost; }
+	void setGhost(bool aGhost) { ghost = aGhost; }
 
 	bool instantSearch = false;
 	bool getInstantSearch() { return instantSearch; }
-	void toggleInstantSearch() { instantSearch = !instantSearch; }
+	void setInstantSearch(bool is) { instantSearch = is; }
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;

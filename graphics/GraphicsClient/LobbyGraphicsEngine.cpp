@@ -2,9 +2,11 @@
 
 #include "FBXObject.h"
 #include "../../network/ClientGame.h"
+#include "../../network/ClientNetwork.h"
 
 #define TEXTURE_PATH "../2D Elements/"
 #define BG_TEX_PATH (TEXTURE_PATH "lobbyscreen.png")
+#define WARNING_TEX_PATH (TEXTURE_PATH "lobbyscreen_warning.png")
 #define LOBBY_PNG(x) (TEXTURE_PATH "lobby_" x ".png" )
 
 #define DESIGN_WIDTH 964
@@ -77,6 +79,7 @@ static void freeSprites(LobbySprite *sprites, size_t count)
 LobbyGraphicsEngine::LobbyGraphicsEngine() : TwoDeeGraphicsEngine()
 {
 	backgroundFilename = BG_TEX_PATH;
+	warningObject = nullptr;
 }
 
 
@@ -93,6 +96,12 @@ void LobbyGraphicsEngine::MainLoopBegin()
 	loadSprites(playerMsg, LOBBY_MAX_PLAYERS);
 	loadSprites(startMsg, 2);
 	loadSprites(&switchMsg, 1);
+
+	if (!warningObject) {
+		warningObject = createObjectForTexture(WARNING_TEX_PATH);
+	}
+
+	warningAlpha = 0.f;
 }
 
 void LobbyGraphicsEngine::MainLoopEnd()
@@ -103,6 +112,11 @@ void LobbyGraphicsEngine::MainLoopEnd()
 	freeSprites(playerMsg, LOBBY_MAX_PLAYERS);
 	freeSprites(startMsg, 2);
 	freeSprites(&switchMsg, 1);
+
+	if (warningObject) {
+		delete warningObject;
+		warningObject = nullptr;
+	}
 }
 
 void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -115,41 +129,18 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 	switch (key) {
 	case GLFW_KEY_SPACE:
 	{
-		// TODO: send a packet to the server
-		playerIsAnimal[myPlayerNum - 1] = !playerIsAnimal[myPlayerNum - 1];
 		sharedClient->sendPackets(SELECT_EVENT);
 		cout << "Lobby got SPACE" << endl;
 		break;
 	}
-	case GLFW_KEY_LEFT:
-	{
-		if (playerIsAnimal[myPlayerNum - 1]) {
-			// TODO: send a packet to the server
-			playerIsAnimal[myPlayerNum - 1] = false;
-		}
-
-		cout << "Lobby got LEFT" << endl;
-		break;
-	}
-	case GLFW_KEY_RIGHT:
-	{
-		if (!playerIsAnimal[myPlayerNum - 1]) {
-			// TODO: send a packet to the server
-			playerIsAnimal[myPlayerNum - 1] = true;
-		}
-
-		cout << "Lobby got RIGHT" << endl;
-		break;
-	}
 	case GLFW_KEY_ENTER:
 	{
-		if (startEnabled) {
-			// TODO: send a packet to the server
-		}
-
-		sharedClient->sendPackets(START_EVENT);
-		//TODO: only do this if the server says it's ok
-		quit = true;
+		// Only send the start event if we have the right mix of players
+		// (or for debugging allow it if we are connected to localhost)
+		//if (startEnabled || !strcmp(SERVER_IP_ADDRESS, LOCAL_HOST)) {
+			sharedClient->sendPackets(START_EVENT);
+			quit = true;
+		//}
 
 		cout << "Lobby got ENTER" << endl;
 		break;
@@ -186,45 +177,34 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 {
 	TwoDeeGraphicsEngine::MainLoopCallback(window);
 
-	double now = glfwGetTime();
+	int myPlayerNum = 1;
 
-#define START_PERIOD 0.8
-	float startAlpha = sinf((now / START_PERIOD) * glm::pi<double>()) * 0.5f + 0.5f;
-
-	// For now, randomize playerIsAnimal for the other 3 players
-	// TODO: get this from the server instead
+	auto gameData = sharedClient->getGameData();
 	sharedClient->update();
-	std::map < int, Player * > players = sharedClient->getGameData()->getAllPlayers();
-	if(sharedClient->getGameData()->getPlayer(sharedClient->getMyID()))
-		myPlayerNum = sharedClient->getGameData()->getPlayer(sharedClient->getMyID())->getPlayerNum();
+	std::map < int, Player * > &players = gameData->getAllPlayers();
+	if(gameData->getPlayer(sharedClient->getMyID()))
+		myPlayerNum = gameData->getPlayer(sharedClient->getMyID())->getPlayerNum();
+
+	bool playerIsOnline[LOBBY_MAX_PLAYERS] = { false };
+	bool playerIsAnimal[LOBBY_MAX_PLAYERS] = { false };
 
 	// update playerIsAnimal using server values
 	for (auto iter = players.begin(); iter != players.end(); iter++)
 	{
 		Player * player = iter->second;
-		playerIsAnimal[(player->getPlayerNum() - 1) % LOBBY_MAX_PLAYERS] = player->hasSelectedAnimal();
+		auto idx = (player->getPlayerNum() - 1) % LOBBY_MAX_PLAYERS;
+		playerIsOnline[idx] = true;
+		playerIsAnimal[idx] = player->hasSelectedAnimal();
 	}
 
-	// Randomize the players (remove if above code works after testing)
-	int blah = (int)(now / 2.75);
-	static int lastBlah = -1;
-	if (blah != lastBlah) {
-		lastBlah = blah;
-		for (int i = 0; i < LOBBY_MAX_PLAYERS; ++i) {
-			if (i + 1 != myPlayerNum) {
-				bool newValue = rand() & 1;
-				if (playerIsAnimal[i] != newValue) {
-					playerIsAnimal[i] = newValue;
-				}
-			}
-		}
-	}
+	// Now draw the players
 
 #define PLAYER_MARGIN_Y 3.25f
 #define PLAYER_TOP_Y 339.f
 	static const float columnX[2] = {221.f, 572.f};
 
 	int chefCount = 0;
+	int animalCount = 0;
 	float columnY[2] = { PLAYER_TOP_Y, PLAYER_TOP_Y };
 	for (int i = 0; i < LOBBY_MAX_PLAYERS; ++i) {
 		targetY[i] = columnY[playerIsAnimal[i]];
@@ -239,7 +219,7 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 			playerY[i] = targetY[i];
 		}
 
-		float targetX = columnX[playerIsAnimal[i]];
+		float targetX = playerIsOnline[i] ? columnX[playerIsAnimal[i]] : 0.5f * (columnX[0] + columnX[1]);
 
 		if (playerX[i] < 1.f || abs(targetX - playerX[i]) < 0.1) {
 			playerX[i] = targetX;
@@ -251,13 +231,30 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 		float playerAlpha = 1.f - sinf(((playerX[i] - columnX[0]) / (columnX[1] - columnX[0])) * glm::pi<float>());
 
 		DrawSprite(playerMsg[i], playerX[i], playerY[i], playerAlpha);
-		columnY[playerIsAnimal[i]] += playerMsg[i].designHeight + PLAYER_MARGIN_Y;
-		chefCount += !playerIsAnimal[i];
+
+		if (playerIsOnline[i]) {
+			columnY[playerIsAnimal[i]] += playerMsg[i].designHeight + PLAYER_MARGIN_Y;
+			chefCount += !playerIsAnimal[i];
+			animalCount += playerIsAnimal[i];
+		}
 	}
 
-	startEnabled = (chefCount == 1);
+	// Draw the rest
+
+	double now = glfwGetTime();
+
+#define START_PERIOD 0.8
+	float startAlpha = sinf((now / START_PERIOD) * glm::pi<double>()) * 0.5f + 0.5f;
+	startEnabled = (chefCount == 1 && animalCount == 3);
 
 	DrawSprite(youArePlayerMsg[myPlayerNum - 1], 792, 10);
 	DrawSprite(switchMsg, 340, 472);
 	DrawSprite(startMsg[startEnabled], 342, 504, startEnabled ? startAlpha : 1.f);
+
+	warningAlpha += ((1 - startEnabled) - warningAlpha) * 0.3f;
+
+	if (warningObject) {
+		glUniform1f(uAlpha, warningAlpha * screenAlpha);
+		warningObject->Draw(passthroughShaderProgram, &identityMat, &orthoProj, identityMat);
+	}
 }

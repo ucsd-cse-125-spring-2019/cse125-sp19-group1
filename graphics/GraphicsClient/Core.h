@@ -45,3 +45,4 @@ using namespace std;
 #define ANIMATIONS_PATH  "../Animations/"
 #define MODELS_PATH      "../Models/"
 #define TEXTURES_PATH    "../Textures/"
+#define PARTICLES_PATH   "../Particles/"

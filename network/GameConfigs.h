@@ -24,7 +24,7 @@
 
 // Player interact data
 #define TIME_TO_OPEN_BOX 2 // in seconds
-#define TIME_TO_CONSTRUCT_GATE 30
+#define TIME_TO_CONSTRUCT_GATE 10
 // DELAY = time to wait before you can act again
 #define SWING_NET_DELAY 0.5
 #define UNLOCK_JAIL_DELAY 0.25

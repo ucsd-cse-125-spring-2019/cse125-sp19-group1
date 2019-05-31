@@ -11,6 +11,7 @@
 #include "FogGenerator.h"
 #include "FBXObject.h"
 #include "UIObject.h"
+#include "ParticleSpawner.h"
 
 #include <thread>
 
@@ -40,18 +41,26 @@
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
 
 #define CHEF_FOG_DISTANCE 85.0f
-#define RACCOON_FOG_DISTANCE 160
+#define RACCOON_FOG_DISTANCE 75
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.png")
 
-//#define CANVAS_MDL_PATH   (MODELS_PATH "canvas.fbx")
-//#define CANVAS_TEX_PATH   (TEXTURES_PATH "canvas.ppm");
+#define BOX_SEARCH_MDL_PATH     (ANIMATIONS_PATH "box_search.dae")
+
+//particle effects
+#define DUST_PARTICLE_TEX (PARTICLES_PATH "dust.png")
+#define FLASH_PARTICLE_TEX (PARTICLES_PATH "flash.png")
+#define SPEED_PARTICLE_TEX (PARTICLES_PATH "speed.png")
+#define SLOW_PARTICLE_TEX (PARTICLES_PATH "slow.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
 
 #define UI_VERT_SHADER_PATH "./ui_shader.vert"
 #define UI_FRAG_SHADER_PATH "./ui_shader.frag"
+
+#define PARTICLE_VERT_SHADER_PATH "./Particle.vertexshader"
+#define PARTICLE_FRAG_SHADER_PATH "./Particle.fragmentshader"
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
@@ -68,6 +77,8 @@
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
 
 
+#define MAX_PLAYERS 4
+
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
 //#define ENV_OBJS_DEMO
@@ -82,6 +93,19 @@
 
 // Uncomment to force the camera to any other player
 // #define DEBUG_CAUGHT
+
+// Uncomment to force carrying
+// #define DEBUG_CARRY
+
+// Uncomment to skip loading player animations
+// #define DEBUG_LOAD_LESS
+
+// Uncomment to skip loading UI
+// #define DEBUG_NO_UI
+
+#ifdef DEBUG_CARRY
+unsigned fake_carried_idx = 1;
+#endif
 
 #define DELETE_IF_NEEDED(x) \
 	if (x) {\
@@ -110,6 +134,7 @@ static const struct PlayerModelSettings {
 	bool attachSkel;               // true if animated with a skeleton
 	float scale;                   // scale adjustment
 	glm::vec3 translate;           // position adjustment
+	glm::vec3 carryPosition;       // where carried items should be drawn
 
 	inline const char * getWalkModelPath() const {
 		return walkModelPath;
@@ -135,11 +160,19 @@ static const struct PlayerModelSettings {
 		return actionTexturePath ? actionTexturePath : walkTexturePath;
 	}
 } playerModelSettings[] = {
-	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f) },
+#ifndef DEBUG_LOAD_LESS
+	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+#else
+	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_MDL_PATH,          CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_MDL_PATH,       RACCOON_TEX_PATH,  -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  false,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_MDL_PATH,           CAT_TEX_PATH,      -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_MDL_PATH,           DOG_TEX_PATH,      -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+#endif
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -156,39 +189,41 @@ static const struct ItemModelSettings {
 	glm::vec3 translate;         // position adjustment
 	glm::vec3 rotation;          // rotation
 	bool wallRotate;             // auto-rotate away from any wall on this tile
+	glm::vec3 carryTranslate;    // translation while being carried
+	glm::vec3 carryRotate;       // rotation while being carried
 } itemModelSettings[] = {
-	// model and texture paths                      name                    id                               scale  translate                      rotate                            wallRotate
-	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false },
-	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true  },
+	// model and texture paths                      name                    id                               scale  translate                      rotate                            wallRotate  carryTranslate               carryRotate
+	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
-	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
-	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false },
+	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
 	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,  2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
+	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
+	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
 	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
 	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
@@ -216,7 +251,6 @@ struct PlayerModel {
 	Geometry *walkGeometry;
 	Geometry *carryGeometry;
 	Geometry *actionGeometry;
-	Transform *transform;
 
 	inline FBXObject * getWalkObject() {
 		return walkObject;
@@ -244,7 +278,6 @@ struct PlayerModel {
 		DELETE_IF_NEEDED(walkGeometry);
 		DELETE_IF_NEEDED(carryGeometry);
 		DELETE_IF_NEEDED(actionGeometry);
-		DELETE_IF_NEEDED(transform);
 	}
 };
 
@@ -258,10 +291,12 @@ static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 
 static FBXObject * tileModel = nullptr;
 static FBXObject * wallModel = nullptr;
+static FBXObject * animatedBoxObjects[MAX_PLAYERS] = {nullptr};
 
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
 static GLuint uiShaderProgram;
+static GLuint particleShaderProgram;
 
 static GLuint uiTexture;
 
@@ -286,6 +321,11 @@ static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
 
+ParticleSpawner * dustSpawner;
+ParticleSpawner * flashSpawner;
+ParticleSpawner * speedSpawner;
+ParticleSpawner * slowSpawner;
+
 
 extern ClientGame * sharedClient;
 
@@ -293,7 +333,7 @@ static int elapsedTime = 0;
 static int directions = 0;
 
 struct PlayerState {
-	Transform *transform;       // for position and rotation
+	glm::mat4 transform;        // for position and rotation
 	float targetAngle;          // the angle it's trying to animate to
 	float angle;                // angle it's currently facing (should be approaching targetAngle)
 	glm::vec3 position;         // position, important for faking targetAngle above
@@ -301,10 +341,17 @@ struct PlayerState {
 	unsigned geometryIdx;       // index into playerGeometry
 	char moving;				// bool indicating whether or not the model should animate
 
-	PlayerState() : position(0.f) {
+	ItemModelType previousInventory;
+	glm::mat4 inventoryTransform;
+	double carryStopTime;
+	Location carryStopLoc;
+	bool animatingInventory;
+
+	PlayerState() : position(0.f), transform(1.f) {
 		angle = targetAngle = 0.f;
 		geometryIdx = 0;
-		transform = nullptr;
+		animatingInventory = false;
+		previousInventory = ItemModelType::EMPTY;
 	}
 
 #ifdef DUMMY_ID
@@ -331,62 +378,31 @@ struct PlayerState {
 	}
 
 	~PlayerState() {
-		if (transform && transform->decrementRefCount()) {
-			delete transform;
-		}
-	}
-
-	PlayerState(const PlayerState &other) {
-		transform = other.transform;
-		if (transform) {
-			transform->incrementRefCount();
-		}
-
-		targetAngle = other.targetAngle;
-		angle = other.angle;
-		position = other.position;
-		id = other.id;
-		geometryIdx = other.geometryIdx;
-		moving = other.moving;
-	}
-
-	PlayerState &operator=(const PlayerState &other) {
-		if (transform && transform->decrementRefCount()) {
-			delete transform;
-		}
-
-		transform = other.transform;
-		if (transform) {
-			transform->incrementRefCount();
-		}
-
-		targetAngle = other.targetAngle;
-		angle = other.angle;
-		position = other.position;
-		id = other.id;
-		geometryIdx = other.geometryIdx;
-
-		return *this;
 	}
 
 	void setGeometryIdx(unsigned geomIdx) {
 		geometryIdx = geomIdx;
 
 		auto translate = glm::translate(glm::mat4(1.f), position);
-		auto transformMat = glm::rotate(translate, angle, glm::vec3(0.f, 1.f, 0.f));
-		if (transform) {
-			transform->setOffset(transformMat);
-			transform->removeAllChildren();
+		transform = glm::rotate(translate, angle, glm::vec3(0.f, 1.f, 0.f));
+	}
+
+	void setTargetAngle(float newTargetAngle) {
+		// Try to find an equivalent (+/- 2pi) target that is closer
+		float alternateTarget = newTargetAngle - glm::two_pi<float>();
+		if (abs(newTargetAngle - angle) > abs(alternateTarget - angle)) {
+			newTargetAngle = alternateTarget;
 		}
-		else {
-			transform = new Transform(transformMat);
+		alternateTarget = newTargetAngle + glm::two_pi<float>();
+		if (abs(newTargetAngle - angle) > abs(alternateTarget - angle)) {
+			newTargetAngle = alternateTarget;
 		}
-		transform->addChild(playerModels[geometryIdx].transform);
+
+		targetAngle = newTargetAngle;
 	}
 };
 
 Transform * root = nullptr;
-Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
 Transform * floorTransform = nullptr;
 Transform * envObjsTransform = nullptr;
@@ -440,8 +456,6 @@ void InGameGraphicsEngine::ReloadPlayers()
 		return;
 	}
 
-	allPlayersNode->removeAllChildren();
-
 	const auto &playersMap = sharedClient->getGameData()->players;
 	const int myId = sharedClient->getMyID();
 
@@ -450,16 +464,12 @@ void InGameGraphicsEngine::ReloadPlayers()
 		const Player *p = pair.second;
 
 		players.emplace_back(id, p);
-
-		const auto state = &players[players.size() - 1];
-		allPlayersNode->addChild(state->transform);
 	}
 
 #ifdef DUMMY_ID
 	// add a dummy player
 	players.emplace_back(DUMMY_ID, CHEF_IDX);
 	const auto state = &players[players.size() - 1];
-	allPlayersNode->addChild(state->transform);
 #endif
 
 	auto myState = getMyState();
@@ -479,7 +489,6 @@ void resetEnvObjs()
 
 	if (envObjsTransform == nullptr) {
 		envObjsTransform = new Transform(glm::mat4(1.f));
-		root->addChild(envObjsTransform);
 	}
 	else {
 		envObjsTransform->removeAllChildren();
@@ -599,7 +608,6 @@ void resetItems()
 
 	if (allItemsTransform == nullptr) {
 		allItemsTransform = new Transform(glm::mat4(1.f));
-		root->addChild(allItemsTransform);
 	} 
 	else {
 		allItemsTransform->removeAllChildren();
@@ -678,8 +686,83 @@ void resetItems()
 	}
 }
 
+void setGoalsFalse() {
+	if (!uiCanvas)
+		return;
+
+	uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::ROPE_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::ROPE_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_INCOMPLETE, true);
+}
+
+void setGoalsVisible(int item) {
+	if (!uiCanvas) {
+		return;
+	}
+
+	if (item == (int)ItemModelType::key1) {
+		uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::key2) {
+		uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::key3) {
+		uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::screwdriver1) {
+		uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::screwdriver2) {
+		uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::screwdriver3) {
+		uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_INCOMPLETE, false);
+	}
+	if (item == (int)ItemModelType::rope) {
+		uiCanvas->setVisible(UICanvas::ROPE_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::ROPE_GOAL_INCOMPLETE, false);
+	}
+	if (item == (int)ItemModelType::plunger) {
+		uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_INCOMPLETE, false);
+	}
+	if (item == (int)ItemModelType::toiletPaper) {
+		uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_INCOMPLETE, false);
+	}
+}
+
 void updateBoxVisibility()
 {
+	//for goalsUI
+	setGoalsFalse();
+
 	if (!sharedClient || !sharedClient->getGameData())
 		return;
 
@@ -696,7 +779,14 @@ void updateBoxVisibility()
 			if (tile && tileLayout[y][x]->getTileType() == TileType::BOX) {
 				tile->hidden = !((BoxTile *)tileLayout[y][x])->hasBox();
 			}
-
+			//Update UI to express keys already placed
+			if (tile && tileLayout[y][x]->getTileType() == TileType::KEY_DROP) {
+				std::vector<ItemModelType> depositedItems = ((KeyDropTile *)tileLayout[y][x])->getDepositedKeys();
+				for (int i = 0; i < depositedItems.size(); i++) {
+					int item = (int)depositedItems[i];
+					setGoalsVisible(item);
+				}
+			}
 			++x;
 		}
 		++y;
@@ -915,32 +1005,16 @@ void InGameGraphicsEngine::MovePlayers()
 		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
 
 		// Set targetAngle based on keyboard for me, based on movement for others
-		bool changedTargetAngle = false;
 		if (state.id != myID) {
 			const auto delta = state.position - oldPos;
-
 			if (abs(delta.x) > 0.0001 || abs(delta.z) > 0.0001) {
-				state.targetAngle = glm::atan(delta.x, delta.z);
-				changedTargetAngle = true;
+				state.setTargetAngle(glm::atan(delta.x, delta.z));
 			}
 		}
 		else {
-			auto dir = directionBitmaskToVector(directions);
+			const auto dir = directionBitmaskToVector(directions);
 			if (dir.x != 0.f || dir.z != 0.f) {
-				state.targetAngle = glm::atan(-dir.x, dir.z);
-				changedTargetAngle = true;
-			}
-		}
-
-		// Try to find an equivalent (+/- 2pi) target that is closer
-		if (changedTargetAngle) {
-			float alternateTarget = state.targetAngle - glm::two_pi<float>();
-			if (abs(state.targetAngle - state.angle) > abs(alternateTarget - state.angle)) {
-				state.targetAngle = alternateTarget;
-			}
-			alternateTarget = state.targetAngle + glm::two_pi<float>();
-			if (abs(state.targetAngle - state.angle) > abs(alternateTarget - state.angle)) {
-				state.targetAngle = alternateTarget;
+				state.setTargetAngle(glm::atan(-dir.x, dir.z));
 			}
 		}
 
@@ -951,8 +1025,7 @@ void InGameGraphicsEngine::MovePlayers()
 			state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
 		}
 
-		auto transformMat = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
-		state.transform->setOffset(transformMat);
+		state.transform = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
 	}
 
 	MoveCamera(myState->position);
@@ -1133,6 +1206,9 @@ void resetIdempotentFlush()
 }
 
 void updateUIElements(GameData * gameData) {
+	if (!uiCanvas) {
+		return;
+	}
 
 	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
 	std::map<int, Player*> players = gameData->getAllPlayers();
@@ -1347,17 +1423,16 @@ void InGameGraphicsEngine::IdleCallback()
 		//server->update();
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
-		for (auto &playerState : players) {
-			playerModels[playerState.geometryIdx].walkObject->Update(playerState.moving != 0);
-		}
-
 		updateUIElements(gameData);
-		fog->setFogDistance(gameData->chefVision);
-
+		if (gameData->getAllPlayers()[sharedClient->getMyID()]->isChef()) {
+			fog->setFogDistance(gameData->chefVision);
+		}
+		else {
+			fog->setFogDistance(gameData->getPlayer(sharedClient->getMyID())->getVisionRadius());
+		}
 	}
 
 }
-
 
 
 void DisplayCallback(GLFWwindow* window)
@@ -1374,10 +1449,166 @@ void DisplayCallback(GLFWwindow* window)
 	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
 
-	uiCanvas->draw(&V, &P, glm::mat4(1.0));
+	// Draw the players
+	if (sharedClient && sharedClient->getGameData()) {
+		auto &networkPlayers = sharedClient->getGameData()->getAllPlayers();
+		for (auto &state : players) {
+			auto &model = playerModels[state.geometryIdx];
+			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
+			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
+			auto inventory = networkPlayer->getInventory();
+			Geometry *playerGeometry = nullptr;
+
+#ifdef DEBUG_CARRY
+			inventory = static_cast<ItemModelType>(fake_carried_idx);
+#endif
+
+			switch (action) {
+			case Action::OPEN_BOX:
+			{
+				// hide the un-animated box
+				int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
+				int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
+				auto transform = envObjs[z][x];
+				transform->hidden = true;
+
+				// show the animated box
+				auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
+				unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
+				animatedBoxObjects[boxIdx]->Update(true);
+				animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
+
+				// Turn towards the box
+				float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
+				float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
+				state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
+
+				// fall through on purpose (missing break is not a mistake)
+			}
+			case Action::CONSTRUCT_GATE:
+			case Action::UNLOCK_JAIL:
+			case Action::SWING_NET:
+				model.getActionObject()->Update(true);
+				playerGeometry = model.getActionGeometry();
+				break;
+
+			case Action::NONE:
+			default:
+				if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
+					model.getCarryObject()->Update(true);
+					playerGeometry = model.getCarryGeometry();
+				}
+				else if (inventory != ItemModelType::EMPTY) {
+					model.getCarryObject()->Update(true);
+					playerGeometry = model.getCarryGeometry();
+				}
+				else {
+					model.getWalkObject()->Update(state.moving != 0);
+					playerGeometry = model.getwalkGeometry();
+				}
+				break;
+			}
+
+			playerGeometry->draw(V, P, state.transform);
+
+			// Prepare to draw a special copy of an item (either carried or thrown)
+			Geometry *inventoryGeometry = nullptr;
+			glm::mat4 inventoryMat;
+
+			if (inventory != ItemModelType::EMPTY) {
+				// Prepare to draw a carried item
+
+				auto playerSettings = playerModels[state.geometryIdx].settings;
+				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
+
+				glm::vec3 modelTranslate = itemModel.settings->translate;
+				modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+				modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+				modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+
+				modelTranslate += playerSettings->carryPosition + itemModel.settings->carryTranslate;
+
+				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
+				const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
+				inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+				inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+				inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+				inventoryGeometry = itemModel.geometry;
+
+				// The thrown item code will need this later
+				state.previousInventory = inventory;
+				state.inventoryTransform = inventoryMat;
+			}
+			else if (state.previousInventory != ItemModelType::EMPTY) {
+				// Prepare to draw a thrown item
+
+				// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
+				// depending on if the item actually was just thrown
+#define INVENTORY_ANIMATION_DURATION 0.275
+#define INVENTORY_GRAVITY 85
+				if (!state.animatingInventory) {
+					state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
+					state.carryStopTime = glfwGetTime();
+					auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
+					state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory);
+					if (!state.animatingInventory) {
+						state.previousInventory = ItemModelType::EMPTY;
+					}
+				}
+
+				// If the animation wasn't cancelled, calculate projectile position
+				if (state.animatingInventory) {
+					int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
+					int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
+					glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
+					targetPosition.y += 6.f;
+					auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
+
+					auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
+					auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
+					animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
+
+					inventoryMat = state.inventoryTransform;
+					inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
+
+					inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
+				}
+
+				// Check if the animation has finished
+				if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
+					state.animatingInventory = false;
+					state.previousInventory = ItemModelType::EMPTY;
+				}
+			}
+
+			if (inventoryGeometry) {
+				inventoryGeometry->draw(V, P, inventoryMat);
+			}
+		}
+	}
+
+	if (envObjsTransform) {
+		envObjsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	if (allItemsTransform) {
+		allItemsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	for (auto &state : players) {
+		//particle effects
+		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), state.moving);
+	}
+
+	if (uiCanvas) {
+		uiCanvas->draw(&V, &P, glm::mat4(1.0));
+	}
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
+		//playerModels[RACCOON_IDX].geometry->draw(V, P, glm::mat4(1.0));
+
 }
 
 void UpdateView() {
@@ -1412,37 +1643,36 @@ void LoadModels()
 	using namespace std::chrono;
 	auto modelLoadingStart = high_resolution_clock::now();
 
+	thread playerLoadingThreads[sizeof(playerModelSettings) / sizeof(playerModelSettings[0])];
+
+	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
-		cout << "\tloading " << setting.name << endl;
+		playerLoadingThreads[threadIdx] = thread([&]() {
+			cout << "\tloading " << setting.title << endl;
 
-		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
 
-		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
-		model.settings = &setting;
-		model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
-		model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
-		if (setting.carryModelPath || setting.carryTexturePath) {
-			model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
-			model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
-		}
-		if (setting.actionModelPath || setting.actionTexturePath) {
-			model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
-			model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
-		}
-		model.transform = new Transform(transform);
+			model.settings = &setting;
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
+			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
+			model.walkGeometry->t = transform;
 
-		model.transform->addChild(model.walkGeometry);
+			if (setting.carryModelPath || setting.carryTexturePath) {
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
+				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
+				model.carryGeometry->t = transform;
+			}
+			if (setting.actionModelPath || setting.actionTexturePath) {
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
+				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
+				model.actionGeometry->t = transform;
+			}
+		});
+
+		++threadIdx;
 	}
-
-	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
-
-	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
-
-	tileGeometry = new Geometry(tileModel, objShaderProgram);
-	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	size_t largestIdx = 0;
 	for (auto &setting : itemModelSettings) {
@@ -1454,14 +1684,35 @@ void LoadModels()
 
 	itemModels.resize(largestIdx + 1);
 
-	for (auto &setting : itemModelSettings) {
+	thread itemLoadingThread([&]() {
+		for (auto &setting : itemModelSettings) {
 
-		cout << "\tloading " << setting.name << endl;
+			cout << "\tloading " << setting.name << endl;
 
-		auto &m = itemModels[static_cast<size_t>(setting.id)];
-		m.settings = &setting;
-		m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
-		m.geometry = new Geometry(m.object, objShaderProgram);
+			auto &m = itemModels[static_cast<size_t>(setting.id)];
+			m.settings = &setting;
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, -1, false);
+			m.geometry = new Geometry(m.object, objShaderProgram);
+		}
+	});
+
+	cout << "\tloading " << "tile" << endl;
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, -1, false);
+
+	cout << "\tloading " << "wall" << endl;
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, -1, false);
+
+	tileGeometry = new Geometry(tileModel, objShaderProgram);
+	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
+	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
+	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, -1, false);
+	}
+
+	itemLoadingThread.join();
+	for (auto &t : playerLoadingThreads) {
+		t.join();
 	}
 
 	auto modelLoadingEnd = high_resolution_clock::now();
@@ -1476,6 +1727,11 @@ InGameGraphicsEngine::InGameGraphicsEngine()
 	fullyLoaded = false;
 	quit = false;
 	needsRenderingSetup = true;
+	objShaderProgram = 0;
+	uiShaderProgram = 0;
+	light = nullptr;
+	fog = nullptr;
+	uiCanvas = nullptr;
 }
 
 
@@ -1496,18 +1752,17 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	}
 
 	// load the shader program
-	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
-	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
-
-	light = new DirLight();
-	fog = new FogGenerator(CHEF_FOG_DISTANCE);
-	//light->toggleNormalShading();
+	if (!objShaderProgram) {
+		objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	}
+	if (!uiShaderProgram) {
+		uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	}
+	if (!particleShaderProgram) {
+		particleShaderProgram = LoadShaders(PARTICLE_VERT_SHADER_PATH, PARTICLE_FRAG_SHADER_PATH);
+	}
 
 	root = new Transform(glm::mat4(1.0));
-	allPlayersNode = new Transform(glm::mat4(1.0));
-	root->addChild(allPlayersNode);
-
-	uiCanvas = new UICanvas(uiShaderProgram);
 
 	needsRenderingSetup = true;
 
@@ -1517,19 +1772,11 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	};
 
 	thread t(finish, &fullyLoaded);
-	//finish(fullyLoaded);
 	t.detach();
 }
 
 void InGameGraphicsEngine::CleanUp()
 {
-
-	if (allPlayersNode) {
-		allPlayersNode->removeAllChildren();
-		delete allPlayersNode;
-		allPlayersNode = nullptr;
-	}
-
 	players.clear();
 
 	for (auto &model : itemModels) {
@@ -1559,6 +1806,22 @@ void InGameGraphicsEngine::CleanUp()
 
 void InGameGraphicsEngine::MainLoopBegin()
 {
+	if (!light) {
+		light = new DirLight();
+		//light->toggleNormalShading();
+	}
+	if (!fog) {
+		fog = new FogGenerator(CHEF_FOG_DISTANCE);
+	}
+
+#ifndef DEBUG_NO_UI
+	if (!uiCanvas) {
+		cout << "Loading UICanvas... ";
+		uiCanvas = new UICanvas(uiShaderProgram);
+		cout << "done.\n";
+	}
+#endif
+
 	calledMainLoopBegin = true;
 	quit = false;
 
@@ -1568,8 +1831,15 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 		cout << "Calling RenderingSetup() on objects...\n ";
 
+		cout << "\ttile... ";
 		tileModel->RenderingSetup();
+		cout << "done.\n";
+
+		cout << "\twall... ";
 		wallModel->RenderingSetup();
+		cout << "done\n";
+
+		cout << "\tPlayer models... ";
 		for (auto &model : playerModels) {
 			if (model.walkObject)
 				model.walkObject->RenderingSetup();
@@ -1578,10 +1848,29 @@ void InGameGraphicsEngine::MainLoopBegin()
 			if (model.actionObject)
 				model.actionObject->RenderingSetup();
 		}
-		for (auto &model : itemModels) {
-			if (model.object)
-				model.object->RenderingSetup();
+		cout << "done\n";
+
+		cout << "\tanimated boxes... ";
+		for (auto box : animatedBoxObjects) {
+			if (box)
+				box->RenderingSetup();
 		}
+		cout << "done\n";
+
+		for (auto &model : itemModels) {
+			if (model.object) {
+				cout << "\t" << model.settings->name << "... ";
+				model.object->RenderingSetup();
+				cout << "done\n";
+			}
+		}
+
+		//particle setup
+		dustSpawner = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0,1.0f,0));
+		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, -1.0f, 0));
+		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
+		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
+
 
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
@@ -1696,6 +1985,17 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		}
 		if (key == GLFW_KEY_P) {
 			sharedClient->sendPackets(RESET_EVENT);
+		}
+		if (key == GLFW_KEY_I) {
+#ifdef DEBUG_CARRY
+			fake_carried_idx++;
+			if (fake_carried_idx >= itemModels.size()) {
+				fake_carried_idx = 0;
+			}
+			if (!itemModels[fake_carried_idx].settings) {
+				fake_carried_idx++;
+			}
+#endif
 		}
 
 	}

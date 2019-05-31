@@ -33,6 +33,11 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
+//#define DEBUG_CLIENTS
+ClientGame * sharedClient2 = nullptr;
+ClientGame * sharedClient3 = nullptr;
+ClientGame * sharedClient3 = nullptr;
+ClientGame * sharedClient4 = nullptr;
 
 void ErrorCallback(int error, const char* description)
 {
@@ -93,15 +98,32 @@ void PrintVersions()
 #endif
 }
 
-void Init()
+void Init(GLFWwindow *window)
 {
+	loadingEngine = new LoadingGraphicsEngine();
+	loadingEngine->StartLoading();
+
+	// Display a basic loading screen, better than blank :(
+	loadingEngine->MainLoopBegin();
+	loadingEngine->temporarilySuppressAnimation = true;
+	loadingEngine->MainLoopCallback(window);
+	loadingEngine->MainLoopEnd();
+	glfwSwapBuffers(window);
+	glfwPollEvents();
+
+	// Now that we have something on-screen, make sure the lobby loads first before slow shader compilation
+	lobbyEngine = new LobbyGraphicsEngine();
+	lobbyEngine->StartLoading();
+	lobbyEngine->MainLoopBegin();
+
 	server = new ServerGame();
 	sharedClient = new ClientGame();
-	//_beginthread(serverLoop, 0, (void*)12);
-
+#ifdef DEBUG_CLIENTS
+	sharedClient2 = new ClientGame();
+	sharedClient3 = new ClientGame();
+	sharedClient4 = new ClientGame();
+#endif
 	inGameEngine = new InGameGraphicsEngine();
-	loadingEngine = new LoadingGraphicsEngine();
-	lobbyEngine = new LobbyGraphicsEngine();
 
 #define CUTSCENES_DIR "../2D Elements/"
 #define CUTSCENE_FILE(x) CUTSCENES_DIR "cutscene - " x ".png"
@@ -127,10 +149,7 @@ void Init()
 		currentEngine = loadingEngine;
 	else
 		currentEngine = lobbyEngine;
-	
-	inGameEngine->StartLoading();
-	loadingEngine->StartLoading();
-	lobbyEngine->StartLoading();
+
 	chefWinsCutscene->StartLoading();
 	animalsWinCutscene->StartLoading();
 	playAgainEngine->StartLoading();
@@ -138,6 +157,8 @@ void Init()
 	for (auto cutscene : startingCutscenes) {
 		cutscene->StartLoading();
 	}
+
+	inGameEngine->StartLoading();
 }
 
 void serverLoop(void * args) {
@@ -300,7 +321,7 @@ int main(void)
 	// Setup OpenGL settings, including lighting, materials, etc.
 	SetupOpenGLSettings();
 	// Initialize objects/pointers for rendering
-	Init();
+	Init(window);
 
 	double crossfadeStart;
 

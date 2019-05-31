@@ -4,6 +4,7 @@
 #define LOBBY_MAX_PLAYERS 4
 
 struct LobbySprite;
+class FBXObject;
 
 class LobbyGraphicsEngine : public TwoDeeGraphicsEngine
 {
@@ -20,8 +21,9 @@ protected:
 	void DrawSprite(LobbySprite &sprite, int designX, int designY, float alpha = 1.f);
 
 	bool startEnabled = false;
-	int myPlayerNum = 1;
-	bool playerIsAnimal[LOBBY_MAX_PLAYERS] = { false };
+
+	float warningAlpha;
+	FBXObject *warningObject;
 
 	float targetY[LOBBY_MAX_PLAYERS] = { 0.f };
 	float playerX[LOBBY_MAX_PLAYERS] = { 0.f };
