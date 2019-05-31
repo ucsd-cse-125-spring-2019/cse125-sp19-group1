@@ -67,6 +67,8 @@ public:
 	void decodeChefAnger(std::string value);
 	void decodeChefVision(std::string value);
 	void decodeWinType(std::string value);
+	void decodeBlindChef(std::string value);
+	void decodeSlowChef(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
@@ -103,6 +105,7 @@ public:
 	double chefVision = 40;
 	double chefMaxVision = 100;
 	bool blindChef = false;
+	bool slowChef = false;
 	double chefRampVision = 0;
 	
 	void setChefRampVision(double crv) { chefRampVision = crv; }
@@ -110,6 +113,9 @@ public:
 
 	bool getBlindChef() { return blindChef; }
 	void setBlindChef(bool aBlindChef) { blindChef = aBlindChef; }
+
+	bool getSlowChef() { return slowChef; }
+	void setSlowChef(bool aSlowChef) { slowChef = aSlowChef; }
 
 	double getChefVision();
 

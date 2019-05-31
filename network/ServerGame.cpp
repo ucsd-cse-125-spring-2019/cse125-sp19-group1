@@ -788,6 +788,7 @@ void ServerGame::receiveFromClients()
 			if (player->getSlowChef() && player->getSlowTime() > MAX_CHEF_TIME)
 			{
 				player->setSlowChef(false);
+				gameData->setSlowChef(false);
 				player->setPowerUp(PowerUp::NONE);
 			}
 
@@ -897,6 +898,7 @@ void ServerGame::receiveFromClients()
 							std::cout << "POWER: limit chef speed" << std::endl;
 							//call limit chef speed 
 							player->setSlowChef(true);
+							gameData->setSlowChef(true);
 							player->setSlowStartTime();
 							player->setPowerUp(PowerUp::CHEF_SLOW);
 						}

@@ -36,6 +36,8 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
+	encodedData << "blindChef:" << getBlindChef() << std::endl;
+	encodedData << "slowChef:" << getSlowChef() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
 	encodedData << "gameState: " << static_cast<int>(gameState) << std::endl;
 	encodedData << "disconnectedClients:";
@@ -149,12 +151,23 @@ void GameData::addDecodeFunctions()
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
 	decodingFunctions["gameData"] = &GameData::decodeGameState;
-	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;
+	decodingFunctions["blindChef"] = &GameData::decodeBlindChef;
+	decodingFunctions["slowChef"] = &GameData::decodeBlindChef;
+ 	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;
 	decodingFunctions["chefVision"] = &GameData::decodeChefVision;
 	decodingFunctions["winType"] = &GameData::decodeWinType;
 
 }
 
+void GameData::decodeSlowChef(std::string value)
+{
+	slowChef = std::stoi(value);
+}
+
+void GameData::decodeBlindChef(std::string value)
+{
+	blindChef = std::stoi(value);
+}
 
 void GameData::decodeChefAnger(std::string value) 
 {
