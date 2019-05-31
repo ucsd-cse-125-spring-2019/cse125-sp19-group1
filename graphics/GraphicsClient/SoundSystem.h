@@ -1,4 +1,7 @@
 #pragma once
+#include <queue>
+#include <mutex>
+#include <thread>
 #include "fmod.hpp"
 #include "fmod.h"
 //#include <windows.h>
@@ -12,10 +15,15 @@ typedef FMOD::Sound Sound;
  */
 class SoundSystem
 {
-public:
+private:
 	FMOD::System * system;
 	FMOD::Channel * channel[3];
+	std::queue<Sound *> soundQueue;
 	bool hasAudioDriver;
+	bool continueQueue;
+	std::mutex m;
+
+public:
 	SoundSystem();
 	~SoundSystem();
 
@@ -34,5 +42,10 @@ public:
 	// sound code with this, it will complain that there aren't 
 	// any audio drivers and crash the game.
 	bool shouldIgnoreSound();
+
+	void pushSoundQueue(Sound * pSound);
+	void playSoundsInQueue();
+	void playSoundsInQueueThread();
+	void pauseSoundQueue();
 };
 
