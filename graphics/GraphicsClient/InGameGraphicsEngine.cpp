@@ -11,6 +11,7 @@
 #include "FogGenerator.h"
 #include "FBXObject.h"
 #include "UIObject.h"
+#include "ParticleSpawner.h"
 
 #include <thread>
 
@@ -44,14 +45,18 @@
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.png")
 
-//#define CANVAS_MDL_PATH   (MODELS_PATH "canvas.fbx")
-//#define CANVAS_TEX_PATH   (TEXTURES_PATH "canvas.ppm");
+
+//particle effects
+#define DUST_PARTICLE_TEX (PARTICLES_PATH "dust.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
 
 #define UI_VERT_SHADER_PATH "./ui_shader.vert"
 #define UI_FRAG_SHADER_PATH "./ui_shader.frag"
+
+#define PARTICLE_VERT_SHADER_PATH "./Particle.vertexshader"
+#define PARTICLE_FRAG_SHADER_PATH "./Particle.fragmentshader"
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
@@ -261,6 +266,7 @@ static FBXObject * wallModel = nullptr;
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
 static GLuint uiShaderProgram;
+static GLuint particleShaderProgram;
 
 static GLuint uiTexture;
 
@@ -284,6 +290,11 @@ static Sound * sound_toilet;
 static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
+
+ParticleSpawner * dustSpawner;
+ParticleSpawner * flashSpawner;
+ParticleSpawner * speedSpawner;
+ParticleSpawner * slowSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -1448,13 +1459,21 @@ void DisplayCallback(GLFWwindow* window)
 
 				itemModel.geometry->draw(V, P, modelRotate);
 			}
+
+			//particle effects
+			dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+				state.position - glm::vec3(0, 3.0f, 0), state.moving);
+
 		}
 	}
-
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
 
+
+
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
+		//playerModels[RACCOON_IDX].geometry->draw(V, P, glm::mat4(1.0));
+
 }
 
 void UpdateView() {
@@ -1599,6 +1618,9 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	if (!uiShaderProgram) {
 		uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
 	}
+	if (!particleShaderProgram) {
+		particleShaderProgram = LoadShaders(PARTICLE_VERT_SHADER_PATH, PARTICLE_FRAG_SHADER_PATH);
+	}
 
 	root = new Transform(glm::mat4(1.0));
 
@@ -1692,6 +1714,9 @@ void InGameGraphicsEngine::MainLoopBegin()
 				cout << "done\n";
 			}
 		}
+
+		//particle setup
+		dustSpawner = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0,1.0f,0));
 
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;

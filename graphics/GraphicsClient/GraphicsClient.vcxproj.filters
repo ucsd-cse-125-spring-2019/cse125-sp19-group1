@@ -130,6 +130,9 @@
     <ClCompile Include="PlayAgainGraphicsEngine.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleSpawner.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h">
@@ -300,6 +303,9 @@
     <ClInclude Include="PlayAgainGraphicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleSpawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -321,6 +327,12 @@
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
     <None Include="passthrough.vert">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
+    <None Include="Particle.fragmentshader">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
+    <None Include="Particle.vertexshader">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
   </ItemGroup>
