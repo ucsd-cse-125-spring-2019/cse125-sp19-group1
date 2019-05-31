@@ -110,6 +110,7 @@ static const struct PlayerModelSettings {
 	bool attachSkel;               // true if animated with a skeleton
 	float scale;                   // scale adjustment
 	glm::vec3 translate;           // position adjustment
+	glm::vec3 carryPosition;       // where carried items should be drawn
 
 	inline const char * getWalkModelPath() const {
 		return walkModelPath;
@@ -135,11 +136,11 @@ static const struct PlayerModelSettings {
 		return actionTexturePath ? actionTexturePath : walkTexturePath;
 	}
 } playerModelSettings[] = {
-	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f) },
+	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 12.f, 6.f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 12.f, 6.f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 12.f, 6.f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 12.f, 6.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -1322,6 +1323,7 @@ void DisplayCallback(GLFWwindow* window)
 			auto &model = playerModels[state.geometryIdx];
 			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
 			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
+			auto inventory = networkPlayer->getInventory();
 			Geometry *playerGeometry = nullptr;
 
 			switch (action) {
@@ -1339,7 +1341,7 @@ void DisplayCallback(GLFWwindow* window)
 					model.getCarryObject()->Update(true);
 					playerGeometry = model.getCarryGeometry();
 				}
-				else if (networkPlayer->getInventory() != ItemModelType::EMPTY) {
+				else if (inventory != ItemModelType::EMPTY) {
 					model.getCarryObject()->Update(true);
 					playerGeometry = model.getCarryGeometry();
 				}
@@ -1351,6 +1353,26 @@ void DisplayCallback(GLFWwindow* window)
 			}
 
 			playerGeometry->draw(V, P, state.transform);
+
+			/*if (inventory != ItemModelType::EMPTY) {
+				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
+
+				glm::vec3 modelTranslate = itemModel.settings->translate;
+				modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+				modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+				modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+
+				modelTranslate += model.settings->carryPosition;
+				cout << "Using carry position: " << model.settings->carryPosition.x << ", " << model.settings->carryPosition.y << ", " << model.settings->carryPosition.z << "\n";
+
+				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
+				const auto modelAngles = itemModel.settings->rotation;
+				auto modelRotate = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+				modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+				modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+
+				itemModel.geometry->draw(V, P, modelRotate);
+			}*/
 		}
 	}
 
@@ -1471,6 +1493,11 @@ InGameGraphicsEngine::InGameGraphicsEngine()
 	fullyLoaded = false;
 	quit = false;
 	needsRenderingSetup = true;
+	objShaderProgram = 0;
+	uiShaderProgram = 0;
+	light = nullptr;
+	fog = nullptr;
+	uiCanvas = nullptr;
 }
 
 
@@ -1491,20 +1518,16 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	}
 
 	// load the shader program
-	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
-	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
-
-	light = new DirLight();
-	fog = new FogGenerator(CHEF_FOG_DISTANCE);
-	//light->toggleNormalShading();
+	if (!objShaderProgram) {
+		objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	}
+	if (!uiShaderProgram) {
+		uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	}
 
 	root = new Transform(glm::mat4(1.0));
 
-	uiCanvas = new UICanvas(uiShaderProgram);
-
 	needsRenderingSetup = true;
-
-
 
 	auto finish = [](bool *finishedFlag) {
 		LoadModels();
@@ -1546,6 +1569,17 @@ void InGameGraphicsEngine::CleanUp()
 
 void InGameGraphicsEngine::MainLoopBegin()
 {
+	if (!light) {
+		light = new DirLight();
+		//light->toggleNormalShading();
+	}
+	if (!fog) {
+		fog = new FogGenerator(CHEF_FOG_DISTANCE);
+	}
+	if (!uiCanvas) {
+		uiCanvas = new UICanvas(uiShaderProgram);
+	}
+
 	calledMainLoopBegin = true;
 	quit = false;
 

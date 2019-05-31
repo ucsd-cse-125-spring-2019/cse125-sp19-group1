@@ -6,6 +6,8 @@ class FBXObject;
 class LoadingGraphicsEngine : public TwoDeeGraphicsEngine
 {
 public:
+	bool temporarilySuppressAnimation;
+
 	LoadingGraphicsEngine();
 	~LoadingGraphicsEngine();
 
