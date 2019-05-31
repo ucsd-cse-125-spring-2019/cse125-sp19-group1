@@ -68,7 +68,7 @@ ParticleSpawner::ParticleSpawner(const char * texPath) {
 
 }
 
-void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition, glm::vec3 spawnerPos) {
+void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition, glm::vec3 spawnerPos, bool spawning) {
 
 	glDisable(GL_DEPTH_TEST);
 	double currentTime = glfwGetTime();
@@ -90,43 +90,45 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 	// Generate 10 new particule each millisecond,
 	// but limit this to 16 ms (60 fps), or if you have 1 long frame (1sec),
 	// newparticles will be huge and the next frame even longer.
-	int newparticles = (int)(delta*10.0);
-	if (newparticles == 0) {
-		timeSinceLastSpawn += delta;
-	}
-	else {
-		timeSinceLastSpawn = 0;
-	}
-	if (newparticles > (int)(0.016f*10000.0))
-		newparticles = (int)(0.016f*10000.0);
+	if (spawning) {
+		int newparticles = (int)(delta*10.0);
+		if (newparticles == 0) {
+			timeSinceLastSpawn += delta;
+		}
+		else {
+			timeSinceLastSpawn = 0;
+		}
+		if (newparticles > (int)(0.016f*10000.0))
+			newparticles = (int)(0.016f*10000.0);
 
-	for (int i = 0; i < newparticles; i++) {
-		int particleIndex = FindUnusedParticle();
-		ParticlesContainer[particleIndex].life = 1.0f; // This particle will live 5 seconds.
-		ParticlesContainer[particleIndex].pos = spawnerPos;
+		for (int i = 0; i < newparticles; i++) {
+			int particleIndex = FindUnusedParticle();
+			ParticlesContainer[particleIndex].life = 2.0f; // This particle will live 5 seconds.
+			ParticlesContainer[particleIndex].pos = spawnerPos;
 
-		float spread = 1.5f;
-		glm::vec3 maindir = glm::vec3(0.0f, 10.0f, 0.0f);
-		// Very bad way to generate a random direction; 
-		// See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
-		// combined with some user-controlled parameters (main direction, spread, etc)
-		glm::vec3 randomdir = glm::vec3(
-			(rand() % 2000 - 1000.0f) / 1000.0f,
-			(rand() % 2000 - 1000.0f) / 1000.0f,
-			(rand() % 2000 - 1000.0f) / 1000.0f
-		);
+			float spread = 1.5f;
+			glm::vec3 maindir = glm::vec3(0.0f, 1.0f, 0.0f);
+			// Very bad way to generate a random direction; 
+			// See for instance http://stackoverflow.com/questions/5408276/python-uniform-spherical-distribution instead,
+			// combined with some user-controlled parameters (main direction, spread, etc)
+			glm::vec3 randomdir = glm::vec3(
+				(rand() % 2000 - 1000.0f) / 1000.0f,
+				(rand() % 2000 - 1000.0f) / 1000.0f,
+				(rand() % 2000 - 1000.0f) / 1000.0f
+			);
 
-		ParticlesContainer[particleIndex].speed = maindir + randomdir * spread;
+			ParticlesContainer[particleIndex].speed = maindir + randomdir * spread;
 
 
-		// Very bad way to generate a random color
-		ParticlesContainer[particleIndex].r = 255.0f;
-		ParticlesContainer[particleIndex].g = 255.0f;
-		ParticlesContainer[particleIndex].b = 255.0f;
-		ParticlesContainer[particleIndex].a = 255.0f;
+			// Very bad way to generate a random color
+			ParticlesContainer[particleIndex].r = 255.0f;
+			ParticlesContainer[particleIndex].g = 255.0f;
+			ParticlesContainer[particleIndex].b = 255.0f;
+			ParticlesContainer[particleIndex].a = 125.0f;
 
-		ParticlesContainer[particleIndex].size = 5.0f;
+			ParticlesContainer[particleIndex].size = 5.0f;
 
+		}
 	}
 
 
@@ -144,7 +146,7 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 			if (p.life > 0.0f) {
 
 				// Simulate simple physics : gravity only, no collisions
-				p.speed += glm::vec3(0.0f, 2.3f, 0.0f) * (float)delta * 0.5f;
+				p.speed += glm::vec3(0.0f, 0.2f, 0.0f) * (float)delta * 0.5f;
 				p.pos += p.speed * (float)delta;
 				p.cameradistance = glm::length2(p.pos - CameraPosition);
 				//ParticlesContainer[i].pos += glm::vec3(0.0f,10.0f, 0.0f) * (float)delta;

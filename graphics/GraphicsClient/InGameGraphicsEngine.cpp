@@ -40,7 +40,7 @@
 
 
 //particle effects
-#define DUST_PARTICLE_TEX (PARTICLES_PATH "face_dog.png")
+#define DUST_PARTICLE_TEX (PARTICLES_PATH "dust.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -1207,7 +1207,14 @@ void DisplayCallback(GLFWwindow* window)
 	root->draw(V, P, glm::mat4(1.0));
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 	if (myState) {
-		particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, myState->position - glm::vec3(0,3.0f,0));
+		if (directions != 0) {
+			particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, 
+				myState->position - glm::vec3(0, 3.0f, 0), true);
+		}
+		else {
+			particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, 
+				myState->position - glm::vec3(0, 3.0f, 0), false);
+		}
 	}
 	else {
 		particleSpawner->draw(particleShaderProgram, &V, &P, cam_pos, glm::vec3(0, 0, 0));

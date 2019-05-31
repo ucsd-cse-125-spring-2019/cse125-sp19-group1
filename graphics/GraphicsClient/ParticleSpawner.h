@@ -28,7 +28,7 @@ struct Particle {
 
 class ParticleSpawner {
 public:
-	void draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition, glm::vec3 spawnerPos);
+	void draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, glm::vec3 CameraPosition, glm::vec3 spawnerPos, bool spawning = true);
 	ParticleSpawner(const char * texPath);
 	~ParticleSpawner();
 	int FindUnusedParticle();
