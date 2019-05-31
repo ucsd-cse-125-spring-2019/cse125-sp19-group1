@@ -11,6 +11,7 @@
 #include "FogGenerator.h"
 #include "FBXObject.h"
 #include "UIObject.h"
+#include "ParticleSpawner.h"
 
 #include <thread>
 
@@ -40,18 +41,25 @@
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
 
 #define CHEF_FOG_DISTANCE 85.0f
-#define RACCOON_FOG_DISTANCE 160
+#define RACCOON_FOG_DISTANCE 75
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.png")
 
-//#define CANVAS_MDL_PATH   (MODELS_PATH "canvas.fbx")
-//#define CANVAS_TEX_PATH   (TEXTURES_PATH "canvas.ppm");
+
+//particle effects
+#define DUST_PARTICLE_TEX (PARTICLES_PATH "dust.png")
+#define FLASH_PARTICLE_TEX (PARTICLES_PATH "flash.png")
+#define SPEED_PARTICLE_TEX (PARTICLES_PATH "speed.png")
+#define SLOW_PARTICLE_TEX (PARTICLES_PATH "slow.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
 
 #define UI_VERT_SHADER_PATH "./ui_shader.vert"
 #define UI_FRAG_SHADER_PATH "./ui_shader.frag"
+
+#define PARTICLE_VERT_SHADER_PATH "./Particle.vertexshader"
+#define PARTICLE_FRAG_SHADER_PATH "./Particle.fragmentshader"
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
@@ -110,6 +118,7 @@ static const struct PlayerModelSettings {
 	bool attachSkel;               // true if animated with a skeleton
 	float scale;                   // scale adjustment
 	glm::vec3 translate;           // position adjustment
+	glm::vec3 carryPosition;       // where carried items should be drawn
 
 	inline const char * getWalkModelPath() const {
 		return walkModelPath;
@@ -135,11 +144,11 @@ static const struct PlayerModelSettings {
 		return actionTexturePath ? actionTexturePath : walkTexturePath;
 	}
 } playerModelSettings[] = {
-	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f) },
+	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 6.f, 3.f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 6.f, 3.f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 6.f, 3.f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 6.f, 3.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -260,6 +269,7 @@ static FBXObject * wallModel = nullptr;
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
 static GLuint uiShaderProgram;
+static GLuint particleShaderProgram;
 
 static GLuint uiTexture;
 
@@ -283,6 +293,11 @@ static Sound * sound_toilet;
 static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
+
+ParticleSpawner * dustSpawner;
+ParticleSpawner * flashSpawner;
+ParticleSpawner * speedSpawner;
+ParticleSpawner * slowSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -1368,8 +1383,7 @@ void InGameGraphicsEngine::IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		updateUIElements(gameData);
-		int id = sharedClient->getMyID();
-		if (gameData->getPlayer(id)->isChef()) {
+		if (gameData->getAllPlayers()[sharedClient->getMyID()]->isChef()) {
 			fog->setFogDistance(gameData->chefVision);
 		}
 		else {
@@ -1402,6 +1416,7 @@ void DisplayCallback(GLFWwindow* window)
 			auto &model = playerModels[state.geometryIdx];
 			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
 			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
+			auto inventory = networkPlayer->getInventory();
 			Geometry *playerGeometry = nullptr;
 
 			switch (action) {
@@ -1419,7 +1434,7 @@ void DisplayCallback(GLFWwindow* window)
 					model.getCarryObject()->Update(true);
 					playerGeometry = model.getCarryGeometry();
 				}
-				else if (networkPlayer->getInventory() != ItemModelType::EMPTY) {
+				else if (inventory != ItemModelType::EMPTY) {
 					model.getCarryObject()->Update(true);
 					playerGeometry = model.getCarryGeometry();
 				}
@@ -1431,13 +1446,41 @@ void DisplayCallback(GLFWwindow* window)
 			}
 
 			playerGeometry->draw(V, P, state.transform);
+
+			if (inventory != ItemModelType::EMPTY) {
+				auto playerSettings = playerModels[state.geometryIdx].settings;
+				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
+
+				glm::vec3 modelTranslate = itemModel.settings->translate;
+				modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+				modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+				modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+
+				modelTranslate += playerSettings->carryPosition;
+
+				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
+				const auto modelAngles = itemModel.settings->rotation;
+				auto modelRotate = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+				modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+				modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+
+				itemModel.geometry->draw(V, P, modelRotate);
+			}
+
+			//particle effects
+			dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+				state.position - glm::vec3(0, 3.0f, 0), state.moving);
+
 		}
 	}
-
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
 
+
+
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
+		//playerModels[RACCOON_IDX].geometry->draw(V, P, glm::mat4(1.0));
+
 }
 
 void UpdateView() {
@@ -1476,7 +1519,7 @@ void LoadModels()
 
 	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
-		playerLoadingThreads[threadIdx] = thread([&, setting]() {
+		playerLoadingThreads[threadIdx] = thread([&]() {
 			cout << "\tloading " << setting.name << endl;
 
 			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
@@ -1520,16 +1563,16 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, -1, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 		}
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, -1, false);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, -1, false);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
@@ -1551,6 +1594,11 @@ InGameGraphicsEngine::InGameGraphicsEngine()
 	fullyLoaded = false;
 	quit = false;
 	needsRenderingSetup = true;
+	objShaderProgram = 0;
+	uiShaderProgram = 0;
+	light = nullptr;
+	fog = nullptr;
+	uiCanvas = nullptr;
 }
 
 
@@ -1571,20 +1619,19 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	}
 
 	// load the shader program
-	objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
-	uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
-
-	light = new DirLight();
-	fog = new FogGenerator(CHEF_FOG_DISTANCE);
-	//light->toggleNormalShading();
+	if (!objShaderProgram) {
+		objShaderProgram = LoadShaders(OBJ_VERT_SHADER_PATH, OBJ_FRAG_SHADER_PATH);
+	}
+	if (!uiShaderProgram) {
+		uiShaderProgram = LoadShaders(UI_VERT_SHADER_PATH, UI_FRAG_SHADER_PATH);
+	}
+	if (!particleShaderProgram) {
+		particleShaderProgram = LoadShaders(PARTICLE_VERT_SHADER_PATH, PARTICLE_FRAG_SHADER_PATH);
+	}
 
 	root = new Transform(glm::mat4(1.0));
 
-	uiCanvas = new UICanvas(uiShaderProgram);
-
 	needsRenderingSetup = true;
-
-
 
 	auto finish = [](bool *finishedFlag) {
 		LoadModels();
@@ -1626,6 +1673,19 @@ void InGameGraphicsEngine::CleanUp()
 
 void InGameGraphicsEngine::MainLoopBegin()
 {
+	if (!light) {
+		light = new DirLight();
+		//light->toggleNormalShading();
+	}
+	if (!fog) {
+		fog = new FogGenerator(CHEF_FOG_DISTANCE);
+	}
+	if (!uiCanvas) {
+		cout << "Loading UICanvas... ";
+		uiCanvas = new UICanvas(uiShaderProgram);
+		cout << "done.\n";
+	}
+
 	calledMainLoopBegin = true;
 	quit = false;
 
@@ -1635,8 +1695,15 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 		cout << "Calling RenderingSetup() on objects...\n ";
 
+		cout << "\ttile... ";
 		tileModel->RenderingSetup();
+		cout << "done.\n";
+
+		cout << "\twall... ";
 		wallModel->RenderingSetup();
+		cout << "done\n";
+
+		cout << "\tPlayer models... ";
 		for (auto &model : playerModels) {
 			if (model.walkObject)
 				model.walkObject->RenderingSetup();
@@ -1645,10 +1712,22 @@ void InGameGraphicsEngine::MainLoopBegin()
 			if (model.actionObject)
 				model.actionObject->RenderingSetup();
 		}
+		cout << "done\n";
+
 		for (auto &model : itemModels) {
-			if (model.object)
+			if (model.object) {
+				cout << "\t" << model.settings->name << "... ";
 				model.object->RenderingSetup();
+				cout << "done\n";
+			}
 		}
+
+		//particle setup
+		dustSpawner = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0,1.0f,0));
+		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, -1.0f, 0));
+		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
+		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
+
 
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;

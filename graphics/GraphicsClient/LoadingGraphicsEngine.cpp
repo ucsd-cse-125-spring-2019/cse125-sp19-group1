@@ -42,6 +42,8 @@ void LoadingGraphicsEngine::MainLoopBegin()
 {
 	TwoDeeGraphicsEngine::MainLoopBegin();
 
+	temporarilySuppressAnimation = false;
+
 	if (!dotObj) {
 		dotObj = createObjectForTexture(DOT_TEX_PATH);
 	}
@@ -170,7 +172,8 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	}
 
 	for (unsigned i = 0; i < 3; ++i) {
-		drawDot(dotPositions[i], dotAlphas[i] * screenAlpha);
+		float alpha = temporarilySuppressAnimation ? 1.f : dotAlphas[i];
+		drawDot(dotPositions[i], alpha * screenAlpha);
 	}
 	
 	static float pawAlphas[2] = { PAW_MAX_ALPHA, PAW_MAX_ALPHA };
@@ -275,7 +278,9 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	pawPreviousPhaseIdx = pawPhaseIdx;
 
-	drawPaw(pawPos[0] + pawAnimationOffset[0], pawAlphas[0] * sqrt(screenAlpha), pawAngle);
-	drawPaw(pawPos[1] + pawAnimationOffset[1], pawAlphas[1] * sqrt(screenAlpha), pawAngle);
+	if (!temporarilySuppressAnimation) {
+		drawPaw(pawPos[0] + pawAnimationOffset[0], pawAlphas[0] * sqrt(screenAlpha), pawAngle);
+		drawPaw(pawPos[1] + pawAnimationOffset[1], pawAlphas[1] * sqrt(screenAlpha), pawAngle);
+	}
 }
 
