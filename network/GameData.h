@@ -27,6 +27,8 @@ enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
 
 enum class WinType { NONE = 0, DOOR = 1, TOILET = 2, VENT = 3, CHEF_WIN = 4 };
 
+enum class GameState { IN_LOBBY, IN_GAME };
+
 class GameData
 {
 public:
@@ -55,13 +57,16 @@ public:
 
 	std::string encodeGameData(bool newPlayerInit);
 	void decodeGameData(const char * data);
+	
 	void addDecodeFunctions();
 	void decodeTileLayout(std::string value);
 	void decodeDisconnectedClients(std::string value);
+	void decodeGameState(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
 	Atlas * getAtlas();
+	ModelType getAvailableCharacter();
 
 	void updateGateProgress(int gateNum);
 
@@ -113,6 +118,9 @@ public:
 	bool countdownDone();
 	bool countdownStarted();
 
+	GameState getGameState();
+	void setGameState(GameState state);
+
 	// tile getters
 	Tile * getTile(Location loc);
 	GateTile * getGateTile(Location loc);
@@ -126,9 +134,11 @@ public:
 	ObjectTile * getObjectTile(Location loc);
 
 protected:
+	GameState gameState;
 	bool beginCountdown;
 	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;
 	bool countdownCompleted;
+	std::vector<ModelType> availableCharacters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
 
 	int playerNum;
 private:

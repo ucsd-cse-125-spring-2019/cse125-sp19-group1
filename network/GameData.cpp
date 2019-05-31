@@ -13,6 +13,7 @@ GameData::GameData(int serverInit)
 	beginCountdown = false;
 	countdownCompleted = false;
 	playerNum = 1;
+	gameState = GameState::IN_LOBBY;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -36,6 +37,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
+	encodedData << "gameState: " << static_cast<int>(gameState) << std::endl;
 	encodedData << "disconnectedClients:";
 	
 	for (auto p : disconnectedPlayers)
@@ -45,6 +47,27 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << std::endl;
 	//std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
+}
+
+GameState GameData::getGameState()
+{
+	return gameState;
+}
+void GameData::setGameState(GameState state)
+{
+	gameState = state;
+}
+
+ModelType GameData::getAvailableCharacter()
+{
+	if (availableCharacters.size() > 0)
+	{
+		int randChoice = rand() % availableCharacters.size();
+		ModelType character = availableCharacters.at(randChoice);
+		availableCharacters.erase(availableCharacters.begin() + randChoice);
+		return character;
+	}
+	return ModelType::CHEF;
 }
 
 void GameData::updateGateProgress(int gateNum)
@@ -88,7 +111,17 @@ void GameData::addNewPlayer(unsigned int anID, Location aLoc, ClientType type)
 			disconnectedPlayers.pop_back();
 		}
 		else
+		{
+
+
 			players[anID] = new Player(anID, playerNum++, atlas->getPlayerSpawnLocation(anID));
+
+			// Assign model for a new player joining the game
+			if (gameState == GameState::IN_GAME)
+			{
+				players[anID]->setModelType(getAvailableCharacter());
+			}
+		}
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
@@ -115,6 +148,7 @@ void GameData::addDecodeFunctions()
 {
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
+	decodingFunctions["gameData"] = &GameData::decodeGameState;
 }
 
 void GameData::decodeDisconnectedClients(std::string value)
@@ -231,6 +265,9 @@ void GameData::decodeTileLayout(std::string value)
 		}
 		std::cout << std::endl;
 	}*/
+}
+void GameData::decodeGameState(std::string value) {
+	gameState = static_cast<GameState>(std::stoi(value));
 }
 
 Player * GameData::getPlayer(int anID)

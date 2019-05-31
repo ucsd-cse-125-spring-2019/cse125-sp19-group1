@@ -33,6 +33,12 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
+//#define DEBUG_CLIENTS
+#ifdef DEBUG_CLIENTS
+ClientGame * sharedClient2 = nullptr;
+ClientGame * sharedClient3 = nullptr;
+ClientGame * sharedClient4 = nullptr;
+#endif
 
 void ErrorCallback(int error, const char* description)
 {
@@ -113,8 +119,11 @@ void Init(GLFWwindow *window)
 
 	server = new ServerGame();
 	sharedClient = new ClientGame();
-	//_beginthread(serverLoop, 0, (void*)12);
-
+#ifdef DEBUG_CLIENTS
+	sharedClient2 = new ClientGame();
+	sharedClient3 = new ClientGame();
+	sharedClient4 = new ClientGame();
+#endif
 	inGameEngine = new InGameGraphicsEngine();
 
 #define CUTSCENES_DIR "../2D Elements/"
@@ -136,7 +145,11 @@ void Init(GLFWwindow *window)
 	
 	playAgainEngine = new PlayAgainGraphicsEngine();
 
-	currentEngine = lobbyEngine;
+	sharedClient->update();
+	if(sharedClient->getGameData()->getGameState() == GameState::IN_GAME)
+		currentEngine = loadingEngine;
+	else
+		currentEngine = lobbyEngine;
 
 	chefWinsCutscene->StartLoading();
 	animalsWinCutscene->StartLoading();

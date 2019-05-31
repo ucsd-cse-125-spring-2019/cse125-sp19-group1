@@ -107,26 +107,24 @@ void ServerGame::receiveFromClients()
 				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
-				if (!gameStarted && allPlayersReady)
 				{
-					initCharacters = true;
-					gameData->startCountdown();
-				}
-				{
-					std::vector<ModelType> characters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
+					//std::vector<ModelType> characters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
 					for (auto iter = gameData->getAllPlayers().begin(); iter != gameData->getAllPlayers().end(); iter++)
 					{
 						Player * player = iter->second;
 						if (player->hasSelectedAnimal())
 						{
-							int randChoice = rand() % characters.size();
-							player->setModelType(characters.at(randChoice));
-							characters.erase(characters.begin() + randChoice);
+							//int randChoice = rand() % characters.size();
+							//player->setModelType(characters.at(randChoice));
+							//characters.erase(characters.begin() + randChoice);
+							player->setModelType(gameData->getAvailableCharacter());
+
 						}
 						else
 							player->setModelType(ModelType::CHEF);
 
 					}
+					gameData->setGameState(GameState::IN_GAME);
 				}
 				break;
 			case SELECT_EVENT:
@@ -245,7 +243,7 @@ void ServerGame::receiveFromClients()
 										player->setActionStartTime();
 										bool animalCaught = false;
 
-										chefWin = true;
+										//chefWin = true;
 										for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
 										{
 											if (iter2->first == iter->first)
@@ -272,12 +270,12 @@ void ServerGame::receiveFromClients()
 														it != jailLocations.end();  // Use (), and assuming itt was a typo
 														it++)
 													{
-														Location jLoc = Location(it->second, 0, it->first);
+														Location jLoc = Location(it->second * TILE_SIZE+1, 0, it->first * TILE_SIZE+1);
 														if (gameData->getAtlas()->hasJail(jLoc)) {
 															JailTile * jailTile = gameData->getJailTile(jLoc);
 															if (jailTile->isJailEmpty()) {
 																iter2->second->setCaughtStatus(true);
-																iter2->second->setLocation(jLoc.getX()+TILE_SIZE/2, (float)jailTile->getHeight(), jLoc.getZ()+TILE_SIZE/2);
+																iter2->second->setLocation(jLoc.getX()+TILE_SIZE/2, (float)(jailTile->getHeight()/2 * TILE_HEIGHT), jLoc.getZ()+TILE_SIZE/2);
 																jailTile->placeAnimalInJail(iter2->first);
 																animalCaught = true;
 																break;
@@ -668,6 +666,7 @@ void ServerGame::receiveFromClients()
 					gameData->setWT(WinType::NONE);
 					resetGame();
 				}
+				gameData->setGameState(GameState::IN_LOBBY);
 				break;
 			}
 
