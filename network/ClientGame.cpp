@@ -28,6 +28,8 @@
 #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
 
 static SoundSystem * soundSystem;
+
+// sounds specific to player (NOT 3D)
 static Sound * sound_door;
 static Sound * sound_door_unlock;
 static Sound * sound_found_item;
@@ -43,6 +45,16 @@ static Sound * sound_yay;
 static Sound * sound_jail_unlock;
 static Sound * sound_keydrop;
 static Sound * sound_chef;
+
+// sounds specific to other players (3D)
+static Sound * sound_other_found_item;
+static Sound * sound_other_search_item;
+static Sound * sound_other_jail_unlock;
+static Sound * sound_other_keydrop;
+static Sound * sound_other_net;
+static Sound * sound_other_toilet;
+static Sound * sound_other_vent_screw;
+static Sound * sound_other_door_unlock;
 
 static Sound * background_music;
 
@@ -93,6 +105,16 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
 		soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
 		soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
+
+		soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
+		soundSystem->createOtherPlayersSounds(&sound_other_jail_unlock, SOUNDS_JAIL_UNLOCK);
+		soundSystem->createOtherPlayersSounds(&sound_other_keydrop, SOUNDS_KEYDROP);
+		soundSystem->createOtherPlayersSounds(&sound_other_search_item, SOUNDS_SEARCH_ITEM);
+		soundSystem->createOtherPlayersSounds(&sound_other_net, SOUNDS_NET);
+		soundSystem->createOtherPlayersSounds(&sound_other_toilet, SOUNDS_TOILET);
+		soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
+		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
+
 		soundSystem->createBackgroundMusic(&background_music, BKG_MUSIC);
 		soundSystem->playBackgroundMusic(background_music, true);
 	}
@@ -179,14 +201,14 @@ void ClientGame::update()
 	// empties the buffer after parsing
 	memset(network_data, 0, sizeof(network_data)); 
 
-	//update sound 
-	
+	// update sounds
 	if (myID != -1 && !soundSystem->shouldIgnoreSound()) {
 		Player * player = gameData->getPlayer(myID);
 		ModelType model = gameData->getPlayer(myID)->getModelType();
 		WinType wt = gameData->getWT();
 		Location loc = gameData->getPlayer(myID)->getLocation();
 
+		// sounds that originate from THIS player
 		if (player->isChef()) 
 		{
 			if (player->getAction() == Action::SWING_NET) {
@@ -194,7 +216,7 @@ void ClientGame::update()
 			}
 
 			if (wt == WinType::CHEF_WIN) {
-				soundSystem->playSoundEffect(sound_yay);
+				soundSystem->playSoundEffect(sound_chef);
 			}
 		}
 		else {
@@ -251,6 +273,51 @@ void ClientGame::update()
 				else if (wt == WinType::CHEF_WIN) {
 					soundSystem->playSoundEffect(sound_chef);
 				}
+			}
+
+			// sounds that originate from other players
+			std::map < int, Player *> allPlayers = gameData->getAllPlayers();
+			std::map < int, Player * >::iterator it;
+			Player * curPlayer;
+			for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
+				if (it->second == player) {
+					continue;
+				}
+
+				curPlayer = it->second;
+				if (curPlayer->isChef())
+				{
+					if (curPlayer->getAction() == Action::SWING_NET) {
+						soundSystem->playOtherPlayersSounds(sound_other_net, it->first);
+					}
+				}
+				else {
+					if (curPlayer->getAction() == Action::NONE) {
+						soundSystem->pauseOtherPlayersSounds(it->first);
+					}
+					else if (curPlayer->getAction() == Action::OPEN_BOX) {
+						soundSystem->playOtherPlayersSounds(sound_other_search_item, it->first);
+					}
+					else if (curPlayer->getAction() == Action::CONSTRUCT_GATE) {
+						int gateNum = gameData->getGateTile(loc)->getGateNum();
+						if (gateNum == 1) { //door
+							soundSystem->playOtherPlayersSounds(sound_other_door_unlock, it->first);
+						}
+						else if (gateNum == 2) { //bathroom
+							soundSystem->playOtherPlayersSounds(sound_other_toilet, it->first);
+						}
+						else if (gateNum == 3) { //vent
+							soundSystem->playOtherPlayersSounds(sound_other_vent_screw, it->first);
+						}
+					}
+					else if (player->getAction() == Action::UNLOCK_JAIL) {
+						soundSystem->playOtherPlayersSounds(sound_other_jail_unlock, it->first);
+					}
+					else if (player->getAction() == Action::KEY_DROP) {
+						soundSystem->playOtherPlayersSounds(sound_other_keydrop, it->first);
+					}
+				}
+
 			}
 		}
 	}
