@@ -1537,16 +1537,16 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, -1, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 		}
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, -1, false);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, -1, false);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
@@ -1664,8 +1664,15 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 		cout << "Calling RenderingSetup() on objects...\n ";
 
+		cout << "\ttile... ";
 		tileModel->RenderingSetup();
+		cout << "done.\n";
+
+		cout << "\twall... ";
 		wallModel->RenderingSetup();
+		cout << "done\n";
+
+		cout << "\tPlayer models... ";
 		for (auto &model : playerModels) {
 			if (model.walkObject)
 				model.walkObject->RenderingSetup();
@@ -1674,9 +1681,14 @@ void InGameGraphicsEngine::MainLoopBegin()
 			if (model.actionObject)
 				model.actionObject->RenderingSetup();
 		}
+		cout << "done\n";
+
 		for (auto &model : itemModels) {
-			if (model.object)
+			if (model.object) {
+				cout << "\t" << model.settings->name << "... ";
 				model.object->RenderingSetup();
+				cout << "done\n";
+			}
 		}
 
 		auto setupEnd = high_resolution_clock::now();
