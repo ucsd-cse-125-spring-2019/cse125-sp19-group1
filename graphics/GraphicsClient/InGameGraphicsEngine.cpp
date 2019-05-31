@@ -216,7 +216,6 @@ struct PlayerModel {
 	Geometry *walkGeometry;
 	Geometry *carryGeometry;
 	Geometry *actionGeometry;
-	Transform *transform;
 
 	inline FBXObject * getWalkObject() {
 		return walkObject;
@@ -244,7 +243,6 @@ struct PlayerModel {
 		DELETE_IF_NEEDED(walkGeometry);
 		DELETE_IF_NEEDED(carryGeometry);
 		DELETE_IF_NEEDED(actionGeometry);
-		DELETE_IF_NEEDED(transform);
 	}
 };
 
@@ -293,7 +291,7 @@ static int elapsedTime = 0;
 static int directions = 0;
 
 struct PlayerState {
-	Transform *transform;       // for position and rotation
+	glm::mat4 transform;        // for position and rotation
 	float targetAngle;          // the angle it's trying to animate to
 	float angle;                // angle it's currently facing (should be approaching targetAngle)
 	glm::vec3 position;         // position, important for faking targetAngle above
@@ -301,10 +299,9 @@ struct PlayerState {
 	unsigned geometryIdx;       // index into playerGeometry
 	char moving;				// bool indicating whether or not the model should animate
 
-	PlayerState() : position(0.f) {
+	PlayerState() : position(0.f), transform(1.f) {
 		angle = targetAngle = 0.f;
 		geometryIdx = 0;
-		transform = nullptr;
 	}
 
 #ifdef DUMMY_ID
@@ -331,62 +328,17 @@ struct PlayerState {
 	}
 
 	~PlayerState() {
-		if (transform && transform->decrementRefCount()) {
-			delete transform;
-		}
-	}
-
-	PlayerState(const PlayerState &other) {
-		transform = other.transform;
-		if (transform) {
-			transform->incrementRefCount();
-		}
-
-		targetAngle = other.targetAngle;
-		angle = other.angle;
-		position = other.position;
-		id = other.id;
-		geometryIdx = other.geometryIdx;
-		moving = other.moving;
-	}
-
-	PlayerState &operator=(const PlayerState &other) {
-		if (transform && transform->decrementRefCount()) {
-			delete transform;
-		}
-
-		transform = other.transform;
-		if (transform) {
-			transform->incrementRefCount();
-		}
-
-		targetAngle = other.targetAngle;
-		angle = other.angle;
-		position = other.position;
-		id = other.id;
-		geometryIdx = other.geometryIdx;
-
-		return *this;
 	}
 
 	void setGeometryIdx(unsigned geomIdx) {
 		geometryIdx = geomIdx;
 
 		auto translate = glm::translate(glm::mat4(1.f), position);
-		auto transformMat = glm::rotate(translate, angle, glm::vec3(0.f, 1.f, 0.f));
-		if (transform) {
-			transform->setOffset(transformMat);
-			transform->removeAllChildren();
-		}
-		else {
-			transform = new Transform(transformMat);
-		}
-		transform->addChild(playerModels[geometryIdx].transform);
+		transform = glm::rotate(translate, angle, glm::vec3(0.f, 1.f, 0.f));
 	}
 };
 
 Transform * root = nullptr;
-Transform * allPlayersNode = nullptr;
 std::vector<PlayerState> players;
 Transform * floorTransform = nullptr;
 Transform * envObjsTransform = nullptr;
@@ -440,8 +392,6 @@ void InGameGraphicsEngine::ReloadPlayers()
 		return;
 	}
 
-	allPlayersNode->removeAllChildren();
-
 	const auto &playersMap = sharedClient->getGameData()->players;
 	const int myId = sharedClient->getMyID();
 
@@ -450,16 +400,12 @@ void InGameGraphicsEngine::ReloadPlayers()
 		const Player *p = pair.second;
 
 		players.emplace_back(id, p);
-
-		const auto state = &players[players.size() - 1];
-		allPlayersNode->addChild(state->transform);
 	}
 
 #ifdef DUMMY_ID
 	// add a dummy player
 	players.emplace_back(DUMMY_ID, CHEF_IDX);
 	const auto state = &players[players.size() - 1];
-	allPlayersNode->addChild(state->transform);
 #endif
 
 	auto myState = getMyState();
@@ -1026,8 +972,7 @@ void InGameGraphicsEngine::MovePlayers()
 			state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
 		}
 
-		auto transformMat = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
-		state.transform->setOffset(transformMat);
+		state.transform = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
 	}
 
 	MoveCamera(myState->position);
@@ -1422,10 +1367,6 @@ void InGameGraphicsEngine::IdleCallback()
 		//server->update();
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
-		for (auto &playerState : players) {
-			playerModels[playerState.geometryIdx].walkObject->Update(playerState.moving != 0);
-		}
-
 		updateUIElements(gameData);
 		fog->setFogDistance(gameData->chefVision);
 
@@ -1448,6 +1389,45 @@ void DisplayCallback(GLFWwindow* window)
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
+
+	// Draw the players
+	if (sharedClient && sharedClient->getGameData()) {
+		auto &networkPlayers = sharedClient->getGameData()->getAllPlayers();
+		for (auto &state : players) {
+			auto &model = playerModels[state.geometryIdx];
+			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
+			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
+			Geometry *playerGeometry = nullptr;
+
+			switch (action) {
+			case Action::CONSTRUCT_GATE:
+			case Action::OPEN_BOX:
+			case Action::UNLOCK_JAIL:
+			case Action::SWING_NET:
+				model.getActionObject()->Update(true);
+				playerGeometry = model.getActionGeometry();
+				break;
+
+			case Action::NONE:
+			default:
+				if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
+					model.getCarryObject()->Update(true);
+					playerGeometry = model.getCarryGeometry();
+				}
+				else if (networkPlayer->getInventory() != ItemModelType::EMPTY) {
+					model.getCarryObject()->Update(true);
+					playerGeometry = model.getCarryGeometry();
+				}
+				else {
+					model.getWalkObject()->Update(state.moving != 0);
+					playerGeometry = model.getwalkGeometry();
+				}
+				break;
+			}
+
+			playerGeometry->draw(V, P, state.transform);
+		}
+	}
 
 	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
@@ -1501,17 +1481,18 @@ void LoadModels()
 			model.settings = &setting;
 			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
+			model.walkGeometry->t = transform;
+
 			if (setting.carryModelPath || setting.carryTexturePath) {
 				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
+				model.carryGeometry->t = transform;
 			}
 			if (setting.actionModelPath || setting.actionTexturePath) {
 				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
+				model.actionGeometry->t = transform;
 			}
-			model.transform = new Transform(transform);
-
-			model.transform->addChild(model.walkGeometry);
 		});
 
 		++threadIdx;
@@ -1593,8 +1574,6 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 	//light->toggleNormalShading();
 
 	root = new Transform(glm::mat4(1.0));
-	allPlayersNode = new Transform(glm::mat4(1.0));
-	root->addChild(allPlayersNode);
 
 	uiCanvas = new UICanvas(uiShaderProgram);
 
@@ -1613,13 +1592,6 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 
 void InGameGraphicsEngine::CleanUp()
 {
-
-	if (allPlayersNode) {
-		allPlayersNode->removeAllChildren();
-		delete allPlayersNode;
-		allPlayersNode = nullptr;
-	}
-
 	players.clear();
 
 	for (auto &model : itemModels) {
