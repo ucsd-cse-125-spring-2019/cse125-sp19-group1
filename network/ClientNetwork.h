@@ -1,3 +1,5 @@
+#pragma once
+
 // Networking libraries
 #include <winsock2.h>
 #include <Windows.h>
