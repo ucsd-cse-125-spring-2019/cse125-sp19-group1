@@ -1562,7 +1562,8 @@ void DisplayCallback(GLFWwindow* window)
 					state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
 					state.carryStopTime = glfwGetTime();
 					auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
-					state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory);
+					bool isKey = state.previousInventory >= ItemModelType::key1 && state.previousInventory <= ItemModelType::screwdriver3;
+					state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory && isKey);
 					if (!state.animatingInventory) {
 						state.previousInventory = ItemModelType::EMPTY;
 					}
