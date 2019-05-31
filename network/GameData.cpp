@@ -12,6 +12,7 @@ GameData::GameData(int serverInit)
 	addDecodeFunctions();
 	beginCountdown = false;
 	countdownCompleted = false;
+	playerNum = 3;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -87,11 +88,11 @@ void GameData::addNewPlayer(unsigned int anID, Location aLoc, ClientType type)
 			disconnectedPlayers.pop_back();
 		}
 		else
-			players[anID] = new Player(anID, atlas->getPlayerSpawnLocation(anID));
+			players[anID] = new Player(anID, playerNum++, atlas->getPlayerSpawnLocation(anID));
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
-		players[anID] = new Player(anID, Location());
+		players[anID] = new Player(anID, 0, Location());
 
 	}
 }

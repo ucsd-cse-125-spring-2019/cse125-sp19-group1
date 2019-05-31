@@ -112,9 +112,23 @@ void ServerGame::receiveFromClients()
 					initCharacters = true;
 					gameData->startCountdown();
 				}
+				{
+					std::vector<ModelType> characters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
+					for (auto iter = gameData->getAllPlayers().begin(); iter != gameData->getAllPlayers().end(); iter++)
+					{
+						Player * player = iter->second;
+						if (player->hasSelectedAnimal())
+						{
+							int randChoice = rand() % characters.size();
+							player->setModelType(characters.at(randChoice));
+							characters.erase(characters.begin() + randChoice);
+						}
+					}
+				}
 				break;
 			case SELECT_EVENT:
 				printf("server received SELECT event packet from client\n");
+				gameData->getPlayer(playerID)->toggleAnimalSelection();
 				break;
 			case SELECT0_EVENT:
 			{

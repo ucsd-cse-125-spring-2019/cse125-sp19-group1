@@ -2,8 +2,8 @@
 
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 
-Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), inventory(ItemModelType::EMPTY),
-	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(1.0)
+Player::Player(int anID, int aPlayerNum, Location aLoc) : playerID(anID), playerNum(aPlayerNum), location(aLoc), inventory(ItemModelType::EMPTY),
+	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(1.0), selectedAnimal(true)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
@@ -13,7 +13,10 @@ Player::Player(int anID, Location aLoc) : playerID(anID), location(aLoc), invent
 }
 
 
- Location Player::getLocation() const { return location; }
+Location Player::getLocation() const { return location; }
+int Player::getPlayerNum() const { return playerNum; }
+bool Player::hasSelectedAnimal() const { return selectedAnimal; }
+void Player::toggleAnimalSelection() { selectedAnimal = !selectedAnimal; dirtyVariablesMap["animalSelection"] = true; }
 bool Player::isReady() const
 {
 	return ready;
@@ -317,6 +320,15 @@ void Player::decodePlayerData(std::string key, std::string value)
 		std::cout << "No decoding function for key: " << key << std::endl;
 }
 
+void Player::decodePlayerNum(std::string value)
+{
+	playerNum = std::stoi(value);
+}
+
+void Player::decodeAnimalSelection(std::string value)
+{
+	selectedAnimal = value == "1";
+}
 void Player::decodeLocation(std::string value)
 {
 	std::stringstream valueStream(value);
@@ -365,6 +377,8 @@ void Player::decodeCaughtAnimalType(std::string value)
 
 void Player::addDecodeFunctions()
 {
+	decodingFunctions["playerNum"] = &Player::decodePlayerNum;
+	decodingFunctions["animalSelection"] = &Player::decodeAnimalSelection;
 	decodingFunctions["location"] = &Player::decodeLocation;
 	decodingFunctions["model"] = &Player::decodeModelType;
 	decodingFunctions["inventory"] = &Player::decodeInventory;
@@ -379,6 +393,8 @@ void Player::addDecodeFunctions()
 
 void Player::addEncodeFunctions()
 {
+	encodingFunctions["playerNum"] = &Player::encodePlayerNum;
+	encodingFunctions["animalSelection"] = &Player::encodeAnimalSelection;
 	encodingFunctions["location"] = &Player::encodeLocation;
 	encodingFunctions["model"] = &Player::encodeModelType;
 	encodingFunctions["inventory"] = &Player::encodeInventory;
@@ -390,6 +406,8 @@ void Player::addEncodeFunctions()
 	encodingFunctions["caughtAnimalType"] = &Player::encodeCaughtAnimalType;
 
 
+	dirtyVariablesMap["playerNum"] = true;
+	dirtyVariablesMap["animalSelection"] = true;
 	dirtyVariablesMap["location"] = true;
 	dirtyVariablesMap["inventory"] = true;
 	dirtyVariablesMap["model"] = true;
@@ -400,6 +418,19 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["caughtAnimal"] = true;
 	dirtyVariablesMap["caughtAnimalType"] = true;
 
+}
+std::string Player::encodePlayerNum() {
+	std::stringstream encodedData;
+	encodedData << "playerNum: " << playerNum << std::endl;
+
+	return encodedData.str();
+}
+
+std::string Player::encodeAnimalSelection() {
+	std::stringstream encodedData;
+	encodedData << "animalSelection: " << selectedAnimal << std::endl;
+
+	return encodedData.str();
 }
 std::string Player::encodeLocation() {
 	std::stringstream encodedData;

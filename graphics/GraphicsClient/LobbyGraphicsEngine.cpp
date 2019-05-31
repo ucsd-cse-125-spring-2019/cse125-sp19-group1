@@ -117,7 +117,7 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 	{
 		// TODO: send a packet to the server
 		playerIsAnimal[myPlayerNum - 1] = !playerIsAnimal[myPlayerNum - 1];
-
+		sharedClient->sendPackets(SELECT_EVENT);
 		cout << "Lobby got SPACE" << endl;
 		break;
 	}
@@ -147,6 +147,7 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 			// TODO: send a packet to the server
 		}
 
+		sharedClient->sendPackets(START_EVENT);
 		//TODO: only do this if the server says it's ok
 		quit = true;
 
@@ -192,6 +193,16 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	// For now, randomize playerIsAnimal for the other 3 players
 	// TODO: get this from the server instead
+	sharedClient->update();
+	std::map < int, Player * > players = sharedClient->getGameData()->getAllPlayers();
+	if(sharedClient->getGameData()->getPlayer(sharedClient->getMyID()))
+		myPlayerNum = sharedClient->getGameData()->getPlayer(sharedClient->getMyID())->getPlayerNum();
+
+	for (auto iter = players.begin(); iter != players.end(); iter++)
+	{
+		Player * player = iter->second;
+		playerIsAnimal[player->getPlayerNum() - 1] = player->hasSelectedAnimal();
+	}
 	int blah = (int)(now / 2.75);
 	static int lastBlah = -1;
 	if (blah != lastBlah) {
