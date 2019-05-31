@@ -115,13 +115,12 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 	switch (key) {
 	case GLFW_KEY_SPACE:
 	{
-		// TODO: send a packet to the server
-		playerIsAnimal[myPlayerNum - 1] = !playerIsAnimal[myPlayerNum - 1];
+		//playerIsAnimal[myPlayerNum - 1] = !playerIsAnimal[myPlayerNum - 1];
 		sharedClient->sendPackets(SELECT_EVENT);
 		cout << "Lobby got SPACE" << endl;
 		break;
 	}
-	case GLFW_KEY_LEFT:
+	/*case GLFW_KEY_LEFT:
 	{
 		if (playerIsAnimal[myPlayerNum - 1]) {
 			// TODO: send a packet to the server
@@ -140,7 +139,7 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 
 		cout << "Lobby got RIGHT" << endl;
 		break;
-	}
+	}*/
 	case GLFW_KEY_ENTER:
 	{
 		if (startEnabled) {
@@ -191,21 +190,26 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 #define START_PERIOD 0.8
 	float startAlpha = sinf((now / START_PERIOD) * glm::pi<double>()) * 0.5f + 0.5f;
 
-	// For now, randomize playerIsAnimal for the other 3 players
-	// TODO: get this from the server instead
 	sharedClient->update();
 	std::map < int, Player * > players = sharedClient->getGameData()->getAllPlayers();
 	if(sharedClient->getGameData()->getPlayer(sharedClient->getMyID()))
 		myPlayerNum = sharedClient->getGameData()->getPlayer(sharedClient->getMyID())->getPlayerNum();
 
+	bool playerIsOnline[LOBBY_MAX_PLAYERS] = {false};
+
 	// update playerIsAnimal using server values
 	for (auto iter = players.begin(); iter != players.end(); iter++)
 	{
 		Player * player = iter->second;
-		playerIsAnimal[(player->getPlayerNum() - 1) % LOBBY_MAX_PLAYERS] = player->hasSelectedAnimal();
+		auto idx = (player->getPlayerNum() - 1) % LOBBY_MAX_PLAYERS;
+		playerIsOnline[idx] = true;
+		playerIsAnimal[idx] = player->hasSelectedAnimal();
 	}
 
 	// Randomize the players (remove if above code works after testing)
+	// For now, randomize playerIsAnimal for the other 3 players
+	// TODO: get this from the server instead
+	/*
 	int blah = (int)(now / 2.75);
 	static int lastBlah = -1;
 	if (blah != lastBlah) {
@@ -219,6 +223,7 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 			}
 		}
 	}
+	*/
 
 #define PLAYER_MARGIN_Y 3.25f
 #define PLAYER_TOP_Y 339.f
@@ -239,7 +244,7 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 			playerY[i] = targetY[i];
 		}
 
-		float targetX = columnX[playerIsAnimal[i]];
+		float targetX = playerIsOnline[i] ? columnX[playerIsAnimal[i]] : 0.5f * (columnX[0] + columnX[1]);
 
 		if (playerX[i] < 1.f || abs(targetX - playerX[i]) < 0.1) {
 			playerX[i] = targetX;
@@ -251,8 +256,11 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 		float playerAlpha = 1.f - sinf(((playerX[i] - columnX[0]) / (columnX[1] - columnX[0])) * glm::pi<float>());
 
 		DrawSprite(playerMsg[i], playerX[i], playerY[i], playerAlpha);
-		columnY[playerIsAnimal[i]] += playerMsg[i].designHeight + PLAYER_MARGIN_Y;
-		chefCount += !playerIsAnimal[i];
+
+		if (playerIsOnline[i]) {
+			columnY[playerIsAnimal[i]] += playerMsg[i].designHeight + PLAYER_MARGIN_Y;
+			chefCount += !playerIsAnimal[i];
+		}
 	}
 
 	startEnabled = (chefCount == 1);
