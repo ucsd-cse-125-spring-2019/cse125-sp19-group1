@@ -187,7 +187,6 @@
     <ClInclude Include="UICanvas.h" />
     <ClInclude Include="UIObject.h" />
     <ClInclude Include="Vertex.h" />
-    <ClInclude Include="WICTextureLoader.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\network\Atlas.cpp" />
@@ -233,7 +232,6 @@
     <ClCompile Include="UICanvas.cpp" />
     <ClCompile Include="UIObject.cpp" />
     <ClCompile Include="Vertex.cpp" />
-    <ClCompile Include="WICTextureLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="obj_shader.frag" />
