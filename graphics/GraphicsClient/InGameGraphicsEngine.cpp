@@ -625,8 +625,76 @@ void resetItems()
 	}
 }
 
+void setGoalsFalse() {
+	uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::ROPE_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_COMPLETE, false);
+	uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::ROPE_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_INCOMPLETE, true);
+	uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_INCOMPLETE, true);
+}
+
+void setGoalsVisible(int item) {
+	if (item == (int)ItemModelType::key1) {
+		uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::key2) {
+		uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::key3) {
+		uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::screwdriver1) {
+		uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::YELLOW_SCREWDRIVER_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::screwdriver2) {
+		uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::GREEN_SCREWDRIVER_GOAL_INCOMPLETE, false);
+
+	}
+	if (item == (int)ItemModelType::screwdriver3) {
+		uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::RED_SCREWDRIVER_GOAL_INCOMPLETE, false);
+	}
+	if (item == (int)ItemModelType::rope) {
+		uiCanvas->setVisible(UICanvas::ROPE_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::ROPE_GOAL_INCOMPLETE, false);
+	}
+	if (item == (int)ItemModelType::plunger) {
+		uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::PLUNGER_GOAL_INCOMPLETE, false);
+	}
+	if (item == (int)ItemModelType::toiletPaper) {
+		uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_COMPLETE, true);
+		uiCanvas->setVisible(UICanvas::TOILET_PAPER_GOAL_INCOMPLETE, false);
+	}
+}
+
 void updateBoxVisibility()
 {
+	//for goalsUI
+	setGoalsFalse();
+
 	if (!sharedClient || !sharedClient->getGameData())
 		return;
 
@@ -643,7 +711,14 @@ void updateBoxVisibility()
 			if (tile && tileLayout[y][x]->getTileType() == TileType::BOX) {
 				tile->hidden = !((BoxTile *)tileLayout[y][x])->hasBox();
 			}
-
+			//Update UI to express keys already placed
+			if (tile && tileLayout[y][x]->getTileType() == TileType::KEY_DROP) {
+				std::vector<ItemModelType> depositedItems = ((KeyDropTile *)tileLayout[y][x])->getDepositedKeys();
+				for (int i = 0; i < depositedItems.size(); i++) {
+					int item = (int)depositedItems[i];
+					setGoalsVisible(item);
+				}
+			}
 			++x;
 		}
 		++y;
