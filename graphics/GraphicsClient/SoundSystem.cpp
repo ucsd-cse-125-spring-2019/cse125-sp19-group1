@@ -79,6 +79,37 @@ void SoundSystem::createSoundEffect(Sound ** pSound, const char* pFile)
 	}
 }
 
+void SoundSystem::createOtherPlayersSounds(Sound ** pSound, const char* pFile)
+{
+	FMOD_RESULT result;
+	struct stat buffer;
+
+	// check if file exists
+	if (stat(pFile, &buffer) != 0) {
+		fprintf(stdout, "createSound ERROR: FILE DOES NOT EXIST\n");
+	}
+
+	fprintf(stdout, "createSound: before system->createSound pSound=%d\n", pSound);
+	// can also use FMOD_CREATESAMPLE to load entire sound
+	// and decompress it in memory to speed up playback
+	result = system->createSound(pFile, FMOD_3D, 0, pSound);
+	if (result != FMOD_OK) {
+		if (result == FMOD_ERR_UNINITIALIZED) {
+			fprintf(stdout, "createOtherPlayersSounds ERROR: FMOD_ERR_UNINITIALIZED\n");
+		}
+		else if (result == FMOD_ERR_UNSUPPORTED) {
+			fprintf(stdout, "createOtherPlayersSounds ERROR: FMOD_ERR_UNSUPPORTED\n");
+		}
+		else {
+			fprintf(stdout, "createOtherPlayersSounds ERROR %d: COULD NOT CREATE SOUND %s\n", result, pFile);
+		}
+	}
+	else {
+		fprintf(stdout, "createOtherPlayersSounds: Able to create sound %s\n", pFile);
+		fprintf(stdout, "createOtherPlayersSounds: pSound=%d\n", pSound);
+	}
+}
+
 void SoundSystem::createBackgroundMusic(Sound ** pSound, const char* pFile)
 {
 	FMOD_RESULT result;

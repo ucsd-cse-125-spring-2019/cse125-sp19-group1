@@ -17,9 +17,11 @@
 #define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
 #define SOUNDS_TOILET		(SOUNDS_PATH "bathroom_toilet.mp3")
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
+#define SOUNDS_VENT_DROP	(SOUNDS_PATH "ventexit_drop.mp3")
 #define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
 #define SOUNDS_JAIL_UNLOCK	(SOUNDS_PATH "jail_rattle.mp3")
+#define SOUNDS_KEYDROP		(SOUNDS_PATH "keydrop.mp3")
 #define SOUNDS_CHEF			(SOUNDS_PATH "chef_win.mp3")
 
 // Paths for background music loops
@@ -35,9 +37,11 @@ static Sound * sound_raccoon_down;
 static Sound * sound_search_item;
 static Sound * sound_toilet;
 static Sound * sound_vent_screw;
+static Sound * sound_vent_drop;
 static Sound * sound_window;
 static Sound * sound_yay;
 static Sound * sound_jail_unlock;
+static Sound * sound_keydrop;
 static Sound * sound_chef;
 
 static Sound * background_music;
@@ -83,9 +87,11 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
+		soundSystem->createSoundEffect(&sound_vent_drop, SOUNDS_VENT_DROP);
 		soundSystem->createSoundEffect(&sound_window, SOUNDS_WINDOW);
 		soundSystem->createSoundEffect(&sound_yay, SOUNDS_YAY);
 		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
+		soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
 		soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
 		soundSystem->createBackgroundMusic(&background_music, BKG_MUSIC);
 		soundSystem->playBackgroundMusic(background_music, true);
@@ -219,6 +225,9 @@ void ClientGame::update()
 			else if (player->getAction() == Action::UNLOCK_JAIL) {
 				soundSystem->playSoundEffect(sound_jail_unlock);
 			}
+			else if (player->getAction() == Action::KEY_DROP) {
+				soundSystem->playSoundEffect(sound_keydrop);
+			}
 
 			if (wt != WinType::NONE) {
 				if (wt == WinType::DOOR) {
@@ -235,7 +244,7 @@ void ClientGame::update()
 				} 
 				else if (wt == WinType::VENT) {
 					// soundSystem->playSoundEffect(sound_vent_screw);
-					soundSystem->pushSoundQueue(sound_vent_screw);
+					soundSystem->pushSoundQueue(sound_vent_drop);
 					soundSystem->pushSoundQueue(sound_yay);
 					soundSystem->playSoundsInQueue();
 				}
