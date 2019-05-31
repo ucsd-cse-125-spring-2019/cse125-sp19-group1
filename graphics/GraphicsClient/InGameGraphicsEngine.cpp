@@ -137,10 +137,10 @@ static const struct PlayerModelSettings {
 	}
 } playerModelSettings[] = {
 	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 12.f, 6.f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 12.f, 6.f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 12.f, 6.f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 12.f, 6.f) },
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 6.f, 3.f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 6.f, 3.f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 6.f, 3.f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 6.f, 3.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -1429,7 +1429,8 @@ void DisplayCallback(GLFWwindow* window)
 
 			playerGeometry->draw(V, P, state.transform);
 
-			/*if (inventory != ItemModelType::EMPTY) {
+			if (inventory != ItemModelType::EMPTY) {
+				auto playerSettings = playerModels[state.geometryIdx].settings;
 				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
 
 				glm::vec3 modelTranslate = itemModel.settings->translate;
@@ -1437,8 +1438,7 @@ void DisplayCallback(GLFWwindow* window)
 				modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 				modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
 
-				modelTranslate += model.settings->carryPosition;
-				cout << "Using carry position: " << model.settings->carryPosition.x << ", " << model.settings->carryPosition.y << ", " << model.settings->carryPosition.z << "\n";
+				modelTranslate += playerSettings->carryPosition;
 
 				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
 				const auto modelAngles = itemModel.settings->rotation;
@@ -1447,7 +1447,7 @@ void DisplayCallback(GLFWwindow* window)
 				modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
 
 				itemModel.geometry->draw(V, P, modelRotate);
-			}*/
+			}
 		}
 	}
 
@@ -1493,7 +1493,7 @@ void LoadModels()
 
 	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
-		playerLoadingThreads[threadIdx] = thread([&, setting]() {
+		playerLoadingThreads[threadIdx] = thread([&]() {
 			cout << "\tloading " << setting.name << endl;
 
 			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
