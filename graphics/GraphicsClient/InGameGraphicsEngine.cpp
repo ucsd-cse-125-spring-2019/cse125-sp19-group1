@@ -1652,7 +1652,9 @@ void InGameGraphicsEngine::MainLoopBegin()
 		fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	}
 	if (!uiCanvas) {
+		cout << "Loading UICanvas... ";
 		uiCanvas = new UICanvas(uiShaderProgram);
+		cout << "done.\n";
 	}
 
 	calledMainLoopBegin = true;
