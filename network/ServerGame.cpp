@@ -123,6 +123,9 @@ void ServerGame::receiveFromClients()
 							player->setModelType(characters.at(randChoice));
 							characters.erase(characters.begin() + randChoice);
 						}
+						else
+							player->setModelType(ModelType::CHEF);
+
 					}
 				}
 				break;

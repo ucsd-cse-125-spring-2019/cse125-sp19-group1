@@ -7,9 +7,9 @@ Player::Player(int anID, int aPlayerNum, Location aLoc) : playerID(anID), player
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
-	if (anID == 1) {
-		modelType = ModelType::CHEF;
-	}
+	//if (anID == 1) {
+	//	modelType = ModelType::CHEF;
+	//}
 }
 
 
