@@ -137,10 +137,10 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 	{
 		// Only send the start event if we have the right mix of players
 		// (or for debugging allow it if we are connected to localhost)
-		if (startEnabled || !strcmp(SERVER_IP_ADDRESS, LOCAL_HOST)) {
+		//if (startEnabled || !strcmp(SERVER_IP_ADDRESS, LOCAL_HOST)) {
 			sharedClient->sendPackets(START_EVENT);
 			quit = true;
-		}
+		//}
 
 		cout << "Lobby got ENTER" << endl;
 		break;

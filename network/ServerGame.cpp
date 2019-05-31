@@ -778,25 +778,26 @@ void ServerGame::receiveFromClients()
 // HEAD
 //			if (player->isInteracting())
 //
-			if (player->getBlindChef() && gameData->getGameClock() > player->getVisionTime() + MAX_CHEF_TIME)
+			if (player->getBlindChef() && player->getVisionTime() > MAX_CHEF_TIME)
 			{
-				player->toggleBlindChef();
+				player->setBlindChef(false);
 				gameData->setChefVisionLimit(1);
 			}
 
-			if (player->getSlowChef() && gameData->getGameClock() > player->getSlowTime() + MAX_CHEF_TIME)
+			if (player->getSlowChef() && player->getSlowTime() > MAX_CHEF_TIME)
 			{
-				player->toggleSlowChef();
+				player->setSlowChef(false);
 			}
 
-			if (player->getGhost() && gameData->getGameClock() > player->getSpeedTime() + MAX_ANIMAL_GHOST_TIME)
+			if (player->getGhost() && player->getSpeedTime() > MAX_ANIMAL_GHOST_TIME)
 			{
-				player->toggleGhost();
+
+				player->setGhost(false);
 			}
 
-			if (player->getInstantSearch() && gameData->getGameClock() > player->getSearchTime() + MAX_ANIMAL_SEARCH_TIME)
+			if (player->getInstantSearch() && player->getSearchTime() > MAX_ANIMAL_SEARCH_TIME)
 			{
-				player->toggleInstantSearch();
+				player->setInstantSearch(false);
 			}
 
 			//if (player->getInteracting())
@@ -877,25 +878,26 @@ void ServerGame::receiveFromClients()
 						
 
 						ItemModelType it = player->getInventory();
+						bool powerUp = true;
 						if (it == ItemModelType::apple)
 						{
 							std::cout << "POWER: limit chef vision" << std::endl;
 							//call limit chef vision
-							player->toggleBlindChef();
+							player->setBlindChef(true);
 							player->setVisionStartTime();
-							gameData->setChefVisionLimit(0.4);
+							gameData->setChefVisionLimit(0.5);
 						}
 						else if (it == ItemModelType::orange)
 						{
 							std::cout << "POWER: limit chef speed" << std::endl;
 							//call limit chef speed 
-							player->toggleSlowChef();
+							player->setSlowChef(true);
 							player->setSlowStartTime();
 						}
 						else if (it == ItemModelType::bananaGreen)
 						{
 							std::cout << "POWER: ghost" << std::endl;
-							player->toggleGhost();
+							player->setGhost(true);
 							//call ghost because green means go 
 							player->setSpeedStartTime();
 						}
@@ -959,50 +961,19 @@ void ServerGame::receiveFromClients()
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
 							std::cout << "POWER: search" << std::endl;
-							player->toggleInstantSearch();
+							player->setInstantSearch(true);
 							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
 							player->setSearchStartTime();
 						}
-						player->setInventory(ItemModelType::EMPTY);
-						player->setSpeedMultiplier(1.0);
-
-// server
+						else {
+							powerUp = false;
+						}
+						if (powerUp) {
+							player->setInventory(ItemModelType::EMPTY);
+							player->setSpeedMultiplier(1.0);
+						}
 					}
-			//	}
-			//}
-
-			/*if (player->getOpenJail()) 
-			{
-				double seconds = player->getInteractingTime(1);
-				if (!player->isChef())
-				{
-					if (seconds > UNLOCK_JAIL_COOLDOWN) {
-						player->setOpenJail(false);
-					}
-				}
-			}*/
-
-			/*if (gameData->getAtlas()->hasGate(loc))
-			{
-				GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-
-				if (!gateTile->isOpen())
-				{
-					double seconds = player->getInteractingTime(0);
-
-					if (player->getOpeningGate() && gateTile->getCurrentConstructTime() + seconds >= TIME_TO_CONSTRUCT_GATE)
-					{
-						std::cout << "GATE CONSTRUCTED" << std::endl;
-						gateTile->constructGate(seconds);
-					}
-				}
-// HEAD
-			}*/
-//
 			}
-
-
-// server
 		}
 	}
 }
@@ -1054,6 +1025,7 @@ void ServerGame::updateMovement(int dir, int id)
 		gameData->getPlayer(id)->getHidden()) {
 		return;
 	}
+
 	switch (dir)
 	{
 	case 1: updateForwardEvent(id);
@@ -1065,12 +1037,17 @@ void ServerGame::updateMovement(int dir, int id)
 	case 4: updateRightEvent(id);
 		break;
 	}
+
 	updateCollision(id);
 	updateHeight(id);
 }
 
 void ServerGame::updateRightEvent(int id)
 {
+	float SPEED = sSpeed;
+	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHEAST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHEAST) {
+		SPEED = dSpeed;
+	}
 	moveRight = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 
@@ -1096,6 +1073,10 @@ void ServerGame::updateRightEvent(int id)
 
 void ServerGame::updateBackwardEvent(int id)
 {
+	float SPEED = sSpeed;
+	if (gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHWEST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHEAST) {
+		SPEED = dSpeed;
+	}
 	moveBackward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 
@@ -1121,6 +1102,10 @@ void ServerGame::updateBackwardEvent(int id)
 
 void ServerGame::updateForwardEvent(int id)
 {
+	float SPEED = sSpeed;
+	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHEAST || gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHWEST) {
+		SPEED = dSpeed;
+	}
 	moveForward = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 
@@ -1141,12 +1126,14 @@ void ServerGame::updateForwardEvent(int id)
 		}
 	}
 	updatePlayerCollision(id, 2);
-	std::cout << "NORTH\n";
-
 }
 
 void ServerGame::updateLeftEvent(int id)
 {
+	float SPEED = sSpeed;
+	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHWEST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHWEST) {
+		SPEED = dSpeed;
+	}
 	moveLeft = true;
 	Location loc = gameData->getPlayer(id)->getLocation();
 
@@ -1168,7 +1155,6 @@ void ServerGame::updateLeftEvent(int id)
 	}
 
 	updatePlayerCollision(id, 3);
-	std::cout << "WEST\n";
 }
 
 void ServerGame::updateHeight(int id)

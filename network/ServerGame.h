@@ -37,7 +37,8 @@ private:
     ServerNetwork* network;
 
 	//Atlas* atlas;
-	float SPEED = 1.0;
+	float sSpeed = 1.2;
+	float dSpeed = sSpeed/1.414;
 
 	// data buffer
 	char network_data[MAX_PACKET_SIZE];

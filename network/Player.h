@@ -107,11 +107,11 @@ public:
 	double slowedSpeed = 0.5;
 	bool slowChef = false;
 	bool getSlowChef() { return slowChef; }
-	void toggleSlowChef() { slowChef = !slowChef; }
+	void setSlowChef(bool slow) { slowChef = slow; }
 
 	bool blindChef = false;
 	bool getBlindChef() { return blindChef; }
-	void toggleBlindChef() { blindChef = !blindChef; }
+	void setBlindChef(bool blind) { blindChef = blind; }
 
 	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
 	void updateChefMultiplier(int anger);
@@ -119,11 +119,11 @@ public:
 	//player interaction/power-up methods
 	bool ghost = false;
 	bool getGhost() { return ghost; }
-	void toggleGhost() { ghost = !ghost; }
+	void setGhost(bool aGhost) { ghost = aGhost; }
 
 	bool instantSearch = false;
 	bool getInstantSearch() { return instantSearch; }
-	void toggleInstantSearch() { instantSearch = !instantSearch; }
+	void setInstantSearch(bool is) { instantSearch = is; }
 
 	std::string encodePlayerData(bool newPlayerInit);
 //	std::string encodePlayerData() const;

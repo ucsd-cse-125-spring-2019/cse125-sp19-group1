@@ -35,6 +35,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
+	encodedData << "vision:" << getVision() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
 	encodedData << "disconnectedClients:";
 	
@@ -269,6 +270,9 @@ void GameData::decodeGameData(const char * data)
 		}
 		else if (p.first == "chefVision") {
 			chefVision = std::stoi(value);
+		}
+		else if (p.first == "vision") {
+			vision = std::stoi(value);
 		}
 		else if (p.first == "winType") {
 			wt = (WinType)std::stoi(value);

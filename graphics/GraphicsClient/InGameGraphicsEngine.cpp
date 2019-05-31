@@ -1368,8 +1368,13 @@ void InGameGraphicsEngine::IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		updateUIElements(gameData);
-		fog->setFogDistance(gameData->chefVision);
-
+		int id = sharedClient->getMyID();
+		if (gameData->getPlayer(id)->isChef()) {
+			fog->setFogDistance(gameData->chefVision);
+		}
+		else {
+			fog->setFogDistance(gameData->vision);
+		}
 	}
 
 }
