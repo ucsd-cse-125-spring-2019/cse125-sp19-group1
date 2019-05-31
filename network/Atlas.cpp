@@ -175,9 +175,9 @@ Atlas::Atlas()
 			case TileType::KEY_DROP: 
 			{
 				int num = std::stoi(keyDepositNum);
-				Key key1 = static_cast<Key>((num - 1) * 3 + 1);
-				Key key2 = static_cast<Key>((num - 1) * 3 + 2);
-				Key key3 = static_cast<Key>((num - 1) * 3 + 3);
+				ItemModelType key1 = static_cast<ItemModelType>((num - 1) * 3 + 1);
+				ItemModelType key2 = static_cast<ItemModelType>((num - 1) * 3 + 2);
+				ItemModelType key3 = static_cast<ItemModelType>((num - 1) * 3 + 3);
 				ItemModelType model = ItemModelType::apple;
 				switch (num)
 				{
@@ -186,7 +186,7 @@ Atlas::Atlas()
 				case 3: model = ItemModelType::keyDropVent; break;
 
 				}
-				tileRow.push_back(new KeyDropTile(std::vector<Key>({ key1, key2, key3 }), num, model, wall, height));
+				tileRow.push_back(new KeyDropTile(std::vector<ItemModelType>({ key1, key2, key3 }), num, model, wall, height));
 			}
 				
 				break;

@@ -4,7 +4,7 @@
 #include <fstream>
 
 // Comment this out to print all messages to stdout, even messages larger than 128 chars
-#define CENSOR_LARGE_MSG 256
+#define CENSOR_LARGE_MSG 1024
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
@@ -20,6 +20,9 @@
 #define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
 #define SOUNDS_JAIL_UNLOCK	(SOUNDS_PATH "jail_rattle.mp3")
+#define SOUNDS_CHEF			(SOUNDS_PATH "chef_win.mp3")
+
+// Paths for background music loops
 #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
 
 static SoundSystem * soundSystem;
@@ -35,6 +38,8 @@ static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
 static Sound * sound_jail_unlock;
+static Sound * sound_chef;
+
 static Sound * background_music;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
@@ -81,6 +86,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_window, SOUNDS_WINDOW);
 		soundSystem->createSoundEffect(&sound_yay, SOUNDS_YAY);
 		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
+		soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
 		soundSystem->createBackgroundMusic(&background_music, BKG_MUSIC);
 		soundSystem->playBackgroundMusic(background_music, true);
 	}
@@ -188,15 +194,15 @@ void ClientGame::update()
 		else {
 			//opening box
 			if (player->getAction() == Action::NONE) {
-				//soundSystem->releaseSound(sound_search_item);
-				//soundSystem->releaseSound(sound_door_unlock);
-				//soundSystem->releaseSound(sound_toilet);
-				//soundSystem->releaseSound(sound_vent_screw);
-				//soundSystem->releaseSound(sound_jail_unlock);
 				soundSystem->pauseSoundEffect();
+				soundSystem->pauseSoundQueue();
 			}
 			else if (player->getAction() == Action::OPEN_BOX) {
 				soundSystem->playSoundEffect(sound_search_item);
+				// uncomment the below if you want to test using the sound queue
+				// soundSystem->pushSoundQueue(sound_yay);
+				// soundSystem->pushSoundQueue(sound_chef);
+				// soundSystem->playSoundsInQueue();
 			}
 			else if (player->getAction() == Action::CONSTRUCT_GATE) {
 				int gateNum = gameData->getGateTile(loc)->getGateNum();
@@ -216,13 +222,25 @@ void ClientGame::update()
 
 			if (wt != WinType::NONE) {
 				if (wt == WinType::DOOR) {
-					soundSystem->playSoundEffect(sound_door);
+					// soundSystem->playSoundEffect(sound_door);
+					soundSystem->pushSoundQueue(sound_door);
+					soundSystem->pushSoundQueue(sound_yay);
+					soundSystem->playSoundsInQueue();
 				}
 				else if (wt == WinType::TOILET) {
-					soundSystem->playSoundEffect(sound_window);
+					// soundSystem->playSoundEffect(sound_window);
+					soundSystem->pushSoundQueue(sound_window);
+					soundSystem->pushSoundQueue(sound_yay);
+					soundSystem->playSoundsInQueue();
 				} 
 				else if (wt == WinType::VENT) {
-					soundSystem->playSoundEffect(sound_vent_screw);
+					// soundSystem->playSoundEffect(sound_vent_screw);
+					soundSystem->pushSoundQueue(sound_vent_screw);
+					soundSystem->pushSoundQueue(sound_yay);
+					soundSystem->playSoundsInQueue();
+				}
+				else if (wt == WinType::CHEF_WIN) {
+					soundSystem->playSoundEffect(sound_chef);
 				}
 			}
 		}
