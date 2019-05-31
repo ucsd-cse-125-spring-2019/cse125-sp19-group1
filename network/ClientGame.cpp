@@ -208,6 +208,8 @@ void ClientGame::update()
 		WinType wt = gameData->getWT();
 		Location loc = gameData->getPlayer(myID)->getLocation();
 
+		soundSystem->setListenerLocation(loc.getX(), loc.getY(), loc.getZ());
+
 		// sounds that originate from THIS player
 		if (player->isChef()) 
 		{
@@ -279,6 +281,11 @@ void ClientGame::update()
 			std::map < int, Player *> allPlayers = gameData->getAllPlayers();
 			std::map < int, Player * >::iterator it;
 			Player * curPlayer;
+			Location curPlayerLoc = curPlayer->getLocation();
+			float locX = curPlayerLoc.getX();
+			float locY = curPlayerLoc.getY();
+			float locZ = curPlayerLoc.getZ();
+
 			for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
 				if (it->second == player) {
 					continue;
@@ -288,7 +295,7 @@ void ClientGame::update()
 				if (curPlayer->isChef())
 				{
 					if (curPlayer->getAction() == Action::SWING_NET) {
-						soundSystem->playOtherPlayersSounds(sound_other_net, it->first);
+						soundSystem->playOtherPlayersSounds(sound_other_net, it->first, locX, locY, locZ);
 					}
 				}
 				else {
@@ -296,29 +303,31 @@ void ClientGame::update()
 						soundSystem->pauseOtherPlayersSounds(it->first);
 					}
 					else if (curPlayer->getAction() == Action::OPEN_BOX) {
-						soundSystem->playOtherPlayersSounds(sound_other_search_item, it->first);
+						soundSystem->playOtherPlayersSounds(sound_other_search_item, it->first, locX, locY, locZ);
 					}
 					else if (curPlayer->getAction() == Action::CONSTRUCT_GATE) {
 						int gateNum = gameData->getGateTile(loc)->getGateNum();
 						if (gateNum == 1) { //door
-							soundSystem->playOtherPlayersSounds(sound_other_door_unlock, it->first);
+							soundSystem->playOtherPlayersSounds(sound_other_door_unlock, it->first, locX, locY, locZ);
 						}
 						else if (gateNum == 2) { //bathroom
-							soundSystem->playOtherPlayersSounds(sound_other_toilet, it->first);
+							soundSystem->playOtherPlayersSounds(sound_other_toilet, it->first, locX, locY, locZ);
 						}
 						else if (gateNum == 3) { //vent
-							soundSystem->playOtherPlayersSounds(sound_other_vent_screw, it->first);
+							soundSystem->playOtherPlayersSounds(sound_other_vent_screw, it->first, locX, locY, locZ);
 						}
 					}
 					else if (player->getAction() == Action::UNLOCK_JAIL) {
-						soundSystem->playOtherPlayersSounds(sound_other_jail_unlock, it->first);
+						soundSystem->playOtherPlayersSounds(sound_other_jail_unlock, it->first, locX, locY, locZ);
 					}
 					else if (player->getAction() == Action::KEY_DROP) {
-						soundSystem->playOtherPlayersSounds(sound_other_keydrop, it->first);
+						soundSystem->playOtherPlayersSounds(sound_other_keydrop, it->first, locX, locY, locZ);
 					}
 				}
 
 			}
+
+			soundSystem->update();
 		}
 	}
 }

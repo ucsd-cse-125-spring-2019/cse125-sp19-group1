@@ -31,11 +31,16 @@ public:
 	SoundSystem();
 	~SoundSystem();
 
+	// needs to be called every frame
+	void setListenerLocation(float x, float y, float z);
+	// needs to be called every frame for 3D calculations
+	void update();
+
 	void createSoundEffect(Sound ** pSound, const char* pFile);
 	void createOtherPlayersSounds(Sound ** pSound, const char* pFile);
 	void createBackgroundMusic(Sound ** pSound, const char* pFile);
 	void playBackgroundMusic(Sound * pSound, bool bLoop = false);
-	void playOtherPlayersSounds(Sound * pSound, int playerID, bool bLoop = false);
+	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop = false);
 	void playSoundEffect(Sound * pSound, bool bLoop = false);
 	void pauseOtherPlayersSounds(int playerID);
 	void pauseSoundEffect();

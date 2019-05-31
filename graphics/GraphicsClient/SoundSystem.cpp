@@ -45,11 +45,44 @@ SoundSystem::SoundSystem()
 	if (result != FMOD_OK) {
 		fprintf(stdout, "SoundSystem ERROR %d: CANNOT INITIALIZE SOUNDSYSTEM\n", result);
 	}
+
+	result = system->set3DListenerAttributes(NULL, NULL, NULL, NULL, NULL);
+	if (result != FMOD_OK) {
+		fprintf(stdout, "SoundSystem ERROR %d: CANNOT SET PLAYER POSITION\n", result);
+	}
+
+	// 3.0 is kind of like for distance -- very arbitrary and needs playing with
+	result = system->set3DSettings(3.0, 3.0, 3.0);
 }
 
 
 SoundSystem::~SoundSystem()
 {
+}
+
+void SoundSystem::setListenerLocation(float x, float y, float z)
+{
+	FMOD_RESULT result;
+	FMOD_VECTOR loc;
+	loc.x = x;
+	loc.y = y;
+	loc.z = z;
+
+	result = system->set3DListenerAttributes(NULL, &loc, NULL, NULL, NULL);
+	if (result != FMOD_OK) {
+		fprintf(stdout, "setListenerLocation ERROR %d: CANNOT SET PLAYER POSITION\n", result);
+	}
+}
+
+void SoundSystem::update()
+{
+	FMOD_RESULT result;
+
+	result = system->update();
+	if (result != FMOD_OK) {
+		fprintf(stdout, "update ERROR %d: CANNOT UPDATE 3D SOUND CALCULATIONS\n", result);
+	}
+
 }
 
 void SoundSystem::createSoundEffect(Sound ** pSound, const char* pFile)
@@ -283,11 +316,15 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 	}
 }
 
-void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, bool bLoop)
+void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop)
 {
 	FMOD_RESULT result;
 	std::map<int, FMOD::Channel *>::iterator it;
 	FMOD::Channel * curPlayerChannel;
+	FMOD_VECTOR loc;
+	loc.x = x;
+	loc.y = y;
+	loc.z = z;
 
 	if (!bLoop) {
 		pSound->setMode(FMOD_LOOP_OFF);
@@ -305,6 +342,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, bool bLoo
 	}
 
 	curPlayerChannel = otherPlayerChannels.at(playerID);
+	curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
 	result = system->playSound(pSound, 0, false, &curPlayerChannel);
 
 	if (result != FMOD_OK) {
