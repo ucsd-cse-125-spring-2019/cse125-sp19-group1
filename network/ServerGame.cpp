@@ -347,7 +347,8 @@ void ServerGame::receiveFromClients()
 										player->setAction(Action::KEY_DROP);
 										player->setInventory(ItemModelType::EMPTY);
 										player->setSpeedMultiplier(1.0);
-
+										sendActionPackets();
+										player->setAction(Action::NONE);
 									}
 								}
 								else if (GateTile * gateTile = gameData->getGateTile(loc))
