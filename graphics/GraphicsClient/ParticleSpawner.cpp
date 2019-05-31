@@ -34,7 +34,7 @@ ParticleSpawner::~ParticleSpawner() {
 	delete[] g_particule_color_data;
 }
 
-ParticleSpawner::ParticleSpawner(const char * texPath, glm::vec3 particleSpeed) {
+ParticleSpawner::ParticleSpawner(const char * texPath, glm::vec3 particleSpeed, float particleLifetime) {
 
 	glGenVertexArrays(1, &VertexArrayID);
 	glBindVertexArray(VertexArrayID);
@@ -66,6 +66,7 @@ ParticleSpawner::ParticleSpawner(const char * texPath, glm::vec3 particleSpeed) 
 
 	lastTime = glfwGetTime();
 	this->particleSpeed = particleSpeed;
+	this->particleLifetime = particleLifetime;
 
 }
 
@@ -104,7 +105,7 @@ void ParticleSpawner::draw(GLuint shaderProgram, glm::mat4 * V, glm::mat4 * P, g
 
 		for (int i = 0; i < newparticles; i++) {
 			int particleIndex = FindUnusedParticle();
-			ParticlesContainer[particleIndex].life = 2.0f; // This particle will live 5 seconds.
+			ParticlesContainer[particleIndex].life = particleLifetime; // This particle will live 5 seconds.
 			ParticlesContainer[particleIndex].pos = spawnerPos;
 
 			float spread = 1.5f;

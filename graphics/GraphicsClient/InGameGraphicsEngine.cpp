@@ -41,13 +41,16 @@
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
 
 #define CHEF_FOG_DISTANCE 85.0f
-#define RACCOON_FOG_DISTANCE 160
+#define RACCOON_FOG_DISTANCE 75
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
 #define WALL_TEX_PATH     (TEXTURES_PATH "wall.png")
 
 
 //particle effects
 #define DUST_PARTICLE_TEX (PARTICLES_PATH "dust.png")
+#define FLASH_PARTICLE_TEX (PARTICLES_PATH "flash.png")
+#define SPEED_PARTICLE_TEX (PARTICLES_PATH "speed.png")
+#define SLOW_PARTICLE_TEX (PARTICLES_PATH "slow.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -1380,7 +1383,12 @@ void InGameGraphicsEngine::IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		updateUIElements(gameData);
-		fog->setFogDistance(gameData->chefVision);
+		if (gameData->getAllPlayers()[sharedClient->getMyID()]->isChef()) {
+			fog->setFogDistance(gameData->chefVision);
+		}
+		else {
+			fog->setFogDistance(RACCOON_FOG_DISTANCE);
+		}
 
 	}
 
@@ -1721,6 +1729,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 		//particle setup
 		dustSpawner = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0,1.0f,0));
+		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, -1.0f, 0));
+		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
+		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
+
 
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
