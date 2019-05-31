@@ -14,19 +14,25 @@
 
 #include <thread>
 
-#define RACCOON_DAE_PATH  (ANIMATIONS_PATH "raccoonWalk.dae")
-#define RACCOON_MDL_PATH  (MODELS_PATH "raccoon.fbx")
-#define RACCOON_TEX_PATH  (TEXTURES_PATH "raccoon.ppm")
+#define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonWalk.dae")
+#define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonWalkWithItem.dae")
+#define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearch.dae")
+#define RACCOON_MDL_PATH        (MODELS_PATH "raccoon.fbx")
+#define RACCOON_TEX_PATH        (TEXTURES_PATH "raccoon.ppm")
 
-#define CAT_DAE_PATH      (ANIMATIONS_PATH "catSearch.dae")
-#define CAT_MDL_PATH      (MODELS_PATH "cat.fbx")
-#define CAT_TEX_PATH      (TEXTURES_PATH "cat.ppm")
+#define CAT_WALK_MDL_PATH       (ANIMATIONS_PATH "catWalk.dae")
+#define CAT_CARRY_MDL_PATH      (ANIMATIONS_PATH "catWalkWithItem.dae")
+#define CAT_SEARCH_MDL_PATH     (ANIMATIONS_PATH "catSearch.dae")
+#define CAT_MDL_PATH            (MODELS_PATH "cat.fbx")
+#define CAT_TEX_PATH            (TEXTURES_PATH "cat.ppm")
 
-#define DOG_MDL_PATH      (MODELS_PATH "doggo.fbx")
-#define DOG_DAE_PATH	  (ANIMATIONS_PATH "dogWalk.dae")
-#define DOG_TEX_PATH      (TEXTURES_PATH "doggo.ppm")
+#define DOG_WALK_MDL_PATH       (ANIMATIONS_PATH "dogWalk.dae")
+#define DOG_CARRY_MDL_PATH      (ANIMATIONS_PATH "dogWalkWithItem.dae")
+#define DOG_SEARCH_MDL_PATH     (ANIMATIONS_PATH "dogSearch.dae")
+#define DOG_MDL_PATH            (MODELS_PATH "doggo.fbx")
+#define DOG_TEX_PATH            (TEXTURES_PATH "doggo.ppm")
 
-#define CHEF_DAE_PATH     (ANIMATIONS_PATH "chefWalk.dae")
+#define CHEF_WALK_PATH    (ANIMATIONS_PATH "chefWalk.dae")
 #define CHEF_MDL_PATH     (MODELS_PATH "chef.fbx")
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
 
@@ -77,26 +83,63 @@
 // Uncomment to force the camera to any other player
 // #define DEBUG_CAUGHT
 
+#define DELETE_IF_NEEDED(x) \
+	if (x) {\
+		delete x;\
+		x = nullptr;\
+	}
+
 #define CHEF_IDX     (static_cast<unsigned>(ModelType::CHEF))
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
 
 static const struct PlayerModelSettings {
-	const char *modelPath;       // filesystem path to a model geometry file
-	const char *texturePath;     // filesystem path to a texture file
-	const char *name;            // name for use in debug messages, maybe user-visible too
-	ModelType modelType;         // A unique ID, like ModelType::CHEF
-	bool attachSkel;             // true if animated with a skeleton
-	int animIndex;				 // index of the preferred animation (optional specification for weird cases)
-	float scale;                 // scale adjustment
-	glm::vec3 translate;         // position adjustment
+	const char *walkModelPath;     // filesystem path to a model geometry file
+	const char *walkTexturePath;   // filesystem path to a texture file
+	int walkAnimIndex;             // index of the preferred animation (optional specification for weird cases)
+	const char *carryModelPath;    // filesystem path to a model geometry file
+	const char *carryTexturePath;  // filesystem path to a texture file
+	int carryAnimIndex;            // index of the preferred animation (optional specification for weird cases)
+	const char *actionModelPath;   // filesystem path to a model geometry file
+	const char *actionTexturePath; // filesystem path to a texture file
+	int actionAnimIndex;           // index of the preferred animation (optional specification for weird cases)
+	const char *title;             // name for use in debug messages, maybe user-visible too
+	const char *name;              // name for use in debug messages, maybe user-visible too
+	ModelType modelType;           // A unique ID, like ModelType::CHEF
+	bool attachSkel;               // true if animated with a skeleton
+	float scale;                   // scale adjustment
+	glm::vec3 translate;           // position adjustment
+
+	inline const char * getWalkModelPath() const {
+		return walkModelPath;
+	}
+
+	inline const char * getCarryModelPath() const {
+		return carryModelPath ? carryModelPath : walkModelPath;
+	}
+
+	inline const char * getActionModelPath() const {
+		return actionModelPath ? actionModelPath : walkModelPath;
+	}
+
+	inline const char * getwalkTexturePath() const {
+		return walkTexturePath;
+	}
+
+	inline const char * getCarryTexturePath() const {
+		return carryTexturePath ? carryTexturePath : walkTexturePath;
+	}
+
+	inline const char * getActionTexturePath() const {
+		return actionTexturePath ? actionTexturePath : walkTexturePath;
+	}
 } playerModelSettings[] = {
-	// modelPath         texturePath        name              modelType        attachSkel animIndex	scale   translate
-	{ CHEF_DAE_PATH,     CHEF_TEX_PATH,     CHEF_NAME_SHORT,  ModelType::CHEF,    true,		-1,		1.f,    glm::vec3(0.f) },
-	{ RACCOON_DAE_PATH,  RACCOON_TEX_PATH,  "Raccoon",        ModelType::RACOON,  true,		-1,		0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
-	{ CAT_DAE_PATH,      CAT_TEX_PATH,      "Cat",            ModelType::CAT,     true,		-1,		1.f,    glm::vec3(0.f) },
-	{ DOG_DAE_PATH,      DOG_TEX_PATH,      "Dog",            ModelType::DOG,     true,		-1,		1.f,    glm::vec3(0.f) },
+	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,   glm::vec3(0.f, 4.0f, -1.2f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f) },
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -167,9 +210,42 @@ static FogGenerator * fog = nullptr;
 
 struct PlayerModel {
 	const PlayerModelSettings *settings;
-	FBXObject *object;
-	Geometry *geometry;
+	FBXObject *walkObject;
+	FBXObject *carryObject;
+	FBXObject *actionObject;
+	Geometry *walkGeometry;
+	Geometry *carryGeometry;
+	Geometry *actionGeometry;
 	Transform *transform;
+
+	inline FBXObject * getWalkObject() {
+		return walkObject;
+	}
+	inline FBXObject * getCarryObject() {
+		return carryObject ? carryObject : walkObject;
+	}
+	inline FBXObject * getActionObject() {
+		return actionObject ? actionObject : walkObject;
+	}
+	inline Geometry * getwalkGeometry() {
+		return walkGeometry;
+	}
+	inline Geometry * getCarryGeometry() {
+		return carryGeometry ? carryGeometry : walkGeometry;
+	}
+	inline Geometry * getActionGeometry() {
+		return actionGeometry ? actionGeometry : walkGeometry;
+	}
+
+	void deallocMembers() {
+		DELETE_IF_NEEDED(walkObject);
+		DELETE_IF_NEEDED(carryObject);
+		DELETE_IF_NEEDED(actionObject);
+		DELETE_IF_NEEDED(walkGeometry);
+		DELETE_IF_NEEDED(carryGeometry);
+		DELETE_IF_NEEDED(actionGeometry);
+		DELETE_IF_NEEDED(transform);
+	}
 };
 
 struct AnimatedItem {
@@ -761,10 +837,7 @@ void reloadMap()
 
 void deallocFloor()
 {
-	if (floorTransform) {
-		delete floorTransform;
-		floorTransform = nullptr;
-	}
+	DELETE_IF_NEEDED(floorTransform);
 
 	for (size_t z = 0; z < floorArray.size(); z++) {
 		auto &row = floorArray[z];
@@ -1276,7 +1349,7 @@ void InGameGraphicsEngine::IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		for (auto &playerState : players) {
-			playerModels[playerState.geometryIdx].object->Update(playerState.moving != 0);
+			playerModels[playerState.geometryIdx].walkObject->Update(playerState.moving != 0);
 		}
 
 		updateUIElements(gameData);
@@ -1348,11 +1421,19 @@ void LoadModels()
 		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
 		model.settings = &setting;
-		model.object = new FBXObject(setting.modelPath, setting.texturePath, setting.attachSkel, setting.animIndex, false);
-		model.geometry = new Geometry(model.object, objShaderProgram);
+		model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
+		model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
+		if (setting.carryModelPath || setting.carryTexturePath) {
+			model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
+			model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
+		}
+		if (setting.actionModelPath || setting.actionTexturePath) {
+			model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
+			model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
+		}
 		model.transform = new Transform(transform);
 
-		model.transform->addChild(model.geometry);
+		model.transform->addChild(model.walkGeometry);
 	}
 
 	cout << "\tloading " << "tile" << endl;
@@ -1460,18 +1541,7 @@ void InGameGraphicsEngine::CleanUp()
 	itemModels.clear();
 
 	for (auto &model : playerModels) {
-		if (model.transform) {
-			delete model.transform;
-			model.transform = nullptr;
-		}
-		if (model.geometry) {
-			delete model.geometry;
-			model.geometry = nullptr;
-		}
-		if (model.object) {
-			delete model.object;
-			model.object = nullptr;
-		}
+		model.deallocMembers();
 	}
 
 	if (tileModel)        delete tileModel;
@@ -1502,8 +1572,12 @@ void InGameGraphicsEngine::MainLoopBegin()
 		tileModel->RenderingSetup();
 		wallModel->RenderingSetup();
 		for (auto &model : playerModels) {
-			if (model.object)
-				model.object->RenderingSetup();
+			if (model.walkObject)
+				model.walkObject->RenderingSetup();
+			if (model.carryObject)
+				model.carryObject->RenderingSetup();
+			if (model.actionObject)
+				model.actionObject->RenderingSetup();
 		}
 		for (auto &model : itemModels) {
 			if (model.object)
