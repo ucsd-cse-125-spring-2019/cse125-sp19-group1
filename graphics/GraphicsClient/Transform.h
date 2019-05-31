@@ -30,6 +30,7 @@ public:
 	void addChild(Node * n);
 	void removeAllChildren();
 	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);
+	const glm::mat4 &getOffset() const;
 	void setOffset(glm::mat4);
 	bool decrementRefCount();
 	void incrementRefCount();

@@ -94,6 +94,12 @@
 // Uncomment to force carrying
 // #define DEBUG_CARRY
 
+// Uncomment to skip loading player animations
+#define DEBUG_LOAD_LESS
+
+// Uncomment to skip loading UI
+#define DEBUG_NO_UI
+
 #ifdef DEBUG_CARRY
 unsigned fake_carried_idx = 1;
 #endif
@@ -151,11 +157,19 @@ static const struct PlayerModelSettings {
 		return actionTexturePath ? actionTexturePath : walkTexturePath;
 	}
 } playerModelSettings[] = {
+#ifndef DEBUG_LOAD_LESS
 	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
 	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
 	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+#else
+	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_MDL_PATH,          CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_MDL_PATH,       RACCOON_TEX_PATH,  -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  false,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_MDL_PATH,           CAT_TEX_PATH,      -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_MDL_PATH,           DOG_TEX_PATH,      -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+#endif
 };
 
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
@@ -323,9 +337,17 @@ struct PlayerState {
 	unsigned geometryIdx;       // index into playerGeometry
 	char moving;				// bool indicating whether or not the model should animate
 
+	ItemModelType previousInventory;
+	glm::mat4 inventoryTransform;
+	double carryStopTime;
+	Location carryStopLoc;
+	bool animatingInventory;
+
 	PlayerState() : position(0.f), transform(1.f) {
 		angle = targetAngle = 0.f;
 		geometryIdx = 0;
+		animatingInventory = false;
+		previousInventory = ItemModelType::EMPTY;
 	}
 
 #ifdef DUMMY_ID
@@ -649,6 +671,9 @@ void resetItems()
 }
 
 void setGoalsFalse() {
+	if (!uiCanvas)
+		return;
+
 	uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_COMPLETE, false);
 	uiCanvas->setVisible(UICanvas::BLUE_KEY_GOAL_COMPLETE, false);
 	uiCanvas->setVisible(UICanvas::GREEN_KEY_GOAL_COMPLETE, false);
@@ -670,6 +695,10 @@ void setGoalsFalse() {
 }
 
 void setGoalsVisible(int item) {
+	if (!uiCanvas) {
+		return;
+	}
+
 	if (item == (int)ItemModelType::key1) {
 		uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_COMPLETE, true);
 		uiCanvas->setVisible(UICanvas::YELLOW_KEY_GOAL_INCOMPLETE, false);
@@ -1177,6 +1206,9 @@ void resetIdempotentFlush()
 }
 
 void updateUIElements(GameData * gameData) {
+	if (!uiCanvas) {
+		return;
+	}
 
 	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
 	std::map<int, Player*> players = gameData->getAllPlayers();
@@ -1403,7 +1435,6 @@ void InGameGraphicsEngine::IdleCallback()
 }
 
 
-
 void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
@@ -1460,6 +1491,9 @@ void DisplayCallback(GLFWwindow* window)
 
 			playerGeometry->draw(V, P, state.transform);
 
+			Geometry *inventoryGeometry = nullptr;
+			glm::mat4 inventoryMat;
+
 			if (inventory != ItemModelType::EMPTY) {
 				auto playerSettings = playerModels[state.geometryIdx].settings;
 				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
@@ -1473,11 +1507,53 @@ void DisplayCallback(GLFWwindow* window)
 
 				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
 				const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
-				auto modelRotate = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
-				modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
-				modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+				inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+				inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+				inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+				inventoryGeometry = itemModel.geometry;
 
-				itemModel.geometry->draw(V, P, modelRotate);
+				state.previousInventory = inventory;
+				state.inventoryTransform = inventoryMat;
+
+			}
+			else if (state.previousInventory != ItemModelType::EMPTY) {
+#define INVENTORY_ANIMATION_DURATION 0.275
+#define INVENTORY_GRAVITY 85
+				if (!state.animatingInventory) {
+					state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
+					state.carryStopTime = glfwGetTime();
+					auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
+					state.animatingInventory = (tile != nullptr);
+					if (!tile) {
+						state.previousInventory = ItemModelType::EMPTY;
+					}
+				}
+
+				if (state.animatingInventory) {
+					int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
+					int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
+					glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
+					targetPosition.y += 6.f;
+					auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
+
+					auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
+					auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
+					animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
+
+					inventoryMat = state.inventoryTransform;
+					inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
+
+					inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
+				}
+
+				if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
+					state.animatingInventory = false;
+					state.previousInventory = ItemModelType::EMPTY;
+				}
+			}
+
+			if (inventoryGeometry) {
+				inventoryGeometry->draw(V, P, inventoryMat);
 			}
 
 			//particle effects
@@ -1486,9 +1562,10 @@ void DisplayCallback(GLFWwindow* window)
 
 		}
 	}
-	uiCanvas->draw(&V, &P, glm::mat4(1.0));
 
-
+	if (uiCanvas) {
+		uiCanvas->draw(&V, &P, glm::mat4(1.0));
+	}
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
@@ -1693,11 +1770,14 @@ void InGameGraphicsEngine::MainLoopBegin()
 	if (!fog) {
 		fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	}
+
+#ifndef DEBUG_NO_UI
 	if (!uiCanvas) {
 		cout << "Loading UICanvas... ";
 		uiCanvas = new UICanvas(uiShaderProgram);
 		cout << "done.\n";
 	}
+#endif
 
 	calledMainLoopBegin = true;
 	quit = false;

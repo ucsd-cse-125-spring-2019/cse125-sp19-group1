@@ -25,6 +25,10 @@ void Transform::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model)
 	}
 }
 
+const glm::mat4 &Transform::getOffset() const {
+	return offset;
+}
+
 void Transform::setOffset(glm::mat4 newOffset) {
 	offset = newOffset;
 }
