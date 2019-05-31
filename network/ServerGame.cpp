@@ -1214,8 +1214,13 @@ void ServerGame::updateHeight(int id)
 	}
 	gameData->getPlayer(id)->setLocation(x, y, z);
 
-	if (!gameData->getPlayer(id)->isChef()) {
-		gameData->getPlayer(id)->setVisionRadius(y*2 + DEFAULT_VISION);
+	if (!gameData->getPlayer(id)->isChef()) 
+	{
+		gameData->getPlayer(id)->setVisionRadius(y*2  + DEFAULT_VISION);
+	}
+	else
+	{
+		gameData->setChefVisionLimit(y*1.2 );;
 	}
 
 	// Update location of captured animal to the chef's location

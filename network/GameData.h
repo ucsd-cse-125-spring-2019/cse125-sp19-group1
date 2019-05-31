@@ -58,6 +58,9 @@ public:
 	void addDecodeFunctions();
 	void decodeTileLayout(std::string value);
 	void decodeDisconnectedClients(std::string value);
+	void decodeChefAnger(std::string value);
+	void decodeChefVision(std::string value);
+	void decodeWinType(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
@@ -94,6 +97,7 @@ public:
 	double chefVision = 40;
 	double chefMaxVision = 100;
 
+	double getLimitChefVision() { return limitChefVision; }
 	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
 	double getChefVision() { return chefVision * limitChefVision; }
 	double getChefMaxVision() { return chefMaxVision; }

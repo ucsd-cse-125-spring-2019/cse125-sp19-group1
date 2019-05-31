@@ -1387,7 +1387,7 @@ void InGameGraphicsEngine::IdleCallback()
 			fog->setFogDistance(gameData->chefVision);
 		}
 		else {
-			fog->setFogDistance(gameData->getPlayer(id)->getVisionRadius());
+			fog->setFogDistance(gameData->getPlayer(sharedClient->getMyID())->getVisionRadius());
 		}
 	}
 
