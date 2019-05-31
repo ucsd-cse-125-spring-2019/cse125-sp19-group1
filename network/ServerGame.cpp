@@ -1220,7 +1220,7 @@ void ServerGame::updateHeight(int id)
 	}
 	else
 	{
-		gameData->setChefVisionLimit(y*1.2 );;
+		gameData->setChefVisionLimit(y*1.2 + );;
 	}
 
 	// Update location of captured animal to the chef's location
