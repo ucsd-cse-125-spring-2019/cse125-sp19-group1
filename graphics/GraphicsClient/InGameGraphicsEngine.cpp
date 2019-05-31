@@ -101,7 +101,7 @@
 // #define DEBUG_LOAD_LESS
 
 // Uncomment to skip loading UI
-#define DEBUG_NO_UI
+// #define DEBUG_NO_UI
 
 #ifdef DEBUG_CARRY
 unsigned fake_carried_idx = 1;
