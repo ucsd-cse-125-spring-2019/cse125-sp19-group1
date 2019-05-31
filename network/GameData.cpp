@@ -303,6 +303,15 @@ void GameData::decodeGameData(const char * data)
 	}
 }
 
+double GameData::getChefVision() {
+	if (getBlindChef())
+	{
+		return (chefVision + chefRampVision) * LIMIT_CHEF_VISION_MULT;
+	}
+	return chefVision + chefRampVision;
+}
+
+
 int GameData::getGameClock()
 {
 	auto now = std::chrono::system_clock::now();

@@ -98,12 +98,16 @@ public:
 	double chefVision = 40;
 	double chefMaxVision = 100;
 	bool blindChef = false;
+	double chefRampVision = 0;
+	
+	void setChefRampVision(double crv) { chefRampVision = crv; }
+	double getChefRampVision() { return chefRampVision; }
 
+	bool getBlindChef() { return blindChef; }
 	void setBlindChef(bool aBlindChef) { blindChef = aBlindChef; }
 
-	double getLimitChefVision() { return limitChefVision; }
-	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
-	double getChefVision() { return chefVision * limitChefVision; }
+	double getChefVision();
+
 	double getChefMaxVision() { return chefMaxVision; }
 	void incrementChefVision() { chefVision++; }
 	void incrementChefAnger() { chefAnger++; }

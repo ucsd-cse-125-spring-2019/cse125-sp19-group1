@@ -780,7 +780,7 @@ void ServerGame::receiveFromClients()
 			if (player->getBlindChef() && player->getVisionTime() > MAX_CHEF_TIME)
 			{
 				player->setBlindChef(false);
-				gameData->setChefVisionLimit(1);
+				gameData->setBlindChef(false);
 				player->setPowerUp(PowerUp::NONE);
 			}
 
@@ -887,8 +887,8 @@ void ServerGame::receiveFromClients()
 							std::cout << "POWER: limit chef vision" << std::endl;
 							//call limit chef vision
 							player->setBlindChef(true);
+							gameData->setBlindChef(true);
 							player->setVisionStartTime();
-							gameData->setChefVisionLimit(0.5);
 							player->setPowerUp(PowerUp::CHEF_BLIND);
 						}
 						else if (it == ItemModelType::orange)
@@ -1230,8 +1230,7 @@ void ServerGame::updateHeight(int id)
 	}
 	else
 	{
-		std::cout << y << " " << gameData->getLimitChefVision() << std::endl;
-		gameData->setChefVisionLimit(y/TILE_HEIGHT*1.2 + 1);
+		gameData->setChefRampVision(y*1.5);
 	}
 
 	// Update location of captured animal to the chef's location
