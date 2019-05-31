@@ -1412,37 +1412,35 @@ void LoadModels()
 	using namespace std::chrono;
 	auto modelLoadingStart = high_resolution_clock::now();
 
+	thread playerLoadingThreads[sizeof(playerModelSettings) / sizeof(playerModelSettings[0])];
+
+	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
-		cout << "\tloading " << setting.name << endl;
+		playerLoadingThreads[threadIdx] = thread([&, setting]() {
+			cout << "\tloading " << setting.name << endl;
 
-		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
 
-		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
-		model.settings = &setting;
-		model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
-		model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
-		if (setting.carryModelPath || setting.carryTexturePath) {
-			model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
-			model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
-		}
-		if (setting.actionModelPath || setting.actionTexturePath) {
-			model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
-			model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
-		}
-		model.transform = new Transform(transform);
+			model.settings = &setting;
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
+			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
+			if (setting.carryModelPath || setting.carryTexturePath) {
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
+				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
+			}
+			if (setting.actionModelPath || setting.actionTexturePath) {
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
+				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
+			}
+			model.transform = new Transform(transform);
 
-		model.transform->addChild(model.walkGeometry);
+			model.transform->addChild(model.walkGeometry);
+		});
+
+		++threadIdx;
 	}
-
-	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
-
-	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
-
-	tileGeometry = new Geometry(tileModel, objShaderProgram);
-	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	size_t largestIdx = 0;
 	for (auto &setting : itemModelSettings) {
@@ -1454,14 +1452,30 @@ void LoadModels()
 
 	itemModels.resize(largestIdx + 1);
 
-	for (auto &setting : itemModelSettings) {
+	thread itemLoadingThread([&]() {
+		for (auto &setting : itemModelSettings) {
 
-		cout << "\tloading " << setting.name << endl;
+			cout << "\tloading " << setting.name << endl;
 
-		auto &m = itemModels[static_cast<size_t>(setting.id)];
-		m.settings = &setting;
-		m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
-		m.geometry = new Geometry(m.object, objShaderProgram);
+			auto &m = itemModels[static_cast<size_t>(setting.id)];
+			m.settings = &setting;
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
+			m.geometry = new Geometry(m.object, objShaderProgram);
+		}
+	});
+
+	cout << "\tloading " << "tile" << endl;
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
+
+	cout << "\tloading " << "wall" << endl;
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
+
+	tileGeometry = new Geometry(tileModel, objShaderProgram);
+	wallGeometry = new Geometry(wallModel, objShaderProgram);
+
+	itemLoadingThread.join();
+	for (auto &t : playerLoadingThreads) {
+		t.join();
 	}
 
 	auto modelLoadingEnd = high_resolution_clock::now();
@@ -1511,13 +1525,14 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 
 	needsRenderingSetup = true;
 
+
+
 	auto finish = [](bool *finishedFlag) {
 		LoadModels();
 		*finishedFlag = true;
 	};
 
 	thread t(finish, &fullyLoaded);
-	//finish(fullyLoaded);
 	t.detach();
 }
 
