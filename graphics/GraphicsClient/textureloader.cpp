@@ -11,6 +11,11 @@
 #pragma comment(lib, "Windowscodecs.lib")
 #pragma comment(lib, "Ole32.lib")
 
+/*
+ * Uses a modified version of William Atkins PNG loading code
+ * https://github.com/WilliamAkins/2D-OpenGL-Scene/blob/master/texture_loader.cpp
+ */
+
 
 unsigned char* loadPPM(const char* filename, int& width, int& height)
 {
