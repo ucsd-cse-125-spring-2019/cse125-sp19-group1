@@ -130,7 +130,7 @@ void ClientGame::sendPackets(const int type, const int selectionNum)
 	packet.id = myID;
 	packet.selectionNum = selectionNum;
 
-	if (myID == -1) {
+	if (myID == NOT_INITIALIZED) {
 		return;
 	}
 
@@ -158,8 +158,9 @@ void ClientGame::update()
 #endif
 		std::cout << "data received on client:\n" << network_data << std::endl;
 		
-	if (myID == -1)
+	if (myID == NOT_INITIALIZED)
 	{
+		// initialize myID with the value sent from server
 		std::vector<std::pair<std::string, std::string>> keyValuePairs;
  		keyValuePairs = StringParser::parseKeyValueString(network_data);
 		std::string key = keyValuePairs[0].first;

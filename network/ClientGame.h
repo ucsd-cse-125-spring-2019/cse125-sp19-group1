@@ -14,6 +14,7 @@
 #include "GameData.h"
 #include <cstdint>
 
+#define NOT_INITIALIZED -1
 enum DirectionBitmask {
 	westSide  = (0x1u << 3),  //1000 = left = 8
 	northSide = (0x1u << 2),  //0100 = up = 4
@@ -42,7 +43,7 @@ public:
 	void update();
 
 
-	int myID = -1;
+	int myID = NOT_INITIALIZED;
 	GameData * gameData;
 
 	GameData * getGameData();
