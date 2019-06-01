@@ -51,8 +51,8 @@ SoundSystem::SoundSystem()
 		fprintf(stdout, "SoundSystem ERROR %d: CANNOT SET PLAYER POSITION\n", result);
 	}
 
-	// 3.0 is kind of like for distance -- very arbitrary and needs playing with
-	result = system->set3DSettings(1.0, 7.0, 1.0);
+	// 5.0 is kind of like for distance -- very arbitrary and needs playing with
+	result = system->set3DSettings(1.0, 5.0, 1.0);
 }
 
 
