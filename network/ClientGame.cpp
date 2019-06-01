@@ -281,10 +281,10 @@ void ClientGame::update()
 			std::map < int, Player *> allPlayers = gameData->getAllPlayers();
 			std::map < int, Player * >::iterator it;
 			Player * curPlayer;
-			Location curPlayerLoc = curPlayer->getLocation();
-			float locX = curPlayerLoc.getX();
-			float locY = curPlayerLoc.getY();
-			float locZ = curPlayerLoc.getZ();
+			Location curPlayerLoc;
+			float locX = 0.0;
+			float locY = 0.0;
+			float locZ = 0.0;
 
 			for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
 				if (it->second == player) {
@@ -292,6 +292,11 @@ void ClientGame::update()
 				}
 
 				curPlayer = it->second;
+				curPlayerLoc = curPlayer->getLocation();
+				locX = curPlayerLoc.getX();
+				locY = curPlayerLoc.getY();
+				locZ = curPlayerLoc.getZ();
+
 				if (curPlayer->isChef())
 				{
 					if (curPlayer->getAction() == Action::SWING_NET) {
