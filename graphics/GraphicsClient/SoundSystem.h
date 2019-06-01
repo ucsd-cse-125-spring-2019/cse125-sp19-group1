@@ -1,5 +1,6 @@
 #pragma once
 #include <queue>
+#include <map>
 #include <mutex>
 #include <thread>
 #include "fmod.hpp"
@@ -10,14 +11,17 @@ typedef FMOD::Sound Sound;
 
 /*
  * Channel 0: sound effects specific to yourself
- * Channel 1: sound effects specific to other players (3D)
- * Channel 2: background music
+ * Channel 1: background music
+ * ChannelGroup otherPlayerSounds: sounds produced by other players (not self)
  */
 class SoundSystem
 {
 private:
 	FMOD::System * system;
-	FMOD::Channel * channel[3];
+	FMOD::Channel * not3DChannel[2];
+	FMOD::Channel * threeDeeChannel[3];
+	int threeDeeChannelTaken;
+	std::map<int, FMOD::Channel *> otherPlayerChannels;
 	std::queue<Sound *> soundQueue;
 	bool hasAudioDriver;
 	bool continueQueue;
@@ -27,11 +31,18 @@ public:
 	SoundSystem();
 	~SoundSystem();
 
+	// needs to be called every frame
+	void setListenerLocation(float x, float y, float z);
+	// needs to be called every frame for 3D calculations
+	void update();
+
 	void createSoundEffect(Sound ** pSound, const char* pFile);
+	void createOtherPlayersSounds(Sound ** pSound, const char* pFile);
 	void createBackgroundMusic(Sound ** pSound, const char* pFile);
 	void playBackgroundMusic(Sound * pSound, bool bLoop = false);
-	void playOtherPlayersSounds(Sound * pSound, bool bLoop = false);
+	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop = false);
 	void playSoundEffect(Sound * pSound, bool bLoop = false);
+	void pauseOtherPlayersSounds(int playerID);
 	void pauseSoundEffect();
 	void playSoundEffectNoOverlap(Sound * pSound, bool bLoop = false);
 	void pauseAllSounds();
