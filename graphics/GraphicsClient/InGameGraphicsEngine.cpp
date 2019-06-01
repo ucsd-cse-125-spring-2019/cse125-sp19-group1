@@ -345,6 +345,7 @@ struct PlayerState {
 	char building;				// bool indicating whether or not model is doing iteraction animation
 	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
 	int movingSpeed;			// -1 = slow, 0 = normal, 1 = fast
+	int flashedRecently;		//counts down to fire a burst of flash particles
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
@@ -1465,10 +1466,16 @@ void DisplayCallback(GLFWwindow* window)
 
 	for (auto state : players) {
 		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), state.moving);
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0));
+		speedSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1));
+		slowSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1));
 		buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
 			glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
+		flashSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position, state.flashedRecently > 0);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -1477,12 +1484,15 @@ void DisplayCallback(GLFWwindow* window)
 	// Draw the players
 	if (sharedClient && sharedClient->getGameData()) {
 		auto &networkPlayers = sharedClient->getGameData()->getAllPlayers();
+		bool chefSlow = sharedClient->getGameData()->getSlowChef();
 		for (auto &state : players) {
 			auto &model = playerModels[state.geometryIdx];
 			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
 			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
 			auto inventory = networkPlayer->getInventory();
 			Geometry *playerGeometry = nullptr;
+
+			PowerUp powerupActive = networkPlayer ? networkPlayer->getPowerUp() : PowerUp::NONE;
 
 #ifdef DEBUG_CARRY
 			inventory = static_cast<ItemModelType>(fake_carried_idx);
@@ -1541,6 +1551,26 @@ void DisplayCallback(GLFWwindow* window)
 				break;
 			}
 
+			//set states to show auras for powerups
+			switch (powerupActive) {
+			case PowerUp::GHOST:
+				state.movingSpeed = 1;
+				break;
+			case PowerUp::CHEF_SLOW:
+				if (networkPlayer->getModelType() == ModelType::CHEF) {
+					state.movingSpeed = -1;
+				}
+				else {
+					state.movingSpeed = 0;
+				}
+				break;
+			case PowerUp::FLASH:
+				state.flashedRecently = 6;
+			default:
+				state.flashedRecently = 0;
+				state.movingSpeed = 0;
+				break;
+			}
 			playerGeometry->draw(V, P, state.transform);
 
 			// Prepare to draw a special copy of an item (either carried or thrown)
