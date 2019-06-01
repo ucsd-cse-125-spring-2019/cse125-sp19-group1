@@ -52,7 +52,7 @@ SoundSystem::SoundSystem()
 	}
 
 	// 3.0 is kind of like for distance -- very arbitrary and needs playing with
-	result = system->set3DSettings(3.0, 3.0, 3.0);
+	result = system->set3DSettings(1.0, 7.0, 1.0);
 }
 
 
@@ -343,16 +343,25 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	}
 
 	curPlayerChannel = otherPlayerChannels.at(playerID);
-	curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
-	result = system->playSound(pSound, 0, false, &curPlayerChannel);
+	
 
-	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_INVALID_PARAM) {
-			fprintf(stdout, "playSound ERROR: pSound=%d\n", pSound);
-			fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
-		}
-		else {
-			fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
+	// just for testing, remove
+	bool paused;
+	bool playing;
+	curPlayerChannel->getPaused(&paused);
+	curPlayerChannel->isPlaying(&playing);
+	if (!playing) {
+		curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
+		result = system->playSound(pSound, 0, false, &curPlayerChannel);
+
+		if (result != FMOD_OK) {
+			if (result == FMOD_ERR_INVALID_PARAM) {
+				fprintf(stdout, "playSound ERROR: pSound=%d\n", pSound);
+				fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
+			}
+			else {
+				fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
+			}
 		}
 	}
 }

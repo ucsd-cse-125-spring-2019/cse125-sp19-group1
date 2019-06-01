@@ -116,7 +116,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
 
 		soundSystem->createBackgroundMusic(&background_music, BKG_MUSIC);
-		soundSystem->playBackgroundMusic(background_music, true);
+		soundSystem->playBackgroundMusic(background_music, true); // FIXME: uncomment
 	}
 
 	// send init packet
@@ -233,6 +233,9 @@ void ClientGame::update()
 				// soundSystem->pushSoundQueue(sound_yay);
 				// soundSystem->pushSoundQueue(sound_chef);
 				// soundSystem->playSoundsInQueue();
+
+				// for testing
+				// soundSystem->playOtherPlayersSounds(sound_other_keydrop, 1, 0, 0, 0, true);
 			}
 			else if (player->getAction() == Action::CONSTRUCT_GATE) {
 				int gateNum = gameData->getGateTile(loc)->getGateNum();
