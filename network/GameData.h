@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <queue>
 #include "GameConfigs.h"
-//#include "Gate.h"
 
 #define GENERAL_GAME_DATA_ID -999
 #define SERVER_GAMEDATA 123
@@ -69,14 +68,6 @@ public:
 
 	std::vector<std::vector<Tile *>> getTileLayout();
 
-	//int	getBoxTime() { return timeToOpenBox; }
-	//double getChefSwingTime() { return timeToSwingNet; }
-	//double getOpenJailTime() { return timeToOpenJail; }
-
-	//int timeToOpenBox = 2; //in seconds
-	//double timeToSwingNet = 0.5;
-	//double timeToOpenJail = 1.5;
-
 	WinType wt = WinType::NONE;
 	WinType getWT() { return wt; }
 	void setWT(WinType newWT) { wt = newWT; };
@@ -98,7 +89,6 @@ public:
 
 	bool getSlowChef() { return slowChef; }
 	void setSlowChef(bool aSlowChef) { slowChef = aSlowChef; }
-
 
 	void incrementChefVision() { chefVision++; }
 	double getChefVision();

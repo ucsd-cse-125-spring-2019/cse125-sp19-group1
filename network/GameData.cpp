@@ -286,16 +286,6 @@ void GameData::decodeTileLayout(std::string value)
 			}
 		}
 	}
-
-	// Debug printing
-	/*for (auto p : clientTileLayout)
-	{
-		for (auto c : p)
-		{
-			std::cout << c.getWall() << " ";
-		}
-		std::cout << std::endl;
-	}*/
 }
 void GameData::decodeGameState(std::string value) {
 	gameState = static_cast<GameState>(std::stoi(value));
@@ -323,7 +313,6 @@ void GameData::decodeGameData(const char * data)
 	{
 		std::string & key = p.first;
 		std::string & value = p.second;
-		//std::cout << key << " : " << value << std::endl;
 		if (p.first == "client")
 		{
 			playerID = std::stoi(value);

@@ -7,29 +7,18 @@ Player::Player(int anID, int aPlayerNum, Location aLoc) : playerID(anID), player
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
-	//if (anID == 1) {
-	//	modelType = ModelType::CHEF;
-	//}
 }
-
 
 Location Player::getLocation() const { return location; }
 int Player::getPlayerNum() const { return playerNum; }
 bool Player::hasSelectedAnimal() const { return selectedAnimal; }
-void Player::toggleAnimalSelection() { selectedAnimal = !selectedAnimal; dirtyVariablesMap["animalSelection"] = true; }
-bool Player::isReady() const
+void Player::toggleAnimalSelection()
 {
-	return ready;
-}
-
-void Player::toggleReady()
-{
-	ready = !ready;
+	selectedAnimal = !selectedAnimal;
+	dirtyVariablesMap["animalSelection"] = true;
 }
 ItemModelType Player::getInventory() const { return inventory; }
 bool Player::isInteracting() const { return interacting; }
-//bool Player::getOpenJail() const { return openingJail; }
-//bool Player::getOpeningGate() const { return openingGate; }
 bool Player::getHidden() { return hidden; }
 Action Player::getAction() const { return action; }
 PowerUp Player::getPowerUp() const { return powerUp; }
@@ -93,15 +82,6 @@ void Player::setInteracting(bool interact)
 	interacting = interact;
 }
 
-//void Player::setOpenJail(bool interact) {
-//	openingJail = interact;
-//}
-//
-//
-//void Player::setOpeningGate(bool status) {
-//	openingGate = status;
-//}
-
 ModelType Player::getModelType() const 
 {
 	return modelType;
@@ -122,22 +102,13 @@ void Player::setCaughtAnimalType(ModelType type) {
 	dirtyVariablesMap["caughtAnimalType"] = true;
 }
 
-//<<<<<<< HEAD
 void Player::setCaughtStatus(bool caught) {
 	caughtStatus = caught;
 	dirtyVariablesMap["caughtStatus"] = true;
 }
 
 bool Player::hasCaughtAnimal() const {
-//=======
-//void Player::setIsCaught(bool caught) 
-//{
-//	isCaught = caught;
-//}
 
-//bool Player::getCaughtAnimal() const 
-//{
-//>>>>>>> server
 	return caughtAnimal;
 }
 
@@ -154,15 +125,8 @@ void Player::setCaughtAnimalId(int id)
 	caughtAnimalId = id;
 }
 
-//<<<<<<< HEAD
 bool Player::isCaught() const {
 	return caughtStatus;
-//=======
-////bool Player::getIsCaught() {
-//bool Player::getIsCaught() const 
-//{
-//	return isCaught;
-//>>>>>>> server
 }
 
 bool Player::inRange(Location & myLoc, Location & theirLoc) 
@@ -181,11 +145,10 @@ void Player::setActionStartTime()
 	actionStartTime = std::chrono::system_clock::now();
 }
 
-//<<<<<<< HEAD
 void Player::setUnlockJailStartTime() {
 	unlockJailStartTime = std::chrono::system_clock::now();
 }
-//=======
+
 void Player::setSpeedStartTime()
 {
 	speedStartTime = std::chrono::system_clock::now();
@@ -203,11 +166,6 @@ void Player::setSlowStartTime()
 	slowStartTime = std::chrono::system_clock::now();
 }
 
-void Player::setStartJailTime() 
-{
-	startJail = std::chrono::system_clock::now();
-//>>>>>>> server
-}
 void Player::setSpeedMultiplier(double multiplier)
 {
 	speedMultiplier = multiplier;

@@ -36,7 +36,6 @@ private:
     // The ServerNetwork object 
     ServerNetwork* network;
 
-	//Atlas* atlas;
 	float sSpeed = 1.2;
 	float dSpeed = sSpeed/1.414;
 
