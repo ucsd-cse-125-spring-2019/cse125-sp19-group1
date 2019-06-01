@@ -1454,6 +1454,26 @@ void DisplayCallback(GLFWwindow* window)
 	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
 
+
+	if (envObjsTransform) {
+		envObjsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	if (allItemsTransform) {
+		allItemsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	for (auto state : players) {
+		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), state.moving);
+		buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
+			glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glUseProgram(objShaderProgram);
+
 	// Draw the players
 	if (sharedClient && sharedClient->getGameData()) {
 		auto &networkPlayers = sharedClient->getGameData()->getAllPlayers();
@@ -1602,26 +1622,13 @@ void DisplayCallback(GLFWwindow* window)
 
 	}
 
-	if (envObjsTransform) {
-		envObjsTransform->draw(V, P, glm::mat4(1.0));
-	}
-
-	if (allItemsTransform) {
-		allItemsTransform->draw(V, P, glm::mat4(1.0));
-	}
 
 
 	if (uiCanvas) {
 		uiCanvas->draw(&V, &P, glm::mat4(1.0));
 	}
 
-	for (auto state: players) {
-		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), state.moving);
-		buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) * 
-									glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f,1,3), state.building);
-	}
+
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
