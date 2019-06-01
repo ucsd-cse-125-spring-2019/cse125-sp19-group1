@@ -15,6 +15,10 @@
 #define GENERAL_GAME_DATA_ID -999
 #define SERVER_GAMEDATA 123
 
+#define CHEF_ANGER_INTERVAL 5
+#define CHEF_MAX_ANGER 60
+#define CHEF_MAX_VISION 100
+#define ABILITY_CHARGE_TIME 0.0
 #define GHOST_MULTIPLIER 1.6
 #define MAX_CHEF_TIME 7
 #define MAX_ANIMAL_GHOST_TIME 5
@@ -91,22 +95,14 @@ public:
 	WinType getWT() { return wt; }
 	void setWT(WinType newWT) { wt = newWT; };
 
-	double abilityChargeTime = 0.0f;
-
-	double maxGhostTime = 7;
-
-	double getAbilityChargeTime() { return abilityChargeTime; }
-	double getMaxGhostTime() { return maxGhostTime; }
+	int currentTime = -1;
 
 	int	chefAnger = 0;
-	int maxChefAnger = 60;
-	int currentTime = -1;
-	int chefAngerInterval = 3;
 	double chefVision = 40;
-	double chefMaxVision = 100;
+	double chefRampVision = 0;
+
 	bool blindChef = false;
 	bool slowChef = false;
-	double chefRampVision = 0;
 	
 	void setChefRampVision(double crv) { chefRampVision = crv; }
 	double getChefRampVision() { return chefRampVision; }
@@ -117,14 +113,13 @@ public:
 	bool getSlowChef() { return slowChef; }
 	void setSlowChef(bool aSlowChef) { slowChef = aSlowChef; }
 
+
+	void incrementChefVision() { chefVision++; }
 	double getChefVision();
 
-	double getChefMaxVision() { return chefMaxVision; }
-	void incrementChefVision() { chefVision++; }
 	void incrementChefAnger() { chefAnger++; }
-	int getChefAngerInterval() { return chefAngerInterval; }
 	int getChefAnger() { return chefAnger; }
-	int getMaxAnger() { return maxChefAnger; }
+
 	int getCurrentTime() { return currentTime; }
 	void setCurrentTime() { currentTime = getGameClock(); }
 

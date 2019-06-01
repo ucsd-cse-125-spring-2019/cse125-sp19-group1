@@ -261,7 +261,7 @@ void ServerGame::receiveFromClients()
 //=
 											if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
 											{
-												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5 && !animalCaught) 
+												if (gameData->getChefAnger() >= CHEF_MAX_ANGER && !animalCaught) 
 												{
 													//get random jail
 													//deploy animal in random jail
@@ -736,14 +736,14 @@ void ServerGame::receiveFromClients()
 
 	//All server loop checks 
 
-	if (gameData->getGameClock() % gameData->getChefAngerInterval() == 0) {
+	if (gameData->getGameClock() % CHEF_ANGER_INTERVAL == 0) {
 		if (gameData->getGameClock() > gameData->getCurrentTime()) 
 		{
-			if (gameData->getChefAnger() < gameData->getMaxAnger())
+			if (gameData->getChefAnger() < CHEF_MAX_ANGER)
 			{
 				gameData->incrementChefAnger();
 			}
-			if (gameData->getChefVision() < gameData->getChefMaxVision())
+			if (gameData->getChefVision() < CHEF_MAX_VISION)
 			{
 				gameData->incrementChefVision();
 			}
@@ -876,7 +876,7 @@ void ServerGame::receiveFromClients()
 					std::cout << "Interacting!!" << std::endl;*/
 
 					//Handling power ups
-					if (player->getPoweringUp() && seconds > gameData->getAbilityChargeTime()) {
+					if (player->getPoweringUp() && seconds > ABILITY_CHARGE_TIME) {
 						std::cout << "POWERING UP" << std::endl;
 						player->setInteracting(false);
 						player->setPoweringUp(false);
