@@ -53,6 +53,7 @@
 #define SPEED_PARTICLE_TEX (PARTICLES_PATH "speed.png")
 #define SLOW_PARTICLE_TEX (PARTICLES_PATH "slow.png")
 #define BUILD_PARTICLE_TEX (PARTICLES_PATH "build.png")
+#define BLIND_PARTICLE_TEX (PARTICLES_PATH "blind.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -327,6 +328,7 @@ ParticleSpawner * flashSpawner;
 ParticleSpawner * speedSpawner;
 ParticleSpawner * slowSpawner;
 ParticleSpawner * buildSpawner;
+ParticleSpawner * blindSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -346,6 +348,7 @@ struct PlayerState {
 	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
 	int movingSpeed;			// -1 = slow, 0 = normal, 1 = fast
 	int flashedRecently;		//counts down to fire a burst of flash particles
+	bool blinded;
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
@@ -1476,6 +1479,8 @@ void DisplayCallback(GLFWwindow* window)
 			glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
 		flashSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position, state.flashedRecently > 0);
+		blindSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position + glm::vec3(0,25.0f,0), state.blinded);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -1550,7 +1555,7 @@ void DisplayCallback(GLFWwindow* window)
 				}
 				break;
 			}
-
+			state.blinded = false;
 			//set states to show auras for powerups
 			switch (powerupActive) {
 			case PowerUp::GHOST:
@@ -1566,6 +1571,11 @@ void DisplayCallback(GLFWwindow* window)
 				break;
 			case PowerUp::FLASH:
 				state.flashedRecently = 6;
+			case PowerUp::CHEF_BLIND:
+				if (networkPlayer->getModelType() == ModelType::CHEF) {
+					state.blinded = true;
+				}
+
 			default:
 				state.flashedRecently = 0;
 				state.movingSpeed = 0;
@@ -1930,6 +1940,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
 		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
+		blindSpawner = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
 
 
 		auto setupEnd = high_resolution_clock::now();
