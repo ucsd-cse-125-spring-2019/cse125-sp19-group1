@@ -15,8 +15,8 @@
 
 #include <thread>
 
-#define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonWalk.dae")
-#define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonWalkWithItem.dae")
+#define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonNewWalk.dae")
+#define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonNewWalkWithItem.dae")
 #define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearchNoEars.dae")
 #define RACCOON_MDL_PATH        (MODELS_PATH "raccoon.fbx")
 #define RACCOON_TEX_PATH        (TEXTURES_PATH "raccoon.ppm")
