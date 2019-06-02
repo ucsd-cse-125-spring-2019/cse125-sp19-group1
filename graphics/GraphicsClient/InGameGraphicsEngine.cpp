@@ -1215,7 +1215,9 @@ void resetIdempotentFlush()
 }
 
 void updateUIElements(GameData * gameData) {
-	if (!uiCanvas) {
+	PlayerState * currState = getMyState();
+
+	if (!currState || !uiCanvas) {
 		return;
 	}
 
@@ -1257,7 +1259,6 @@ void updateUIElements(GameData * gameData) {
 	}
 
 	//check if current user is holding item
-	PlayerState * currState = getMyState();
 	Player * currPlayer = players[currState->id];
 	//items held by chef are the icons for animals
 	if (currPlayer->isChef()) {
