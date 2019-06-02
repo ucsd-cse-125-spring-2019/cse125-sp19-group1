@@ -13,6 +13,7 @@ public:
 
   DirLight();
   void toggleNormalShading();
+  void setNewLight(glm::vec3 newColor);
   void draw(GLuint program, glm::vec3 * cam_pos, glm::vec3 cam_look_at);
 };
 
