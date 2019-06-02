@@ -212,7 +212,7 @@ void ServerGame::receiveFromClients()
 								gameData->getPlayer(animal)->setLocation(x, y, z);
 
 							}
-							else
+							else if (!player->hasCaughtAnimal())
 							{
 								std::cout << "SWINGING" << std::endl;
 								if (!player->isInteracting())
@@ -250,6 +250,7 @@ void ServerGame::receiveFromClients()
 														if (jailTile->isJailEmpty()) {
 															iter2->second->setCaughtStatus(true);
 															iter2->second->setLocation(jLoc.getX() + TILE_SIZE / 2, (float)(jailTile->getHeight() / 2 * TILE_HEIGHT), jLoc.getZ() + TILE_SIZE / 2);
+															iter2->second->setAction(Action::NONE);
 															jailTile->placeAnimalInJail(iter2->first);
 															animalCaught = true;
 															break;
@@ -263,6 +264,7 @@ void ServerGame::receiveFromClients()
 												player->setCaughtAnimalId(iter2->first);
 												iter2->second->setLocation(player->getLocation());
 												iter2->second->setCaughtStatus(true);
+												gameData->getPlayer(iter2->first)->setAction(Action::NONE);
 											}
 										}
 
