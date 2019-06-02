@@ -350,11 +350,9 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 		else {
 			otherPlayerChannels.insert(std::pair<int, FMOD::Channel*>(playerID, threeDeeChannel[threeDeeChannelTaken]));
 			threeDeeChannelTaken++;
+			curPlayerChannel = otherPlayerChannels.at(playerID);
 		}
-	}
-
-	curPlayerChannel = otherPlayerChannels.at(playerID);
-	
+	}	
 
 	// just for testing, remove
 	bool paused;
