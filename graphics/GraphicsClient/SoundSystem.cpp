@@ -236,37 +236,39 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 	if (it != otherPlayerChannels.end()) {
 		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
 			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
+			return;
 		}
 		else {
 			std::lock_guard<std::mutex> lock(otherPlayerChannelsM);
 			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
 			threeDeeChannelTaken++;
 		}
-	
-		curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
-		std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
-		fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
-		result = curPlayerChannel->setPaused(true);
-	
-		if (result != FMOD_OK) {
-			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
-			}
-			else if (result == FMOD_ERR_INVALID_HANDLE) {
-				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_HANDLE\n");
-			}
-			else if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
-			}
-			else if (result == FMOD_ERR_INVALID_POSITION) {
-				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_POSITION\n");
-			}
-			else {
-				fprintf(stdout, "pauseOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
-			}
-		}
-
 	}
+
+	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
+	std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
+	fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
+	result = curPlayerChannel->setPaused(true);
+	
+	if (result != FMOD_OK) {
+		if (result == FMOD_ERR_INVALID_PARAM) {
+			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
+		}
+		else if (result == FMOD_ERR_INVALID_HANDLE) {
+			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_HANDLE\n");
+		}
+		else if (result == FMOD_ERR_INVALID_PARAM) {
+			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
+		}
+		else if (result == FMOD_ERR_INVALID_POSITION) {
+			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_POSITION\n");
+		}
+		else {
+			fprintf(stdout, "pauseOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
+		}
+	}
+
+
 }
 
 void SoundSystem::pauseAllSounds()
