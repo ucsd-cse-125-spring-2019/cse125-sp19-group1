@@ -150,7 +150,7 @@ void GameData::addDecodeFunctions()
 {
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
-	decodingFunctions["gameData"] = &GameData::decodeGameState;
+	decodingFunctions["gameState"] = &GameData::decodeGameState;
 	decodingFunctions["blindChef"] = &GameData::decodeBlindChef;
 	decodingFunctions["slowChef"] = &GameData::decodeBlindChef;
  	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;

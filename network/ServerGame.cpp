@@ -683,13 +683,21 @@ void ServerGame::receiveFromClients()
 	if (gameData->getGameClock() % CHEF_ANGER_INTERVAL == 0) {
 		if (gameData->getGameClock() > gameData->getCurrentTime()) 
 		{
+			bool sendUpdate = false;
 			if (gameData->getChefAnger() < CHEF_MAX_ANGER)
 			{
 				gameData->incrementChefAnger();
+				sendUpdate = true;
 			}
 			if (gameData->getChefVision() < CHEF_MAX_VISION)
 			{
 				gameData->incrementChefVision();
+				sendUpdate = true;
+			}
+
+			if (sendUpdate)
+			{
+				sendActionPackets();
 			}
 			gameData->setCurrentTime();
 		}
