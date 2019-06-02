@@ -239,14 +239,12 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 			return;
 		}
 		else {
-			std::lock_guard<std::mutex> lock(otherPlayerChannelsM);
 			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
 			threeDeeChannelTaken++;
 		}
 	}
 
 	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
-	std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
 	fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
 	result = curPlayerChannel->setPaused(true);
 	
@@ -363,7 +361,6 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 			return;
 		}
 		else {
-			std::lock_guard<std::mutex> lock(otherPlayerChannelsM);
 			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
 			threeDeeChannelTaken++;
 		}
@@ -377,7 +374,6 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	curPlayerChannel->getPaused(&paused);
 	curPlayerChannel->isPlaying(&playing);
 	if (!playing && paused) {
-		std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
 		fprintf(stdout, "playOtherPlayersSounds playerID=%d channelID=%d playing=%d paused=%d", playerID, otherPlayerChannels.at(playerID), playing, paused);
 		curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
 		result = system->playSound(pSound, 0, false, &curPlayerChannel);
