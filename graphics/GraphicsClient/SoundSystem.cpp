@@ -228,7 +228,7 @@ void SoundSystem::pauseSoundEffect()
 void SoundSystem::pauseOtherPlayersSounds(int playerID)
 {
 	FMOD_RESULT result;
-	std::map<int, FMOD::Channel *>::iterator it;
+	std::map<int, int>::iterator it;
 	FMOD::Channel * curPlayerChannel;
 
 	// if the specific player doesn't have their own channel yet
@@ -238,11 +238,13 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
 		}
 		else {
-			otherPlayerChannels.insert(std::pair<int, FMOD::Channel*>(playerID, threeDeeChannel[threeDeeChannelTaken]));
+			std::lock_guard<std::mutex> lock(otherPlayerChannelsM);
+			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
 			threeDeeChannelTaken++;
 		}
 	
-	curPlayerChannel = otherPlayerChannels.at(playerID);
+	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
+	std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
 	result = curPlayerChannel->setPaused(true);
 	
 
@@ -325,7 +327,7 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop)
 {
 	FMOD_RESULT result;
-	std::map<int, FMOD::Channel *>::iterator it;
+	std::map<int, int>::iterator it;
 	FMOD::Channel * curPlayerChannel;
 	FMOD_VECTOR loc;
 	loc.x = x;
@@ -348,13 +350,13 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 			fprintf(stdout, "playOtherPlayersSounds ERROR: playerID: %d does not have a channel?\n", playerID);
 		}
 		else {
-			otherPlayerChannels.insert(std::pair<int, FMOD::Channel*>(playerID, threeDeeChannel[threeDeeChannelTaken]));
+			std::lock_guard<std::mutex> lock(otherPlayerChannelsM);
+			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
 			threeDeeChannelTaken++;
 		}
 	}
 
-	curPlayerChannel = otherPlayerChannels.at(playerID);
-	
+	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
 
 	// just for testing, remove
 	bool paused;
@@ -362,6 +364,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	curPlayerChannel->getPaused(&paused);
 	curPlayerChannel->isPlaying(&playing);
 	if (!playing && paused) {
+		std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
 		curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
 		result = system->playSound(pSound, 0, false, &curPlayerChannel);
 
