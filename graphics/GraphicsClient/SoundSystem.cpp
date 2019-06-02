@@ -243,11 +243,10 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 			threeDeeChannelTaken++;
 		}
 	
-	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
-	std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
-	result = curPlayerChannel->setPaused(true);
+		curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
+		std::lock_guard<std::mutex> lock(threeDeeChannelM[otherPlayerChannels.at(playerID)]);
+		result = curPlayerChannel->setPaused(true);
 	
-
 		if (result != FMOD_OK) {
 			if (result == FMOD_ERR_INVALID_PARAM) {
 				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
@@ -256,6 +255,7 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 				fprintf(stdout, "pauseOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
 			}
 		}
+
 	}
 }
 
@@ -315,7 +315,7 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 
 	if (result != FMOD_OK) {
 		if (result == FMOD_ERR_INVALID_PARAM) {
-			fprintf(stdout, "playSound ERROR: pSound=%d\n", pSound);
+			fprintf(stdout, "playSound ERROR: pSound=%p\n", pSound);
 			fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
 		}
 		else {
@@ -348,6 +348,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
 			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
 			fprintf(stdout, "playOtherPlayersSounds ERROR: playerID: %d does not have a channel?\n", playerID);
+			return;
 		}
 		else {
 			std::lock_guard<std::mutex> lock(otherPlayerChannelsM);
@@ -370,7 +371,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 
 		if (result != FMOD_OK) {
 			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "playSound ERROR: pSound=%d\n", pSound);
+				fprintf(stdout, "playSound ERROR: pSound=%p\n", pSound);
 				fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
 			}
 			else {
@@ -403,7 +404,7 @@ void SoundSystem::playSoundEffectNoOverlap(Sound * pSound, bool bLoop)
 
 		if (result != FMOD_OK) {
 			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "playSound ERROR: pSound=%d\n", pSound);
+				fprintf(stdout, "playSound ERROR: pSound=%p\n", pSound);
 				fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
 			}
 			else {
@@ -439,7 +440,7 @@ void SoundSystem::playSoundsInQueueThread()
 	result = not3DChannel[0]->isPlaying(&playing);
 
 	fprintf(stdout, "playSoundsInQueueThread: I'm %d\n", std::this_thread::get_id());
-	fprintf(stdout, "playSoundsInQueueThread: num in queue: %d, playing=%d\n", soundQueue.size(), playing);
+	fprintf(stdout, "playSoundsInQueueThread: num in queue: %llu, playing=%d\n", soundQueue.size(), playing);
 
 	while ((!soundQueue.empty()) && (continueQueue)) {
 		result = not3DChannel[0]->isPlaying(&playing);
@@ -454,7 +455,7 @@ void SoundSystem::playSoundsInQueueThread()
 
 			if (result != FMOD_OK) {
 				if (result == FMOD_ERR_INVALID_PARAM) {
-					fprintf(stdout, "playSoundsInQueueThread ERROR: pSound=%d\n", currSound);
+					fprintf(stdout, "playSoundsInQueueThread ERROR: pSound=%p\n", currSound);
 					fprintf(stdout, "playSoundsInQueueThread ERROR: FMOD_ERR_INVALID_PARAM\n");
 				}
 				else {
