@@ -203,11 +203,11 @@ void ClientGame::update()
 	memset(network_data, 0, sizeof(network_data)); 
 
 	// update sounds
-	if (myID != NOT_INITIALIZED && !soundSystem->shouldIgnoreSound()) {
-		Player * player = gameData->getPlayer(myID);
-		ModelType model = gameData->getPlayer(myID)->getModelType();
+	Player* player = gameData->getPlayer(myID);
+	if (myID != NOT_INITIALIZED && player != nullptr && !soundSystem->shouldIgnoreSound()) {
+		ModelType model = player->getModelType();
 		WinType wt = gameData->getWT();
-		Location loc = gameData->getPlayer(myID)->getLocation();
+		Location loc = player->getLocation();
 
 		soundSystem->setListenerLocation(loc.getX(), loc.getY(), loc.getZ());
 
