@@ -343,8 +343,13 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	// if the specific player doesn't have their own channel yet
 	it = otherPlayerChannels.find(playerID);
 	if (it == otherPlayerChannels.end()) {
-		otherPlayerChannels.insert(std::pair<int, FMOD::Channel *>(playerID, threeDeeChannel[threeDeeChannelTaken]));
-		threeDeeChannelTaken++;
+		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
+			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
+		}
+		else {
+			otherPlayerChannels.insert(std::pair<int, FMOD::Channel*>(playerID, threeDeeChannel[threeDeeChannelTaken]));
+			threeDeeChannelTaken++;
+		}
 	}
 
 	curPlayerChannel = otherPlayerChannels.at(playerID);
@@ -355,7 +360,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	bool playing;
 	curPlayerChannel->getPaused(&paused);
 	curPlayerChannel->isPlaying(&playing);
-	if (!playing) {
+	if (!playing && paused) {
 		curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
 		result = system->playSound(pSound, 0, false, &curPlayerChannel);
 
