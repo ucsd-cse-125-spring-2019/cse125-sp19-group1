@@ -252,6 +252,15 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 			if (result == FMOD_ERR_INVALID_PARAM) {
 				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
 			}
+			else if (result == FMOD_ERR_INVALID_HANDLE) {
+				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_HANDLE\n");
+			}
+			else if (result == FMOD_ERR_INVALID_PARAM) {
+				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
+			}
+			else if (result == FMOD_ERR_INVALID_POSITION) {
+				fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_POSITION\n");
+			}
 			else {
 				fprintf(stdout, "pauseOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
 			}
