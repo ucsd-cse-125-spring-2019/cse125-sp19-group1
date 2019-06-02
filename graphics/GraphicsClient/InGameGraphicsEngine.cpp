@@ -1499,6 +1499,8 @@ void DisplayCallback(GLFWwindow* window)
 		for (auto &state : players) {
 			auto &model = playerModels[state.geometryIdx];
 			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
+			if (!networkPlayer) continue;
+
 			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
 			auto inventory = networkPlayer->getInventory();
 			Geometry *playerGeometry = nullptr;

@@ -203,11 +203,11 @@ void ClientGame::update()
 	memset(network_data, 0, sizeof(network_data)); 
 
 	// update sounds
-	if (myID != NOT_INITIALIZED && !soundSystem->shouldIgnoreSound()) {
-		Player * player = gameData->getPlayer(myID);
-		ModelType model = gameData->getPlayer(myID)->getModelType();
+	Player* player = gameData->getPlayer(myID);
+	if (myID != NOT_INITIALIZED && player != nullptr && !soundSystem->shouldIgnoreSound()) {
+		ModelType model = player->getModelType();
 		WinType wt = gameData->getWT();
-		Location loc = gameData->getPlayer(myID)->getLocation();
+		Location loc = player->getLocation();
 
 		soundSystem->setListenerLocation(loc.getX(), loc.getY(), loc.getZ());
 
@@ -239,7 +239,8 @@ void ClientGame::update()
 				// soundSystem->playOtherPlayersSounds(sound_other_keydrop, 1, 0, 0, 0, true);
 			}
 			else if (player->getAction() == Action::CONSTRUCT_GATE) {
-				int gateNum = gameData->getGateTile(loc)->getGateNum();
+				GateTile* gateTile = gameData->getGateTile(loc);
+				int gateNum = gateTile ? gateTile->getGateNum() : 0;
 				if (gateNum == 1) { //door
 					soundSystem->playSoundEffect(sound_door_unlock);
 				}
@@ -291,7 +292,7 @@ void ClientGame::update()
 			float locZ = 0.0;
 
 			for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
-				if (it->second == player) {
+				if (it->first == myID) {
 					continue;
 				}
 
@@ -315,7 +316,7 @@ void ClientGame::update()
 						soundSystem->playOtherPlayersSounds(sound_other_search_item, it->first, locX, locY, locZ);
 					}
 					else if (curPlayer->getAction() == Action::CONSTRUCT_GATE) {
-						int gateNum = gameData->getGateTile(loc)->getGateNum();
+						int gateNum = gameData->getGateTile(curPlayerLoc)->getGateNum();
 						if (gateNum == 1) { //door
 							soundSystem->playOtherPlayersSounds(sound_other_door_unlock, it->first, locX, locY, locZ);
 						}
