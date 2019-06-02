@@ -315,7 +315,7 @@ void ClientGame::update()
 						soundSystem->playOtherPlayersSounds(sound_other_search_item, it->first, locX, locY, locZ);
 					}
 					else if (curPlayer->getAction() == Action::CONSTRUCT_GATE) {
-						int gateNum = gameData->getGateTile(loc)->getGateNum();
+						int gateNum = gameData->getGateTile(curPlayerLoc)->getGateNum();
 						if (gateNum == 1) { //door
 							soundSystem->playOtherPlayersSounds(sound_other_door_unlock, it->first, locX, locY, locZ);
 						}
