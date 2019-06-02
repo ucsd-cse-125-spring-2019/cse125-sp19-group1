@@ -239,7 +239,7 @@ void ClientGame::update()
 				// soundSystem->playOtherPlayersSounds(sound_other_keydrop, 1, 0, 0, 0, true);
 			}
 			else if (player->getAction() == Action::CONSTRUCT_GATE) {
-				GateTile* gateTile = gameData->getGateTile(loc));
+				GateTile* gateTile = gameData->getGateTile(loc);
 				int gateNum = gateTile ? gateTile->getGateNum() : 0;
 				if (gateNum == 1) { //door
 					soundSystem->playSoundEffect(sound_door_unlock);
