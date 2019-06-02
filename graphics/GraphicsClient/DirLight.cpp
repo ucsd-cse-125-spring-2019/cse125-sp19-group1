@@ -2,12 +2,16 @@
 
 DirLight::DirLight () {
   useNormalShading = false;
-  color = glm::vec3(1.0f, 1.0f, 1.0f);
+  color = glm::vec3(0.8f, 0.8f, 0.8f);
   //dir = glm::vec3(0.0f, 0.0f, -1.0f);
-  dir = glm::vec3(0.0f, -1.0f, -2.0f);
+  dir = glm::vec3(-0.5f, -1.0f, 0.5f);
   //pos = glm::vec3(1.0f, 0.8f, 0.6f);
-  pos = glm::vec3(0.0f, 10.0f, 20.0f);
+  pos = glm::vec3(5.0f, 10.0f, -5.0f);
 
+}
+
+void DirLight::setNewLight(glm::vec3 newColor) {
+	color = newColor;
 }
 
 void DirLight::toggleNormalShading() {
