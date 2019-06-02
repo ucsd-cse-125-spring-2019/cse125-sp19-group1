@@ -291,7 +291,7 @@ void ClientGame::update()
 			float locZ = 0.0;
 
 			for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
-				if (it->second == player) {
+				if (it->first == myID) {
 					continue;
 				}
 
