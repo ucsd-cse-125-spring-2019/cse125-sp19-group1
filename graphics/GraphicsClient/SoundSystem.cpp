@@ -345,6 +345,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	if (it == otherPlayerChannels.end()) {
 		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
 			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
+			fprintf(stdout, "playOtherPlayersSounds ERROR: playerID: %d does not have a channel?\n", playerID);
 		}
 		else {
 			otherPlayerChannels.insert(std::pair<int, FMOD::Channel*>(playerID, threeDeeChannel[threeDeeChannelTaken]));
