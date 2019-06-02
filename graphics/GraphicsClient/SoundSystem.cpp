@@ -233,7 +233,7 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 
 	// if the specific player doesn't have their own channel yet
 	it = otherPlayerChannels.find(playerID);
-	if (it != otherPlayerChannels.end()) {
+	if (it == otherPlayerChannels.end()) {
 		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
 			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
 			return;
