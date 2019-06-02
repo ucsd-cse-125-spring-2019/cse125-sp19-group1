@@ -234,8 +234,13 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 	// if the specific player doesn't have their own channel yet
 	it = otherPlayerChannels.find(playerID);
 	if (it != otherPlayerChannels.end()) {
-		otherPlayerChannels.insert(std::pair<int, FMOD::Channel *>(playerID, threeDeeChannel[threeDeeChannelTaken]));
-		threeDeeChannelTaken++;
+		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
+			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
+		}
+		else {
+			otherPlayerChannels.insert(std::pair<int, FMOD::Channel*>(playerID, threeDeeChannel[threeDeeChannelTaken]));
+			threeDeeChannelTaken++;
+		}
 	
 	curPlayerChannel = otherPlayerChannels.at(playerID);
 	result = curPlayerChannel->setPaused(true);

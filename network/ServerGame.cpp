@@ -223,7 +223,7 @@ void ServerGame::receiveFromClients()
 									player->setActionStartTime();
 									bool animalCaught = false;
 
-									//chefWin = true;
+									chefWin = true;
 									for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
 									{
 										if (iter2->first == iter->first)
