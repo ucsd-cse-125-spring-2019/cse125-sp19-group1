@@ -54,6 +54,7 @@
 #define SLOW_PARTICLE_TEX (PARTICLES_PATH "slow.png")
 #define BUILD_PARTICLE_TEX (PARTICLES_PATH "build.png")
 #define BLIND_PARTICLE_TEX (PARTICLES_PATH "blind.png")
+#define SEARCH_PARTICLE_TEX (PARTICLES_PATH "search.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -329,6 +330,7 @@ ParticleSpawner * speedSpawner;
 ParticleSpawner * slowSpawner;
 ParticleSpawner * buildSpawner;
 ParticleSpawner * blindSpawner;
+ParticleSpawner * searchSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -348,7 +350,8 @@ struct PlayerState {
 	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
 	int movingSpeed;			// -1 = slow, 0 = normal, 1 = fast
 	int flashedRecently;		//counts down to fire a burst of flash particles
-	bool blinded;
+	bool blinded; //will activate if player is blinded: should only activate on chef
+	bool instantSearch; //will activate if player has instant search. 
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
@@ -1481,6 +1484,8 @@ void DisplayCallback(GLFWwindow* window)
 			state.position, state.flashedRecently > 0);
 		blindSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position + glm::vec3(0,25.0f,0), state.blinded);
+		searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -1556,6 +1561,7 @@ void DisplayCallback(GLFWwindow* window)
 				break;
 			}
 			state.blinded = false;
+			state.instantSearch = false;
 			//set states to show auras for powerups
 			switch (powerupActive) {
 			case PowerUp::GHOST:
@@ -1575,7 +1581,8 @@ void DisplayCallback(GLFWwindow* window)
 				if (networkPlayer->getModelType() == ModelType::CHEF) {
 					state.blinded = true;
 				}
-
+			case PowerUp::INSTA_SEARCH:
+				state.instantSearch = true;
 			default:
 				state.flashedRecently = 0;
 				state.movingSpeed = 0;
@@ -1802,6 +1809,12 @@ InGameGraphicsEngine::InGameGraphicsEngine()
 
 InGameGraphicsEngine::~InGameGraphicsEngine()
 {
+	delete dustSpawner;
+	delete speedSpawner;
+	delete searchSpawner;
+	delete slowSpawner;
+	delete blindSpawner;
+	delete flashSpawner;
 }
 
 void InGameGraphicsEngine::StartLoading()  // may launch a thread and return immediately
@@ -1941,6 +1954,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
 		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 		blindSpawner = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
+		searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
 
 
 		auto setupEnd = high_resolution_clock::now();
