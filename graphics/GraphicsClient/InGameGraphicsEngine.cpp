@@ -391,6 +391,7 @@ struct PlayerState {
 	int flashedRecently;		//counts down to fire a burst of flash particles
 	bool blinded; //will activate if player is blinded: should only activate on chef
 	bool instantSearch; //will activate if player has instant search. 
+	bool restrictRotation;
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
@@ -1055,6 +1056,13 @@ void InGameGraphicsEngine::MovePlayers()
 			const auto loc = p->getLocation();
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
+			if (p->getAction() == Action::SWING_NET) {
+				state.angle = state.angle + 4;
+				state.restrictRotation = true;
+			}
+			else {
+				state.restrictRotation = false;
+			}
 		}
 #ifdef DUMMY_ID
 		else if (state.id == DUMMY_ID) {
@@ -1073,16 +1081,18 @@ void InGameGraphicsEngine::MovePlayers()
 		const glm::mat4 newOffset = glm::translate(glm::mat4(1.0f), state.position);
 
 		// Set targetAngle based on keyboard for me, based on movement for others
-		if (state.id != myID) {
-			const auto delta = state.position - oldPos;
-			if (abs(delta.x) > 0.0001 || abs(delta.z) > 0.0001) {
-				state.setTargetAngle(glm::atan(delta.x, delta.z));
+		if (!state.restrictRotation) {
+			if (state.id != myID) {
+				const auto delta = state.position - oldPos;
+				if (abs(delta.x) > 0.0001 || abs(delta.z) > 0.0001) {
+					state.setTargetAngle(glm::atan(delta.x, delta.z));
+				}
 			}
-		}
-		else {
-			const auto dir = directionBitmaskToVector(directions);
-			if (dir.x != 0.f || dir.z != 0.f) {
-				state.setTargetAngle(glm::atan(-dir.x, dir.z));
+			else {
+				const auto dir = directionBitmaskToVector(directions);
+				if (dir.x != 0.f || dir.z != 0.f) {
+					state.setTargetAngle(glm::atan(-dir.x, dir.z));
+				}
 			}
 		}
 
@@ -1346,7 +1356,7 @@ void updateUIElements(GameData * gameData) {
 		uiCanvas->setVisible(UICanvas::PROMPT_APPLE, false);
 		uiCanvas->setVisible(UICanvas::PROMPT_ORANGE, false);
 		uiCanvas->setVisible(UICanvas::PROMPT_KEY, false);
-
+		bool hasItem = true;
 
 		if (currPlayer->getInventory() == ItemModelType::toiletPaper) {
 			uiCanvas->setItem(UICanvas::TOILET_PAPER_ITEM);
@@ -1409,6 +1419,7 @@ void updateUIElements(GameData * gameData) {
 			uiCanvas->setVisible(UICanvas::PROMPT_BLACK_BANANA, true);
 		}
 		else {
+			hasItem = false;
 			uiCanvas->removeItems();
 		}
 
@@ -1422,9 +1433,19 @@ void updateUIElements(GameData * gameData) {
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, false);
 		}
+
+		//cake prompt check
+		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::GATE &&
+			gameData->getGateTile(currPlayer->getLocation())->getKeyProgress() == 3 && !hasItem){
+			uiCanvas->setVisible(UICanvas::PROMPT_GET_CAKE, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_GET_CAKE, false);
+		}
+
 		uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
 		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::BOX && !currPlayer->isChef() &&
-			gameData->getBoxTile(currPlayer->getLocation())->hasBox())
+			gameData->getBoxTile(currPlayer->getLocation())->hasBox() && !hasItem)
 		{
 			uiCanvas->setVisible(UICanvas::PROMPT_BOX_SEARCH, true);
 		}
