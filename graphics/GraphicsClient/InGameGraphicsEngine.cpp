@@ -108,6 +108,12 @@
 // Uncomment to skip loading UI
 // #define DEBUG_NO_UI
 
+// Uncomment to make gates always animate so that you don't have to play through
+// #define DEBUG_GATE_ANIMATION
+
+// Set to 0 to disable gate animation
+#define ENABLE_GATE_ANIMATION 0
+
 #ifdef DEBUG_CARRY
 unsigned fake_carried_idx = 1;
 #endif
@@ -183,10 +189,21 @@ static const struct PlayerModelSettings {
 #endif
 };
 
+#define ANIM_AND_TEX(m, t) ANIMATIONS_PATH m ".dae", TEXTURES_PATH t
 #define MDL_AND_TEX(m, t) MODELS_PATH m ".fbx", TEXTURES_PATH t ".png"
 #define MDL_SAME_TEX(x) MDL_AND_TEX(x, x)
 #define GLM_H_PI glm::half_pi<float>()
 #define GLM_PI glm::pi<float>()
+
+#if ENABLE_GATE_ANIMATION
+#define DOOR_FILENAMES ANIM_AND_TEX("betterdoor_build", "betterdoor.ppm")
+#define VENT_FILENAMES ANIM_AND_TEX("vent_build", "vent.png")
+#define WINDOW_FILENAMES ANIM_AND_TEX("window_build", "window.png")
+#else
+#define DOOR_FILENAMES MDL_SAME_TEX("door")
+#define VENT_FILENAMES MDL_SAME_TEX("vent")
+#define WINDOW_FILENAMES MDL_SAME_TEX("window")
+#endif
 
 static const struct ItemModelSettings {
 	const char *modelPath;       // filesystem path to a model geometry file
@@ -200,41 +217,41 @@ static const struct ItemModelSettings {
 	glm::vec3 carryTranslate;    // translation while being carried
 	glm::vec3 carryRotate;       // rotation while being carried
 } itemModelSettings[] = {
-	// model and texture paths                      name                    id                               scale  translate                      rotate                            wallRotate  carryTranslate               carryRotate
-	{ MDL_SAME_TEX("apple"),                        "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_AND_TEX("banana", "bananagreen"),         "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_AND_TEX("banana", "bananaperfect"),       "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_AND_TEX("banana", "bananaveryveryripe"),  "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_SAME_TEX("box"),                          "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("cake"),                         "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
-	{ MDL_SAME_TEX("cookingpot"),                   "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("door"),                         "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("fork"),                         "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("garbagebag"),                   "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("jail"),                         "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("key", "key1"),                   "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("key", "key2"),                   "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("key", "key3"),                   "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),   "bathroom key drop",    ItemModelType::keyDropBathroom,  2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),  "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_AND_TEX("keydrop", "keydrop_vent"),       "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_SAME_TEX("knife"),                        "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("orange"),                       "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("painting"),                     "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
-	{ MDL_SAME_TEX("pear"),                         "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("plate"),                        "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
-	{ MDL_SAME_TEX("plunger"),                      "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("restaurantchair"),              "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
-	{ MDL_SAME_TEX("rope"),                         "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver1"),   "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver2"),   "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver3"),   "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_SAME_TEX("stove"),                        "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("toilet"),                       "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("toiletpaper"),                  "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
-	{ MDL_SAME_TEX("vent"),                         "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("window"),                       "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("table"),                        "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	// model and texture paths                             name                    id                               scale  translate                      rotate                            wallRotate  carryTranslate               carryRotate
+	{ MDL_SAME_TEX("apple"),                               "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_AND_TEX("banana", "bananagreen"),                "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaperfect"),              "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaveryveryripe"),         "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_SAME_TEX("box"),                                 "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
+	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("key", "key1"),                          "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key2"),                          "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key3"),                          "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),          "bathroom key drop",    ItemModelType::keyDropBathroom,  2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),         "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("painting"),                            "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
+	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("plate"),                               "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
+	{ MDL_SAME_TEX("plunger"),                             "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("restaurantchair"),                     "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("rope"),                                "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver1"),          "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver2"),          "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver3"),          "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_SAME_TEX("stove"),                               "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toilet"),                              "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toiletpaper"),                         "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
+	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
+	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
 
 struct ItemModel {
@@ -805,6 +822,23 @@ void updateBoxVisibility()
 			if (tile && tileLayout[y][x]->getTileType() == TileType::BOX) {
 				tile->hidden = !((BoxTile *)tileLayout[y][x])->hasBox();
 			}
+
+			if (tile && tileLayout[y][x]->getTileType() == TileType::GATE) {
+				GateTile *gate = (GateTile *)tileLayout[y][x];
+
+				static unsigned char gateHistory[4] = { 0 };
+				static double gateTimes[4] = {0.0};
+				int num = gate->getGateNum();
+				gateHistory[num] = (gateHistory[num] << 1) | (gateTimes[num] != gate->getCurrentConstructTime());
+				gateTimes[num] = gate->getCurrentConstructTime();
+
+#ifdef DEBUG_GATE_ANIMATION
+				gateHistory[num] = 1;
+#endif
+
+				itemModels[static_cast<unsigned>(gate->getModel())].object->Update(gateHistory[num] != 0);
+			}
+
 			//Update UI to express keys already placed
 			if (tile && tileLayout[y][x]->getTileType() == TileType::KEY_DROP) {
 				std::vector<ItemModelType> depositedItems = ((KeyDropTile *)tileLayout[y][x])->getDepositedKeys();
@@ -1462,6 +1496,181 @@ void InGameGraphicsEngine::IdleCallback()
 }
 
 
+static void UpdateAndDrawPlayer(PlayerState &state)
+{
+	auto &model = playerModels[state.geometryIdx];
+	auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
+	if (!networkPlayer) return;;
+
+	Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
+	auto inventory = networkPlayer->getInventory();
+	Geometry *playerGeometry = nullptr;
+
+	PowerUp powerupActive = networkPlayer ? networkPlayer->getPowerUp() : PowerUp::NONE;
+
+#ifdef DEBUG_CARRY
+	inventory = static_cast<ItemModelType>(fake_carried_idx);
+#endif
+	state.building = false;
+	switch (action) {
+	case Action::OPEN_BOX:
+	{
+		// hide the un-animated box
+		int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
+		int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
+		auto transform = envObjs[z][x];
+		transform->hidden = true;
+
+		// show the animated box
+		auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
+		unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
+		animatedBoxObjects[boxIdx]->Update(true);
+		animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
+
+		// Turn towards the box
+		float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
+		float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
+		state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
+
+		//for particle effects
+		state.building = true;
+		state.buildPosition = transform->getOffset() * glm::vec4(0, 0, 0, 1);
+
+		// fall through on purpose (missing break is not a mistake)
+	}
+	case Action::CONSTRUCT_GATE: {
+	}
+	case Action::UNLOCK_JAIL:
+	{
+	}
+	case Action::SWING_NET:
+		model.getActionObject()->Update(true);
+		playerGeometry = model.getActionGeometry();
+		break;
+
+	case Action::NONE:
+	default:
+		if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
+			model.getCarryObject()->Update(true);
+			playerGeometry = model.getCarryGeometry();
+		}
+		else if (inventory != ItemModelType::EMPTY) {
+			model.getCarryObject()->Update(true);
+			playerGeometry = model.getCarryGeometry();
+		}
+		else {
+			model.getWalkObject()->Update(state.moving != 0);
+			playerGeometry = model.getwalkGeometry();
+		}
+		break;
+	}
+	state.blinded = false;
+	state.instantSearch = false;
+	//set states to show auras for powerups
+	switch (powerupActive) {
+	case PowerUp::GHOST:
+		state.movingSpeed = 1;
+		break;
+	case PowerUp::CHEF_SLOW:
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			state.movingSpeed = -1;
+		}
+		else {
+			state.movingSpeed = 0;
+		}
+		break;
+	case PowerUp::FLASH:
+		state.flashedRecently = 6;
+	case PowerUp::CHEF_BLIND:
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			state.blinded = true;
+		}
+	case PowerUp::INSTA_SEARCH:
+		state.instantSearch = true;
+	default:
+		state.flashedRecently = 0;
+		state.movingSpeed = 0;
+		break;
+	}
+	playerGeometry->draw(V, P, state.transform);
+
+	// Prepare to draw a special copy of an item (either carried or thrown)
+	Geometry *inventoryGeometry = nullptr;
+	glm::mat4 inventoryMat;
+
+	if (inventory != ItemModelType::EMPTY) {
+		// Prepare to draw a carried item
+
+		auto playerSettings = playerModels[state.geometryIdx].settings;
+		const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
+
+		glm::vec3 modelTranslate = itemModel.settings->translate;
+		modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+		modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+		modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+
+		modelTranslate += playerSettings->carryPosition + itemModel.settings->carryTranslate;
+
+		const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
+		const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
+		inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+		inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+		inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+		inventoryGeometry = itemModel.geometry;
+
+		// The thrown item code will need this later
+		state.previousInventory = inventory;
+		state.inventoryTransform = inventoryMat;
+	}
+	else if (state.previousInventory != ItemModelType::EMPTY) {
+		// Prepare to draw a thrown item
+
+		// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
+		// depending on if the item actually was just thrown
+#define INVENTORY_ANIMATION_DURATION 0.275
+#define INVENTORY_GRAVITY 85
+		if (!state.animatingInventory) {
+			state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
+			state.carryStopTime = glfwGetTime();
+			auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
+			bool isKey = state.previousInventory >= ItemModelType::key1 && state.previousInventory <= ItemModelType::screwdriver3;
+			state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory && isKey);
+			if (!state.animatingInventory) {
+				state.previousInventory = ItemModelType::EMPTY;
+			}
+		}
+
+		// If the animation wasn't cancelled, calculate projectile position
+		if (state.animatingInventory) {
+			int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
+			int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
+			glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
+			targetPosition.y += 6.f;
+			auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
+
+			auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
+			auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
+			animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
+
+			inventoryMat = state.inventoryTransform;
+			inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
+
+			inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
+		}
+
+		// Check if the animation has finished
+		if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
+			state.animatingInventory = false;
+			state.previousInventory = ItemModelType::EMPTY;
+		}
+	}
+
+	if (inventoryGeometry) {
+		inventoryGeometry->draw(V, P, inventoryMat);
+	}
+}
+
+
 void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
@@ -1485,7 +1694,7 @@ void DisplayCallback(GLFWwindow* window)
 		allItemsTransform->draw(V, P, glm::mat4(1.0));
 	}
 
-	for (auto state : players) {
+	for (const auto &state : players) {
 		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0));
 		speedSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
@@ -1508,178 +1717,8 @@ void DisplayCallback(GLFWwindow* window)
 
 	// Draw the players
 	if (sharedClient && sharedClient->getGameData()) {
-		bool chefSlow = sharedClient->getGameData()->getSlowChef();
 		for (auto &state : players) {
-			auto &model = playerModels[state.geometryIdx];
-			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
-			if (!networkPlayer) continue;
-
-			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
-			auto inventory = networkPlayer->getInventory();
-			Geometry *playerGeometry = nullptr;
-
-			PowerUp powerupActive = networkPlayer ? networkPlayer->getPowerUp() : PowerUp::NONE;
-
-#ifdef DEBUG_CARRY
-			inventory = static_cast<ItemModelType>(fake_carried_idx);
-#endif
-			state.building = false;
-			switch (action) {
-			case Action::OPEN_BOX:
-			{
-				// hide the un-animated box
-				int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
-				int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
-				auto transform = envObjs[z][x];
-				transform->hidden = true;
-
-				// show the animated box
-				auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
-				unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
-				animatedBoxObjects[boxIdx]->Update(true);
-				animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
-
-				// Turn towards the box
-				float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
-				float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
-				state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
-
-				//for particle effects
-				state.building = true;
-				state.buildPosition = transform->getOffset() * glm::vec4(0, 0, 0, 1);
-
-				// fall through on purpose (missing break is not a mistake)
-			}
-			case Action::CONSTRUCT_GATE: {
-			}
-			case Action::UNLOCK_JAIL:
-			{
-			}
-			case Action::SWING_NET:
-				model.getActionObject()->Update(true);
-				playerGeometry = model.getActionGeometry();
-				break;
-
-			case Action::NONE:
-			default:
-				if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
-					model.getCarryObject()->Update(true);
-					playerGeometry = model.getCarryGeometry();
-				}
-				else if (inventory != ItemModelType::EMPTY) {
-					model.getCarryObject()->Update(true);
-					playerGeometry = model.getCarryGeometry();
-				}
-				else {
-					model.getWalkObject()->Update(state.moving != 0);
-					playerGeometry = model.getwalkGeometry();
-				}
-				break;
-			}
-			state.blinded = false;
-			state.instantSearch = false;
-			//set states to show auras for powerups
-			switch (powerupActive) {
-			case PowerUp::GHOST:
-				state.movingSpeed = 1;
-				break;
-			case PowerUp::CHEF_SLOW:
-				if (networkPlayer->getModelType() == ModelType::CHEF) {
-					state.movingSpeed = -1;
-				}
-				else {
-					state.movingSpeed = 0;
-				}
-				break;
-			case PowerUp::FLASH:
-				state.flashedRecently = 6;
-			case PowerUp::CHEF_BLIND:
-				if (networkPlayer->getModelType() == ModelType::CHEF) {
-					state.blinded = true;
-				}
-			case PowerUp::INSTA_SEARCH:
-				state.instantSearch = true;
-			default:
-				state.flashedRecently = 0;
-				state.movingSpeed = 0;
-				break;
-			}
-			playerGeometry->draw(V, P, state.transform);
-
-			// Prepare to draw a special copy of an item (either carried or thrown)
-			Geometry *inventoryGeometry = nullptr;
-			glm::mat4 inventoryMat;
-
-			if (inventory != ItemModelType::EMPTY) {
-				// Prepare to draw a carried item
-
-				auto playerSettings = playerModels[state.geometryIdx].settings;
-				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
-
-				glm::vec3 modelTranslate = itemModel.settings->translate;
-				modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
-				modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
-				modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
-
-				modelTranslate += playerSettings->carryPosition + itemModel.settings->carryTranslate;
-
-				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
-				const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
-				inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
-				inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
-				inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
-				inventoryGeometry = itemModel.geometry;
-
-				// The thrown item code will need this later
-				state.previousInventory = inventory;
-				state.inventoryTransform = inventoryMat;
-			}
-			else if (state.previousInventory != ItemModelType::EMPTY) {
-				// Prepare to draw a thrown item
-
-				// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
-				// depending on if the item actually was just thrown
-#define INVENTORY_ANIMATION_DURATION 0.275
-#define INVENTORY_GRAVITY 85
-				if (!state.animatingInventory) {
-					state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
-					state.carryStopTime = glfwGetTime();
-					auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
-					bool isKey = state.previousInventory >= ItemModelType::key1 && state.previousInventory <= ItemModelType::screwdriver3;
-					state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory && isKey);
-					if (!state.animatingInventory) {
-						state.previousInventory = ItemModelType::EMPTY;
-					}
-				}
-
-				// If the animation wasn't cancelled, calculate projectile position
-				if (state.animatingInventory) {
-					int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
-					int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
-					glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
-					targetPosition.y += 6.f;
-					auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
-
-					auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
-					auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
-					animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
-
-					inventoryMat = state.inventoryTransform;
-					inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
-
-					inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
-				}
-
-				// Check if the animation has finished
-				if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
-					state.animatingInventory = false;
-					state.previousInventory = ItemModelType::EMPTY;
-				}
-			}
-			if (inventoryGeometry) {
-				inventoryGeometry->draw(V, P, inventoryMat);
-			}
-
+			UpdateAndDrawPlayer(state);
 		}
 		//particleEffects for powerups
 
@@ -1807,9 +1846,21 @@ void LoadModels()
 
 			cout << "\tloading " << setting.name << endl;
 
+			bool animated = false;
+			switch (setting.id) {
+			case ItemModelType::door:
+			case ItemModelType::vent:
+			case ItemModelType::window:
+				animated = ENABLE_GATE_ANIMATION;
+				break;
+
+			default:
+				break;
+			}
+
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 		}
 	});
