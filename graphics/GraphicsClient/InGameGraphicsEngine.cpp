@@ -2349,7 +2349,7 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 			sharedClient->sendPackets(OPEN_ALL_BOXES_EVENT);
 		}
 		if (key == GLFW_KEY_F9) {
-			sharedClient->sendPackets(UNLOCK_ALL_GATES);
+			sharedClient->sendPackets(UNLOCK_ALL_GATES_EVENT);
 		}
 
 		if (key == GLFW_KEY_UP) {
