@@ -1345,34 +1345,44 @@ void updateUIElements(GameData * gameData) {
 		uiCanvas->setVisible(UICanvas::PROMPT_BLACK_BANANA, false);
 		uiCanvas->setVisible(UICanvas::PROMPT_APPLE, false);
 		uiCanvas->setVisible(UICanvas::PROMPT_ORANGE, false);
+		uiCanvas->setVisible(UICanvas::PROMPT_KEY, false);
 
 
 		if (currPlayer->getInventory() == ItemModelType::toiletPaper) {
 			uiCanvas->setItem(UICanvas::TOILET_PAPER_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::rope) {
 			uiCanvas->setItem(UICanvas::ROPE_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::plunger) {
 			uiCanvas->setItem(UICanvas::PLUNGER_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::key1) {
 			uiCanvas->setItem(UICanvas::YELLOW_KEY_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::key2) {
 			uiCanvas->setItem(UICanvas::BLUE_KEY_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::key3) {
 			uiCanvas->setItem(UICanvas::GREEN_KEY_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::screwdriver1) {
 			uiCanvas->setItem(UICanvas::YELLOW_SCREWDRIVER_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::screwdriver2) {
 			uiCanvas->setItem(UICanvas::GREEN_SCREWDRIVER_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::screwdriver3) {
 			uiCanvas->setItem(UICanvas::RED_SCREWDRIVER_ITEM);
+			uiCanvas->setVisible(UICanvas::PROMPT_KEY, true);
 		}
 		else if (currPlayer->getInventory() == ItemModelType::cake) {
 			uiCanvas->setItem(UICanvas::CAKE_ITEM);
