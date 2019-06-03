@@ -140,6 +140,7 @@ void UICanvas::removeItems() {
 	visibleItems[BANANA_GREEN_ITEM] = false;
 	visibleItems[BANANA_YELLOW_ITEM] = false;
 	visibleItems[BANANA_BLACK_ITEM] = false;
+	visibleItems[PROMPT_DROP_ITEM] = false;
 }
 
 UICanvas::~UICanvas() {
