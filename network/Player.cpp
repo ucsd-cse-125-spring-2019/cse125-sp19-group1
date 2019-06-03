@@ -103,7 +103,7 @@ void Player::setCaughtAnimalType(ModelType type) {
 }
 
 void Player::setCaughtStatus(bool caught) {
-	caughtStatus = caught;
+   	caughtStatus = caught;
 	dirtyVariablesMap["caughtStatus"] = true;
 }
 
@@ -114,7 +114,7 @@ bool Player::hasCaughtAnimal() const {
 
 int Player::getCaughtAnimalId() const 
 {
-	return caughtAnimalId;
+	return caughtAnimalID;
 }
 ModelType Player::getCaughtAnimalType() const {
 	return caughtAnimalType;
@@ -122,7 +122,7 @@ ModelType Player::getCaughtAnimalType() const {
 
 void Player::setCaughtAnimalId(int id) 
 {
-	caughtAnimalId = id;
+	caughtAnimalID = id;
 }
 
 bool Player::isCaught() const {
@@ -346,6 +346,11 @@ void Player::decodeCaughtAnimal(std::string value)
 {
 	caughtAnimal = value == "1";
 }
+
+void Player::decodeCaughtAnimalID(std::string value)
+{
+	caughtAnimalID = std::stoi(value);
+}
 void Player::decodeCaughtAnimalType(std::string value)
 {
 	caughtAnimalType = static_cast<ModelType>(std::stoi(value));
@@ -364,6 +369,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["visionRadius"] = &Player::decodeVisionRadius;
 	decodingFunctions["caughtStatus"] = &Player::decodeCaughtStatus;
 	decodingFunctions["caughtAnimal"] = &Player::decodeCaughtAnimal;
+	decodingFunctions["caughtAnimalID"] = &Player::decodeCaughtAnimalID;
 	decodingFunctions["caughtAnimalType"] = &Player::decodeCaughtAnimalType;
 
 }
@@ -381,6 +387,7 @@ void Player::addEncodeFunctions()
 	encodingFunctions["visionRadius"] = &Player::encodeVisionRadius;
 	encodingFunctions["caughtStatus"] = &Player::encodeCaughtStatus;
 	encodingFunctions["caughtAnimal"] = &Player::encodeCaughtAnimal;
+	encodingFunctions["caughtAnimalID"] = &Player::encodeCaughtAnimalID;
 	encodingFunctions["caughtAnimalType"] = &Player::encodeCaughtAnimalType;
 
 
@@ -395,6 +402,7 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["visionRadius"] = true;
 	dirtyVariablesMap["caughtStatus"] = true;
 	dirtyVariablesMap["caughtAnimal"] = true;
+	dirtyVariablesMap["caughtAnimalID"] = true;
 	dirtyVariablesMap["caughtAnimalType"] = true;
 
 }
@@ -467,6 +475,12 @@ std::string Player::encodeCaughtStatus() {
 std::string Player::encodeCaughtAnimal() {
 	std::stringstream encodedData;
 	encodedData << "caughtAnimal: " << (int)caughtAnimal << std::endl;
+
+	return encodedData.str();
+}
+std::string Player::encodeCaughtAnimalID() {
+	std::stringstream encodedData;
+	encodedData << "caughtAnimalID: " << caughtAnimalID << std::endl;
 
 	return encodedData.str();
 }

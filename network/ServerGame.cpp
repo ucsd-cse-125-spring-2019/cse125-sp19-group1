@@ -82,10 +82,10 @@ void ServerGame::receiveFromClients()
 			}
 
 			switch (packet.packet_type) {
-			case OPEN_ALL_BOXES:
+			case OPEN_ALL_BOXES_EVENT:
 				gameData->getAtlas()->openAllBoxes();
 				break;
-			case INCREMENT_ANGER:
+			case INCREMENT_ANGER_EVENT:
 				if (gameData->getChefAnger() < CHEF_MAX_ANGER)
 				{
 					gameData->incrementChefAnger();
@@ -95,7 +95,7 @@ void ServerGame::receiveFromClients()
 					gameData->incrementChefVision();
 				}
 				break;
-			case UNLOCK_ALL_GATES:
+			case UNLOCK_ALL_GATES_EVENT:
 				gameData->getAtlas()->unlockAllGates();
 				break;
 			case INIT_CONNECTION:
@@ -296,6 +296,7 @@ void ServerGame::receiveFromClients()
 											{
 												player->setCaughtAnimal(true);
 												player->setCaughtAnimalId(iter2->first);
+												player->setCaughtAnimalType(iter2->second->getModelType());
 												iter2->second->setLocation(player->getLocation());
 												iter2->second->setCaughtStatus(true);
 												gameData->getPlayer(iter2->first)->setAction(Action::NONE);

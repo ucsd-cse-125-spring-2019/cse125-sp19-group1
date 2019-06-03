@@ -134,6 +134,7 @@ public:
 	void decodeVisionRadius(std::string value);
 	void decodeCaughtStatus(std::string value);
 	void decodeCaughtAnimal(std::string value);
+	void decodeCaughtAnimalID(std::string value);
 	void decodeCaughtAnimalType(std::string value);
 
 	// Encode functions
@@ -149,6 +150,7 @@ public:
 	std::string encodeVisionRadius();
 	std::string encodeCaughtStatus();
 	std::string encodeCaughtAnimal();
+	std::string encodeCaughtAnimalID();
 	std::string encodeCaughtAnimalType();
 
 protected:
@@ -171,7 +173,7 @@ protected:
 	bool		openingBox;
 
 	bool		caughtAnimal = false;
-	int			caughtAnimalId;
+	int			caughtAnimalID;
 	ModelType	caughtAnimalType;
 	bool		hidden = false;
 	float		visionRadius;
