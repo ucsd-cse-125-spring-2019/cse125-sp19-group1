@@ -13,6 +13,8 @@
 #include "UIObject.h"
 #include "ParticleSpawner.h"
 
+#include "TwoDeeGraphicsEngine.h"  // for createObjectForTexture()
+
 #include <thread>
 
 #define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonNewWalk.dae")
@@ -120,6 +122,9 @@ unsigned fake_carried_idx = 1;
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
+
+static const glm::mat4 identityMat(1.f);
+static glm::mat4 orthoP;
 
 static const struct PlayerModelSettings {
 	const char *walkModelPath;     // filesystem path to a model geometry file
@@ -241,7 +246,6 @@ struct ItemModel {
 static vector<ItemModel> itemModels;
 
 static glm::mat4 P; // P for projection
-static glm::mat4 orthoP; // P for 2d elements;
 static glm::mat4 V; // V for view
 static DirLight * light = nullptr;
 static FogGenerator * fog = nullptr;
@@ -337,6 +341,16 @@ extern ClientGame * sharedClient;
 
 static int elapsedTime = 0;
 static int directions = 0;
+
+
+#define TWO_DEE_PATH "../2D Elements/"
+#define ANIMAL_START_PROMPT_PATH (TWO_DEE_PATH "promptGOGOGOAnimals.png")
+#define CHEF_START_PROMPT_PATH (TWO_DEE_PATH "promptGOGOGOChef.png")
+
+static double mainLoopBeginTime = 0.0;
+static GLuint twoDeeShader = 0;
+static FBXObject *animalStartingPrompt = nullptr;
+static FBXObject *chefStartingPrompt = nullptr;
 
 struct PlayerState {
 	glm::mat4 transform;        // for position and rotation
@@ -1494,7 +1508,6 @@ void DisplayCallback(GLFWwindow* window)
 
 	// Draw the players
 	if (sharedClient && sharedClient->getGameData()) {
-		auto &networkPlayers = sharedClient->getGameData()->getAllPlayers();
 		bool chefSlow = sharedClient->getGameData()->getSlowChef();
 		for (auto &state : players) {
 			auto &model = playerModels[state.geometryIdx];
@@ -1672,13 +1685,45 @@ void DisplayCallback(GLFWwindow* window)
 
 	}
 
+	// Draw the starting prompt
+#define START_PROMPT_DURATION 10.0
+#define START_PROMPT_FADEOUT 1.0
+#define START_PROMPT_PERIOD 0.5
+	double now = glfwGetTime();
+	Player *networkPlayer = nullptr;
+	if (now >= mainLoopBeginTime && now < mainLoopBeginTime + START_PROMPT_DURATION
+		&& twoDeeShader && animalStartingPrompt && chefStartingPrompt
+		&& sharedClient && sharedClient->getGameData()
+		&& ( networkPlayer = sharedClient->getGameData()->getPlayer(sharedClient->getMyID()) ) ) {
+		
+		FBXObject *message = networkPlayer->isChef() ? chefStartingPrompt : animalStartingPrompt;
 
+		float scale = 1.f - (sinf(now * (glm::two_pi<float>() / START_PROMPT_PERIOD)) + 1.f) * 0.01f;
+		auto mat = glm::scale(identityMat, glm::vec3(scale));
+
+		float msgAlpha = 1.f;
+		double alphaPhase = now - (mainLoopBeginTime + START_PROMPT_DURATION - START_PROMPT_FADEOUT) / START_PROMPT_FADEOUT;
+		if (alphaPhase >= 0.f && alphaPhase <= 1.f) {
+			msgAlpha = 1.f - alphaPhase;
+		}
+
+		printf("Scale: %f  \tAlpha: %f\n", scale, msgAlpha);
+
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		
+		glUseProgram(twoDeeShader);
+		auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
+		glUniform1f(uAlpha, msgAlpha);
+		message->Draw(twoDeeShader, &identityMat, &orthoP, mat);
+	}
 
 	if (uiCanvas) {
 		uiCanvas->draw(&V, &P, glm::mat4(1.0));
 	}
-
-
 
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
@@ -1860,6 +1905,21 @@ void InGameGraphicsEngine::CleanUp()
 {
 	players.clear();
 
+	if (twoDeeShader) {
+		TwoDeeGraphicsEngine::releaseShader();
+		twoDeeShader = 0;
+	}
+
+	if (animalStartingPrompt) {
+		delete animalStartingPrompt;
+		animalStartingPrompt = nullptr;
+	}
+
+	if (chefStartingPrompt) {
+		delete chefStartingPrompt;
+		chefStartingPrompt = nullptr;
+	}
+
 	for (auto &model : itemModels) {
 		if (model.object) delete model.object;
 		if (model.geometry) delete model.geometry;
@@ -1904,6 +1964,17 @@ void InGameGraphicsEngine::MainLoopBegin()
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
 		cout << "done constructing UICanvas in " << setupDuration.count() << " seconds\n";
+	}
+
+	if (!twoDeeShader) {
+		twoDeeShader = TwoDeeGraphicsEngine::retainShader();
+	}
+
+	if (!animalStartingPrompt) {
+		animalStartingPrompt = createObjectForTexture(ANIMAL_START_PROMPT_PATH);
+	}
+	if (!chefStartingPrompt) {
+		chefStartingPrompt = createObjectForTexture(CHEF_START_PROMPT_PATH);
 	}
 #endif
 
@@ -1969,11 +2040,13 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 	InitCamera(glm::vec3(0.f));
 
+	// Set clear color
+	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
+
 	const auto gameData = sharedClient->getGameData();
 	gameData->startGameClock();
 
-	// Set clear color
-	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
+	mainLoopBeginTime = glfwGetTime();
 }
 
 void InGameGraphicsEngine::MainLoopEnd()
@@ -1990,9 +2063,9 @@ void InGameGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int 
 	if (windowHeight > 0)
 	{
 		P = glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4000.0f);
-		//orthoP = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, -1.0f, 1.0f);
-		orthoP = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+
+		orthoP = glm::ortho(-1.f, 1.f, -1.f, 1.f);
 	}
 }
 
