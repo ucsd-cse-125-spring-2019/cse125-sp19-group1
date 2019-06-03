@@ -1814,7 +1814,7 @@ static void DrawMinimap()
 	// Draw a ping originating from the chef
 	double now = glfwGetTime();
 	float pingPhase = fmod(now, MINIMAP_PING_INTERVAL) / MINIMAP_PING_DURATION;
-	if (pingPhase >= 0.0 && pingPhase <= 1.0) {
+	if (foundChef && pingPhase >= 0.0 && pingPhase <= 1.0) {
 		glUseProgram(twoDeeShader);
 		auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
 		glUniform1f(uAlpha, (1.f - pingPhase) * (1.f - pingPhase));
