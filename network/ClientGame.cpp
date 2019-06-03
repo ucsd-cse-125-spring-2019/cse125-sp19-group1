@@ -312,8 +312,13 @@ void ClientGame::update()
 
 				if (curPlayer->isChef())
 				{
-					if (curPlayer->getAction() == Action::SWING_NET) {
+					if (curPlayer->getAction() == Action::NONE) {
+						playerDoingStuff.at(it->first) = false;
+						soundSystem->pauseOtherPlayersSounds(it->first);
+					}
+					else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(it->first) == false) {
 						soundSystem->playOtherPlayersSounds(sound_other_net, it->first, locX, locY, locZ);
+						playerDoingStuff.at(it->first) = true;
 					}
 				}
 				else {
