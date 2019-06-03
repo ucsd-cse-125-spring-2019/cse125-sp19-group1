@@ -23,9 +23,10 @@ public:
 	void updateRightEvent(int id);
 	void updateHeight(int id);
 	void updateCollision(int id);
-	void updatePlayerCollision(int id, int dir);
+	void updatePlayerCollision(int id, Direction dir);
 	void resetGame();
 	void updateMovement(int dir, int id);
+	void updateMovement2(Direction dir, int id);
 
 	GameData * gameData;
 private:

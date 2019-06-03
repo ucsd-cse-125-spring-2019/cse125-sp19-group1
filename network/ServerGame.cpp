@@ -693,6 +693,7 @@ void ServerGame::receiveFromClients()
 			{
 				Direction facingDirection = static_cast<Direction>(sum);
 				player->setFacingDirection(facingDirection);
+				updateMovement2(facingDirection, playerID);
 			}
 			
 		}
@@ -997,6 +998,66 @@ void ServerGame::initNewClient()
 	gameData->addNewPlayer(client_id, Location(30, 0, 30), ClientType::SERVER_SIDE);
 }
 
+void ServerGame::updateMovement2(Direction dir, int id)
+{
+	Location loc = gameData->getPlayer(id)->getLocation();
+	float xSPEED = 0.0f;
+	float zSPEED = 0.0f;
+	switch (dir)
+	{
+	case Direction::NORTH:
+		zSPEED = sSpeed;
+		break;
+	case Direction::SOUTH:
+		zSPEED = -sSpeed;
+		break;
+	case Direction::EAST:
+		xSPEED = -sSpeed;
+		break;
+	case Direction::WEST:
+		xSPEED = sSpeed;
+		break;
+	case Direction::NORTHEAST:
+		zSPEED = dSpeed;
+		xSPEED = -dSpeed;
+		break;
+	case Direction::NORTHWEST:
+		zSPEED = dSpeed;
+		xSPEED = dSpeed;
+		break;
+	case Direction::SOUTHEAST:
+		zSPEED = -dSpeed;
+		xSPEED = -dSpeed;
+		break;
+	case Direction::SOUTHWEST:
+		zSPEED = -dSpeed;
+		xSPEED = dSpeed;
+		break;
+	}
+
+	if (gameData->getPlayer(id)->isChef())
+	{
+		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
+		gameData->getPlayer(id)->setLocation(loc.getX() + (xSPEED*multiplier), loc.getY(), 
+												loc.getZ() + (zSPEED*multiplier));
+	}
+	else
+	{
+		if (gameData->getPlayer(id)->getGhost())
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER, loc.getY(),
+													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
+		}
+		else
+		{
+			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
+													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
+		}
+	}
+	updatePlayerCollision(id, dir);
+	updateCollision(id);
+	updateHeight(id);
+}
 void ServerGame::updateMovement(int dir, int id)
 {
 	if (gameData->getPlayer(id)->isInteracting() ||
@@ -1023,7 +1084,9 @@ void ServerGame::updateMovement(int dir, int id)
 
 void ServerGame::updateRightEvent(int id)
 {
-	float SPEED = sSpeed;
+	moveRight = true;
+
+	/*float SPEED = sSpeed;
 	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHEAST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHEAST) {
 		SPEED = dSpeed;
 	}
@@ -1047,12 +1110,14 @@ void ServerGame::updateRightEvent(int id)
 		}
 	}
 
-	updatePlayerCollision(id, 0);
+	updatePlayerCollision(id, 0);*/
 }
 
 void ServerGame::updateBackwardEvent(int id)
 {
-	float SPEED = sSpeed;
+	moveBackward = true;
+
+	/*float SPEED = sSpeed;
 	if (gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHWEST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHEAST) {
 		SPEED = dSpeed;
 	}
@@ -1076,12 +1141,14 @@ void ServerGame::updateBackwardEvent(int id)
 		}
 	}
 
-	updatePlayerCollision(id, 1);
+	updatePlayerCollision(id, 1);*/
 }
 
 void ServerGame::updateForwardEvent(int id)
 {
-	float SPEED = sSpeed;
+	moveForward = true;
+
+	/*float SPEED = sSpeed;
 	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHEAST || gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHWEST) {
 		SPEED = dSpeed;
 	}
@@ -1104,12 +1171,14 @@ void ServerGame::updateForwardEvent(int id)
 			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier());
 		}
 	}
-	updatePlayerCollision(id, 2);
+	updatePlayerCollision(id, 2);*/
 }
 
 void ServerGame::updateLeftEvent(int id)
 {
-	float SPEED = sSpeed;
+	moveLeft = true;
+
+	/*float SPEED = sSpeed;
 	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHWEST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHWEST) {
 		SPEED = dSpeed;
 	}
@@ -1133,7 +1202,7 @@ void ServerGame::updateLeftEvent(int id)
 		}
 	}
 
-	updatePlayerCollision(id, 3);
+	updatePlayerCollision(id, 3);*/
 }
 
 void ServerGame::updateHeight(int id)
@@ -1219,7 +1288,7 @@ void ServerGame::updateHeight(int id)
 	}
 }
 
-void ServerGame::updatePlayerCollision(int id, int dir) 
+void ServerGame::updatePlayerCollision(int id, Direction dir) 
 {
 	Location pLoc = gameData->getPlayer(id)->getLocation();
 	std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
@@ -1253,7 +1322,7 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 		
 		if (dist < 2 * PLAYER_RADIUS) 
 		{
-			if (dir == 0) 
+			/*if (dir == 0) 
 			{
 				loc[0] = ot_x - 2 * PLAYER_RADIUS;
 			} 
@@ -1265,9 +1334,57 @@ void ServerGame::updatePlayerCollision(int id, int dir)
 			{
 				loc[2] = ot_z - 2 * PLAYER_RADIUS;
 			}
-			else
+			else if(dir == 3)
 			{
 				loc[0] = ot_x + 2 * PLAYER_RADIUS;
+			}*/
+
+			switch (dir)
+			{
+			case Direction::NORTH:
+				loc[2] = ot_z - 2 * PLAYER_RADIUS;
+				break;
+			case Direction::SOUTH:
+				loc[2] = ot_z + 2 * PLAYER_RADIUS;
+				break;
+			case Direction::EAST:
+				loc[0] = ot_x + 2 * PLAYER_RADIUS;
+				break;
+			case Direction::WEST:
+				loc[0] = ot_x - 2 * PLAYER_RADIUS;
+				break;
+			case Direction::NORTHEAST:
+				loc[2] = ot_z - 2 * PLAYER_RADIUS;
+				my_x = loc[0];
+				my_z = loc[2];
+				dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
+				if (dist < 2 * PLAYER_RADIUS)
+					loc[0] = ot_x + 2 * PLAYER_RADIUS;
+				break;
+			case Direction::NORTHWEST:
+				loc[2] = ot_z - 2 * PLAYER_RADIUS;
+				my_x = loc[0];
+				my_z = loc[2];
+				dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
+				if (dist < 2 * PLAYER_RADIUS)
+					loc[0] = ot_x - 2 * PLAYER_RADIUS;
+				break;
+			case Direction::SOUTHEAST:
+				loc[2] = ot_z + 2 * PLAYER_RADIUS;
+				my_x = loc[0];
+				my_z = loc[2];
+				dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
+				if (dist < 2 * PLAYER_RADIUS)
+					loc[0] = ot_x + 2 * PLAYER_RADIUS;
+				break;
+			case Direction::SOUTHWEST:
+				loc[2] = ot_z + 2 * PLAYER_RADIUS;
+				my_x = loc[0];
+				my_z = loc[2];
+				dist = sqrt(pow(my_x - ot_x, 2) + pow(my_z - ot_z, 2) * 1.0);
+				if (dist < 2 * PLAYER_RADIUS)
+					loc[0] = ot_x - 2 * PLAYER_RADIUS;
+				break;
 			}
 			gameData->getPlayer(id)->setLocation(loc[0], loc[1], loc[2]);
 		}
