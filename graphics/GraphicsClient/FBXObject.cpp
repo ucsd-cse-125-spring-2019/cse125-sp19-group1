@@ -393,13 +393,7 @@ void FBXObject::LoadMatrices(const char * path) {
 	int bufsize = 128;
 	Tokenizer * token = new Tokenizer();
 	token->Open(path);
-	bool print = false;
-	if (path == "../Animations/catSearch.dae")
-		print = true;
-	if (print) {
-		std::cout << "LOADING MATS FROM PATH: " << path << std::endl; 
-		skel->PrintBoneStructure();
-	}
+	
 	if (token->FindToken("<library_animations>")) {
 		while (token->FindToken("<animation id=\"")) {
 			char * out = new char[bufsize];
@@ -419,7 +413,6 @@ void FBXObject::LoadMatrices(const char * path) {
 						for (int i = 0; i < numValues; i++)
 							values[i] = token->GetFloat();
 						currBone->SetChannelMatrices(values, numValues);
-						if (print) std::cout << "ADDING MAT TO " << boneName << std::endl;
 					}
 					else
 						std::cout << "ERROR READING FLOATS FOR " << boneName << std::endl;

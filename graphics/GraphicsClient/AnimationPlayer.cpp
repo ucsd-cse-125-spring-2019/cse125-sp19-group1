@@ -46,6 +46,7 @@ void AnimationPlayer::SetAnimation(Animation * newAnimation) {
 
 void AnimationPlayer::SetBoneChannels() {
 	std::vector<AnimationChannel *> * channels = animation->GetChannels();
+
 	for (int i = 0; i < channels->size(); i++) {
 		AnimationChannel * currChannel = (*channels)[i];
 		string currName = currChannel->getBoneName();
@@ -53,6 +54,14 @@ void AnimationPlayer::SetBoneChannels() {
 			skeleton->GetBone(currName)->SetChannel(currChannel);
 		else
 			std::cout << "ANIMPLAYER: NO BONE MATCHES THIS CHANNEL" << std::endl;
+	}
+
+	std::map<string, Bone *> * bones = skeleton->GetBones();
+	for (std::map<string, Bone *>::iterator it = bones->begin(); it != bones->end(); it++) {
+		Bone * currBone = it->second;
+		if (currBone->GetName().find("joint") != string::npos && currBone->CheckIsBone() && currBone->GetChannel() == NULL) {
+			currBone->CopyParentChannel();
+		}
 	}
 }
 
