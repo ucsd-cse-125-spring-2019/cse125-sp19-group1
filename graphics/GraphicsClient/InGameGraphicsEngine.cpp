@@ -31,7 +31,7 @@
 
 #define DOG_WALK_MDL_PATH       (ANIMATIONS_PATH "dogWalk.dae")
 #define DOG_CARRY_MDL_PATH      (ANIMATIONS_PATH "dogWalkWithItem.dae")
-#define DOG_SEARCH_MDL_PATH     (ANIMATIONS_PATH "dogSearchNoEars.dae")
+#define DOG_SEARCH_MDL_PATH     (ANIMATIONS_PATH "dogSearch.dae")
 #define DOG_MDL_PATH            (MODELS_PATH "doggo.fbx")
 #define DOG_TEX_PATH            (TEXTURES_PATH "doggo.ppm")
 
