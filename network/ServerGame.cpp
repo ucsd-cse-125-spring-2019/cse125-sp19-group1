@@ -82,6 +82,12 @@ void ServerGame::receiveFromClients()
 			}
 
 			switch (packet.packet_type) {
+			case OPEN_ALL_BOXES:
+				break;
+			case INCREMENT_ANGER:
+				break;
+			case UNLOCK_ALL_GATES:
+				break;
 			case INIT_CONNECTION:
 				newPlayerInit = true;
 				printf("server received init packet from client\n");
@@ -145,9 +151,6 @@ void ServerGame::receiveFromClients()
 				printf("server received SELECT4 event packet from client\n");
 				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
 				break;
-				/*if (gameStarted && !(chefWin || animalWin))
-				{
-					if (chefWin || animalWin) { break; }*/
 			case FORWARD_EVENT:
 				if (gameStarted && !(chefWin || animalWin)) 
 				{
@@ -240,23 +243,44 @@ void ServerGame::receiveFromClients()
 												//get random jail
 												//deploy animal in random jail
 												auto jailLocations = gameData->getAtlas()->jailLocations;
-												for (auto it = jailLocations.begin();
-													it != jailLocations.end();  // Use (), and assuming itt was a typo
-													it++)
+												int randJailIndex = rand() % jailLocations.size();
+												auto randJailCoords = jailLocations.at(randJailIndex);
+												Location randJailLoc = Location(randJailCoords.second * TILE_SIZE, 0,  randJailCoords.first * TILE_SIZE);
+												JailTile * randJailTile = gameData->getJailTile(randJailLoc);
+												// Keep checking for a random empty jail
+												while (!randJailTile->isJailEmpty())
 												{
-													Location jLoc = Location(it->second * TILE_SIZE + 1, 0, it->first * TILE_SIZE + 1);
-													if (gameData->getAtlas()->hasJail(jLoc)) {
-														JailTile * jailTile = gameData->getJailTile(jLoc);
-														if (jailTile->isJailEmpty()) {
-															iter2->second->setCaughtStatus(true);
-															iter2->second->setLocation(jLoc.getX() + TILE_SIZE / 2, (float)(jailTile->getHeight() / 2 * TILE_HEIGHT), jLoc.getZ() + TILE_SIZE / 2);
-															iter2->second->setAction(Action::NONE);
-															jailTile->placeAnimalInJail(iter2->first);
-															animalCaught = true;
-															break;
-														}
-													}
+													randJailIndex = rand() % jailLocations.size();
+													randJailCoords = jailLocations.at(randJailIndex);
+													randJailLoc = Location(randJailCoords.second * TILE_SIZE, 0, randJailCoords.first * TILE_SIZE);
+													randJailTile = gameData->getJailTile(randJailLoc);
 												}
+
+												if (randJailTile->isJailEmpty()) {
+													iter2->second->setCaughtStatus(true);
+													iter2->second->setLocation(randJailLoc.getX() + TILE_SIZE / 2, (float)(randJailTile->getHeight() / 2 * TILE_HEIGHT), randJailLoc.getZ() + TILE_SIZE / 2);
+													iter2->second->setAction(Action::NONE);
+													jailTile->placeAnimalInJail(iter2->first);
+													animalCaught = true;
+													
+												}
+												//for (auto it = jailLocations.begin();
+												//	it != jailLocations.end();  // Use (), and assuming itt was a typo
+												//	it++)
+												//{
+												//	Location jLoc = Location(it->second * TILE_SIZE + 1, 0, it->first * TILE_SIZE + 1);
+												//	if (gameData->getAtlas()->hasJail(jLoc)) {
+												//		JailTile * jailTile = gameData->getJailTile(jLoc);
+												//		if (jailTile->isJailEmpty()) {
+												//			iter2->second->setCaughtStatus(true);
+												//			iter2->second->setLocation(jLoc.getX() + TILE_SIZE / 2, (float)(jailTile->getHeight() / 2 * TILE_HEIGHT), jLoc.getZ() + TILE_SIZE / 2);
+												//			iter2->second->setAction(Action::NONE);
+												//			jailTile->placeAnimalInJail(iter2->first);
+												//			animalCaught = true;
+												//			break;
+												//		}
+												//	}
+												//}
 											}
 											else
 											{
