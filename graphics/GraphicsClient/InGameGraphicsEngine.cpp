@@ -107,7 +107,7 @@
 // #define DEBUG_CARRY
 
 // Uncomment to skip loading player animations
- #define DEBUG_LOAD_LESS
+ // #define DEBUG_LOAD_LESS
 
 // Uncomment to skip loading UI
  // #define DEBUG_NO_UI
