@@ -391,7 +391,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 				fprintf(stdout, "playOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
 			}
 		}
-		threeDeeChannelPlayedBefore[otherPlayerChannels.at(playerID)] = true;
+		// threeDeeChannelPlayedBefore[otherPlayerChannels.at(playerID)] = true;
 	}
 	else {
 		// just for testing, remove

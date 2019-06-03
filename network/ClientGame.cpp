@@ -58,6 +58,9 @@ static Sound * sound_other_door_unlock;
 
 static Sound * background_music;
 
+// VERY HACKY FIX....
+std::map<int, bool> playerDoingStuff; // true if currently doing something
+
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
 
@@ -285,6 +288,7 @@ void ClientGame::update()
 			// sounds that originate from other players
 			std::map < int, Player *> allPlayers = gameData->getAllPlayers();
 			std::map < int, Player * >::iterator it;
+			std::map < int, bool>::iterator miniIt;
 			Player * curPlayer;
 			Location curPlayerLoc;
 			float locX = 0.0;
@@ -294,6 +298,10 @@ void ClientGame::update()
 			for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
 				if (it->first == myID) {
 					continue;
+				}
+				miniIt = playerDoingStuff.find(it->first);
+				if (miniIt == playerDoingStuff.end()) {
+					playerDoingStuff.insert(std::pair<int, bool>(it->first, false));
 				}
 
 				curPlayer = it->second;
@@ -310,12 +318,14 @@ void ClientGame::update()
 				}
 				else {
 					if (curPlayer->getAction() == Action::NONE) {
+						playerDoingStuff.at(it->first) = false;
 						soundSystem->pauseOtherPlayersSounds(it->first);
 					}
-					else if (curPlayer->getAction() == Action::OPEN_BOX) {
+					else if (curPlayer->getAction() == Action::OPEN_BOX && playerDoingStuff.at(it->first) == false) {
 						soundSystem->playOtherPlayersSounds(sound_other_search_item, it->first, locX, locY, locZ);
+						playerDoingStuff.at(it->first) = true;
 					}
-					else if (curPlayer->getAction() == Action::CONSTRUCT_GATE) {
+					else if (curPlayer->getAction() == Action::CONSTRUCT_GATE && playerDoingStuff.at(it->first) == false) {
 						int gateNum = gameData->getGateTile(curPlayerLoc)->getGateNum();
 						if (gateNum == 1) { //door
 							soundSystem->playOtherPlayersSounds(sound_other_door_unlock, it->first, locX, locY, locZ);
@@ -326,9 +336,11 @@ void ClientGame::update()
 						else if (gateNum == 3) { //vent
 							soundSystem->playOtherPlayersSounds(sound_other_vent_screw, it->first, locX, locY, locZ);
 						}
+						playerDoingStuff.at(it->first) = true;
 					}
-					else if (player->getAction() == Action::UNLOCK_JAIL) {
+					else if (player->getAction() == Action::UNLOCK_JAIL && playerDoingStuff.at(it->first) == false) {
 						soundSystem->playOtherPlayersSounds(sound_other_jail_unlock, it->first, locX, locY, locZ);
+						playerDoingStuff.at(it->first) = true;
 					}
 					else if (player->getAction() == Action::KEY_DROP) {
 						soundSystem->playOtherPlayersSounds(sound_other_keydrop, it->first, locX, locY, locZ);
