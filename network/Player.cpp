@@ -123,6 +123,7 @@ ModelType Player::getCaughtAnimalType() const {
 void Player::setCaughtAnimalId(int id) 
 {
 	caughtAnimalID = id;
+	dirtyVariablesMap["caughtAnimalID"] = true;
 }
 
 bool Player::isCaught() const {

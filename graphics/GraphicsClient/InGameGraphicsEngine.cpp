@@ -942,11 +942,11 @@ void reloadMap()
 			{
 				// Calculate the altitude of the wall
 				int height = 1;
-				/*if (z == 0 || z != clippedZ) {
-					height = sharedClient->heights[clippedZ][x];
+				if (z == 0 || z != clippedZ) {
+					height = tileLayout[clippedZ][x]->getHeight();
 				} else {
-					height = (sharedClient->heights[z - 1][x] + sharedClient->heights[z][x]) / 2;
-				}*/
+					height = max(tileLayout[z - 1][x]->getHeight(), tileLayout[z][x]->getHeight());
+				}
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
 				// translate to the edge between tiles
@@ -971,12 +971,12 @@ void reloadMap()
 			{
 				// Calculate the altitude of the wall
 				int height = 1;
-				/*if (x == 0 || x != clippedX) {
-					height = sharedClient->heights[z][clippedX];
+				if (x == 0 || x != clippedX) {
+					height = tileLayout[z][clippedX]->getHeight();
 				}
 				else {
-					height = (sharedClient->heights[z][x - 1] + sharedClient->heights[z][x]) / 2;
-				}*/
+					height = max(tileLayout[z][x - 1]->getHeight(), tileLayout[z][x]->getHeight());
+				}
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
 				// translate to the edge between tiles
@@ -1539,7 +1539,24 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 {
 	auto &model = playerModels[state.geometryIdx];
 	auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
-	if (!networkPlayer) return;;
+	if (!networkPlayer) return;
+
+	bool notHidden = true;
+
+	if (networkPlayer->isCaught()) {
+		// Search for any chef that is carrying this player
+		Player *networkChef = nullptr;
+		for (const auto pair : sharedClient->getGameData()->getAllPlayers()) {
+			Player *networkChef = pair.second;
+			if (!networkChef->isChef()) continue;
+
+			if (networkChef->hasCaughtAnimal() && networkChef->getCaughtAnimalId() == state.id) {
+				// We are being carried, so draw nothing
+				notHidden = false;
+				break;
+			}
+		}
+	}
 
 	Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
 	auto inventory = networkPlayer->getInventory();
@@ -1632,7 +1649,10 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		state.flashedRecently = 0;
 		break;
 	}
-	playerGeometry->draw(V, P, state.transform);
+
+	if (notHidden) {
+		playerGeometry->draw(V, P, state.transform);
+	}
 
 	// Prepare to draw a special copy of an item (either carried or thrown)
 	Geometry *inventoryGeometry = nullptr;
@@ -1705,7 +1725,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		}
 	}
 
-	if (inventoryGeometry) {
+	if (notHidden && inventoryGeometry) {
 		inventoryGeometry->draw(V, P, inventoryMat);
 	}
 }
