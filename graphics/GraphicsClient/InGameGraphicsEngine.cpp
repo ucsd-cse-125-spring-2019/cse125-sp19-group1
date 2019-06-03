@@ -375,6 +375,7 @@ static FBXObject *chefStartingPrompt = nullptr;
 
 static GLuint solidColorShader = 0;
 static FBXObject *solidColorObject = nullptr;
+static FBXObject *mapPingObject = nullptr;
 
 struct PlayerState {
 	glm::mat4 transform;        // for position and rotation
@@ -1683,6 +1684,18 @@ void printPoint(float x, float y, const glm::mat4 &transform)
 	printf("(%f, %f)", newPoint.x, newPoint.y);
 }
 
+#define MINIMAP_MARGIN_LEFT 0.02f
+#define MINIMAP_MARGIN_BOTTOM ((windowWidth / (float)windowHeight) * 0.02f)
+#define MINIMAP_SCREEN_WIDTH 0.275f
+#define MINIMAP_WALL_WIDTH (TILE_SIZE_SERVER * 0.2f)
+#define MINIMAP_ALPHA 1.f
+#define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
+#define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
+#define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
+#define MINIMAP_PING_INTERVAL 15.0
+#define MINIMAP_PING_DURATION 2.25
+#define MINIMAP_PING_FINAL_RADIUS (9.f * TILE_SIZE_SERVER)
+#define MINIMAP_PING_BEGIN_RADIUS (0.5f * TILE_SIZE_SERVER)
 static void DrawMinimap()
 {
 	GameData *gameData = nullptr;
@@ -1701,14 +1714,7 @@ static void DrawMinimap()
 	const float mapWidth = tileWidth * TILE_SIZE_SERVER;
 	const float mapHeight = tileHeight * TILE_SIZE_SERVER;
 
-#define MINIMAP_MARGIN_LEFT 0.02f
-#define MINIMAP_MARGIN_BOTTOM ((windowWidth / (float)windowHeight) * 0.02f)
-#define MINIMAP_SCREEN_WIDTH 0.275f
-#define MINIMAP_WALL_WIDTH (TILE_SIZE_SERVER * 0.2f)
-#define MINIMAP_ALPHA 1.f
-#define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
-#define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
-#define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
+	// First calculate transformation from (x, z, 0) map coords to the minimap rectangle on the screen
 
 	float screenHeight = (windowWidth / (float)windowHeight) * (MINIMAP_SCREEN_WIDTH * tileHeight) / tileWidth;
 
@@ -1719,6 +1725,7 @@ static void DrawMinimap()
 	glUseProgram(solidColorShader);
 	const auto uFillColor = glGetUniformLocation(solidColorShader, "fillColor");
 
+	// Convenience method to draw a rectangle
 	auto fillRect = [&](float centerX, float centerZ, float width, float height, float r, float g, float b, float a) {
 		const auto transform = glm::scale(glm::translate(identityMat, glm::vec3(centerX, centerZ, 0.f)), glm::vec3(0.5f * width, 0.5f * height, 1.f));
 
@@ -1726,10 +1733,12 @@ static void DrawMinimap()
 		solidColorObject->Draw(solidColorShader, &identityMat, &orthoP, viewMat * transform);
 	};
 
+	// Draw the background
 	fillRect(mapWidth * 0.5f, mapHeight * 0.5f, mapWidth, mapHeight, MINIMAP_BG_COLOR);
 
 	int z;
 
+	// Draw gates
 	z = 0;
 	for (const auto &row : tileLayout) {
 		int x = 0;
@@ -1744,6 +1753,7 @@ static void DrawMinimap()
 		++z;
 	}
 
+	// Draw north walls (horizontal along the tops of tiles)
 	z = 0;
 	for (const auto &row : northWalls) {
 		int x = 0;
@@ -1758,6 +1768,7 @@ static void DrawMinimap()
 		++z;
 	}
 
+	// Draw west walls (vertical along the left sides of tiles)
 	z = 0;
 	for (const auto &row : westWalls) {
 		int x = 0;
@@ -1772,9 +1783,20 @@ static void DrawMinimap()
 		++z;
 	}
 
+	// Draw dots for players you have permission to see the position of
+	bool foundChef = false;
+	glm::vec3 chefPosition(0.f);
 	auto networkPlayerMe = gameData->getPlayer(sharedClient->getMyID());
 	for (const auto &state : players) {
-		if (networkPlayerMe->isChef() != (state.geometryIdx == static_cast<unsigned>(ModelType::CHEF))) {
+		bool isChefState = state.geometryIdx == static_cast<unsigned>(ModelType::CHEF);
+		if (isChefState) {
+			foundChef = true;
+			chefPosition.x = state.position.x;
+			chefPosition.y = state.position.z;
+			chefPosition.z = 0.f;
+		}
+
+		if (networkPlayerMe->isChef() != isChefState) {
 			continue;
 		}
 
@@ -1787,6 +1809,20 @@ static void DrawMinimap()
 		else {
 			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.25f, 0.55f, 0.95f, 0.85f);
 		}
+	}
+
+	// Draw a ping originating from the chef
+	double now = glfwGetTime();
+	float pingPhase = fmod(now, MINIMAP_PING_INTERVAL) / MINIMAP_PING_DURATION;
+	if (pingPhase >= 0.0 && pingPhase <= 1.0) {
+		glUseProgram(twoDeeShader);
+		auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
+		glUniform1f(uAlpha, (1.f - pingPhase) * (1.f - pingPhase));
+
+		const float radius = MINIMAP_PING_BEGIN_RADIUS + pingPhase * (MINIMAP_PING_FINAL_RADIUS - MINIMAP_PING_BEGIN_RADIUS);
+		const auto transform = glm::scale(glm::translate(identityMat, chefPosition), glm::vec3(radius, radius, 1.f));
+
+		mapPingObject->Draw(twoDeeShader, &identityMat, &orthoP, viewMat * transform);
 	}
 }
 
@@ -2106,6 +2142,7 @@ void InGameGraphicsEngine::CleanUp()
 	if (wallGeometry)     delete wallGeometry;
 	if (light)            delete light;
 	if (solidColorObject) delete solidColorObject;
+	if (mapPingObject)    delete mapPingObject;
 
 	deallocFloor();
 
@@ -2156,6 +2193,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 	if (!solidColorObject) {
 		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false);
 		solidColorObject->SetDepthTest(false);
+	}
+
+	if (!mapPingObject) {
+		mapPingObject = createObjectForTexture(CANVAS_PATH "mapPing.png");
 	}
 
 	calledMainLoopBegin = true;
