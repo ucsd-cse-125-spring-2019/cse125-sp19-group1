@@ -83,10 +83,20 @@ void ServerGame::receiveFromClients()
 
 			switch (packet.packet_type) {
 			case OPEN_ALL_BOXES:
+				gameData->getAtlas()->openAllBoxes();
 				break;
 			case INCREMENT_ANGER:
+				if (gameData->getChefAnger() < CHEF_MAX_ANGER)
+				{
+					gameData->incrementChefAnger();
+				}
+				if (gameData->getChefVision() < CHEF_MAX_VISION)
+				{
+					gameData->incrementChefVision();
+				}
 				break;
 			case UNLOCK_ALL_GATES:
+				gameData->getAtlas()->unlockAllGates();
 				break;
 			case INIT_CONNECTION:
 				newPlayerInit = true;
