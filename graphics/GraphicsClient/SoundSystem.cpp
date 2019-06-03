@@ -249,11 +249,12 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 	}
 
 	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
-	fprintf(stdout, "pauseOtherPlayersSounds threeDeeChannel size=%d\n", sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0]));
-	fprintf(stdout, "pauseOtherPlayersSounds curPlayerChannel=%d\n", curPlayerChannel);
-	fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
+	// fprintf(stdout, "pauseOtherPlayersSounds threeDeeChannel size=%d\n", sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0]));
+	// fprintf(stdout, "pauseOtherPlayersSounds curPlayerChannel=%d\n", curPlayerChannel);
+	// fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
 	result = curPlayerChannel->setPaused(true);
 	
+	/*
 	if (result != FMOD_OK) {
 		if (result == FMOD_ERR_INVALID_PARAM) {
 			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
@@ -271,6 +272,7 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 			fprintf(stdout, "pauseOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
 		}
 	}
+	*/
 
 
 }

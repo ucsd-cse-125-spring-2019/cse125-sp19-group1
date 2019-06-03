@@ -392,7 +392,8 @@ void ServerGame::receiveFromClients()
 								double seconds = player->getInteractingTime(1);
 
 								// Only allow another jail action if enough time has passed
-								if (seconds > UNLOCK_JAIL_COOLDOWN) {
+								if (seconds > UNLOCK_JAIL_COOLDOWN && !jailTile->isJailEmpty()) {
+			
 
 									player->setAction(Action::UNLOCK_JAIL);
 									player->setInteracting(true);
