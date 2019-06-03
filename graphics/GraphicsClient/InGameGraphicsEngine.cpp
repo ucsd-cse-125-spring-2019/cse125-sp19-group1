@@ -108,6 +108,12 @@
 // Uncomment to skip loading UI
 // #define DEBUG_NO_UI
 
+// Uncomment to make gates always animate so that you don't have to play through
+// #define DEBUG_GATE_ANIMATION
+
+// Set to 0 to disable gate animation
+#define ENABLE_GATE_ANIMATION 0
+
 #ifdef DEBUG_CARRY
 unsigned fake_carried_idx = 1;
 #endif
@@ -189,6 +195,16 @@ static const struct PlayerModelSettings {
 #define GLM_H_PI glm::half_pi<float>()
 #define GLM_PI glm::pi<float>()
 
+#if ENABLE_GATE_ANIMATION
+#define DOOR_FILENAMES ANIM_AND_TEX("betterdoor_build", "betterdoor.ppm")
+#define VENT_FILENAMES ANIM_AND_TEX("vent_build", "vent.png")
+#define WINDOW_FILENAMES ANIM_AND_TEX("window_build", "window.png")
+#else
+#define DOOR_FILENAMES MDL_SAME_TEX("door")
+#define VENT_FILENAMES MDL_SAME_TEX("vent")
+#define WINDOW_FILENAMES MDL_SAME_TEX("window")
+#endif
+
 static const struct ItemModelSettings {
 	const char *modelPath;       // filesystem path to a model geometry file
 	const char *texturePath;     // filesystem path to a texture file
@@ -209,7 +225,7 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("box"),                                 "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
 	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
 	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
-	{ ANIM_AND_TEX("betterdoor_build", "betterdoor.ppm"),  "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
+	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
@@ -233,8 +249,8 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("stove"),                               "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("toilet"),                              "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("toiletpaper"),                         "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
-	{ ANIM_AND_TEX("vent_build", "vent.png"),              "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
-	{ ANIM_AND_TEX("window_build", "window.png"),          "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
+	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
+	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
 
@@ -815,6 +831,10 @@ void updateBoxVisibility()
 				int num = gate->getGateNum();
 				gateHistory[num] = (gateHistory[num] << 1) | (gateTimes[num] != gate->getCurrentConstructTime());
 				gateTimes[num] = gate->getCurrentConstructTime();
+
+#ifdef DEBUG_GATE_ANIMATION
+				gateHistory[num] = 1;
+#endif
 
 				itemModels[static_cast<unsigned>(gate->getModel())].object->Update(gateHistory[num] != 0);
 			}
@@ -1826,9 +1846,21 @@ void LoadModels()
 
 			cout << "\tloading " << setting.name << endl;
 
+			bool animated = false;
+			switch (setting.id) {
+			case ItemModelType::door:
+			case ItemModelType::vent:
+			case ItemModelType::window:
+				animated = ENABLE_GATE_ANIMATION;
+				break;
+
+			default:
+				break;
+			}
+
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 		}
 	});
