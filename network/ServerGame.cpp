@@ -270,7 +270,7 @@ void ServerGame::receiveFromClients()
 													iter2->second->setCaughtStatus(true);
 													iter2->second->setLocation(randJailLoc.getX() + TILE_SIZE / 2, (float)(randJailTile->getHeight() / 2 * TILE_HEIGHT), randJailLoc.getZ() + TILE_SIZE / 2);
 													iter2->second->setAction(Action::NONE);
-													jailTile->placeAnimalInJail(iter2->first);
+													randJailTile->placeAnimalInJail(iter2->first);
 													animalCaught = true;
 													
 												}
