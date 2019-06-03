@@ -242,9 +242,11 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
 			threeDeeChannelTaken++;
 		}
+		return;
 	}
 
 	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
+	fprintf(stdout, "pauseOtherPlayersSounds threeDeeChannel size=%d\n", sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0]));
 	fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
 	result = curPlayerChannel->setPaused(true);
 	
