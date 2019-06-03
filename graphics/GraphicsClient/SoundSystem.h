@@ -20,6 +20,7 @@ private:
 	FMOD::System * system;
 	FMOD::Channel * not3DChannel[2];
 	FMOD::Channel * threeDeeChannel[3];
+	bool threeDeeChannelPlayedBefore[3];
 	int threeDeeChannelTaken;
 	std::map<int, int> otherPlayerChannels;
 	std::queue<Sound *> soundQueue;
