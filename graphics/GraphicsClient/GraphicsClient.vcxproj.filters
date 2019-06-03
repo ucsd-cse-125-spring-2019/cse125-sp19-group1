@@ -329,6 +329,12 @@
     <None Include="Particle.vertexshader">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
+    <None Include="solidcolor.frag">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
+    <None Include="solidcolor.vert">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
