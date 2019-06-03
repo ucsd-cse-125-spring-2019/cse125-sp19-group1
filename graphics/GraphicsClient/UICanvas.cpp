@@ -107,11 +107,18 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	visibleItems[PROMPT_ORANGE] = false;
 	uiItems[PROMPT_APPLE] = new UIObject(PROMPT_APPLE_TEX);
 	visibleItems[PROMPT_APPLE] = false;
+	uiItems[PROMPT_KEY] = new UIObject(PROMPT_KEY_TEX);
+	visibleItems[PROMPT_KEY] = false;
+	uiItems[PROMPT_GET_CAKE] = new UIObject(PROMPT_GET_CAKE_TEX);
+	visibleItems[PROMPT_GET_CAKE] = false;
+	uiItems[PROMPT_DROP_ITEM] = new UIObject(PROMPT_DROP_ITEM_TEX);
+	visibleItems[PROMPT_DROP_ITEM] = false;
 }
 
 void UICanvas::setItem(UIType item) {
 	removeItems();
 	visibleItems[item] = true;
+	visibleItems[PROMPT_DROP_ITEM] = true;
 }
 
 void UICanvas::removeItems() {
@@ -133,6 +140,7 @@ void UICanvas::removeItems() {
 	visibleItems[BANANA_GREEN_ITEM] = false;
 	visibleItems[BANANA_YELLOW_ITEM] = false;
 	visibleItems[BANANA_BLACK_ITEM] = false;
+	visibleItems[PROMPT_DROP_ITEM] = false;
 }
 
 UICanvas::~UICanvas() {

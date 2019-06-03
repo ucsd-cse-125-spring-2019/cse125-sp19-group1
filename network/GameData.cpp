@@ -302,7 +302,7 @@ Player * GameData::getPlayer(int anID)
 std::map < int, Player * > & GameData::getAllPlayers() { return players; }
 Atlas * GameData::getAtlas() { return atlas; }
 
-std::vector<std::vector<Tile *>> GameData::getTileLayout() { return clientTileLayout; }
+const std::vector<std::vector<Tile *>>& GameData::getTileLayout() const { return clientTileLayout; }
 void GameData::decodeGameData(const char * data)
 {
 	std::vector<std::pair<std::string, std::string>> keyValuePairs;

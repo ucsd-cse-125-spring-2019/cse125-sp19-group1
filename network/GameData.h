@@ -66,7 +66,7 @@ public:
 
 	void updateGateProgress(int gateNum);
 
-	std::vector<std::vector<Tile *>> getTileLayout();
+	const std::vector<std::vector<Tile *>>& getTileLayout() const;
 
 	WinType wt = WinType::NONE;
 	WinType getWT() { return wt; }
