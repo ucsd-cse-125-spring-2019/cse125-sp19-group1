@@ -84,10 +84,10 @@ void CutsceneGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 //#define START_PERIOD 0.8
 //	float alpha = sinf((now / START_PERIOD) * glm::pi<double>()) * 0.5f + 0.5f;
-	float alpha = 0.8f;
+	float alpha = 0.75f;
 
 	if (showSkippableMsg && foregroundObj) {
-		glUniform1f(uAlpha, alpha * screenAlpha);
+		glUniform1f(uAlpha, alpha * sqrt(screenAlpha));
 		foregroundObj->Draw(passthroughShaderProgram, &identityMat, &orthoProj, identityMat);
 	}
 }

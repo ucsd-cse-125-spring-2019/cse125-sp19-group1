@@ -132,16 +132,16 @@ void Init(GLFWwindow *window)
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake2_2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake6_2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("instructions")));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 1"), 2.0));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2"), 2.0));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 3"), 2.0));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("angry meter explanation"), 8.0));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 1")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 3")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("angry meter explanation")));
 
 	chefWinsCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("chef win"));
 	animalsWinCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("animal win"));
 	
-	chefWinsCutscene->showSkippableMsg = false;
-	animalsWinCutscene->showSkippableMsg = false;
+	//chefWinsCutscene->showSkippableMsg = false;
+	//animalsWinCutscene->showSkippableMsg = false;
 	
 	playAgainEngine = new PlayAgainGraphicsEngine();
 
