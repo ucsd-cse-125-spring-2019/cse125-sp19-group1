@@ -60,9 +60,7 @@ void AnimationPlayer::SetBoneChannels() {
 	for (std::map<string, Bone *>::iterator it = bones->begin(); it != bones->end(); it++) {
 		Bone * currBone = it->second;
 		if (currBone->GetName().find("joint") != string::npos && currBone->CheckIsBone() && currBone->GetChannel() == NULL) {
-			std::cout << "JOINT WITH NO CHANNEL: " << currBone->GetName() << std::endl;
 			currBone->CopyParentChannel();
-			// TODO: channels.push_back(newChannel) would be required if we make a new channel rather than share the pointer
 		}
 	}
 }
