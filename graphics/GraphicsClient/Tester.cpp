@@ -140,8 +140,8 @@ void Init(GLFWwindow *window)
 	chefWinsCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("chef win"));
 	animalsWinCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("animal win"));
 	
-	chefWinsCutscene->showSkippableMsg = false;
-	animalsWinCutscene->showSkippableMsg = false;
+	//chefWinsCutscene->showSkippableMsg = false;
+	//animalsWinCutscene->showSkippableMsg = false;
 	
 	playAgainEngine = new PlayAgainGraphicsEngine();
 
