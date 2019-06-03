@@ -25,6 +25,9 @@ public:
 
 	virtual bool ShouldFadeout();
 
+	static GLuint retainShader();
+	static void releaseShader();
+
 protected:
 	const char * backgroundFilename;
 

@@ -16,6 +16,7 @@ public:
 	void SetOffset(glm::mat4 newOffset);
 	void SetTransform(glm::mat4 * newTransform);
 	void SetChannel(AnimationChannel * newChannel);
+	void CopyParentChannel();
 	void Update(glm::mat4 globalInverseT, glm::mat4 parentT);
 
 	void PrintMatrix(glm::mat4 * matrix);

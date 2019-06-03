@@ -10,22 +10,15 @@
 #include <algorithm>
 #include <queue>
 #include "GameConfigs.h"
-//#include "Gate.h"
 
 #define GENERAL_GAME_DATA_ID -999
 #define SERVER_GAMEDATA 123
 
-#define GHOST_MULTIPLIER 1.6
-#define MAX_CHEF_TIME 7
-#define MAX_ANIMAL_GHOST_TIME 5
-#define MAX_ANIMAL_SEARCH_TIME 5
-#define FLASH_DISTANCE 14
-#define DEFAULT_VISION 60
-
-
 enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
 
 enum class WinType { NONE = 0, DOOR = 1, TOILET = 2, VENT = 3, CHEF_WIN = 4 };
+
+enum class GameState { IN_LOBBY, IN_GAME };
 
 class GameData
 {
@@ -55,53 +48,54 @@ public:
 
 	std::string encodeGameData(bool newPlayerInit);
 	void decodeGameData(const char * data);
+	
 	void addDecodeFunctions();
 	void decodeTileLayout(std::string value);
 	void decodeDisconnectedClients(std::string value);
+	void decodeGameState(std::string value);
+	void decodeChefAnger(std::string value);
+	void decodeChefVision(std::string value);
+	void decodeWinType(std::string value);
+	void decodeBlindChef(std::string value);
+	void decodeSlowChef(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
 	Atlas * getAtlas();
+	ModelType getAvailableCharacter();
 
 	void updateGateProgress(int gateNum);
 
 	std::vector<std::vector<Tile *>> getTileLayout();
 
-	//int	getBoxTime() { return timeToOpenBox; }
-	//double getChefSwingTime() { return timeToSwingNet; }
-	//double getOpenJailTime() { return timeToOpenJail; }
-
-	//int timeToOpenBox = 2; //in seconds
-	//double timeToSwingNet = 0.5;
-	//double timeToOpenJail = 1.5;
-
 	WinType wt = WinType::NONE;
 	WinType getWT() { return wt; }
 	void setWT(WinType newWT) { wt = newWT; };
 
-	double abilityChargeTime = 0.0f;
-
-	double maxGhostTime = 7;
-	double limitChefVision = 1;
-
-	double getAbilityChargeTime() { return abilityChargeTime; }
-	double getMaxGhostTime() { return maxGhostTime; }
+	int currentTime = -1;
 
 	int	chefAnger = 0;
-	int maxChefAnger = 60;
-	int currentTime = -1;
-	int chefAngerInterval = 3;
 	double chefVision = 40;
-	double chefMaxVision = 100;
+	double chefRampVision = 0;
 
-	void setChefVisionLimit(int multiplier) { limitChefVision = multiplier; }
-	double getChefVision() { return chefVision * limitChefVision; }
-	double getChefMaxVision() { return chefMaxVision; }
+	bool blindChef = false;
+	bool slowChef = false;
+	
+	void setChefRampVision(double crv) { chefRampVision = crv; }
+	double getChefRampVision() { return chefRampVision; }
+
+	bool getBlindChef() { return blindChef; }
+	void setBlindChef(bool aBlindChef) { blindChef = aBlindChef; }
+
+	bool getSlowChef() { return slowChef; }
+	void setSlowChef(bool aSlowChef) { slowChef = aSlowChef; }
+
 	void incrementChefVision() { chefVision++; }
+	double getChefVision();
+
 	void incrementChefAnger() { chefAnger++; }
-	int getChefAngerInterval() { return chefAngerInterval; }
 	int getChefAnger() { return chefAnger; }
-	int getMaxAnger() { return maxChefAnger; }
+
 	int getCurrentTime() { return currentTime; }
 	void setCurrentTime() { currentTime = getGameClock(); }
 
@@ -112,6 +106,9 @@ public:
 	void startCountdown();
 	bool countdownDone();
 	bool countdownStarted();
+
+	GameState getGameState();
+	void setGameState(GameState state);
 
 	// tile getters
 	Tile * getTile(Location loc);
@@ -126,9 +123,11 @@ public:
 	ObjectTile * getObjectTile(Location loc);
 
 protected:
+	GameState gameState;
 	bool beginCountdown;
 	std::chrono::time_point<std::chrono::system_clock> countdownStartTime;
 	bool countdownCompleted;
+	std::vector<ModelType> availableCharacters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
 
 	int playerNum;
 private:

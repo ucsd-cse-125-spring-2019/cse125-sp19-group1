@@ -20,13 +20,11 @@ ServerGame::ServerGame(void)
 	bool animalWin = false;
     // set up the server network to listen 
     network = new ServerNetwork(); 
-	//atlas = new Atlas();
 	gameData = new GameData(SERVER_GAMEDATA);
 }
  
 void ServerGame::update() 
 {
-	auto start_time = std::chrono::high_resolution_clock::now();
 
     // get new clients
     if(network->acceptNewClient(client_id))
@@ -34,11 +32,6 @@ void ServerGame::update()
         printf("client %d has been connected to the server\n",client_id); 
     }
 	receiveFromClients();
-	//sendActionPackets();
-
-	auto end_time = std::chrono::high_resolution_clock::now();
-	auto time = end_time - start_time;
-	//std::cout << " took " << time / std::chrono::milliseconds(1) << "ms to run.\n";
 }
 
 void ServerGame::receiveFromClients()
@@ -54,7 +47,6 @@ void ServerGame::receiveFromClients()
 	{
 		int playerID = iter->first;
 		int data_length = network->receiveData(iter->first, network_data);
-		//cout << "size:" << network->sessions.size() << std::endl;
 		if (data_length <= 0)
 		{
 			//no data recieved
@@ -102,31 +94,23 @@ void ServerGame::receiveFromClients()
 				break;
 			case READY_EVENT:
 				printf("server received ENTER event packet from client\n");
-				if(!gameStarted)
-					gameData->getPlayer(iter->first)->toggleReady();
+				
 				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
-				if (!gameStarted && allPlayersReady)
 				{
-					initCharacters = true;
-					gameData->startCountdown();
-				}
-				{
-					std::vector<ModelType> characters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
 					for (auto iter = gameData->getAllPlayers().begin(); iter != gameData->getAllPlayers().end(); iter++)
 					{
 						Player * player = iter->second;
 						if (player->hasSelectedAnimal())
 						{
-							int randChoice = rand() % characters.size();
-							player->setModelType(characters.at(randChoice));
-							characters.erase(characters.begin() + randChoice);
+							player->setModelType(gameData->getAvailableCharacter());
 						}
 						else
 							player->setModelType(ModelType::CHEF);
 
 					}
+					gameData->setGameState(GameState::IN_GAME);
 				}
 				break;
 			case SELECT_EVENT:
@@ -205,251 +189,219 @@ void ServerGame::receiveFromClients()
 						}
 
 						Location loc = player->getLocation();
-						/*if (player->isChef())
+						if (player->isChef())
 						{
-							*///if (player->getIsCaught()) { break; }
+							std::cout << "CAUGHT ANIMAL" << std::endl;
+							Direction dir = player->getFacingDirection();
+							Location jailLoc;
+							JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir, jailLoc);
 
-							//Location loc = player->getLocation();
-							if (player->isChef())
+							//drop off animal
+							if (player->hasCaughtAnimal() && jailTile && jailTile->isJailEmpty())//gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
 							{
-								std::cout << "CAUGHT ANIMAL" << std::endl;
-								Direction dir = player->getFacingDirection();
-								Location jailLoc;
-								JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir, jailLoc);
+								int animal = player->getCaughtAnimalId();
+								//update jail with animal
+								std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
+								jailTile->placeAnimalInJail(animal);
+								player->setCaughtAnimal(false);
 
-								//drop off animal
-								if (player->hasCaughtAnimal() && jailTile && jailTile->isJailEmpty())//gameData->getAtlas()->hasJail(loc) && (gameData->getAtlas()->isJailEmpty(loc)))
+								//update animal's location to jail
+								int x = (int)(jailLoc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+								int y = jailLoc.getY();
+								int z = (int)(jailLoc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
+								gameData->getPlayer(animal)->setLocation(x, y, z);
+
+							}
+							else if (!player->hasCaughtAnimal())
+							{
+								std::cout << "SWINGING" << std::endl;
+								if (!player->isInteracting())
 								{
-									int animal = player->getCaughtAnimalId();
-									//update jail with animal
-									std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
-									//gameData->getAtlas()->placeInJail(loc, animal);
-									jailTile->placeAnimalInJail(animal);
-									player->setCaughtAnimal(false);
+									std::cout << "CAN SWING" << std::endl;
+									player->setInteracting(true);
+									player->setAction(Action::SWING_NET);
+									player->setActionStartTime();
+									bool animalCaught = false;
 
-									//update animal's location to jail
-									int x = (int)(jailLoc.getX() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
-									int y = jailLoc.getY();
-									int z = (int)(jailLoc.getZ() / TILE_SIZE) * TILE_SIZE + (int)(TILE_SIZE / 2);
-									gameData->getPlayer(animal)->setLocation(x, y, z);
-
-								}
-								else
-								{
-									std::cout << "SWINGING" << std::endl;
-									if (!player->isInteracting())
+									chefWin = true;
+									for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
 									{
-										std::cout << "CAN SWING" << std::endl;
-										player->setInteracting(true);
-										player->setAction(Action::SWING_NET);
-										player->setActionStartTime();
-										bool animalCaught = false;
-
-										chefWin = true;
-										for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
+										if (iter2->first == iter->first)
 										{
-											if (iter2->first == iter->first)
-											{
-												continue;
-											}
+											continue;
+										}
 
-											Location tLoc = iter2->second->getLocation();
-// HEAD
-											/*if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
+										Location tLoc = iter2->second->getLocation();
+
+										if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
+										{
+											if (gameData->getChefAnger() >= CHEF_MAX_ANGER && !animalCaught)
 											{
-												player->setCaughtAnimal(true);
-												player->setCaughtAnimalId(iter2->first);
-												iter2->second->setCaughtStatus(true);*/
-//=
-											if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
-											{
-												if (gameData->getChefAnger() >= gameData->getMaxAnger() - 5 && !animalCaught) 
+												//get random jail
+												//deploy animal in random jail
+												auto jailLocations = gameData->getAtlas()->jailLocations;
+												for (auto it = jailLocations.begin();
+													it != jailLocations.end();  // Use (), and assuming itt was a typo
+													it++)
 												{
-													//get random jail
-													//deploy animal in random jail
-													auto jailLocations = gameData->getAtlas()->jailLocations;
-													for (auto it = jailLocations.begin();
-														it != jailLocations.end();  // Use (), and assuming itt was a typo
-														it++)
-													{
-														Location jLoc = Location(it->second, 0, it->first);
-														if (gameData->getAtlas()->hasJail(jLoc)) {
-															JailTile * jailTile = gameData->getJailTile(jLoc);
-															if (jailTile->isJailEmpty()) {
-																iter2->second->setCaughtStatus(true);
-																iter2->second->setLocation(jLoc.getX()+TILE_SIZE/2, (float)jailTile->getHeight(), jLoc.getZ()+TILE_SIZE/2);
-																jailTile->placeAnimalInJail(iter2->first);
-																animalCaught = true;
-																break;
-															}
+													Location jLoc = Location(it->second * TILE_SIZE + 1, 0, it->first * TILE_SIZE + 1);
+													if (gameData->getAtlas()->hasJail(jLoc)) {
+														JailTile * jailTile = gameData->getJailTile(jLoc);
+														if (jailTile->isJailEmpty()) {
+															iter2->second->setCaughtStatus(true);
+															iter2->second->setLocation(jLoc.getX() + TILE_SIZE / 2, (float)(jailTile->getHeight() / 2 * TILE_HEIGHT), jLoc.getZ() + TILE_SIZE / 2);
+															iter2->second->setAction(Action::NONE);
+															jailTile->placeAnimalInJail(iter2->first);
+															animalCaught = true;
+															break;
 														}
 													}
 												}
-												else
-												{
-													player->setCaughtAnimal(true);
-													player->setCaughtAnimalId(iter2->first);
-													iter2->second->setLocation(player->getLocation());
-													iter2->second->setCaughtStatus(true);
-												}
 											}
-
-											if (!iter2->second->isChef() && !iter2->second->isCaught())
+											else
 											{
-												chefWin = false;
+												player->setCaughtAnimal(true);
+												player->setCaughtAnimalId(iter2->first);
+												iter2->second->setLocation(player->getLocation());
+												iter2->second->setCaughtStatus(true);
+												gameData->getPlayer(iter2->first)->setAction(Action::NONE);
 											}
-
 										}
-									}
-									if (chefWin)
-									{
-										gameData->setWT(WinType::CHEF_WIN);
-										std::cout << "CHEF WIN" << std::endl;
+
+										if (!iter2->second->isChef() && !iter2->second->isCaught())
+										{
+											chefWin = false;
+										}
+
 									}
 								}
+								if (chefWin)
+								{
+									gameData->setWT(WinType::CHEF_WIN);
+									std::cout << "CHEF WIN" << std::endl;
+								}
 							}
-							else
+						}
+						else
+						{
+							Location loc = player->getLocation();
+							ItemModelType item = gameData->getAtlas()->getTileItem(loc);
+							Direction dir = player->getFacingDirection();
+							Location objectLoc;
+							Location jailLoc;
+							ObjectTile * objectTile = gameData->getAdjacentObjectTile(loc, dir, objectLoc);
+
+							if (player->getInventory() == ItemModelType::EMPTY && (item != ItemModelType::EMPTY || objectTile && objectTile->getItem() == ItemModelType::cake))
 							{
-								Location loc = player->getLocation();
-								ItemModelType item = gameData->getAtlas()->getTileItem(loc);
-								Direction dir = player->getFacingDirection();
-								Location objectLoc;
-								Location jailLoc;
-								ObjectTile * objectTile = gameData->getAdjacentObjectTile(loc, dir, objectLoc);
-
-								if (player->getInventory() == ItemModelType::EMPTY && (item != ItemModelType::EMPTY || objectTile && objectTile->getItem() == ItemModelType::cake))
+								// Pr
+								if (objectTile && objectTile->getItem() == ItemModelType::cake)
 								{
-									// Pr
-									if (objectTile && objectTile->getItem() == ItemModelType::cake)
-									{
-										std::cout << "table has cake!" << std::endl;
-										player->setInventory(objectTile->getItem());
-										objectTile->setItem(ItemModelType::EMPTY);
-										player->setSpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
+									std::cout << "table has cake!" << std::endl;
+									player->setInventory(objectTile->getItem());
+									objectTile->setItem(ItemModelType::EMPTY);
+									player->setSpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
 
 
-									}
-									else if (item != ItemModelType::EMPTY)
-									{
-										player->setInventory(item);
-										player->setSpeedMultiplier(ITEM_SLOWDOWN_MULTIPLIER);
-										gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
-									}
 								}
-								//else if (gameData->getAtlas()->hasGate(loc))
-								else if (KeyDropTile * keyDropTile = gameData->getKeyDropTile(loc))
+								else if (item != ItemModelType::EMPTY)
 								{
-									if (keyDropTile->isValidKey(player->getInventory()))
-									{
-
-										keyDropTile->updateKeyProgress(player->getInventory());
-										gameData->updateGateProgress(keyDropTile->getGateNum());
-										player->setInventory(ItemModelType::EMPTY);
-										player->setSpeedMultiplier(1.0);
-
-									}
+									player->setInventory(item);
+									player->setSpeedMultiplier(ITEM_SLOWDOWN_MULTIPLIER);
+									gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
 								}
-								else if (GateTile * gateTile = gameData->getGateTile(loc))
+							}
+							else if (KeyDropTile * keyDropTile = gameData->getKeyDropTile(loc))
+							{
+								if (keyDropTile->isValidKey(player->getInventory()))
 								{
-									
-									//GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
-									/*if (gateTile->isValidKey(static_cast<Key>(player->getInventory())))
+									keyDropTile->updateKeyProgress(player->getInventory());
+									gameData->updateGateProgress(keyDropTile->getGateNum());
+									player->setAction(Action::KEY_DROP);
+									player->setInventory(ItemModelType::EMPTY);
+									player->setSpeedMultiplier(1.0);
+									sendActionPackets();
+									player->setAction(Action::NONE);
+								}
+							}
+							else if (GateTile * gateTile = gameData->getGateTile(loc))
+							{
+								if (gateTile->hasAllKeys() && !gateTile->isOpen())
+								{
+									player->setAction(Action::CONSTRUCT_GATE);
+									player->setInteracting(true);
+									player->setActionStartTime();
+								}
+								if (gateTile->hasAllKeys() && gateTile->isOpen())
+								{
+									if (player->getInventory() == ItemModelType::cake)
 									{
-
-										gateTile->updateKeyProgress(static_cast<Key>(player->getInventory()));
-										player->setInventory(ItemModelType::EMPTY);
-									}*/
-									if (gateTile->hasAllKeys() /*&& !player->getOpeningGate()*/ && !gateTile->isOpen())
-									{
-
-										//player->setOpeningGate(true);
-										player->setAction(Action::CONSTRUCT_GATE);
-										player->setInteracting(true);
-										player->setActionStartTime();
-									}
-									if (gateTile->hasAllKeys() && gateTile->isOpen())
-									{
-										if (player->getInventory() == ItemModelType::cake)
-										{
-											int gateNum = gameData->getGateTile(loc)->getGateNum();
-											if (gateNum == 1) { //door
-												gameData->setWT(WinType::DOOR);
-											}
-											else if (gateNum == 2) { //bathroom
-												gameData->setWT(WinType::TOILET);
-											}
-											else if (gateNum == 3) { //vent
-												gameData->setWT(WinType::VENT);
-											}
-
-											animalWin = true;
-											std::cout << "ANIMAL WIN" << std::endl;
+										int gateNum = gameData->getGateTile(loc)->getGateNum();
+										if (gateNum == 1) { //door
+											gameData->setWT(WinType::DOOR);
+										}
+										else if (gateNum == 2) { //bathroom
+											gameData->setWT(WinType::TOILET);
+										}
+										else if (gateNum == 3) { //vent
+											gameData->setWT(WinType::VENT);
 										}
 
+										animalWin = true;
+										std::cout << "ANIMAL WIN" << std::endl;
 									}
+
 								}
-								//else if (gameData->getAtlas()->hasJail(loc))
-								//else if (JailTile * jailTile = gameData->getJailTile(loc))
-								else if (JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir, jailLoc))
-								{
-									//JailTile * jailTile = (JailTile *)(gameData->getAtlas()->getTileAt(loc));
-									//player->setOpenJail(true);
-									double seconds = player->getInteractingTime(1);
-									
-									// Only allow another jail action if enough time has passed
-									if (seconds > UNLOCK_JAIL_COOLDOWN) {
+							}
+							else if (JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir, jailLoc))
+							{
+								double seconds = player->getInteractingTime(1);
 
-										player->setAction(Action::UNLOCK_JAIL);
-										player->setInteracting(true);
-										player->setActionStartTime();
-										player->setUnlockJailStartTime();
+								// Only allow another jail action if enough time has passed
+								if (seconds > UNLOCK_JAIL_COOLDOWN) {
 
-										//update jail progres
-										std::cout << "UNLOCKING JAIL" << std::endl;
+									player->setAction(Action::UNLOCK_JAIL);
+									player->setInteracting(true);
+									player->setActionStartTime();
+									player->setUnlockJailStartTime();
 
-										jailTile->unlockJail();
+									//update jail progres
+									std::cout << "UNLOCKING JAIL" << std::endl;
 
-										//check if jail progress == 5
-										if (jailTile->getProgress() >= 5)
-										{
-											std::cout << "ANIMAL IS RELEASED" << std::endl;
-											//update animal 
-											int animal = jailTile->getCapturedAnimal();
-											gameData->getPlayer(animal)->setCaughtStatus(false);
+									jailTile->unlockJail();
 
-											//update jail
-											jailTile->resetJail();
+									//check if jail progress == 5
+									if (jailTile->getProgress() >= 5)
+									{
+										std::cout << "ANIMAL IS RELEASED" << std::endl;
+										//update animal 
+										int animal = jailTile->getCapturedAnimal();
+										gameData->getPlayer(animal)->setCaughtStatus(false);
 
-										}
-									}
-								}
-								else if (gameData->getAtlas()->hasBox(loc))
-								{
-									std::cout << "HAS BOX" << std::endl;
-									if (!player->isInteracting()) {
-										std::cout << "starting to interact!" << std::endl;
-// HEAD
-										/*player->setInteracting(true);
-										player->setAction(Action::OPEN_BOX);
-										player->setActionStartTime();*/
-//
+										//update jail
+										jailTile->resetJail();
 
-										if (player->getInstantSearch()) 
-										{
-											gameData->getAtlas()->updateBoxLayout(loc);
-										}
-										else
-										{
-											player->setInteracting(true);
-											//player->setOpeningBox(true);
-											player->setAction(Action::OPEN_BOX);
-											player->setActionStartTime();
-										}
-// server
 									}
 								}
 							}
-						//}
+							else if (gameData->getAtlas()->hasBox(loc))
+							{
+								std::cout << "HAS BOX" << std::endl;
+								if (!player->isInteracting()) {
+									std::cout << "starting to interact!" << std::endl;
+
+									if (player->getInstantSearch())
+									{
+										gameData->getAtlas()->updateBoxLayout(loc);
+									}
+									else
+									{
+										player->setInteracting(true);
+										player->setAction(Action::OPEN_BOX);
+										player->setActionStartTime();
+									}
+								}
+							}
+						}
 					}
 				}
 				break;
@@ -666,6 +618,7 @@ void ServerGame::receiveFromClients()
 					gameData->setWT(WinType::NONE);
 					resetGame();
 				}
+				gameData->setGameState(GameState::IN_LOBBY);
 				break;
 			}
 
@@ -717,7 +670,6 @@ void ServerGame::receiveFromClients()
 	{
 		sendActionPackets();
 	}
-	//sendActionPackets(); // uncomment to always send data from server
 	if (gameData->countdownStarted() && !gameData->countdownDone())
 	{
 		sendActionPackets();
@@ -728,24 +680,26 @@ void ServerGame::receiveFromClients()
 		gameStarted = true;
 	}
 
-	if (initCharacters)
-	{
-		initCharacters = false;
-	}
-	allPlayersReady = true;
-
 	//All server loop checks 
 
-	if (gameData->getGameClock() % gameData->getChefAngerInterval() == 0) {
+	if (gameData->getGameClock() % CHEF_ANGER_INTERVAL == 0) {
 		if (gameData->getGameClock() > gameData->getCurrentTime()) 
 		{
-			if (gameData->getChefAnger() < gameData->getMaxAnger())
+			bool sendUpdate = false;
+			if (gameData->getChefAnger() < CHEF_MAX_ANGER)
 			{
 				gameData->incrementChefAnger();
+				sendUpdate = true;
 			}
-			if (gameData->getChefVision() < gameData->getChefMaxVision())
+			if (gameData->getChefVision() < CHEF_MAX_VISION)
 			{
 				gameData->incrementChefVision();
+				sendUpdate = true;
+			}
+
+			if (sendUpdate)
+			{
+				sendActionPackets();
 			}
 			gameData->setCurrentTime();
 		}
@@ -755,53 +709,45 @@ void ServerGame::receiveFromClients()
 	{
 		if (Player * player = gameData->getPlayer(iter->first))
 		{
-			if (!player->isReady())
-			{
-				allPlayersReady = false;
-			}
+			
 			Location loc = player->getLocation();
-			//std::vector<float> loc{ pLoc.getX(), pLoc.getY(), pLoc.getZ() };
 
-// HEAD
-			//if (player->isCaught())
-//
 			if (player->isChef()) {
 				player->updateChefMultiplier(gameData->getChefAnger());
 			}
 
 			if (player->isCaught())
-// server
 			{
 				continue;
 			}
 
-// HEAD
-//			if (player->isInteracting())
-//
 			if (player->getBlindChef() && player->getVisionTime() > MAX_CHEF_TIME)
 			{
 				player->setBlindChef(false);
-				gameData->setChefVisionLimit(1);
+				gameData->setBlindChef(false);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
 			if (player->getSlowChef() && player->getSlowTime() > MAX_CHEF_TIME)
 			{
 				player->setSlowChef(false);
+				gameData->setSlowChef(false);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
 			if (player->getGhost() && player->getSpeedTime() > MAX_ANIMAL_GHOST_TIME)
 			{
 
 				player->setGhost(false);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
 			if (player->getInstantSearch() && player->getSearchTime() > MAX_ANIMAL_SEARCH_TIME)
 			{
 				player->setInstantSearch(false);
+				player->setPowerUp(PowerUp::NONE);
 			}
 
-			//if (player->getInteracting())
-// server
 			if (player->isInteracting())
 
 			{
@@ -817,7 +763,7 @@ void ServerGame::receiveFromClients()
 				}
 				else if (player->getAction() == Action::OPEN_BOX)
 				{
-// HEAD
+					// HEAD
 					if (seconds > TIME_TO_OPEN_BOX) {
 						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 						gameData->getAtlas()->updateBoxLayout(loc);
@@ -832,7 +778,6 @@ void ServerGame::receiveFromClients()
 					if (!player->isChef())
 					{
 						if (seconds > UNLOCK_JAIL_DELAY) {
-							//player->setOpenJail(false);
 							player->setInteracting(false);
 							player->setAction(Action::NONE);
 							sendActionPackets();
@@ -860,122 +805,121 @@ void ServerGame::receiveFromClients()
 						}
 					}
 				}
-			
-//
-					/*if (player->getOpeningBox() && seconds > gameData->getBoxTime()) {
-						std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
-						gameData->getAtlas()->updateBoxLayout(loc);
-						player->setInteracting(false);
-						player->setOpeningBox(false);
+
+				//Handling power ups
+				if (player->getPoweringUp() && seconds > ABILITY_CHARGE_TIME) {
+					std::cout << "POWERING UP" << std::endl;
+					player->setInteracting(false);
+					player->setPoweringUp(false);
+
+
+					ItemModelType it = player->getInventory();
+					bool powerUp = true;
+					if (it == ItemModelType::apple)
+					{
+						std::cout << "POWER: limit chef vision" << std::endl;
+						//call limit chef vision
+						player->setBlindChef(true);
+						gameData->setBlindChef(true);
+						player->setVisionStartTime();
+						player->setPowerUp(PowerUp::CHEF_BLIND);
 					}
-					std::cout << "Interacting!!" << std::endl;*/
-
-					//Handling power ups
-					if (player->getPoweringUp() && seconds > gameData->getAbilityChargeTime()) {
-						std::cout << "POWERING UP" << std::endl;
-						player->setInteracting(false);
-						player->setPoweringUp(false);
-						
-
-						ItemModelType it = player->getInventory();
-						bool powerUp = true;
-						if (it == ItemModelType::apple)
-						{
-							std::cout << "POWER: limit chef vision" << std::endl;
-							//call limit chef vision
-							player->setBlindChef(true);
-							player->setVisionStartTime();
-							gameData->setChefVisionLimit(0.5);
-						}
-						else if (it == ItemModelType::orange)
-						{
-							std::cout << "POWER: limit chef speed" << std::endl;
-							//call limit chef speed 
-							player->setSlowChef(true);
-							player->setSlowStartTime();
-						}
-						else if (it == ItemModelType::bananaGreen)
-						{
-							std::cout << "POWER: ghost" << std::endl;
-							player->setGhost(true);
-							//call ghost because green means go 
-							player->setSpeedStartTime();
-						}
-						else if (it == ItemModelType::bananaPerfect)
-						{
-							std::cout << "POWER: flash" << std::endl;
-
-							//call flash because yellow banana
-							float x = player->getLocation().getX();
-							float y = player->getLocation().getY();
-							float z = player->getLocation().getZ();
-							if (player->getFacingDirection() == Direction::NORTH)
-							{
-								z += FLASH_DISTANCE;
-							}
-							else if (player->getFacingDirection() == Direction::SOUTH)
-							{
-								z -= FLASH_DISTANCE;
-							}
-							else if (player->getFacingDirection() == Direction::EAST)
-							{
-								x -= FLASH_DISTANCE;
-							}
-							else if (player->getFacingDirection() == Direction::WEST)
-							{
-								x += FLASH_DISTANCE;
-							}
-							else if (player->getFacingDirection() == Direction::NORTHEAST)
-							{
-								z += FLASH_DISTANCE/1.5;
-								x -= FLASH_DISTANCE/1.5;
-							}
-							else if (player->getFacingDirection() == Direction::NORTHWEST)
-							{
-								z += FLASH_DISTANCE/1.5;
-								x+= FLASH_DISTANCE/1.5;
-							}
-							else if (player->getFacingDirection() == Direction::SOUTHEAST)
-							{
-								z -= FLASH_DISTANCE/1.5;
-								x -= FLASH_DISTANCE/1.5;
-							}
-							else if (player->getFacingDirection() == Direction::SOUTHWEST)
-							{
-								z -= FLASH_DISTANCE/1.5;
-								x += FLASH_DISTANCE/1.5;
-							}
-							if (x > TILE_SIZE * gameData->getAtlas()->getServerTileLayout()[0].size()) 
-							{
-								x = TILE_SIZE * gameData->getAtlas()->getServerTileLayout()[0].size() - TILE_SIZE / 2;
-							}
-							if (z > TILE_SIZE * gameData->getAtlas()->getServerTileLayout().size()) 
-							{
-								z = TILE_SIZE * gameData->getAtlas()->getServerTileLayout().size() - TILE_SIZE / 2;
-							}
-							if (x < 0) x = TILE_SIZE / 2;
-							if (z < 0) z = TILE_SIZE / 2;
-
-							Location tileLoc = Location();
-							tileLoc.update(x, y, z);
-							Tile * tile = gameData->getAtlas()->getTileAt(tileLoc);
-							player->setLocation(x, tile->getHeight()/2 * TILE_HEIGHT, z);
-						}
-						else if (it == ItemModelType::bananaVeryRipe)
-						{
-							std::cout << "POWER: search" << std::endl;
-							player->setInstantSearch(true);
-							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
-							player->setSearchStartTime();
-						}
-						else {
-							powerUp = false;
-						}
-						if (powerUp) {
-							player->setInventory(ItemModelType::EMPTY);
-							player->setSpeedMultiplier(1.0);
-						}
+					else if (it == ItemModelType::orange)
+					{
+						std::cout << "POWER: limit chef speed" << std::endl;
+						//call limit chef speed 
+						player->setSlowChef(true);
+						gameData->setSlowChef(true);
+						player->setSlowStartTime();
+						player->setPowerUp(PowerUp::CHEF_SLOW);
 					}
+					else if (it == ItemModelType::bananaGreen)
+					{
+						std::cout << "POWER: ghost" << std::endl;
+						player->setGhost(true);
+						//call ghost because green means go 
+						player->setSpeedStartTime();
+						player->setPowerUp(PowerUp::GHOST);
+					}
+					else if (it == ItemModelType::bananaPerfect)
+					{
+						std::cout << "POWER: flash" << std::endl;
+
+						//call flash because yellow banana
+						float x = player->getLocation().getX();
+						float y = player->getLocation().getY();
+						float z = player->getLocation().getZ();
+						if (player->getFacingDirection() == Direction::NORTH)
+						{
+							z += FLASH_DISTANCE;
+						}
+						else if (player->getFacingDirection() == Direction::SOUTH)
+						{
+							z -= FLASH_DISTANCE;
+						}
+						else if (player->getFacingDirection() == Direction::EAST)
+						{
+							x -= FLASH_DISTANCE;
+						}
+						else if (player->getFacingDirection() == Direction::WEST)
+						{
+							x += FLASH_DISTANCE;
+						}
+						else if (player->getFacingDirection() == Direction::NORTHEAST)
+						{
+							z += FLASH_DISTANCE / 1.5;
+							x -= FLASH_DISTANCE / 1.5;
+						}
+						else if (player->getFacingDirection() == Direction::NORTHWEST)
+						{
+							z += FLASH_DISTANCE / 1.5;
+							x += FLASH_DISTANCE / 1.5;
+						}
+						else if (player->getFacingDirection() == Direction::SOUTHEAST)
+						{
+							z -= FLASH_DISTANCE / 1.5;
+							x -= FLASH_DISTANCE / 1.5;
+						}
+						else if (player->getFacingDirection() == Direction::SOUTHWEST)
+						{
+							z -= FLASH_DISTANCE / 1.5;
+							x += FLASH_DISTANCE / 1.5;
+						}
+						if (x > TILE_SIZE * gameData->getAtlas()->getServerTileLayout()[0].size())
+						{
+							x = TILE_SIZE * gameData->getAtlas()->getServerTileLayout()[0].size() - TILE_SIZE / 2;
+						}
+						if (z > TILE_SIZE * gameData->getAtlas()->getServerTileLayout().size())
+						{
+							z = TILE_SIZE * gameData->getAtlas()->getServerTileLayout().size() - TILE_SIZE / 2;
+						}
+						if (x < 0) x = TILE_SIZE / 2;
+						if (z < 0) z = TILE_SIZE / 2;
+
+						Location tileLoc = Location();
+						tileLoc.update(x, y, z);
+						Tile * tile = gameData->getAtlas()->getTileAt(tileLoc);
+						player->setLocation(x, tile->getHeight() / 2 * TILE_HEIGHT, z);
+						player->setPowerUp(PowerUp::FLASH);
+						sendActionPackets();
+						player->setPowerUp(PowerUp::NONE);
+					}
+					else if (it == ItemModelType::bananaVeryRipe)
+					{
+						std::cout << "POWER: search" << std::endl;
+						player->setInstantSearch(true);
+						//maybe like a trap item - makes chef slip or creates a barrier for a set duration
+						player->setSearchStartTime();
+						player->setPowerUp(PowerUp::INSTA_SEARCH);
+					}
+					else {
+						powerUp = false;
+					}
+					if (powerUp) {
+						player->setInventory(ItemModelType::EMPTY);
+						player->setSpeedMultiplier(1.0);
+					}
+				}
 			}
 		}
 	}
@@ -1016,8 +960,6 @@ void ServerGame::sendActionPackets()
 void ServerGame::initNewClient()
 {
 	//updating current data structure to hold onto client
-	//std::vector<int> loc{ 10, 0, 10 };
-
 	gameData->addNewPlayer(client_id, Location(30, 0, 30), ClientType::SERVER_SIDE);
 }
 
@@ -1178,6 +1120,15 @@ void ServerGame::updateHeight(int id)
 			}
 		}
 
+		if (!gameData->getPlayer(id)->isChef())
+		{
+			gameData->getPlayer(id)->setVisionRadius(y * 2 + DEFAULT_VISION);
+		}
+		else
+		{
+			gameData->setChefRampVision(y * 2);
+		}
+
 		return; 
 	}
 
@@ -1214,8 +1165,13 @@ void ServerGame::updateHeight(int id)
 	}
 	gameData->getPlayer(id)->setLocation(x, y, z);
 
-	if (!gameData->getPlayer(id)->isChef()) {
-		gameData->getPlayer(id)->setVisionRadius(y*2 + DEFAULT_VISION);
+	if (!gameData->getPlayer(id)->isChef()) 
+	{
+		gameData->getPlayer(id)->setVisionRadius(y*2  + DEFAULT_VISION);
+	}
+	else
+	{
+		gameData->setChefRampVision(y*2);
 	}
 
 	// Update location of captured animal to the chef's location

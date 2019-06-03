@@ -16,7 +16,7 @@ int TwoDeeGraphicsEngine::passthroughShaderRefCount = 0;
 
 FBXObject * createObjectForTexture(const char *texturePath)
 {
-	auto obj = new FBXObject(CANVAS_MDL_PATH, texturePath, false, -1, true, GL_LINEAR);
+	auto obj = new FBXObject(CANVAS_MDL_PATH, texturePath, false, true, GL_LINEAR);
 	obj->SetDepthTest(false);
 
 	return obj;
@@ -55,10 +55,7 @@ void TwoDeeGraphicsEngine::MainLoopBegin()
 	quit = false;
 	screenAlpha = 1.f;
 
-	if (passthroughShaderRefCount++ <= 0) {
-		passthroughShaderProgram = LoadShaders("./passthrough.vert", "./passthrough.frag");
-		passthroughShaderRefCount = 1;
-	}
+	passthroughShaderProgram = retainShader();
 
 	if (!backgroundObj) {
 		backgroundObj = createObjectForTexture(backgroundFilename);
@@ -78,10 +75,7 @@ void TwoDeeGraphicsEngine::MainLoopEnd()
 		backgroundObj = nullptr;
 	}
 
-	if (--passthroughShaderRefCount <= 0 && passthroughShaderProgram) {
-		glDeleteShader(passthroughShaderProgram);
-		passthroughShaderProgram = 0;
-	}
+	releaseShader();
 }
 
 void TwoDeeGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)
@@ -141,4 +135,22 @@ void TwoDeeGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 bool TwoDeeGraphicsEngine::ShouldFadeout()
 {
 	return quit;
+}
+
+GLuint TwoDeeGraphicsEngine::retainShader()
+{
+	if (passthroughShaderRefCount++ <= 0) {
+		passthroughShaderProgram = LoadShaders("./passthrough.vert", "./passthrough.frag");
+		passthroughShaderRefCount = 1;
+	}
+
+	return passthroughShaderProgram;
+}
+
+void TwoDeeGraphicsEngine::releaseShader()
+{
+	if (--passthroughShaderRefCount <= 0 && passthroughShaderProgram) {
+		glDeleteShader(passthroughShaderProgram);
+		passthroughShaderProgram = 0;
+	}
 }

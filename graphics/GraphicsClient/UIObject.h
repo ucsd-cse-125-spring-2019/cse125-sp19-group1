@@ -16,7 +16,10 @@ public:
 	UIObject(const char * texPath);
 	~UIObject();
 private:
-	FBXObject * altCanvas;
+
+	GLuint textureID;
+	static FBXObject * sharedAltCanvas;
+	static int altCanvasRefCount;
 };
 
 #endif

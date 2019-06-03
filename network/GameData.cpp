@@ -13,6 +13,7 @@ GameData::GameData(int serverInit)
 	beginCountdown = false;
 	countdownCompleted = false;
 	playerNum = 1;
+	gameState = GameState::IN_LOBBY;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -35,7 +36,10 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
+	encodedData << "blindChef:" << getBlindChef() << std::endl;
+	encodedData << "slowChef:" << getSlowChef() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
+	encodedData << "gameState: " << static_cast<int>(gameState) << std::endl;
 	encodedData << "disconnectedClients:";
 	
 	for (auto p : disconnectedPlayers)
@@ -45,6 +49,27 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << std::endl;
 	//std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
+}
+
+GameState GameData::getGameState()
+{
+	return gameState;
+}
+void GameData::setGameState(GameState state)
+{
+	gameState = state;
+}
+
+ModelType GameData::getAvailableCharacter()
+{
+	if (availableCharacters.size() > 0)
+	{
+		int randChoice = rand() % availableCharacters.size();
+		ModelType character = availableCharacters.at(randChoice);
+		availableCharacters.erase(availableCharacters.begin() + randChoice);
+		return character;
+	}
+	return ModelType::CHEF;
 }
 
 void GameData::updateGateProgress(int gateNum)
@@ -88,7 +113,17 @@ void GameData::addNewPlayer(unsigned int anID, Location aLoc, ClientType type)
 			disconnectedPlayers.pop_back();
 		}
 		else
+		{
+
+
 			players[anID] = new Player(anID, playerNum++, atlas->getPlayerSpawnLocation(anID));
+
+			// Assign model for a new player joining the game
+			if (gameState == GameState::IN_GAME)
+			{
+				players[anID]->setModelType(getAvailableCharacter());
+			}
+		}
 	}
 	else if (type == ClientType::CLIENT_SIDE)
 	{
@@ -115,6 +150,36 @@ void GameData::addDecodeFunctions()
 {
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
+	decodingFunctions["gameState"] = &GameData::decodeGameState;
+	decodingFunctions["blindChef"] = &GameData::decodeBlindChef;
+	decodingFunctions["slowChef"] = &GameData::decodeBlindChef;
+ 	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;
+	decodingFunctions["chefVision"] = &GameData::decodeChefVision;
+	decodingFunctions["winType"] = &GameData::decodeWinType;
+
+}
+
+void GameData::decodeSlowChef(std::string value)
+{
+	slowChef = std::stoi(value);
+}
+
+void GameData::decodeBlindChef(std::string value)
+{
+	blindChef = std::stoi(value);
+}
+
+void GameData::decodeChefAnger(std::string value) 
+{
+	chefAnger = std::stoi(value);
+}
+void GameData::decodeChefVision(std::string value) 
+{
+	chefVision = std::stoi(value);
+}
+void GameData::decodeWinType(std::string value) 
+{
+	wt = (WinType)std::stoi(value);
 }
 
 void GameData::decodeDisconnectedClients(std::string value)
@@ -221,16 +286,9 @@ void GameData::decodeTileLayout(std::string value)
 			}
 		}
 	}
-
-	// Debug printing
-	/*for (auto p : clientTileLayout)
-	{
-		for (auto c : p)
-		{
-			std::cout << c.getWall() << " ";
-		}
-		std::cout << std::endl;
-	}*/
+}
+void GameData::decodeGameState(std::string value) {
+	gameState = static_cast<GameState>(std::stoi(value));
 }
 
 Player * GameData::getPlayer(int anID)
@@ -255,7 +313,6 @@ void GameData::decodeGameData(const char * data)
 	{
 		std::string & key = p.first;
 		std::string & value = p.second;
-		//std::cout << key << " : " << value << std::endl;
 		if (p.first == "client")
 		{
 			playerID = std::stoi(value);
@@ -263,15 +320,6 @@ void GameData::decodeGameData(const char * data)
 			{
 				addNewPlayer(playerID, Location(), ClientType::CLIENT_SIDE);
 			}
-		}
-		else if (p.first == "chefAnger") {
-			chefAnger = std::stoi(value);
-		}
-		else if (p.first == "chefVision") {
-			chefVision = std::stoi(value);
-		}
-		else if (p.first == "winType") {
-			wt = (WinType)std::stoi(value);
 		}
 		else
 		{
@@ -293,6 +341,15 @@ void GameData::decodeGameData(const char * data)
 		}
 	}
 }
+
+double GameData::getChefVision() {
+	if (getBlindChef())
+	{
+		return (chefVision + getChefRampVision()) * LIMIT_CHEF_VISION_MULT;
+	}
+	return chefVision + getChefRampVision();
+}
+
 
 int GameData::getGameClock()
 {

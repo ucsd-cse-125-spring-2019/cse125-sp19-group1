@@ -3,13 +3,7 @@
 Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
 	id = -1; // default ID; should be updated later (if all goes correctly)
 	name = string(newName);
-	// TODO: initializing this matrix to zero affects...the ears and tail?!?!?
-	// joint5 has animation data in the file, but it doesn't have an assimp channel?
-	// note that we are still attaching channel matrix data to it; it just has a null channel
-	// not necessarly problematic because channel has essentially been reduced to a counter
-	// we may just want to change keyframes here as we go through the matrix array
 	transform = glm::mat4(1.0f);
-	// TODO: initializing this to zero is okay?
 	offset = glm::mat4(0.0f);
 	nodeTransform = glm::mat4(nodeMat);
 	parent = newParent;
@@ -59,6 +53,11 @@ void Bone::SetChannel(AnimationChannel * newChannel) {
 	channel = newChannel;
 }
 
+void Bone::CopyParentChannel() {
+	AnimationChannel * parentChannel = parent->GetChannel();
+	channel = parentChannel;
+}
+
 void Bone::Print(string spaces) {
 	std::cout << spaces << name << ": " << isBone << " and " << (channel != NULL) << std::endl;
 	for (int i = 0; i < children.size(); i++) {
@@ -81,10 +80,6 @@ void Bone::Update(glm::mat4 globalInverseT, glm::mat4 parentT) {
 
 	else
 		globalT = parentT * nodeTransform;
-
-	if (channel != NULL && channelMatrices.size() < 1)
-		std::cout << "lol";
-
 
 	for (int i = 0; i < children.size(); i++)
 		children[i]->Update(globalInverseT, globalT);

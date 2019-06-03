@@ -7,31 +7,22 @@ Player::Player(int anID, int aPlayerNum, Location aLoc) : playerID(anID), player
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
-	//if (anID == 1) {
-	//	modelType = ModelType::CHEF;
-	//}
 }
-
 
 Location Player::getLocation() const { return location; }
 int Player::getPlayerNum() const { return playerNum; }
 bool Player::hasSelectedAnimal() const { return selectedAnimal; }
-void Player::toggleAnimalSelection() { selectedAnimal = !selectedAnimal; dirtyVariablesMap["animalSelection"] = true; }
-bool Player::isReady() const
+void Player::toggleAnimalSelection()
 {
-	return ready;
-}
-
-void Player::toggleReady()
-{
-	ready = !ready;
+	selectedAnimal = !selectedAnimal;
+	dirtyVariablesMap["animalSelection"] = true;
 }
 ItemModelType Player::getInventory() const { return inventory; }
 bool Player::isInteracting() const { return interacting; }
-//bool Player::getOpenJail() const { return openingJail; }
-//bool Player::getOpeningGate() const { return openingGate; }
 bool Player::getHidden() { return hidden; }
 Action Player::getAction() const { return action; }
+PowerUp Player::getPowerUp() const { return powerUp; }
+
 
 Direction Player::getFacingDirection() const { return facingDirection; }
 void Player::setFacingDirection(Direction dir) { facingDirection = dir; }
@@ -49,6 +40,11 @@ void Player::setAction(Action anAction)
 {
 	action = anAction;
 	dirtyVariablesMap["interactAction"] = true;
+}
+void Player::setPowerUp(PowerUp aPowerUp)
+{
+	powerUp = aPowerUp;
+	dirtyVariablesMap["interactPowerUp"] = true;
 }
 void Player::setLocation(float argX, float argY, float argZ)
 {
@@ -86,15 +82,6 @@ void Player::setInteracting(bool interact)
 	interacting = interact;
 }
 
-//void Player::setOpenJail(bool interact) {
-//	openingJail = interact;
-//}
-//
-//
-//void Player::setOpeningGate(bool status) {
-//	openingGate = status;
-//}
-
 ModelType Player::getModelType() const 
 {
 	return modelType;
@@ -115,22 +102,13 @@ void Player::setCaughtAnimalType(ModelType type) {
 	dirtyVariablesMap["caughtAnimalType"] = true;
 }
 
-//<<<<<<< HEAD
 void Player::setCaughtStatus(bool caught) {
 	caughtStatus = caught;
 	dirtyVariablesMap["caughtStatus"] = true;
 }
 
 bool Player::hasCaughtAnimal() const {
-//=======
-//void Player::setIsCaught(bool caught) 
-//{
-//	isCaught = caught;
-//}
 
-//bool Player::getCaughtAnimal() const 
-//{
-//>>>>>>> server
 	return caughtAnimal;
 }
 
@@ -147,15 +125,8 @@ void Player::setCaughtAnimalId(int id)
 	caughtAnimalId = id;
 }
 
-//<<<<<<< HEAD
 bool Player::isCaught() const {
 	return caughtStatus;
-//=======
-////bool Player::getIsCaught() {
-//bool Player::getIsCaught() const 
-//{
-//	return isCaught;
-//>>>>>>> server
 }
 
 bool Player::inRange(Location & myLoc, Location & theirLoc) 
@@ -174,11 +145,10 @@ void Player::setActionStartTime()
 	actionStartTime = std::chrono::system_clock::now();
 }
 
-//<<<<<<< HEAD
 void Player::setUnlockJailStartTime() {
 	unlockJailStartTime = std::chrono::system_clock::now();
 }
-//=======
+
 void Player::setSpeedStartTime()
 {
 	speedStartTime = std::chrono::system_clock::now();
@@ -196,11 +166,6 @@ void Player::setSlowStartTime()
 	slowStartTime = std::chrono::system_clock::now();
 }
 
-void Player::setStartJailTime() 
-{
-	startJail = std::chrono::system_clock::now();
-//>>>>>>> server
-}
 void Player::setSpeedMultiplier(double multiplier)
 {
 	speedMultiplier = multiplier;
@@ -362,6 +327,11 @@ void Player::decodeInteractAction(std::string value)
 	action = static_cast<Action>(std::stoi(value));
 }
 
+void Player::decodeInteractPowerUp(std::string value)
+{
+	powerUp = static_cast<PowerUp>(std::stoi(value));
+}
+
 void Player::decodeVisionRadius(std::string value)
 {
 	visionRadius = std::stof(value);
@@ -390,6 +360,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["inventory"] = &Player::decodeInventory;
 	decodingFunctions["hidden"] = &Player::decodeHidden;
 	decodingFunctions["interactAction"] = &Player::decodeInteractAction;
+	decodingFunctions["interactPowerUp"] = &Player::decodeInteractPowerUp;
 	decodingFunctions["visionRadius"] = &Player::decodeVisionRadius;
 	decodingFunctions["caughtStatus"] = &Player::decodeCaughtStatus;
 	decodingFunctions["caughtAnimal"] = &Player::decodeCaughtAnimal;
@@ -406,6 +377,7 @@ void Player::addEncodeFunctions()
 	encodingFunctions["inventory"] = &Player::encodeInventory;
 	encodingFunctions["hidden"] = &Player::encodeHidden;
 	encodingFunctions["interactAction"] = &Player::encodeInteractAction;
+	encodingFunctions["interactPowerUp"] = &Player::encodeInteractPowerUp;
 	encodingFunctions["visionRadius"] = &Player::encodeVisionRadius;
 	encodingFunctions["caughtStatus"] = &Player::encodeCaughtStatus;
 	encodingFunctions["caughtAnimal"] = &Player::encodeCaughtAnimal;
@@ -419,6 +391,7 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["model"] = true;
 	dirtyVariablesMap["hidden"] = true;
 	dirtyVariablesMap["interactAction"] = true;
+	dirtyVariablesMap["interactPowerUp"] = true;
 	dirtyVariablesMap["visionRadius"] = true;
 	dirtyVariablesMap["caughtStatus"] = true;
 	dirtyVariablesMap["caughtAnimal"] = true;
@@ -468,6 +441,13 @@ std::string Player::encodeHidden() {
 std::string Player::encodeInteractAction() {
 	std::stringstream encodedData;
 	encodedData << "interactAction: " << static_cast<int>(action) << std::endl;
+
+	return encodedData.str();
+}
+
+std::string Player::encodeInteractPowerUp() {
+	std::stringstream encodedData;
+	encodedData << "interactPowerUp: " << static_cast<int>(powerUp) << std::endl;
 
 	return encodedData.str();
 }

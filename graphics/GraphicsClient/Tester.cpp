@@ -33,6 +33,12 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
+//#define DEBUG_CLIENTS
+#ifdef DEBUG_CLIENTS
+ClientGame * sharedClient2 = nullptr;
+ClientGame * sharedClient3 = nullptr;
+ClientGame * sharedClient4 = nullptr;
+#endif
 
 void ErrorCallback(int error, const char* description)
 {
@@ -113,8 +119,11 @@ void Init(GLFWwindow *window)
 
 	server = new ServerGame();
 	sharedClient = new ClientGame();
-	//_beginthread(serverLoop, 0, (void*)12);
-
+#ifdef DEBUG_CLIENTS
+	sharedClient2 = new ClientGame();
+	sharedClient3 = new ClientGame();
+	sharedClient4 = new ClientGame();
+#endif
 	inGameEngine = new InGameGraphicsEngine();
 
 #define CUTSCENES_DIR "../2D Elements/"
@@ -123,20 +132,24 @@ void Init(GLFWwindow *window)
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake2_2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("cake6_2")));
 	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("instructions")));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 1"), 2.0));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2"), 2.0));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 3"), 2.0));
-	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("angry meter explanation"), 8.0));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 1")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 2")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("exits 3")));
+	startingCutscenes.push_back(new CutsceneGraphicsEngine(CUTSCENE_FILE("angry meter explanation")));
 
 	chefWinsCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("chef win"));
 	animalsWinCutscene = new CutsceneGraphicsEngine(CUTSCENE_FILE("animal win"));
 	
-	chefWinsCutscene->showSkippableMsg = false;
-	animalsWinCutscene->showSkippableMsg = false;
+	//chefWinsCutscene->showSkippableMsg = false;
+	//animalsWinCutscene->showSkippableMsg = false;
 	
 	playAgainEngine = new PlayAgainGraphicsEngine();
 
-	currentEngine = lobbyEngine;
+	sharedClient->update();
+	if(sharedClient->getGameData()->getGameState() == GameState::IN_GAME)
+		currentEngine = loadingEngine;
+	else
+		currentEngine = lobbyEngine;
 
 	chefWinsCutscene->StartLoading();
 	animalsWinCutscene->StartLoading();

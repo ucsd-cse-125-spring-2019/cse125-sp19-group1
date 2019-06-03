@@ -13,11 +13,13 @@
 #include "UIObject.h"
 #include "ParticleSpawner.h"
 
+#include "TwoDeeGraphicsEngine.h"  // for createObjectForTexture()
+
 #include <thread>
 
-#define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonWalk.dae")
-#define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonWalkWithItem.dae")
-#define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearch.dae")
+#define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonNewWalk.dae")
+#define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonNewWalkWithItem.dae")
+#define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearchNoEars.dae")
 #define RACCOON_MDL_PATH        (MODELS_PATH "raccoon.fbx")
 #define RACCOON_TEX_PATH        (TEXTURES_PATH "raccoon.ppm")
 
@@ -29,7 +31,7 @@
 
 #define DOG_WALK_MDL_PATH       (ANIMATIONS_PATH "dogWalk.dae")
 #define DOG_CARRY_MDL_PATH      (ANIMATIONS_PATH "dogWalkWithItem.dae")
-#define DOG_SEARCH_MDL_PATH     (ANIMATIONS_PATH "dogSearch.dae")
+#define DOG_SEARCH_MDL_PATH     (ANIMATIONS_PATH "dogSearchNoEars.dae")
 #define DOG_MDL_PATH            (MODELS_PATH "doggo.fbx")
 #define DOG_TEX_PATH            (TEXTURES_PATH "doggo.ppm")
 
@@ -52,6 +54,9 @@
 #define FLASH_PARTICLE_TEX (PARTICLES_PATH "flash.png")
 #define SPEED_PARTICLE_TEX (PARTICLES_PATH "speed.png")
 #define SLOW_PARTICLE_TEX (PARTICLES_PATH "slow.png")
+#define BUILD_PARTICLE_TEX (PARTICLES_PATH "build.png")
+#define BLIND_PARTICLE_TEX (PARTICLES_PATH "blind.png")
+#define SEARCH_PARTICLE_TEX (PARTICLES_PATH "search.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -117,6 +122,9 @@ unsigned fake_carried_idx = 1;
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
+
+static const glm::mat4 identityMat(1.f);
+static glm::mat4 orthoP;
 
 static const struct PlayerModelSettings {
 	const char *walkModelPath;     // filesystem path to a model geometry file
@@ -239,7 +247,6 @@ struct ItemModel {
 static vector<ItemModel> itemModels;
 
 static glm::mat4 P; // P for projection
-static glm::mat4 orthoP; // P for 2d elements;
 static glm::mat4 V; // V for view
 static DirLight * light = nullptr;
 static FogGenerator * fog = nullptr;
@@ -326,12 +333,25 @@ ParticleSpawner * dustSpawner;
 ParticleSpawner * flashSpawner;
 ParticleSpawner * speedSpawner;
 ParticleSpawner * slowSpawner;
+ParticleSpawner * buildSpawner;
+ParticleSpawner * blindSpawner;
+ParticleSpawner * searchSpawner;
 
 
 extern ClientGame * sharedClient;
 
 static int elapsedTime = 0;
 static int directions = 0;
+
+
+#define TWO_DEE_PATH "../2D Elements/"
+#define ANIMAL_START_PROMPT_PATH (TWO_DEE_PATH "promptGOGOGOAnimals.png")
+#define CHEF_START_PROMPT_PATH (TWO_DEE_PATH "promptGOGOGOChef.png")
+
+static double mainLoopBeginTime = 0.0;
+static GLuint twoDeeShader = 0;
+static FBXObject *animalStartingPrompt = nullptr;
+static FBXObject *chefStartingPrompt = nullptr;
 
 struct PlayerState {
 	glm::mat4 transform;        // for position and rotation
@@ -341,6 +361,12 @@ struct PlayerState {
 	int id;                     // the player ID from the server
 	unsigned geometryIdx;       // index into playerGeometry
 	char moving;				// bool indicating whether or not the model should animate
+	char building;				// bool indicating whether or not model is doing iteraction animation
+	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
+	int movingSpeed;			// -1 = slow, 0 = normal, 1 = fast
+	int flashedRecently;		//counts down to fire a burst of flash particles
+	bool blinded; //will activate if player is blinded: should only activate on chef
+	bool instantSearch; //will activate if player has instant search. 
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
@@ -1220,7 +1246,9 @@ void resetIdempotentFlush()
 }
 
 void updateUIElements(GameData * gameData) {
-	if (!uiCanvas) {
+	PlayerState * currState = getMyState();
+
+	if (!currState || !uiCanvas) {
 		return;
 	}
 
@@ -1262,7 +1290,6 @@ void updateUIElements(GameData * gameData) {
 	}
 
 	//check if current user is holding item
-	PlayerState * currState = getMyState();
 	Player * currPlayer = players[currState->id];
 	//items held by chef are the icons for animals
 	if (currPlayer->isChef()) {
@@ -1449,6 +1476,181 @@ void InGameGraphicsEngine::IdleCallback()
 }
 
 
+static void UpdateAndDrawPlayer(PlayerState &state)
+{
+	auto &model = playerModels[state.geometryIdx];
+	auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
+	if (!networkPlayer) return;;
+
+	Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
+	auto inventory = networkPlayer->getInventory();
+	Geometry *playerGeometry = nullptr;
+
+	PowerUp powerupActive = networkPlayer ? networkPlayer->getPowerUp() : PowerUp::NONE;
+
+#ifdef DEBUG_CARRY
+	inventory = static_cast<ItemModelType>(fake_carried_idx);
+#endif
+	state.building = false;
+	switch (action) {
+	case Action::OPEN_BOX:
+	{
+		// hide the un-animated box
+		int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
+		int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
+		auto transform = envObjs[z][x];
+		transform->hidden = true;
+
+		// show the animated box
+		auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
+		unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
+		animatedBoxObjects[boxIdx]->Update(true);
+		animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
+
+		// Turn towards the box
+		float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
+		float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
+		state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
+
+		//for particle effects
+		state.building = true;
+		state.buildPosition = transform->getOffset() * glm::vec4(0, 0, 0, 1);
+
+		// fall through on purpose (missing break is not a mistake)
+	}
+	case Action::CONSTRUCT_GATE: {
+	}
+	case Action::UNLOCK_JAIL:
+	{
+	}
+	case Action::SWING_NET:
+		model.getActionObject()->Update(true);
+		playerGeometry = model.getActionGeometry();
+		break;
+
+	case Action::NONE:
+	default:
+		if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
+			model.getCarryObject()->Update(true);
+			playerGeometry = model.getCarryGeometry();
+		}
+		else if (inventory != ItemModelType::EMPTY) {
+			model.getCarryObject()->Update(true);
+			playerGeometry = model.getCarryGeometry();
+		}
+		else {
+			model.getWalkObject()->Update(state.moving != 0);
+			playerGeometry = model.getwalkGeometry();
+		}
+		break;
+	}
+	state.blinded = false;
+	state.instantSearch = false;
+	//set states to show auras for powerups
+	switch (powerupActive) {
+	case PowerUp::GHOST:
+		state.movingSpeed = 1;
+		break;
+	case PowerUp::CHEF_SLOW:
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			state.movingSpeed = -1;
+		}
+		else {
+			state.movingSpeed = 0;
+		}
+		break;
+	case PowerUp::FLASH:
+		state.flashedRecently = 6;
+	case PowerUp::CHEF_BLIND:
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			state.blinded = true;
+		}
+	case PowerUp::INSTA_SEARCH:
+		state.instantSearch = true;
+	default:
+		state.flashedRecently = 0;
+		state.movingSpeed = 0;
+		break;
+	}
+	playerGeometry->draw(V, P, state.transform);
+
+	// Prepare to draw a special copy of an item (either carried or thrown)
+	Geometry *inventoryGeometry = nullptr;
+	glm::mat4 inventoryMat;
+
+	if (inventory != ItemModelType::EMPTY) {
+		// Prepare to draw a carried item
+
+		auto playerSettings = playerModels[state.geometryIdx].settings;
+		const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
+
+		glm::vec3 modelTranslate = itemModel.settings->translate;
+		modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+		modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+		modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+
+		modelTranslate += playerSettings->carryPosition + itemModel.settings->carryTranslate;
+
+		const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
+		const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
+		inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+		inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+		inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+		inventoryGeometry = itemModel.geometry;
+
+		// The thrown item code will need this later
+		state.previousInventory = inventory;
+		state.inventoryTransform = inventoryMat;
+	}
+	else if (state.previousInventory != ItemModelType::EMPTY) {
+		// Prepare to draw a thrown item
+
+		// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
+		// depending on if the item actually was just thrown
+#define INVENTORY_ANIMATION_DURATION 0.275
+#define INVENTORY_GRAVITY 85
+		if (!state.animatingInventory) {
+			state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
+			state.carryStopTime = glfwGetTime();
+			auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
+			bool isKey = state.previousInventory >= ItemModelType::key1 && state.previousInventory <= ItemModelType::screwdriver3;
+			state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory && isKey);
+			if (!state.animatingInventory) {
+				state.previousInventory = ItemModelType::EMPTY;
+			}
+		}
+
+		// If the animation wasn't cancelled, calculate projectile position
+		if (state.animatingInventory) {
+			int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
+			int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
+			glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
+			targetPosition.y += 6.f;
+			auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
+
+			auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
+			auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
+			animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
+
+			inventoryMat = state.inventoryTransform;
+			inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
+
+			inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
+		}
+
+		// Check if the animation has finished
+		if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
+			state.animatingInventory = false;
+			state.previousInventory = ItemModelType::EMPTY;
+		}
+	}
+
+	if (inventoryGeometry) {
+		inventoryGeometry->draw(V, P, inventoryMat);
+	}
+}
+
+
 void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
@@ -1463,143 +1665,6 @@ void DisplayCallback(GLFWwindow* window)
 	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
 
-	// Draw the players
-	if (sharedClient && sharedClient->getGameData()) {
-		auto &networkPlayers = sharedClient->getGameData()->getAllPlayers();
-		for (auto &state : players) {
-			auto &model = playerModels[state.geometryIdx];
-			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
-			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
-			auto inventory = networkPlayer->getInventory();
-			Geometry *playerGeometry = nullptr;
-
-#ifdef DEBUG_CARRY
-			inventory = static_cast<ItemModelType>(fake_carried_idx);
-#endif
-
-			switch (action) {
-			case Action::OPEN_BOX:
-			{
-				// hide the un-animated box
-				int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
-				int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
-				auto transform = envObjs[z][x];
-				transform->hidden = true;
-
-				// show the animated box
-				auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
-				unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
-				animatedBoxObjects[boxIdx]->Update(true);
-				animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
-
-				// Turn towards the box
-				float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
-				float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
-				state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
-
-				// fall through on purpose (missing break is not a mistake)
-			}
-			case Action::CONSTRUCT_GATE:
-			case Action::UNLOCK_JAIL:
-			case Action::SWING_NET:
-				model.getActionObject()->Update(true);
-				playerGeometry = model.getActionGeometry();
-				break;
-
-			case Action::NONE:
-			default:
-				if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
-					model.getCarryObject()->Update(true);
-					playerGeometry = model.getCarryGeometry();
-				}
-				else if (inventory != ItemModelType::EMPTY) {
-					model.getCarryObject()->Update(true);
-					playerGeometry = model.getCarryGeometry();
-				}
-				else {
-					model.getWalkObject()->Update(state.moving != 0);
-					playerGeometry = model.getwalkGeometry();
-				}
-				break;
-			}
-
-			playerGeometry->draw(V, P, state.transform);
-
-			// Prepare to draw a special copy of an item (either carried or thrown)
-			Geometry *inventoryGeometry = nullptr;
-			glm::mat4 inventoryMat;
-
-			if (inventory != ItemModelType::EMPTY) {
-				// Prepare to draw a carried item
-
-				auto playerSettings = playerModels[state.geometryIdx].settings;
-				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
-
-				glm::vec3 modelTranslate = itemModel.settings->translate;
-				modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
-				modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
-				modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
-
-				modelTranslate += playerSettings->carryPosition + itemModel.settings->carryTranslate;
-
-				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
-				const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
-				inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
-				inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
-				inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
-				inventoryGeometry = itemModel.geometry;
-
-				// The thrown item code will need this later
-				state.previousInventory = inventory;
-				state.inventoryTransform = inventoryMat;
-			}
-			else if (state.previousInventory != ItemModelType::EMPTY) {
-				// Prepare to draw a thrown item
-
-				// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
-				// depending on if the item actually was just thrown
-#define INVENTORY_ANIMATION_DURATION 0.275
-#define INVENTORY_GRAVITY 85
-				if (!state.animatingInventory) {
-					state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
-					state.carryStopTime = glfwGetTime();
-					auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
-					state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory);
-					if (!state.animatingInventory) {
-						state.previousInventory = ItemModelType::EMPTY;
-					}
-				}
-
-				// If the animation wasn't cancelled, calculate projectile position
-				if (state.animatingInventory) {
-					int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
-					int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
-					glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
-					targetPosition.y += 6.f;
-					auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
-
-					auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
-					auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
-					animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
-
-					inventoryMat = state.inventoryTransform;
-					inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
-
-					inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
-				}
-
-				// Check if the animation has finished
-				if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
-					state.animatingInventory = false;
-					state.previousInventory = ItemModelType::EMPTY;
-				}
-			}
-
-			if (inventoryGeometry) {
-				inventoryGeometry->draw(V, P, inventoryMat);
-			}
-		}
-	}
 
 	if (envObjsTransform) {
 		envObjsTransform->draw(V, P, glm::mat4(1.0));
@@ -1609,10 +1674,68 @@ void DisplayCallback(GLFWwindow* window)
 		allItemsTransform->draw(V, P, glm::mat4(1.0));
 	}
 
-	for (auto &state : players) {
-		//particle effects
+	for (const auto &state : players) {
 		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), state.moving);
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0));
+		speedSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1));
+		slowSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1));
+		buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
+			glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
+		flashSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position, state.flashedRecently > 0);
+		blindSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position + glm::vec3(0,25.0f,0), state.blinded);
+		searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
+	}
+
+	glEnable(GL_DEPTH_TEST);
+	glUseProgram(objShaderProgram);
+
+	// Draw the players
+	if (sharedClient && sharedClient->getGameData()) {
+		for (auto &state : players) {
+			UpdateAndDrawPlayer(state);
+		}
+		//particleEffects for powerups
+
+	}
+
+	// Draw the starting prompt
+#define START_PROMPT_DURATION 10.0
+#define START_PROMPT_FADEOUT 1.0
+#define START_PROMPT_PERIOD 0.5
+	double now = glfwGetTime();
+	Player *networkPlayer = nullptr;
+	if (now >= mainLoopBeginTime && now < mainLoopBeginTime + START_PROMPT_DURATION
+		&& twoDeeShader && animalStartingPrompt && chefStartingPrompt
+		&& sharedClient && sharedClient->getGameData()
+		&& ( networkPlayer = sharedClient->getGameData()->getPlayer(sharedClient->getMyID()) ) ) {
+		
+		FBXObject *message = networkPlayer->isChef() ? chefStartingPrompt : animalStartingPrompt;
+
+		float scale = 1.f - (sinf(now * (glm::two_pi<float>() / START_PROMPT_PERIOD)) + 1.f) * 0.01f;
+		auto mat = glm::scale(identityMat, glm::vec3(scale));
+
+		float msgAlpha = 1.f;
+		double alphaPhase = now - (mainLoopBeginTime + START_PROMPT_DURATION - START_PROMPT_FADEOUT) / START_PROMPT_FADEOUT;
+		if (alphaPhase >= 0.f && alphaPhase <= 1.f) {
+			msgAlpha = 1.f - alphaPhase;
+		}
+
+		glEnable(GL_BLEND);
+		glDisable(GL_DEPTH_TEST);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
+		
+		glUseProgram(twoDeeShader);
+		auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
+		glUniform1f(uAlpha, msgAlpha * 0.88f);
+		message->Draw(twoDeeShader, &identityMat, &orthoP, mat);
 	}
 
 	if (uiCanvas) {
@@ -1669,17 +1792,17 @@ void LoadModels()
 			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
 			model.settings = &setting;
-			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
-				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
 			}
 			if (setting.actionModelPath || setting.actionTexturePath) {
-				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, false);
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
 				model.actionGeometry->t = transform;
 			}
@@ -1705,23 +1828,23 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, -1, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 		}
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, -1, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, -1, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
 	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, -1, false);
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, false);
 	}
 
 	itemLoadingThread.join();
@@ -1751,6 +1874,12 @@ InGameGraphicsEngine::InGameGraphicsEngine()
 
 InGameGraphicsEngine::~InGameGraphicsEngine()
 {
+	delete dustSpawner;
+	delete speedSpawner;
+	delete searchSpawner;
+	delete slowSpawner;
+	delete blindSpawner;
+	delete flashSpawner;
 }
 
 void InGameGraphicsEngine::StartLoading()  // may launch a thread and return immediately
@@ -1793,6 +1922,21 @@ void InGameGraphicsEngine::CleanUp()
 {
 	players.clear();
 
+	if (twoDeeShader) {
+		TwoDeeGraphicsEngine::releaseShader();
+		twoDeeShader = 0;
+	}
+
+	if (animalStartingPrompt) {
+		delete animalStartingPrompt;
+		animalStartingPrompt = nullptr;
+	}
+
+	if (chefStartingPrompt) {
+		delete chefStartingPrompt;
+		chefStartingPrompt = nullptr;
+	}
+
 	for (auto &model : itemModels) {
 		if (model.object) delete model.object;
 		if (model.geometry) delete model.geometry;
@@ -1831,8 +1975,23 @@ void InGameGraphicsEngine::MainLoopBegin()
 #ifndef DEBUG_NO_UI
 	if (!uiCanvas) {
 		cout << "Loading UICanvas... ";
+		using namespace std::chrono;
+		auto setupStart = high_resolution_clock::now();
 		uiCanvas = new UICanvas(uiShaderProgram);
-		cout << "done.\n";
+		auto setupEnd = high_resolution_clock::now();
+		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
+		cout << "done constructing UICanvas in " << setupDuration.count() << " seconds\n";
+	}
+
+	if (!twoDeeShader) {
+		twoDeeShader = TwoDeeGraphicsEngine::retainShader();
+	}
+
+	if (!animalStartingPrompt) {
+		animalStartingPrompt = createObjectForTexture(ANIMAL_START_PROMPT_PATH);
+	}
+	if (!chefStartingPrompt) {
+		chefStartingPrompt = createObjectForTexture(CHEF_START_PROMPT_PATH);
 	}
 #endif
 
@@ -1884,6 +2043,9 @@ void InGameGraphicsEngine::MainLoopBegin()
 		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, -1.0f, 0));
 		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
+		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
+		blindSpawner = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
+		searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
 
 
 		auto setupEnd = high_resolution_clock::now();
@@ -1895,11 +2057,13 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 	InitCamera(glm::vec3(0.f));
 
+	// Set clear color
+	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
+
 	const auto gameData = sharedClient->getGameData();
 	gameData->startGameClock();
 
-	// Set clear color
-	glClearColor(0.05f, 0.8f, 0.85f, 1.0f);
+	mainLoopBeginTime = glfwGetTime();
 }
 
 void InGameGraphicsEngine::MainLoopEnd()
@@ -1916,9 +2080,9 @@ void InGameGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int 
 	if (windowHeight > 0)
 	{
 		P = glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4000.0f);
-		//orthoP = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f, -1.0f, 1.0f);
-		orthoP = glm::ortho(0.0f, 800.0f, 600.0f, 0.0f, -1.0f, 1.0f);
 		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
+
+		orthoP = glm::ortho(-1.f, 1.f, -1.f, 1.f);
 	}
 }
 

@@ -30,6 +30,10 @@ private:
 	std::vector<glm::vec2> uvs;
 	std::vector<glm::vec3> normals;
 
+	// Temporaries that are deallocated in RenderingSetup
+	std::vector<glm::ivec4> weightIndices;
+	std::vector<glm::vec4> weightValues;
+
 	const char * texPath;
 
 	Skeleton * skel;
@@ -52,9 +56,9 @@ private:
 
 public:
 	// creating. destroying, and debugging
-	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, int animIndex = -1, bool setupRendering = true, GLint filtering = GL_NEAREST);
+	FBXObject(const char * obj_path, const char * tex_path, bool attachSkel, bool setupRendering = true, GLint filtering = GL_NEAREST);
 	void Init(bool attachSkel);
-	void Parse(const char* filepath, int animIndex);
+	void Parse(const char* filepath);
 	~FBXObject();
 	void PrintMatrix(glm::mat4 * matrix);
 	void PrintSkeleton();
@@ -79,6 +83,7 @@ public:
 	void SetDepthTest(bool depthTestEnabled);
 	// rendering
 	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
+	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model, GLuint textureOverride);
 	void RenderingSetup();
 	bool GetIsRenderingSetup();
 	void UpdateBuffers();

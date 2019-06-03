@@ -43,7 +43,7 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
   //load in texture from sampler2D
   vec3 surfaceToLight = normalize(light.light_pos.xyz);
   vec4 texColor = texture(renderedTexture, UV);
-  vec3 texColorNoAlpha =  vec3(texColor.x, texColor.y, texColor.z);
+  vec3 texColorNoAlpha =  vec3(texColor.x * light.light_color.x, texColor.y* light.light_color.y, texColor.z * light.light_color.z);
   vec3 amb = texColorNoAlpha;
   //vec3 amb = ambient;
   // Diffuse shading
@@ -68,15 +68,11 @@ vec3 CalcDirLight(vec3 normal, vec3 viewDir)
 	//}
 	if (intensity > 0.95){//otherwise, intensities
 		//toonColor = vec4(1.0,0.5,0.5,1.0);
-		toonColor = toonColor * 0.95;
+		toonColor = toonColor * 0.7;
 	}
 	else if (intensity > 0.5){
 		//toonColor = vec4(0.6,0.3,0.3,1.0);
-		toonColor = toonColor * 0.80;
-	}
-	else if (intensity > 0.25){
-		//toonColor = vec4(0.4,0.2,0.2,1.0);
-		toonColor = toonColor * 0.70;
+		toonColor = toonColor * 0.60;
 	}
 	else
 		//toonColor = vec4(0.2,0.1,0.1,1.0);

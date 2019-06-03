@@ -30,6 +30,10 @@ float Animation::getEndTime() {
 	return endTime;
 }
 
+void Animation::setEndTime(float end) {
+	endTime = end;
+}
+
 /**
 * For every channel, set the correct offsets for the time listed.
 * Skeleton is needed to set the right bones

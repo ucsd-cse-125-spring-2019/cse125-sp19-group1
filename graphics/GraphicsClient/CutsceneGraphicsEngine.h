@@ -1,6 +1,8 @@
 #pragma once
 #include "TwoDeeGraphicsEngine.h"
 
+#include <cstdint>
+
 class FBXObject;
 
 class CutsceneGraphicsEngine : public TwoDeeGraphicsEngine
@@ -8,7 +10,7 @@ class CutsceneGraphicsEngine : public TwoDeeGraphicsEngine
 public:
 	bool showSkippableMsg;
 
-	CutsceneGraphicsEngine(const char *textureFilename, double duration = 3.0);
+	CutsceneGraphicsEngine(const char *textureFilename, double duration = DBL_MAX);
 	~CutsceneGraphicsEngine();
 
 	virtual bool ShouldFadeout();
