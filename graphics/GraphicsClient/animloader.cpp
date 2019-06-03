@@ -1,5 +1,7 @@
 #include "animloader.h"
 
+#define FRAME_TIME_MODIFIER 2.0f
+
 bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer) {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
@@ -36,15 +38,20 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	std::vector<AnimationChannel*> * channels = newAnimation->GetChannels();
 
 	channels->reserve(anim->mNumChannels);
-	convertChannels(anim, channels);
+	float modifiedDuration = convertChannels(anim, channels);
+
+	std::cout << anim->mDuration << " VS " << modifiedDuration << std::endl;
+
+	newAnimation->setEndTime(modifiedDuration);
 
 	*animPlayer = new AnimationPlayer(skel, newAnimation);
 	return true;
 }
 
-void convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * channels) {
+float convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * channels) {
 
 	//assumes there are no keyframes individually holding position/rotation/scaling info
+	float latestTime = 0.0f;
 	for (int i = 0; i < anim->mNumChannels; i++) {
 		aiNodeAnim * currChannel = anim->mChannels[i];
 		//have to map the channels while building them, mold all keyframes together.
@@ -53,7 +60,9 @@ void convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * chann
 		channels->push_back(newChannel);
 		for (int j = 0; j < currChannel->mNumPositionKeys; j++) {
 			aiVectorKey positionKey = currChannel->mPositionKeys[j];
-			float keyTime = positionKey.mTime;
+			float keyTime = positionKey.mTime / FRAME_TIME_MODIFIER;
+			if (keyTime > latestTime)
+				latestTime = keyTime;
 			glm::vec3 positionVec = glm::vec3();
 			positionVec.x = positionKey.mValue.x;
 			positionVec.y = positionKey.mValue.y;
@@ -72,6 +81,8 @@ void convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * chann
 			keyframes->push_back(new Keyframe(keyTime, positionVec, rotationVec, scalingVec));
 		}
 	}
+
+	return latestTime;
 }
 
 // convert aiMatrix4x4 to glm::mat4

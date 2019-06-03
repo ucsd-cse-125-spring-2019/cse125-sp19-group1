@@ -17,6 +17,7 @@ public:
 	void resetAnimation();
 	float getStartTime();
 	float getEndTime();
+	void setEndTime(float end);
 	void evaluateChannels(float currTime);
 	glm::mat4 GetGlobalInverseT();
 };
