@@ -49,6 +49,9 @@
 
 #define BOX_SEARCH_MDL_PATH     (ANIMATIONS_PATH "box_search.dae")
 
+#define CANVAS_PATH      "../Canvas/"
+#define CANVAS_MDL_PATH  (CANVAS_PATH "canvas2.fbx")
+
 //particle effects
 #define DUST_PARTICLE_TEX (PARTICLES_PATH "dust.png")
 #define FLASH_PARTICLE_TEX (PARTICLES_PATH "flash.png")
@@ -92,6 +95,7 @@
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
 #define TILE_LEVEL_OFFSET 1.0f   /* from first floor to second */
 #define TILE_STRIDE 2.0f         /* difference in position from one tile to the next */
+#define TILE_SIZE_SERVER 20.f
 
 // Uncomment to render an additional dummy Chef that mirrors the player's movements
 // #define DUMMY_ID -4000
@@ -103,10 +107,10 @@
 // #define DEBUG_CARRY
 
 // Uncomment to skip loading player animations
-// #define DEBUG_LOAD_LESS
+ #define DEBUG_LOAD_LESS
 
 // Uncomment to skip loading UI
-// #define DEBUG_NO_UI
+ // #define DEBUG_NO_UI
 
 // Uncomment to make gates always animate so that you don't have to play through
 // #define DEBUG_GATE_ANIMATION
@@ -368,6 +372,9 @@ static double mainLoopBeginTime = 0.0;
 static GLuint twoDeeShader = 0;
 static FBXObject *animalStartingPrompt = nullptr;
 static FBXObject *chefStartingPrompt = nullptr;
+
+static GLuint solidColorShader = 0;
+static FBXObject *solidColorObject = nullptr;
 
 struct PlayerState {
 	glm::mat4 transform;        // for position and rotation
@@ -1670,6 +1677,118 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	}
 }
 
+void printPoint(float x, float y, const glm::mat4 &transform)
+{
+	auto newPoint = transform * glm::vec4(x, y, 0.f, 0.f);
+	printf("(%f, %f)", newPoint.x, newPoint.y);
+}
+
+static void DrawMinimap()
+{
+	GameData *gameData = nullptr;
+	if (!sharedClient || !(gameData = sharedClient->getGameData()) || !solidColorObject) {
+		return;
+	}
+
+	const auto &tileLayout = gameData->getTileLayout();
+	int tileHeight = tileLayout.size();
+	int tileWidth = 0;
+	for (int z = 0; z < tileHeight; z++) {
+		if (tileWidth < tileLayout[z].size())
+			tileWidth = tileLayout[z].size();
+	}
+
+	const float mapWidth = tileWidth * TILE_SIZE_SERVER;
+	const float mapHeight = tileHeight * TILE_SIZE_SERVER;
+
+#define MINIMAP_MARGIN_LEFT 0.02f
+#define MINIMAP_MARGIN_BOTTOM ((windowWidth / (float)windowHeight) * 0.02f)
+#define MINIMAP_SCREEN_WIDTH 0.275f
+#define MINIMAP_WALL_WIDTH (TILE_SIZE_SERVER * 0.2f)
+#define MINIMAP_ALPHA 1.f
+#define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
+#define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
+#define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
+
+	float screenHeight = (windowWidth / (float)windowHeight) * (MINIMAP_SCREEN_WIDTH * tileHeight) / tileWidth;
+
+	const auto position = glm::translate(identityMat, glm::vec3(-1.f + 0.5f * MINIMAP_SCREEN_WIDTH + MINIMAP_MARGIN_LEFT, -1.f + 0.5f * screenHeight + MINIMAP_MARGIN_BOTTOM, 0.f));
+	const auto rescale = glm::scale(position, glm::vec3(-MINIMAP_SCREEN_WIDTH / mapWidth, screenHeight / mapHeight, 1.f));
+	const auto viewMat = glm::translate(rescale, glm::vec3(mapWidth * -0.5f, mapHeight * -0.5f, 0.f));
+
+	glUseProgram(solidColorShader);
+	const auto uFillColor = glGetUniformLocation(solidColorShader, "fillColor");
+
+	auto fillRect = [&](float centerX, float centerZ, float width, float height, float r, float g, float b, float a) {
+		const auto transform = glm::scale(glm::translate(identityMat, glm::vec3(centerX, centerZ, 0.f)), glm::vec3(0.5f * width, 0.5f * height, 1.f));
+
+		glUniform4f(uFillColor, r, g, b, a * MINIMAP_ALPHA);
+		solidColorObject->Draw(solidColorShader, &identityMat, &orthoP, viewMat * transform);
+	};
+
+	fillRect(mapWidth * 0.5f, mapHeight * 0.5f, mapWidth, mapHeight, MINIMAP_BG_COLOR);
+
+	int z;
+
+	z = 0;
+	for (const auto &row : tileLayout) {
+		int x = 0;
+		for (auto tile : row) {
+			if (tile && tile->getTileType() == TileType::GATE) {
+				const float centerX = (x + 0.5f) * TILE_SIZE_SERVER;
+				const float centerZ = (z + 0.5f) * TILE_SIZE_SERVER;
+				fillRect(centerX, centerZ, TILE_SIZE_SERVER, TILE_SIZE_SERVER, MINIMAP_GATE_COLOR);
+			}
+			++x;
+		}
+		++z;
+	}
+
+	z = 0;
+	for (const auto &row : northWalls) {
+		int x = 0;
+		for (auto wall : row) {
+			if (wall) {
+				const float centerX = (x + 0.5f) * TILE_SIZE_SERVER;
+				const float centerZ = z * TILE_SIZE_SERVER;
+				fillRect(centerX, centerZ, TILE_SIZE_SERVER + MINIMAP_WALL_WIDTH, MINIMAP_WALL_WIDTH, MINIMAP_WALL_COLOR);
+			}
+			++x;
+		}
+		++z;
+	}
+
+	z = 0;
+	for (const auto &row : westWalls) {
+		int x = 0;
+		for (auto wall : row) {
+			if (wall) {
+				const float centerX = x * TILE_SIZE_SERVER;
+				const float centerZ = (z + 0.5f) * TILE_SIZE_SERVER;
+				fillRect(centerX, centerZ, MINIMAP_WALL_WIDTH, TILE_SIZE_SERVER + MINIMAP_WALL_WIDTH, MINIMAP_WALL_COLOR);
+			}
+			++x;
+		}
+		++z;
+	}
+
+	auto networkPlayerMe = gameData->getPlayer(sharedClient->getMyID());
+	for (const auto &state : players) {
+		if (networkPlayerMe->isChef() != (state.geometryIdx == static_cast<unsigned>(ModelType::CHEF))) {
+			continue;
+		}
+
+		if (state.geometryIdx == static_cast<unsigned>(ModelType::CHEF)) {
+			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.95f, 0.4f, 0.2f, 1.f);
+		}
+		else if (state.id == sharedClient->getMyID()) {
+			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.3f, 0.6f, 0.95f, 1.f);
+		}
+		else {
+			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.25f, 0.55f, 0.95f, 0.85f);
+		}
+	}
+}
 
 void DisplayCallback(GLFWwindow* window)
 {
@@ -1762,6 +1881,7 @@ void DisplayCallback(GLFWwindow* window)
 		uiCanvas->draw(&V, &P, glm::mat4(1.0));
 	}
 
+	DrawMinimap();
 
 	//raccoonModel->Draw(objShaderProgram, &V, &P);
 		//playerModels[RACCOON_IDX].geometry->draw(V, P, glm::mat4(1.0));
@@ -1985,6 +2105,7 @@ void InGameGraphicsEngine::CleanUp()
 	if (tileGeometry)     delete tileGeometry;
 	if (wallGeometry)     delete wallGeometry;
 	if (light)            delete light;
+	if (solidColorObject) delete solidColorObject;
 
 	deallocFloor();
 
@@ -1992,6 +2113,7 @@ void InGameGraphicsEngine::CleanUp()
 	if (root)             delete root;
 
 	glDeleteProgram(objShaderProgram);
+	glDeleteProgram(solidColorShader);
 }
 
 void InGameGraphicsEngine::MainLoopBegin()
@@ -2026,6 +2148,15 @@ void InGameGraphicsEngine::MainLoopBegin()
 		chefStartingPrompt = createObjectForTexture(CHEF_START_PROMPT_PATH);
 	}
 #endif
+
+	if (!solidColorShader) {
+		solidColorShader = LoadShaders("./solidcolor.vert", "./solidcolor.frag");
+	}
+
+	if (!solidColorObject) {
+		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false);
+		solidColorObject->SetDepthTest(false);
+	}
 
 	calledMainLoopBegin = true;
 	quit = false;

@@ -241,6 +241,8 @@
     <None Include="Particle.vertexshader" />
     <None Include="passthrough.frag" />
     <None Include="passthrough.vert" />
+    <None Include="solidcolor.frag" />
+    <None Include="solidcolor.vert" />
     <None Include="ui_shader.frag" />
     <None Include="ui_shader.vert" />
   </ItemGroup>
