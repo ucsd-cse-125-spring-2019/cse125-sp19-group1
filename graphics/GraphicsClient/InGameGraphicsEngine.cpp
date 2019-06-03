@@ -2342,6 +2342,15 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 			glfwSetWindowShouldClose(window, GL_TRUE);
 		}
 
+		if (key == GLFW_KEY_F10) {
+			sharedClient->sendPackets(INCREMENT_ANGER);
+		}
+		if (key == GLFW_KEY_F11) {
+			sharedClient->sendPackets(OPEN_ALL_BOXES);
+		}
+		if (key == GLFW_KEY_F9) {
+			sharedClient->sendPackets(UNLOCK_ALL_GATES);
+		}
 
 		if (key == GLFW_KEY_UP) {
 			directions |= DirectionBitmask::northSide;

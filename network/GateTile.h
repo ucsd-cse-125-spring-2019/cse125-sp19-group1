@@ -18,7 +18,7 @@ public:
 	int			getGateNum() { return gateNum; }
 	int			getKeyProgress() { return keyProgress; }
 	double		getCurrentConstructTime() { return currentConstructTime; }
-	bool		hasAllKeys() { return keyProgress == 3; }
+	bool		hasAllKeys() { return keyProgress >= 3; }
 	bool		isOpen() { return currentConstructTime >= TIME_TO_CONSTRUCT_GATE; }
 	ItemModelType getModel() { return model; }
 	// Setters
