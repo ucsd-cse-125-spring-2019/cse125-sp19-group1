@@ -1605,6 +1605,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	}
 	state.blinded = false;
 	state.instantSearch = false;
+	state.movingSpeed = 0;
 	//set states to show auras for powerups
 	switch (powerupActive) {
 	case PowerUp::GHOST:
@@ -1614,21 +1615,21 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		if (networkPlayer->getModelType() == ModelType::CHEF) {
 			state.movingSpeed = -1;
 		}
-		else {
-			state.movingSpeed = 0;
-		}
 		break;
 	case PowerUp::FLASH:
 		state.flashedRecently = 6;
+		break;
 	case PowerUp::CHEF_BLIND:
 		if (networkPlayer->getModelType() == ModelType::CHEF) {
 			state.blinded = true;
 		}
+		state.movingSpeed = 0;
+		break;
 	case PowerUp::INSTA_SEARCH:
 		state.instantSearch = true;
+		break;
 	default:
 		state.flashedRecently = 0;
-		state.movingSpeed = 0;
 		break;
 	}
 	playerGeometry->draw(V, P, state.transform);
