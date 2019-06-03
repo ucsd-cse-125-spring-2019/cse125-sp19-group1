@@ -356,6 +356,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	}
 
 	fprintf(stdout, "playOtherPlayerSounds for playerID=%d", playerID);
+	
 
 	// if the specific player doesn't have their own channel yet
 	it = otherPlayerChannels.find(playerID);
@@ -372,6 +373,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 	}
 
 	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
+	fprintf(stdout, "playOtherPlayerSounds curPlayerChannel=%d\n", curPlayerChannel);
 
 	// just for testing, remove
 	bool paused = false;
