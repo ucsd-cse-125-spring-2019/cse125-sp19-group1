@@ -1462,6 +1462,181 @@ void InGameGraphicsEngine::IdleCallback()
 }
 
 
+static void UpdateAndDrawPlayer(PlayerState &state)
+{
+	auto &model = playerModels[state.geometryIdx];
+	auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
+	if (!networkPlayer) return;;
+
+	Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
+	auto inventory = networkPlayer->getInventory();
+	Geometry *playerGeometry = nullptr;
+
+	PowerUp powerupActive = networkPlayer ? networkPlayer->getPowerUp() : PowerUp::NONE;
+
+#ifdef DEBUG_CARRY
+	inventory = static_cast<ItemModelType>(fake_carried_idx);
+#endif
+	state.building = false;
+	switch (action) {
+	case Action::OPEN_BOX:
+	{
+		// hide the un-animated box
+		int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
+		int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
+		auto transform = envObjs[z][x];
+		transform->hidden = true;
+
+		// show the animated box
+		auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
+		unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
+		animatedBoxObjects[boxIdx]->Update(true);
+		animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
+
+		// Turn towards the box
+		float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
+		float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
+		state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
+
+		//for particle effects
+		state.building = true;
+		state.buildPosition = transform->getOffset() * glm::vec4(0, 0, 0, 1);
+
+		// fall through on purpose (missing break is not a mistake)
+	}
+	case Action::CONSTRUCT_GATE: {
+	}
+	case Action::UNLOCK_JAIL:
+	{
+	}
+	case Action::SWING_NET:
+		model.getActionObject()->Update(true);
+		playerGeometry = model.getActionGeometry();
+		break;
+
+	case Action::NONE:
+	default:
+		if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
+			model.getCarryObject()->Update(true);
+			playerGeometry = model.getCarryGeometry();
+		}
+		else if (inventory != ItemModelType::EMPTY) {
+			model.getCarryObject()->Update(true);
+			playerGeometry = model.getCarryGeometry();
+		}
+		else {
+			model.getWalkObject()->Update(state.moving != 0);
+			playerGeometry = model.getwalkGeometry();
+		}
+		break;
+	}
+	state.blinded = false;
+	state.instantSearch = false;
+	//set states to show auras for powerups
+	switch (powerupActive) {
+	case PowerUp::GHOST:
+		state.movingSpeed = 1;
+		break;
+	case PowerUp::CHEF_SLOW:
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			state.movingSpeed = -1;
+		}
+		else {
+			state.movingSpeed = 0;
+		}
+		break;
+	case PowerUp::FLASH:
+		state.flashedRecently = 6;
+	case PowerUp::CHEF_BLIND:
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			state.blinded = true;
+		}
+	case PowerUp::INSTA_SEARCH:
+		state.instantSearch = true;
+	default:
+		state.flashedRecently = 0;
+		state.movingSpeed = 0;
+		break;
+	}
+	playerGeometry->draw(V, P, state.transform);
+
+	// Prepare to draw a special copy of an item (either carried or thrown)
+	Geometry *inventoryGeometry = nullptr;
+	glm::mat4 inventoryMat;
+
+	if (inventory != ItemModelType::EMPTY) {
+		// Prepare to draw a carried item
+
+		auto playerSettings = playerModels[state.geometryIdx].settings;
+		const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
+
+		glm::vec3 modelTranslate = itemModel.settings->translate;
+		modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
+		modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
+		modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
+
+		modelTranslate += playerSettings->carryPosition + itemModel.settings->carryTranslate;
+
+		const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
+		const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
+		inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
+		inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
+		inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
+		inventoryGeometry = itemModel.geometry;
+
+		// The thrown item code will need this later
+		state.previousInventory = inventory;
+		state.inventoryTransform = inventoryMat;
+	}
+	else if (state.previousInventory != ItemModelType::EMPTY) {
+		// Prepare to draw a thrown item
+
+		// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
+		// depending on if the item actually was just thrown
+#define INVENTORY_ANIMATION_DURATION 0.275
+#define INVENTORY_GRAVITY 85
+		if (!state.animatingInventory) {
+			state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
+			state.carryStopTime = glfwGetTime();
+			auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
+			bool isKey = state.previousInventory >= ItemModelType::key1 && state.previousInventory <= ItemModelType::screwdriver3;
+			state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory && isKey);
+			if (!state.animatingInventory) {
+				state.previousInventory = ItemModelType::EMPTY;
+			}
+		}
+
+		// If the animation wasn't cancelled, calculate projectile position
+		if (state.animatingInventory) {
+			int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
+			int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
+			glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
+			targetPosition.y += 6.f;
+			auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
+
+			auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
+			auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
+			animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
+
+			inventoryMat = state.inventoryTransform;
+			inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
+
+			inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
+		}
+
+		// Check if the animation has finished
+		if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
+			state.animatingInventory = false;
+			state.previousInventory = ItemModelType::EMPTY;
+		}
+	}
+
+	if (inventoryGeometry) {
+		inventoryGeometry->draw(V, P, inventoryMat);
+	}
+}
+
+
 void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
@@ -1485,7 +1660,7 @@ void DisplayCallback(GLFWwindow* window)
 		allItemsTransform->draw(V, P, glm::mat4(1.0));
 	}
 
-	for (auto state : players) {
+	for (const auto &state : players) {
 		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0));
 		speedSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
@@ -1508,178 +1683,8 @@ void DisplayCallback(GLFWwindow* window)
 
 	// Draw the players
 	if (sharedClient && sharedClient->getGameData()) {
-		bool chefSlow = sharedClient->getGameData()->getSlowChef();
 		for (auto &state : players) {
-			auto &model = playerModels[state.geometryIdx];
-			auto networkPlayer = sharedClient->getGameData()->getPlayer(state.id);
-			if (!networkPlayer) continue;
-
-			Action action = networkPlayer ? networkPlayer->getAction() : Action::NONE;
-			auto inventory = networkPlayer->getInventory();
-			Geometry *playerGeometry = nullptr;
-
-			PowerUp powerupActive = networkPlayer ? networkPlayer->getPowerUp() : PowerUp::NONE;
-
-#ifdef DEBUG_CARRY
-			inventory = static_cast<ItemModelType>(fake_carried_idx);
-#endif
-			state.building = false;
-			switch (action) {
-			case Action::OPEN_BOX:
-			{
-				// hide the un-animated box
-				int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
-				int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
-				auto transform = envObjs[z][x];
-				transform->hidden = true;
-
-				// show the animated box
-				auto boxGeometry = itemModels[static_cast<unsigned>(ItemModelType::box)].geometry;
-				unsigned boxIdx = (unsigned)(networkPlayer->getPlayerNum() - 1) % MAX_PLAYERS;
-				animatedBoxObjects[boxIdx]->Update(true);
-				animatedBoxObjects[boxIdx]->Draw(objShaderProgram, &V, &P, transform->getOffset() * boxGeometry->t);
-
-				// Turn towards the box
-				float centerX = (x + 0.5f) * TILE_SCALE * TILE_STRIDE;
-				float centerZ = (z + 0.5f) * TILE_SCALE * TILE_STRIDE;
-				state.setTargetAngle(glm::atan(centerX - state.position.x, centerZ - state.position.z));
-
-				//for particle effects
-				state.building = true;
-				state.buildPosition = transform->getOffset() * glm::vec4(0, 0, 0, 1);
-
-				// fall through on purpose (missing break is not a mistake)
-			}
-			case Action::CONSTRUCT_GATE: {
-			}
-			case Action::UNLOCK_JAIL:
-			{
-			}
-			case Action::SWING_NET:
-				model.getActionObject()->Update(true);
-				playerGeometry = model.getActionGeometry();
-				break;
-
-			case Action::NONE:
-			default:
-				if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
-					model.getCarryObject()->Update(true);
-					playerGeometry = model.getCarryGeometry();
-				}
-				else if (inventory != ItemModelType::EMPTY) {
-					model.getCarryObject()->Update(true);
-					playerGeometry = model.getCarryGeometry();
-				}
-				else {
-					model.getWalkObject()->Update(state.moving != 0);
-					playerGeometry = model.getwalkGeometry();
-				}
-				break;
-			}
-			state.blinded = false;
-			state.instantSearch = false;
-			//set states to show auras for powerups
-			switch (powerupActive) {
-			case PowerUp::GHOST:
-				state.movingSpeed = 1;
-				break;
-			case PowerUp::CHEF_SLOW:
-				if (networkPlayer->getModelType() == ModelType::CHEF) {
-					state.movingSpeed = -1;
-				}
-				else {
-					state.movingSpeed = 0;
-				}
-				break;
-			case PowerUp::FLASH:
-				state.flashedRecently = 6;
-			case PowerUp::CHEF_BLIND:
-				if (networkPlayer->getModelType() == ModelType::CHEF) {
-					state.blinded = true;
-				}
-			case PowerUp::INSTA_SEARCH:
-				state.instantSearch = true;
-			default:
-				state.flashedRecently = 0;
-				state.movingSpeed = 0;
-				break;
-			}
-			playerGeometry->draw(V, P, state.transform);
-
-			// Prepare to draw a special copy of an item (either carried or thrown)
-			Geometry *inventoryGeometry = nullptr;
-			glm::mat4 inventoryMat;
-
-			if (inventory != ItemModelType::EMPTY) {
-				// Prepare to draw a carried item
-
-				auto playerSettings = playerModels[state.geometryIdx].settings;
-				const auto &itemModel = itemModels[static_cast<unsigned>(inventory)];
-
-				glm::vec3 modelTranslate = itemModel.settings->translate;
-				modelTranslate.x *= TILE_STRIDE * TILE_SCALE;
-				modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
-				modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
-
-				modelTranslate += playerSettings->carryPosition + itemModel.settings->carryTranslate;
-
-				const auto scale = glm::scale(glm::translate(state.transform, modelTranslate), glm::vec3(itemModel.settings->scale));
-				const auto modelAngles = itemModel.settings->rotation + itemModel.settings->carryRotate;
-				inventoryMat = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
-				inventoryMat = glm::rotate(inventoryMat, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
-				inventoryMat = glm::rotate(inventoryMat, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
-				inventoryGeometry = itemModel.geometry;
-
-				// The thrown item code will need this later
-				state.previousInventory = inventory;
-				state.inventoryTransform = inventoryMat;
-			}
-			else if (state.previousInventory != ItemModelType::EMPTY) {
-				// Prepare to draw a thrown item
-
-				// Start the throw animation by setting carryStartTime or otherwise cancel it by unsetting previousInventory
-				// depending on if the item actually was just thrown
-#define INVENTORY_ANIMATION_DURATION 0.275
-#define INVENTORY_GRAVITY 85
-				if (!state.animatingInventory) {
-					state.carryStopLoc = Location(state.position.x, state.position.y, state.position.z);
-					state.carryStopTime = glfwGetTime();
-					auto tile = sharedClient->getGameData()->getKeyDropTile(state.carryStopLoc);
-					bool isKey = state.previousInventory >= ItemModelType::key1 && state.previousInventory <= ItemModelType::screwdriver3;
-					state.animatingInventory = (tile != nullptr && tile->getItem() != state.previousInventory && isKey);
-					if (!state.animatingInventory) {
-						state.previousInventory = ItemModelType::EMPTY;
-					}
-				}
-
-				// If the animation wasn't cancelled, calculate projectile position
-				if (state.animatingInventory) {
-					int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
-					int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
-					glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
-					targetPosition.y += 6.f;
-					auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
-
-					auto animationFraction = (float)((glfwGetTime() - state.carryStopTime) / INVENTORY_ANIMATION_DURATION);
-					auto animatedPosition = sourcePosition + (targetPosition - sourcePosition) * animationFraction;
-					animatedPosition.y += 0.5f * INVENTORY_GRAVITY * animationFraction - 0.5f * INVENTORY_GRAVITY * animationFraction * animationFraction;
-
-					inventoryMat = state.inventoryTransform;
-					inventoryMat[3] = glm::vec4(animatedPosition, inventoryMat[3][3]);
-
-					inventoryGeometry = itemModels[static_cast<unsigned>(state.previousInventory)].geometry;
-				}
-
-				// Check if the animation has finished
-				if (glfwGetTime() >= state.carryStopTime + INVENTORY_ANIMATION_DURATION) {
-					state.animatingInventory = false;
-					state.previousInventory = ItemModelType::EMPTY;
-				}
-			}
-			if (inventoryGeometry) {
-				inventoryGeometry->draw(V, P, inventoryMat);
-			}
-
+			UpdateAndDrawPlayer(state);
 		}
 		//particleEffects for powerups
 
