@@ -1707,8 +1707,6 @@ void DisplayCallback(GLFWwindow* window)
 			msgAlpha = 1.f - alphaPhase;
 		}
 
-		printf("Scale: %f  \tAlpha: %f\n", scale, msgAlpha);
-
 		glEnable(GL_BLEND);
 		glDisable(GL_DEPTH_TEST);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1717,7 +1715,7 @@ void DisplayCallback(GLFWwindow* window)
 		
 		glUseProgram(twoDeeShader);
 		auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
-		glUniform1f(uAlpha, msgAlpha);
+		glUniform1f(uAlpha, msgAlpha * 0.88f);
 		message->Draw(twoDeeShader, &identityMat, &orthoP, mat);
 	}
 
