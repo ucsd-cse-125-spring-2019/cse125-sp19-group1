@@ -16,7 +16,7 @@ int TwoDeeGraphicsEngine::passthroughShaderRefCount = 0;
 
 FBXObject * createObjectForTexture(const char *texturePath)
 {
-	auto obj = new FBXObject(CANVAS_MDL_PATH, texturePath, false, -1, true, GL_LINEAR);
+	auto obj = new FBXObject(CANVAS_MDL_PATH, texturePath, false, true, GL_LINEAR);
 	obj->SetDepthTest(false);
 
 	return obj;

@@ -1773,17 +1773,17 @@ void LoadModels()
 			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
 			model.settings = &setting;
-			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimIndex, false);
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
-				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimIndex, false);
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
 			}
 			if (setting.actionModelPath || setting.actionTexturePath) {
-				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimIndex, false);
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, false);
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
 				model.actionGeometry->t = transform;
 			}
@@ -1809,23 +1809,23 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, -1, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, false, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 		}
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, -1, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, -1, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
 	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, -1, false);
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, false);
 	}
 
 	itemLoadingThread.join();
