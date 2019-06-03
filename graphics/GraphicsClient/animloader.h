@@ -21,7 +21,7 @@
 #include "AnimationChannel.h"
 #include "Keyframe.h"
 
-bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer, int animIndex);
+bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer);
 void convertChannels(aiAnimation * aiAnim, std::vector<AnimationChannel *> * channels);
 glm::mat4 aiMatTOglm_ANIM(aiMatrix4x4 mat);
 
