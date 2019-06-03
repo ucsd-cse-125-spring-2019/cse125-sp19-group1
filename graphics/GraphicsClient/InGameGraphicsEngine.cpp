@@ -2276,7 +2276,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 		//particle setup
 		dustSpawner = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0,1.0f,0));
-		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, -1.0f, 0));
+		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, 10.0f, 0), 3.0f);
 		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
 		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
