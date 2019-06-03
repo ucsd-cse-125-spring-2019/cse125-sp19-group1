@@ -59,6 +59,12 @@ void Bone::SetChannel(AnimationChannel * newChannel) {
 	channel = newChannel;
 }
 
+// TODO: this could result in a pointer problem
+void Bone::CopyParentChannel() {
+	AnimationChannel * parentChannel = parent->GetChannel();
+	channel = parentChannel;
+}
+
 void Bone::Print(string spaces) {
 	std::cout << spaces << name << ": " << isBone << " and " << (channel != NULL) << std::endl;
 	for (int i = 0; i < children.size(); i++) {
@@ -81,10 +87,6 @@ void Bone::Update(glm::mat4 globalInverseT, glm::mat4 parentT) {
 
 	else
 		globalT = parentT * nodeTransform;
-
-	if (channel != NULL && channelMatrices.size() < 1)
-		std::cout << "lol";
-
 
 	for (int i = 0; i < children.size(); i++)
 		children[i]->Update(globalInverseT, globalT);

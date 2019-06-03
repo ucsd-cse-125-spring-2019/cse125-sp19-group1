@@ -23,7 +23,7 @@
 
 #define CAT_WALK_MDL_PATH       (ANIMATIONS_PATH "catWalk.dae")
 #define CAT_CARRY_MDL_PATH      (ANIMATIONS_PATH "catWalkWithItem.dae")
-#define CAT_SEARCH_MDL_PATH     (ANIMATIONS_PATH "catSearchNoEars.dae")
+#define CAT_SEARCH_MDL_PATH     (ANIMATIONS_PATH "catSearch.dae") //TODO: "catSearchNoEars.dae"
 #define CAT_MDL_PATH            (MODELS_PATH "cat.fbx")
 #define CAT_TEX_PATH            (TEXTURES_PATH "cat.ppm")
 
