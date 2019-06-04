@@ -414,7 +414,7 @@ void ServerGame::receiveFromClients()
 									jailTile->unlockJail();
 
 									//check if jail progress == 5
-									if (jailTile->getProgress() >= 5)
+									if (jailTile->getProgress() >= HITS_TO_OPEN_JAIL)
 									{
 										std::cout << "ANIMAL IS RELEASED" << std::endl;
 										//update animal 
