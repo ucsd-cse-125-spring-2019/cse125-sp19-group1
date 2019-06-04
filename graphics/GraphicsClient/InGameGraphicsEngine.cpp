@@ -147,19 +147,19 @@ static glm::mat4 orthoP;
 static const struct PlayerModelSettings {
 	const char *walkModelPath;     // filesystem path to a model geometry file
 	const char *walkTexturePath;   // filesystem path to a texture file
-	int walkAnimIndex;             // index of the preferred animation (optional specification for weird cases)
+	float walkAnimMultiplier;		   // multiply each keyframe by this amount to modify animation speed
 	const char *idleModelPath;
 	const char *idleTexturePath;
-	int idleAnimIndex;
+	float idleAnimMultiplier;
 	const char *carryModelPath;    // filesystem path to a model geometry file
 	const char *carryTexturePath;  // filesystem path to a texture file
-	int carryAnimIndex;            // index of the preferred animation (optional specification for weird cases)
+	float carryAnimMultiplier;
 	const char *idleCarryModelPath;
 	const char *idleCarryTexturePath;
-	int idleCarryAnimIndex;
+	float idleCarryAnimMultiplier;
 	const char *actionModelPath;   // filesystem path to a model geometry file
 	const char *actionTexturePath; // filesystem path to a texture file
-	int actionAnimIndex;           // index of the preferred animation (optional specification for weird cases)
+	float actionAnimMultiplier;
 	const char *title;             // name for use in debug messages, maybe user-visible too
 	const char *name;              // name for use in debug messages, maybe user-visible too
 	ModelType modelType;           // A unique ID, like ModelType::CHEF
@@ -209,18 +209,17 @@ static const struct PlayerModelSettings {
 	}
 } playerModelSettings[] = {
 #ifndef DEBUG_LOAD_LESS
-	// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				CHEF_IDLE_PATH,					nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 0.f,-1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_IDLE_MDL_PATH,		 nullptr,		   -1,			   CAT_CARRY_MDL_PATH,       nullptr,          -1,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_IDLE_MDL_PATH,		 nullptr,		   -1,			   DOG_CARRY_MDL_PATH,       nullptr,          -1,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	// walkModelPath          walkTexturePath    walkAnimMultiplier 	idleModelPath			idleTexturePath		idleAnimMultiplier	carryModelPath           carryTexturePath  carryAnimMultiplier	idleCarryModelPath				idleCarryTexturePath	idleCarryAnimMultiplier	  actionModelPath           actionTexturePath  actionAnimMultiplier  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,                  CHEF_IDLE_PATH,			 nullptr,		    1.0f,		        nullptr,                 nullptr,          1.0f,			    CHEF_IDLE_PATH,					nullptr,			    1.0f,					  nullptr,                  nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  0.5f,                  RACCOON_IDLE_MDL_PATH,	 nullptr,		    1.0f,		        RACCOON_CARRY_MDL_PATH,  nullptr,          1.0f,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			    1.0f,					  RACCOON_SEARCH_MDL_PATH,  nullptr,           1.0f,                 "Raccoon",  "Hung",       ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 0.f,-1.2f),    glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      0.5f,                  CAT_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        CAT_CARRY_MDL_PATH,      nullptr,          1.0f,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  CAT_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      0.5f,                  DOG_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        DOG_CARRY_MDL_PATH,      nullptr,          1.0f,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  DOG_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 #else
-	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,				nullptr,		   -1,			   nullptr,                  nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,			      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	// walkModelPath          walkTexturePath    walkAnimMultiplier		idleModelPath			idleTexturePath		idleAnimMultiplier	carryModelPath           carryTexturePath  carryAnimMultiplier	idleCarryModelPath				idleCarrTexturePath		idleCarryAnimMultiplier   actionModelPath           actionTexturePath  actionAnimMultiplier  title       name          modelType        attachSkel scale   translate					 carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,                 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,                  nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,	   glm::vec3(0.f),				 glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,				    nullptr,           1.0f,                 "Raccoon",  "Hung",       ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 0.f, -1.2f),	 glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,				    nullptr,           1.0f,                 "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),				 glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,			        nullptr,           1.0f,                 "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),			     glm::vec3(0.f, 5.5f, 3.5f) },
 #endif
 };
 
@@ -2103,27 +2102,27 @@ void LoadModels()
 			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
 			model.settings = &setting;
-			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, false);
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimMultiplier, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
-				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, false);
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimMultiplier, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
 			}
 			if (setting.actionModelPath || setting.actionTexturePath) {
-				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, false);
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimMultiplier, false);
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
 				model.actionGeometry->t = transform;
 			}
 			if (setting.idleModelPath || setting.idleTexturePath) {
-				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, false);
+				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, setting.idleAnimMultiplier, false);
 				model.idleGeometry = new Geometry(model.idleObject, objShaderProgram);
 				model.idleGeometry->t = transform;
 			}
 			if (setting.idleCarryModelPath || setting.idleCarryTexturePath) {
-				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, false);
+				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, setting.idleCarryAnimMultiplier, false);
 				model.idleCarryGeometry = new Geometry(model.idleCarryObject, objShaderProgram);
 				model.idleCarryGeometry->t = transform;
 			}
@@ -2161,23 +2160,23 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, 1.0f, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 		}
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, 1.0f, false);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, 1.0f, false);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
 	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, false);
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, 1.0f, false);
 	}
 
 	itemLoadingThread.join();
@@ -2336,7 +2335,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 	}
 
 	if (!solidColorObject) {
-		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false);
+		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false, 1.0f);
 		solidColorObject->SetDepthTest(false);
 	}
 
