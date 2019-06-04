@@ -269,8 +269,14 @@ void ServerGame::receiveFromClients()
 												gameData->getAtlas()->updateDroppedItem(itemName, loc);
 											}
 											else {
-												ItemModelType itemName = iter2->second->getInventory();
-												gameData->getAtlas()->returnItemToSpawn(itemName, loc.getZ(), loc.getX());
+												ItemModelType playerItem = iter2->second->getInventory();
+												ItemModelType tileItem = gameData->getAtlas()->getTileItem(loc);
+
+												gameData->getAtlas()->returnItemToSpawn(tileItem);
+												gameData->getAtlas()->updateTileItem(loc, playerItem);
+												iter2->second->setInventory(ItemModelType::EMPTY);
+												iter2->second->setSpeedMultiplier(1.0);
+												gameData->getAtlas()->updateDroppedItem(playerItem, loc);
 											}
 
 											if (gameData->getChefAnger() >= CHEF_MAX_ANGER && !animalCaught)

@@ -47,6 +47,7 @@ public:
 	void updateTileItem(Location & loc, ItemModelType anItem);
 	void getAdjacentFreeTile(int currRow, int currCol, int & row, int & col);
 	void returnItemToSpawn(ItemModelType anItem, int currRow, int currCol);
+	void returnItemToSpawn(ItemModelType anItem);
 
 	std::string encodeTileLayoutData(bool newPlayerInit);
 	bool hasRamp(Location & loc);
