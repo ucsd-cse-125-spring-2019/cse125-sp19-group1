@@ -226,7 +226,6 @@ void ClientGame::update()
 			}
 		}
 		else {
-			//opening box
 			if (player->getAction() == Action::NONE) {
 				soundSystem->pauseSoundEffect();
 				soundSystem->pauseSoundQueue();
@@ -285,77 +284,82 @@ void ClientGame::update()
 				}
 			}
 
-			// sounds that originate from other players
-			std::map < int, Player *> allPlayers = gameData->getAllPlayers();
-			std::map < int, Player * >::iterator it;
-			std::map < int, bool>::iterator miniIt;
-			Player * curPlayer;
-			Location curPlayerLoc;
-			float locX = 0.0;
-			float locY = 0.0;
-			float locZ = 0.0;
+		}
 
-			for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
-				if (it->first == myID) {
-					continue;
-				}
-				miniIt = playerDoingStuff.find(it->first);
-				if (miniIt == playerDoingStuff.end()) {
-					playerDoingStuff.insert(std::pair<int, bool>(it->first, false));
-				}
+		// sounds that originate from other players
+		std::map < int, Player *> allPlayers = gameData->getAllPlayers();
+		std::map < int, Player * >::iterator it;
+		std::map < int, bool>::iterator miniIt;
+		Player * curPlayer;
+		Location curPlayerLoc;
+		int curPlayerNum;
+		float locX = 0.0;
+		float locY = 0.0;
+		float locZ = 0.0;
 
-				curPlayer = it->second;
-				curPlayerLoc = curPlayer->getLocation();
-				locX = curPlayerLoc.getX();
-				locY = curPlayerLoc.getY();
-				locZ = curPlayerLoc.getZ();
-
-				if (curPlayer->isChef())
-				{
-					if (curPlayer->getAction() == Action::NONE) {
-						playerDoingStuff.at(it->first) = false;
-						soundSystem->pauseOtherPlayersSounds(it->first);
-					}
-					else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(it->first) == false) {
-						soundSystem->playOtherPlayersSounds(sound_other_net, it->first, locX, locY, locZ);
-						playerDoingStuff.at(it->first) = true;
-					}
-				}
-				else {
-					if (curPlayer->getAction() == Action::NONE) {
-						playerDoingStuff.at(it->first) = false;
-						soundSystem->pauseOtherPlayersSounds(it->first);
-					}
-					else if (curPlayer->getAction() == Action::OPEN_BOX && playerDoingStuff.at(it->first) == false) {
-						soundSystem->playOtherPlayersSounds(sound_other_search_item, it->first, locX, locY, locZ);
-						playerDoingStuff.at(it->first) = true;
-					}
-					else if (curPlayer->getAction() == Action::CONSTRUCT_GATE && playerDoingStuff.at(it->first) == false) {
-						int gateNum = gameData->getGateTile(curPlayerLoc)->getGateNum();
-						if (gateNum == 1) { //door
-							soundSystem->playOtherPlayersSounds(sound_other_door_unlock, it->first, locX, locY, locZ);
-						}
-						else if (gateNum == 2) { //bathroom
-							soundSystem->playOtherPlayersSounds(sound_other_toilet, it->first, locX, locY, locZ);
-						}
-						else if (gateNum == 3) { //vent
-							soundSystem->playOtherPlayersSounds(sound_other_vent_screw, it->first, locX, locY, locZ);
-						}
-						playerDoingStuff.at(it->first) = true;
-					}
-					else if (player->getAction() == Action::UNLOCK_JAIL && playerDoingStuff.at(it->first) == false) {
-						soundSystem->playOtherPlayersSounds(sound_other_jail_unlock, it->first, locX, locY, locZ);
-						playerDoingStuff.at(it->first) = true;
-					}
-					else if (player->getAction() == Action::KEY_DROP) {
-						soundSystem->playOtherPlayersSounds(sound_other_keydrop, it->first, locX, locY, locZ);
-					}
-				}
-
+		for (it = allPlayers.begin(); it != allPlayers.end(); it++) {
+			if (it->first == myID) {
+				continue;
 			}
 
-			soundSystem->update();
+			curPlayer = it->second;
+			curPlayerLoc = curPlayer->getLocation();
+			curPlayerNum = it->second->getPlayerNum();
+
+			miniIt = playerDoingStuff.find(curPlayerNum);
+			if (miniIt == playerDoingStuff.end()) {
+				playerDoingStuff.insert(std::pair<int, bool>(curPlayerNum, false));
+			}
+
+			locX = curPlayerLoc.getX();
+			locY = curPlayerLoc.getY();
+			locZ = curPlayerLoc.getZ();
+
+			if (curPlayer->isChef())
+			{
+				if (curPlayer->getAction() == Action::NONE) {
+					playerDoingStuff.at(curPlayerNum) = false;
+					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
+				}
+				else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(it->first) == false) {
+					soundSystem->playOtherPlayersSounds(sound_other_net, curPlayerNum, locX, locY, locZ);
+					playerDoingStuff.at(curPlayerNum) = true;
+				}
+			}
+			else {
+				if (curPlayer->getAction() == Action::NONE) {
+					playerDoingStuff.at(curPlayerNum) = false;
+					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
+				}
+				else if (curPlayer->getAction() == Action::OPEN_BOX && playerDoingStuff.at(curPlayerNum) == false) {
+					soundSystem->playOtherPlayersSounds(sound_other_search_item, curPlayerNum, locX, locY, locZ);
+					playerDoingStuff.at(curPlayerNum) = true;
+				}
+				else if (curPlayer->getAction() == Action::CONSTRUCT_GATE && playerDoingStuff.at(curPlayerNum) == false) {
+					int gateNum = gameData->getGateTile(curPlayerLoc)->getGateNum();
+					if (gateNum == 1) { //door
+						soundSystem->playOtherPlayersSounds(sound_other_door_unlock, curPlayerNum, locX, locY, locZ);
+					}
+					else if (gateNum == 2) { //bathroom
+						soundSystem->playOtherPlayersSounds(sound_other_toilet, curPlayerNum, locX, locY, locZ);
+					}
+					else if (gateNum == 3) { //vent
+						soundSystem->playOtherPlayersSounds(sound_other_vent_screw, curPlayerNum, locX, locY, locZ);
+					}
+					playerDoingStuff.at(curPlayerNum) = true;
+				}
+				else if (player->getAction() == Action::UNLOCK_JAIL && playerDoingStuff.at(curPlayerNum) == false) {
+					soundSystem->playOtherPlayersSounds(sound_other_jail_unlock, curPlayerNum, locX, locY, locZ);
+					playerDoingStuff.at(curPlayerNum) = true;
+				}
+				else if (player->getAction() == Action::KEY_DROP) {
+					soundSystem->playOtherPlayersSounds(sound_other_keydrop, curPlayerNum, locX, locY, locZ);
+				}
+			}
+
 		}
+
+		soundSystem->update();
 	}
 }
 

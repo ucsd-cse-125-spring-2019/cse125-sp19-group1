@@ -228,33 +228,19 @@ void SoundSystem::pauseSoundEffect()
 	}
 }
 
-void SoundSystem::pauseOtherPlayersSounds(int playerID)
+void SoundSystem::pauseOtherPlayersSounds(int playerNum)
 {
 	FMOD_RESULT result;
-	std::map<int, int>::iterator it;
 	FMOD::Channel * curPlayerChannel;
 
 	// if the specific player doesn't have their own channel yet
-	it = otherPlayerChannels.find(playerID);
-	if (it == otherPlayerChannels.end()) {
-		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
-			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
-			return;
-		}
-		else {
-			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
-			threeDeeChannelTaken++;
-		}
-		return;
-	}
 
-	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
+	curPlayerChannel = threeDeeChannel[playerNum - 1];
 	// fprintf(stdout, "pauseOtherPlayersSounds threeDeeChannel size=%d\n", sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0]));
 	// fprintf(stdout, "pauseOtherPlayersSounds curPlayerChannel=%d\n", curPlayerChannel);
 	// fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
 	result = curPlayerChannel->setPaused(true);
 	
-	/*
 	if (result != FMOD_OK) {
 		if (result == FMOD_ERR_INVALID_PARAM) {
 			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
@@ -272,8 +258,6 @@ void SoundSystem::pauseOtherPlayersSounds(int playerID)
 			fprintf(stdout, "pauseOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
 		}
 	}
-	*/
-
 
 }
 
@@ -342,10 +326,9 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 	}
 }
 
-void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop)
+void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerNum, float x, float y, float z, bool bLoop)
 {
 	FMOD_RESULT result;
-	std::map<int, int>::iterator it;
 	FMOD::Channel * curPlayerChannel;
 	FMOD_VECTOR loc;
 	loc.x = x;
@@ -360,27 +343,13 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 		pSound->setLoopCount(-1);
 	}
 
-	fprintf(stdout, "playOtherPlayerSounds for playerID=%d", playerID);
+	fprintf(stdout, "playOtherPlayerSounds for playerNum=%d", playerNum);
 
-	// if the specific player doesn't have their own channel yet
-	it = otherPlayerChannels.find(playerID);
-	if (it == otherPlayerChannels.end()) {
-		if (threeDeeChannelTaken >= sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0])) {
-			std::cerr << "WARNING: threeDeeChannelTaken = " << threeDeeChannelTaken << std::endl;
-			fprintf(stdout, "playOtherPlayersSounds ERROR: playerID: %d does not have a channel?\n", playerID);
-			return;
-		}
-		else {
-			otherPlayerChannels.insert(std::pair<int, int>(playerID, threeDeeChannelTaken));
-			threeDeeChannelTaken++;
-		}
-	}
-
-	curPlayerChannel = threeDeeChannel[otherPlayerChannels.at(playerID)];
+	curPlayerChannel = threeDeeChannel[playerNum - 1];
 	fprintf(stdout, "playOtherPlayerSounds curPlayerChannel=%d\n", curPlayerChannel);
 
 	// haven't played before
-	if (threeDeeChannelPlayedBefore[otherPlayerChannels.at(playerID)] == false) {
+	if (threeDeeChannelPlayedBefore[playerNum - 1] == false) {
 		result = system->playSound(pSound, 0, false, &curPlayerChannel);
 		curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
 
@@ -409,7 +378,7 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerID, float x, 
 		}
 		fprintf(stdout, "paused=%d playing=%d\n", paused, playing);
 		if (!playing && paused) {
-			fprintf(stdout, "playOtherPlayersSounds playerID=%d channelID=%d playing=%d paused=%d\n", playerID, otherPlayerChannels.at(playerID), playing, paused);
+			fprintf(stdout, "playOtherPlayersSounds playerNum=%d playing=%d paused=%d\n", playerNum, playing, paused);
 			curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
 			result = system->playSound(pSound, 0, false, &curPlayerChannel);
 
