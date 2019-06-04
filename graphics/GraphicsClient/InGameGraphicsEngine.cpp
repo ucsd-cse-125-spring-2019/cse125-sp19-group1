@@ -757,6 +757,11 @@ void resetItems()
 			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
 			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
 
+			// If on a ramp, give a slight height boost
+			if (tile->getHeight() & 1) {
+				tileTranslate.y += 4.f;
+			}
+
 			if (tile->getTileType() == TileType::OBJECT) {
 				if (((ObjectTile *)tile)->getModel() == ItemModelType::table) {
 					tileTranslate.y += 9.25f;
