@@ -18,24 +18,32 @@
 #include <thread>
 
 #define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonNewWalk.dae")
+#define RACCOON_IDLE_MDL_PATH	(ANIMATIONS_PATH "raccoonIdle.dae")
 #define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonNewWalkWithItem.dae")
+#define RACCOON_IDLE_CARRY_MDL_PATH (ANIMATIONS_PATH "raccoonIdleWithItem.dae")
 #define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearchNoEars.dae")
 #define RACCOON_MDL_PATH        (MODELS_PATH "raccoon.fbx")
 #define RACCOON_TEX_PATH        (TEXTURES_PATH "raccoon.ppm")
 
 #define CAT_WALK_MDL_PATH       (ANIMATIONS_PATH "catWalk.dae")
+#define CAT_IDLE_MDL_PATH       (ANIMATIONS_PATH "catIdle.dae")
 #define CAT_CARRY_MDL_PATH      (ANIMATIONS_PATH "catWalkWithItem.dae")
+#define CAT_IDLE_CARRY_MDL_PATH	(ANIMATIONS_PATH "catIdleWithItem.dae")
 #define CAT_SEARCH_MDL_PATH     (ANIMATIONS_PATH "catSearch.dae")
 #define CAT_MDL_PATH            (MODELS_PATH "cat.fbx")
 #define CAT_TEX_PATH            (TEXTURES_PATH "cat.ppm")
 
 #define DOG_WALK_MDL_PATH       (ANIMATIONS_PATH "dogWalk.dae")
+#define DOG_IDLE_MDL_PATH		(ANIMATIONS_PATH "dogIdle.dae")
 #define DOG_CARRY_MDL_PATH      (ANIMATIONS_PATH "dogWalkWithItem.dae")
+#define DOG_IDLE_CARRY_MDL_PATH	(ANIMATIONS_PATH "dogIdleWithItem.dae")
 #define DOG_SEARCH_MDL_PATH     (ANIMATIONS_PATH "dogSearch.dae")
 #define DOG_MDL_PATH            (MODELS_PATH "doggo.fbx")
 #define DOG_TEX_PATH            (TEXTURES_PATH "doggo.ppm")
 
 #define CHEF_WALK_PATH    (ANIMATIONS_PATH "chefWalk.dae")
+#define CHEF_IDLE_PATH	  (ANIMATIONS_PATH "chefIdle.dae")
+#define CHEF_WITH_NET_PATH (MODELS_PATH "chefSwing.fbx")
 #define CHEF_MDL_PATH     (MODELS_PATH "chef.fbx")
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
 
@@ -140,9 +148,15 @@ static const struct PlayerModelSettings {
 	const char *walkModelPath;     // filesystem path to a model geometry file
 	const char *walkTexturePath;   // filesystem path to a texture file
 	int walkAnimIndex;             // index of the preferred animation (optional specification for weird cases)
+	const char *idleModelPath;
+	const char *idleTexturePath;
+	int idleAnimIndex;
 	const char *carryModelPath;    // filesystem path to a model geometry file
 	const char *carryTexturePath;  // filesystem path to a texture file
 	int carryAnimIndex;            // index of the preferred animation (optional specification for weird cases)
+	const char *idleCarryModelPath;
+	const char *idleCarryTexturePath;
+	int idleCarryAnimIndex;
 	const char *actionModelPath;   // filesystem path to a model geometry file
 	const char *actionTexturePath; // filesystem path to a texture file
 	int actionAnimIndex;           // index of the preferred animation (optional specification for weird cases)
@@ -158,8 +172,16 @@ static const struct PlayerModelSettings {
 		return walkModelPath;
 	}
 
+	inline const char * getIdleModelPath() const {
+		return idleModelPath ? idleModelPath : walkModelPath;
+	}
+
 	inline const char * getCarryModelPath() const {
 		return carryModelPath ? carryModelPath : walkModelPath;
+	}
+
+	inline const char * getIdleCarryModelPath() const {
+		return idleCarryModelPath ? idleCarryModelPath : walkModelPath;
 	}
 
 	inline const char * getActionModelPath() const {
@@ -170,8 +192,16 @@ static const struct PlayerModelSettings {
 		return walkTexturePath;
 	}
 
+	inline const char * getIdleTexturePath() const {
+		return idleTexturePath ? idleTexturePath : walkTexturePath;
+	}
+
 	inline const char * getCarryTexturePath() const {
 		return carryTexturePath ? carryTexturePath : walkTexturePath;
+	}
+
+	inline const char * getIdleCarryTexturePath() const {
+		return idleCarryTexturePath ? idleCarryTexturePath : walkTexturePath;
 	}
 
 	inline const char * getActionTexturePath() const {
@@ -179,17 +209,18 @@ static const struct PlayerModelSettings {
 	}
 } playerModelSettings[] = {
 #ifndef DEBUG_LOAD_LESS
-	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_CARRY_MDL_PATH,  nullptr,          -1,             RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_CARRY_MDL_PATH,      nullptr,          -1,             CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_CARRY_MDL_PATH,      nullptr,          -1,             DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_IDLE_MDL_PATH,		 nullptr,		   -1,			   CAT_CARRY_MDL_PATH,       nullptr,          -1,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_IDLE_MDL_PATH,		 nullptr,		   -1,			   DOG_CARRY_MDL_PATH,       nullptr,          -1,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 #else
 	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_MDL_PATH,          CHEF_TEX_PATH,     -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_MDL_PATH,       RACCOON_TEX_PATH,  -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  false,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_MDL_PATH,           CAT_TEX_PATH,      -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_MDL_PATH,           DOG_TEX_PATH,      -1,            nullptr,                 nullptr,          -1,             nullptr,                  nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     false,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,				nullptr,		   -1,			   nullptr,                  nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,			      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 #endif
 };
 
@@ -276,9 +307,13 @@ struct PlayerModel {
 	FBXObject *walkObject;
 	FBXObject *carryObject;
 	FBXObject *actionObject;
+	FBXObject *idleObject;
+	FBXObject *idleCarryObject;
 	Geometry *walkGeometry;
 	Geometry *carryGeometry;
 	Geometry *actionGeometry;
+	Geometry *idleGeometry;
+	Geometry *idleCarryGeometry;
 
 	inline FBXObject * getWalkObject() {
 		return walkObject;
@@ -289,6 +324,12 @@ struct PlayerModel {
 	inline FBXObject * getActionObject() {
 		return actionObject ? actionObject : walkObject;
 	}
+	inline FBXObject * getIdleObject() {
+		return idleObject ? idleObject : walkObject;
+	}
+	inline FBXObject * getIdleCarryObject() {
+		return idleCarryObject ? idleCarryObject : walkObject;
+	}
 	inline Geometry * getwalkGeometry() {
 		return walkGeometry;
 	}
@@ -298,12 +339,22 @@ struct PlayerModel {
 	inline Geometry * getActionGeometry() {
 		return actionGeometry ? actionGeometry : walkGeometry;
 	}
+	inline Geometry * getIdleGeometry() {
+			return idleGeometry ? idleGeometry : walkGeometry;
+	}
+	inline Geometry * getIdleCarryGeometry() {
+			return idleCarryGeometry ? idleCarryGeometry : walkGeometry;
+	}
 
 	void deallocMembers() {
 		DELETE_IF_NEEDED(walkObject);
 		DELETE_IF_NEEDED(carryObject);
+		DELETE_IF_NEEDED(idleObject);
+		DELETE_IF_NEEDED(idleCarryObject);
 		DELETE_IF_NEEDED(actionObject);
 		DELETE_IF_NEEDED(walkGeometry);
+		DELETE_IF_NEEDED(idleGeometry);
+		DELETE_IF_NEEDED(idleCarryGeometry);
 		DELETE_IF_NEEDED(carryGeometry);
 		DELETE_IF_NEEDED(actionGeometry);
 	}
@@ -355,7 +406,7 @@ ParticleSpawner * speedSpawner;
 ParticleSpawner * slowSpawner;
 ParticleSpawner * buildSpawner;
 ParticleSpawner * blindSpawner;
-ParticleSpawner * searchSpawner;
+//ParticleSpawner * searchSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -1616,11 +1667,21 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		}
 		else if (inventory != ItemModelType::EMPTY) {
 			model.getCarryObject()->Update(true);
-			playerGeometry = model.getCarryGeometry();
+			if (state.moving) {
+				playerGeometry = model.getCarryGeometry();
+			}
+			else {
+				playerGeometry = model.getIdleCarryGeometry();
+			}
 		}
 		else {
-			model.getWalkObject()->Update(state.moving != 0);
-			playerGeometry = model.getwalkGeometry();
+			model.getWalkObject()->Update(true);
+			if (state.moving) {
+				playerGeometry = model.getwalkGeometry();
+			}
+			else {
+				playerGeometry = model.getIdleGeometry();
+			}
 		}
 		break;
 	}
@@ -1924,8 +1985,8 @@ void DisplayCallback(GLFWwindow* window)
 			state.position, state.flashedRecently > 0);
 		blindSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position + glm::vec3(0,25.0f,0), state.blinded);
-		searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
+		//searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+		//	state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -2043,6 +2104,16 @@ void LoadModels()
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
 				model.actionGeometry->t = transform;
 			}
+			if (setting.idleModelPath || setting.idleTexturePath) {
+				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, false);
+				model.idleGeometry = new Geometry(model.idleObject, objShaderProgram);
+				model.idleGeometry->t = transform;
+			}
+			if (setting.idleCarryModelPath || setting.idleCarryTexturePath) {
+				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, false);
+				model.idleCarryGeometry = new Geometry(model.idleCarryObject, objShaderProgram);
+				model.idleCarryGeometry->t = transform;
+			}
 		});
 
 		++threadIdx;
@@ -2125,7 +2196,7 @@ InGameGraphicsEngine::~InGameGraphicsEngine()
 {
 	delete dustSpawner;
 	delete speedSpawner;
-	delete searchSpawner;
+	//delete searchSpawner;
 	delete slowSpawner;
 	delete blindSpawner;
 	delete flashSpawner;
@@ -2285,6 +2356,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 				model.carryObject->RenderingSetup();
 			if (model.actionObject)
 				model.actionObject->RenderingSetup();
+			if (model.idleObject)
+				model.idleObject->RenderingSetup();
+			if (model.idleCarryObject)
+				model.idleCarryObject->RenderingSetup();
 		}
 		cout << "done\n";
 
@@ -2310,7 +2385,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
 		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 		blindSpawner = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
-		searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
+		//searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
 
 
 		auto setupEnd = high_resolution_clock::now();
