@@ -130,7 +130,7 @@ void ServerGame::receiveFromClients()
 							chefLocation.setY(tile->getHeight() / 2 * TILE_HEIGHT);
 							player->setLocation(chefLocation);
 						}
-
+						updateHeight(iter->first);
 					}
 					gameData->setGameState(GameState::IN_GAME);
 				}
@@ -256,7 +256,7 @@ void ServerGame::receiveFromClients()
 
 										Location tLoc = iter2->second->getLocation();
 
-										if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
+										if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
 										{
 
 											if (!(gameData->getAtlas()->tileHasItem(loc)))
@@ -303,7 +303,6 @@ void ServerGame::receiveFromClients()
 													iter2->second->setAction(Action::NONE);
 													randJailTile->placeAnimalInJail(iter2->first);
 													animalCaught = true;
-													
 												}
 											}
 											else
@@ -427,6 +426,11 @@ void ServerGame::receiveFromClients()
 										int animal = jailTile->getCapturedAnimal();
 										gameData->getPlayer(animal)->setCaughtStatus(false);
 
+										//output animal to adjacent tile
+										Location tileLoc;
+										Tile * tile = gameData->getAdjacentTileNotThroughWalls(jailLoc, tileLoc);
+										gameData->getPlayer(animal)->setLocation(tileLoc.getX(), tileLoc.getY(), tileLoc.getZ());
+									
 										//update jail
 										jailTile->resetJail();
 
