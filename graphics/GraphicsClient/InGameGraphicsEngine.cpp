@@ -1662,8 +1662,14 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case Action::NONE:
 	default:
 		if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
-			model.getCarryObject()->Update(true);
-			playerGeometry = model.getCarryGeometry();
+			if (state.moving) {
+				model.getCarryObject()->Update(true);
+				playerGeometry = model.getCarryGeometry();
+			}
+			else {
+				model.getIdleCarryObject()->Update(true);
+				playerGeometry = model.getIdleCarryGeometry();
+			}
 		}
 		else if (inventory != ItemModelType::EMPTY) {
 			if (state.moving) {
