@@ -121,7 +121,7 @@
  // #define DEBUG_NO_UI
 
 // Uncomment to make gates always animate so that you don't have to play through
-// #define DEBUG_GATE_ANIMATION
+ // #define DEBUG_GATE_ANIMATION
 
 // Set to 0 to disable gate animation
 #define ENABLE_GATE_ANIMATION 0
@@ -234,10 +234,12 @@ static const struct PlayerModelSettings {
 #define DOOR_FILENAMES ANIM_AND_TEX("betterdoor_build", "betterdoor.ppm")
 #define VENT_FILENAMES ANIM_AND_TEX("vent_build", "vent.png")
 #define WINDOW_FILENAMES ANIM_AND_TEX("window_build", "window.png")
+#define WINDOW_SCALE glm::vec3(11.904f, 6.626f, 0.92f)
 #else
 #define DOOR_FILENAMES MDL_SAME_TEX("door")
 #define VENT_FILENAMES MDL_SAME_TEX("vent")
 #define WINDOW_FILENAMES MDL_SAME_TEX("window")
+#define WINDOW_SCALE glm::vec3(1.f)
 #endif
 
 static const struct ItemModelSettings {
@@ -245,48 +247,48 @@ static const struct ItemModelSettings {
 	const char *texturePath;     // filesystem path to a texture file
 	const char *name;            // name for use in debug messages, maybe user-visible too
 	ItemModelType id;            // A unique ID, like ItemModelType::apple
-	float scale;                 // scale adjustment
+	glm::vec3 scale;                 // scale adjustment
 	glm::vec3 translate;         // position adjustment
 	glm::vec3 rotation;          // rotation
 	bool wallRotate;             // auto-rotate away from any wall on this tile
 	glm::vec3 carryTranslate;    // translation while being carried
 	glm::vec3 carryRotate;       // rotation while being carried
 } itemModelSettings[] = {
-	// model and texture paths                             name                    id                               scale  translate                      rotate                            wallRotate  carryTranslate               carryRotate
-	{ MDL_SAME_TEX("apple"),                               "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_AND_TEX("banana", "bananagreen"),                "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_AND_TEX("banana", "bananaperfect"),              "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_AND_TEX("banana", "bananaveryveryripe"),         "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_SAME_TEX("box"),                                 "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
-	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
-	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("key", "key1"),                          "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("key", "key2"),                          "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("key", "key3"),                          "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),          "bathroom key drop",    ItemModelType::keyDropBathroom,  2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),         "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("painting"),                            "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
-	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("plate"),                               "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
-	{ MDL_SAME_TEX("plunger"),                             "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("restaurantchair"),                     "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
-	{ MDL_SAME_TEX("rope"),                                "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver1"),          "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver2"),          "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver3"),          "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_SAME_TEX("stove"),                               "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("toilet"),                              "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("toiletpaper"),                         "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
-	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
-	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	// model and texture paths                             name                    id                               scale                translate                      rotate                            wallRotate  carryTranslate               carryRotate
+	{ MDL_SAME_TEX("apple"),                               "apple",                ItemModelType::apple,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_AND_TEX("banana", "bananagreen"),                "green banana",         ItemModelType::bananaGreen,       glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaperfect"),              "perfect banana",       ItemModelType::bananaPerfect,     glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaveryveryripe"),         "very ripe banana",     ItemModelType::bananaVeryRipe,    glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_SAME_TEX("box"),                                 "box",                  ItemModelType::box,               glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,              glm::vec3(0.6f),    glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
+	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              glm::vec3(1.f),     glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,              glm::vec3(0.3f),    glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("key", "key1"),                          "key #1",               ItemModelType::key1,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key2"),                          "key #2",               ItemModelType::key2,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key3"),                          "key #3",               ItemModelType::key3,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),          "bathroom key drop",    ItemModelType::keyDropBathroom,   glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),         "front exit key drop",  ItemModelType::keyDropFrontExit,  glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,       glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("painting"),                            "wall painting",        ItemModelType::painting,          glm::vec3(1.8f),    glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
+	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("plate"),                               "plate",                ItemModelType::plate,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
+	{ MDL_SAME_TEX("plunger"),                             "plunger",              ItemModelType::plunger,           glm::vec3(0.7f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("restaurantchair"),                     "restaurant chair",     ItemModelType::restaurantChair,   glm::vec3(0.7f),    glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("rope"),                                "rope",                 ItemModelType::rope,              glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver1"),          "screwdriver #1",       ItemModelType::screwdriver1,      glm::vec3(0.225f),  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver2"),          "screwdriver #2",       ItemModelType::screwdriver2,      glm::vec3(0.225f),  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver3"),          "screwdriver #3",       ItemModelType::screwdriver3,      glm::vec3(0.225f),  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_SAME_TEX("stove"),                               "stove",                ItemModelType::stove,             glm::vec3(1.45f),   glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toilet"),                              "toilet",               ItemModelType::toilet,            glm::vec3(0.6f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toiletpaper"),                         "toilet paper",         ItemModelType::toiletPaper,       glm::vec3(0.9f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
+	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,              glm::vec3(2.5f),    glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
+	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            WINDOW_SCALE,       glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,             glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
 
 struct ItemModel {
@@ -686,7 +688,7 @@ void resetEnvObjs()
 			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
 
-			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), settings.scale);
 
 			auto modelAngles = settings.rotation;
 			auto modelRotate = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
@@ -769,7 +771,7 @@ void resetItems()
 			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
 
-			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), settings.scale);
 
 #define ITEM_ROTATION_PERIOD 5.25
 			auto t = glfwGetTime();
@@ -896,7 +898,9 @@ void updateBoxVisibility()
 				gateHistory[num] = 1;
 #endif
 
-				itemModels[static_cast<unsigned>(gate->getModel())].object->Update(gateHistory[num] != 0);
+				auto index = static_cast<unsigned>(gate->getModel());
+				//cout << "Calling update(" << (gateHistory[num] != 0) << ") on model " << index << " (" << itemModels[index].settings->name << ")\n";
+				itemModels[index].object->Update(gateHistory[num] != 0);
 			}
 
 			//Update UI to express keys already placed
@@ -2083,7 +2087,7 @@ void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis) {
 void LoadModels()
 {
 	// Load models
-	cout << "Loading models..." << endl;
+	puts("Loading models...");
 
 	using namespace std::chrono;
 	auto modelLoadingStart = high_resolution_clock::now();
