@@ -33,7 +33,7 @@
 // Item data
 #define MAX_ITEMS 14
 #define ITEM_DROP_DURATION 10
-#define POWERUP_DROP_CHANCE 4 // drop chance is 1 divided by the value shown here
+#define POWERUP_DROP_CHANCE 1 // drop chance is 1 divided by the value shown here
 #define TIME_TO_RESPAWN_BOX 10
 
 // Player interact data
