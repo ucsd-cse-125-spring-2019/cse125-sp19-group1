@@ -38,7 +38,6 @@ private:
 
 	Skeleton * skel;
 	AnimationPlayer * animPlayer;
-	bool hasSkel;
 	bool depthTest;
 	bool renderingIsSetup;
 	bool shouldAnimate;
