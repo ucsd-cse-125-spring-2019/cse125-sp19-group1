@@ -304,7 +304,7 @@ void ClientGame::update()
 		// sounds that originate from other players
 		std::map < int, Player *> allPlayers = gameData->getAllPlayers();
 		std::map < int, Player * >::iterator it;
-		std::map < int, bool>::iterator miniIt;
+		std::map < int, bool>::iterator miniIt2;
 		Player * curPlayer;
 		Location curPlayerLoc;
 		int curPlayerNum;
@@ -321,8 +321,8 @@ void ClientGame::update()
 			curPlayerLoc = curPlayer->getLocation();
 			curPlayerNum = it->second->getPlayerNum();
 
-			miniIt = playerDoingStuff.find(curPlayerNum);
-			if (miniIt == playerDoingStuff.end()) {
+			miniIt2 = playerDoingStuff.find(curPlayerNum);
+			if (miniIt2 == playerDoingStuff.end()) {
 				playerDoingStuff.insert(std::pair<int, bool>(curPlayerNum, false));
 			}
 
