@@ -222,22 +222,22 @@ void Player::updateChefMultiplier(int anger)
 {
 	if (anger < 12) 
 	{
-		chefSpeedMultiplier = 0.8;
+		chefSpeedMultiplier = 1.0;
 		catchRadius = 12;
 	}
 	else if (anger < 24) 
 	{
-		chefSpeedMultiplier = 0.8;
+		chefSpeedMultiplier = 1.05;
 		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
-		chefSpeedMultiplier = 0.9;
+		chefSpeedMultiplier = 1.10;
 		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
-		chefSpeedMultiplier = 1.1;
+		chefSpeedMultiplier = 1.15;
 		//catchRadius = 16;
 	}
 	else if (anger < 59) 
