@@ -215,6 +215,7 @@ void ClientGame::update()
 		std::map<int, bool>::iterator miniIt;
 
 		soundSystem->setListenerLocation(loc.getX(), loc.getY(), loc.getZ());
+		miniIt = playerDoingStuff.find(pNum);
 		if (miniIt == playerDoingStuff.end()) {
 			playerDoingStuff.insert(std::pair<int, bool>(pNum, false));
 		}
