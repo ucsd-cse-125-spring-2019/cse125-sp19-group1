@@ -2086,51 +2086,68 @@ void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis) {
 void LoadModels()
 {
 	// Load models
-	puts("Loading models...");
+	cout << "Loading models...\n";
 
 	using namespace std::chrono;
 	auto modelLoadingStart = high_resolution_clock::now();
 
 	thread playerLoadingThreads[sizeof(playerModelSettings) / sizeof(playerModelSettings[0])];
+	thread actionLoadingThread;
 
 	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
+		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+
 		playerLoadingThreads[threadIdx] = thread([&]() {
-			cout << "\tloading " << setting.title << endl;
-
-			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
-
-			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
-
+			cout << "\tloading " << setting.title << " walk" << endl;
 			model.settings = &setting;
 			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
+			cout << "\tfinished loading " << setting.title << " walk" << endl;
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
+				cout << "\tloading " << setting.title << " carry" << endl;
 				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
-			}
-			if (setting.actionModelPath || setting.actionTexturePath) {
-				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, false);
-				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
-				model.actionGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " carry" << endl;
 			}
 			if (setting.idleModelPath || setting.idleTexturePath) {
+				cout << "\tloading " << setting.title << " idle" << endl;
 				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, false);
 				model.idleGeometry = new Geometry(model.idleObject, objShaderProgram);
 				model.idleGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " idle" << endl;
 			}
 			if (setting.idleCarryModelPath || setting.idleCarryTexturePath) {
+				cout << "\tloading " << setting.title << " idle carry" << endl;
 				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, false);
 				model.idleCarryGeometry = new Geometry(model.idleCarryObject, objShaderProgram);
 				model.idleCarryGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " idle carry" << endl;
 			}
+
 		});
 
 		++threadIdx;
 	}
+
+	actionLoadingThread = thread([&]() {
+		for (auto &setting : playerModelSettings) {
+			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+			
+			if (setting.actionModelPath || setting.actionTexturePath) {
+				cout << "\tloading " << setting.title << " action" << endl;
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, false);
+				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
+				model.actionGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " action" << endl;
+			}
+		}
+	});
 
 	size_t largestIdx = 0;
 	for (auto &setting : itemModelSettings) {
@@ -2163,6 +2180,8 @@ void LoadModels()
 			m.settings = &setting;
 			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
+
+			cout << "\tfinished loading " << setting.name << endl;
 		}
 	});
 
@@ -2184,6 +2203,7 @@ void LoadModels()
 	for (auto &t : playerLoadingThreads) {
 		t.join();
 	}
+	actionLoadingThread.join();
 
 	auto modelLoadingEnd = high_resolution_clock::now();
 	std::chrono::duration<float> modelLoadingDuration = modelLoadingEnd - modelLoadingStart;
