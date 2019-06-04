@@ -115,13 +115,13 @@
 // #define DEBUG_CARRY
 
 // Uncomment to skip loading player animations
- // #define DEBUG_LOAD_LESS
+// #define DEBUG_LOAD_LESS
 
 // Uncomment to skip loading UI
- // #define DEBUG_NO_UI
+// #define DEBUG_NO_UI
 
 // Uncomment to make gates always animate so that you don't have to play through
- // #define DEBUG_GATE_ANIMATION
+// #define DEBUG_GATE_ANIMATION
 
 // Set to 0 to disable gate animation
 #define ENABLE_GATE_ANIMATION 0
@@ -1000,16 +1000,17 @@ void reloadMap()
 				(z == clippedZ && (tileLayout[z][x]->getWall() & DirectionBitmask::northSide)))
 			{
 				// Calculate the altitude of the wall
-				int height = 1;
+				float height = 0.f;
+				float scaleY = 1.f;
 				if (z == 0 || z != clippedZ) {
-					height = tileLayout[clippedZ][x]->getHeight();
+					scaleY = 1.f + 0.25f * tileLayout[clippedZ][x]->getHeight();
 				} else {
-					height = max(tileLayout[z - 1][x]->getHeight(), tileLayout[z][x]->getHeight());
+					scaleY = 1.f + 0.25f * max(tileLayout[z - 1][x]->getHeight(), tileLayout[z][x]->getHeight());
 				}
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
 				// translate to the edge between tiles
-				row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)));
+				row[x] = new Transform(glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)), glm::vec3(1.f, scaleY, 1.f)));
 				row[x]->addChild(wallGeometry);
 				floorTransform->addChild(row[x]);
 			}
@@ -1029,12 +1030,13 @@ void reloadMap()
 				(x == clippedX && (tileLayout[z][x]->getWall() & DirectionBitmask::westSide)))
 			{
 				// Calculate the altitude of the wall
-				int height = 1;
+				float height = 0.f;
+				float scaleY = 1.f;
 				if (x == 0 || x != clippedX) {
-					height = tileLayout[z][clippedX]->getHeight();
+					scaleY = 1.f + 0.25f * tileLayout[z][clippedX]->getHeight();
 				}
 				else {
-					height = max(tileLayout[z][x - 1]->getHeight(), tileLayout[z][x]->getHeight());
+					scaleY = 1.f + 0.25f * max(tileLayout[z][x - 1]->getHeight(), tileLayout[z][x]->getHeight());
 				}
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
@@ -1042,7 +1044,7 @@ void reloadMap()
 				const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3((x - 0.5f) * TILE_STRIDE, y, z * TILE_STRIDE));
 				// 90 degree rotation
 				const auto rotate = glm::rotate(translate, glm::half_pi<float>(), glm::vec3(0.f, 1.f, 0.f));
-				row[x] = new Transform(rotate);
+				row[x] = new Transform(glm::scale(rotate, glm::vec3(1.f, scaleY, 1.f)));
 				row[x]->addChild(wallGeometry);
 				floorTransform->addChild(row[x]);
 			}
@@ -1587,11 +1589,14 @@ void InGameGraphicsEngine::IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		updateUIElements(gameData);
-		if (gameData->getAllPlayers()[sharedClient->getMyID()]->isChef()) {
-			fog->setFogDistance(gameData->chefVision);
-		}
-		else {
-			fog->setFogDistance(gameData->getPlayer(sharedClient->getMyID())->getVisionRadius());
+		Player *networkPlayer = gameData->getPlayer(sharedClient->getMyID());
+		if (networkPlayer) {
+			if (networkPlayer->isChef()) {
+				fog->setFogDistance(gameData->chefVision);
+			}
+			else {
+				fog->setFogDistance(networkPlayer->getVisionRadius());
+			}
 		}
 	//}
 

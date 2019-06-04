@@ -2,6 +2,8 @@
 // Tester.cpp
 ////////////////////////////////////////
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "Tester.h"
 #include "InGameGraphicsEngine.h"
 #include "LoadingGraphicsEngine.h"
@@ -313,6 +315,14 @@ void SetupCallbacks()
 
 int main(void)
 {
+	cout << "Enter an IP address to connect to [or leave blank to connect to localhost]: ";
+	string newIp;
+	getline(cin, newIp);
+	if (newIp.size()) {
+		strncpy(serverIpAddress, newIp.c_str(), sizeof(serverIpAddress));
+		serverIpAddress[sizeof(serverIpAddress) - 1] = '\0';
+	}
+
 	// Create the GLFW window
 	window = CreateWindowFrame(1600, 900);
 	// Print OpenGL and GLSL versions

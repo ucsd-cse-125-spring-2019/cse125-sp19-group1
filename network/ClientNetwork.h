@@ -8,10 +8,12 @@
 #include <ws2tcpip.h>
 #include <stdio.h> 
 
+extern char serverIpAddress[64];
+
 // server address info (modify desktop ip as needed)
-#define DESKTOP_IP "128.54.70.13"
+#define DESKTOP_IP "128.54.70.15"
 #define LOCAL_HOST "127.0.0.1"
-#define SERVER_IP_ADDRESS LOCAL_HOST
+#define SERVER_IP_ADDRESS serverIpAddress
 
 // size of our buffer
 #define DEFAULT_BUFLEN 512
