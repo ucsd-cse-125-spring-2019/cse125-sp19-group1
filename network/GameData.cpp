@@ -47,7 +47,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 		encodedData << " " << p.first;
 	}
 	encodedData << std::endl;
-	//std::cout << encodedData.str() << std::endl;
+	std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
 
