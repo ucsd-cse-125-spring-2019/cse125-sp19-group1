@@ -1818,7 +1818,6 @@ void printPoint(float x, float y, const glm::mat4 &transform)
 #define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
 #define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
 #define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
-#define MINIMAP_PING_INTERVAL 15.0
 #define MINIMAP_PING_DURATION 2.25
 #define MINIMAP_PING_FINAL_RADIUS (9.f * TILE_SIZE_SERVER)
 #define MINIMAP_PING_BEGIN_RADIUS (0.5f * TILE_SIZE_SERVER)
