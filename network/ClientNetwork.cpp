@@ -5,6 +5,8 @@
 
 #include <vector>
 
+char serverIpAddress[64] = "127.0.0.1";
+
 #define ShowErrorPopup(...) {\
 	size_t len = snprintf(NULL, 0, __VA_ARGS__ ) + 1;\
 	std::vector<char> msg(len, 0);\
