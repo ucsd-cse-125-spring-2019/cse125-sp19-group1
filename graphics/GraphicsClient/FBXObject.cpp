@@ -99,7 +99,7 @@ void FBXObject::PrintMatrix(glm::mat4 * matrix) {
 }
 
 void FBXObject::PrintSkeleton() {
-	if (hasSkel)
+	if (skel != NULL)
 		skel->PrintBoneStructure();
 }
 
