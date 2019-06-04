@@ -245,6 +245,7 @@ void ServerGame::receiveFromClients()
 									player->setActionStartTime();
 									bool animalCaught = false;
 
+
 									chefWin = true;
 									for (auto iter2 = gameData->getAllPlayers().begin(); iter2 != gameData->getAllPlayers().end(); iter2++)
 									{
@@ -257,6 +258,21 @@ void ServerGame::receiveFromClients()
 
 										if (player->inRange(loc, tLoc) && !iter2->second->isCaught())
 										{
+
+											if (!(gameData->getAtlas()->tileHasItem(loc)))
+											{
+												ItemModelType itemName = iter2->second->getInventory();
+												gameData->getAtlas()->updateTileItem(loc, itemName);
+												iter2->second->setInventory(ItemModelType::EMPTY);
+												iter2->second->setSpeedMultiplier(1.0);
+
+												gameData->getAtlas()->updateDroppedItem(itemName, loc);
+											}
+											else {
+												ItemModelType itemName = iter2->second->getInventory();
+												
+											}
+
 											if (gameData->getChefAnger() >= CHEF_MAX_ANGER && !animalCaught)
 											{
 												//get random jail
@@ -283,23 +299,6 @@ void ServerGame::receiveFromClients()
 													animalCaught = true;
 													
 												}
-												//for (auto it = jailLocations.begin();
-												//	it != jailLocations.end();  // Use (), and assuming itt was a typo
-												//	it++)
-												//{
-												//	Location jLoc = Location(it->second * TILE_SIZE + 1, 0, it->first * TILE_SIZE + 1);
-												//	if (gameData->getAtlas()->hasJail(jLoc)) {
-												//		JailTile * jailTile = gameData->getJailTile(jLoc);
-												//		if (jailTile->isJailEmpty()) {
-												//			iter2->second->setCaughtStatus(true);
-												//			iter2->second->setLocation(jLoc.getX() + TILE_SIZE / 2, (float)(jailTile->getHeight() / 2 * TILE_HEIGHT), jLoc.getZ() + TILE_SIZE / 2);
-												//			iter2->second->setAction(Action::NONE);
-												//			jailTile->placeAnimalInJail(iter2->first);
-												//			animalCaught = true;
-												//			break;
-												//		}
-												//	}
-												//}
 											}
 											else
 											{
@@ -603,7 +602,6 @@ void ServerGame::receiveFromClients()
 							player->setSpeedMultiplier(1.0);
 
 							gameData->getAtlas()->updateDroppedItem(itemName, loc);
-
 						}
 					}
 				}
