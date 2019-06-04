@@ -404,9 +404,9 @@ ParticleSpawner * dustSpawner;
 ParticleSpawner * flashSpawner;
 ParticleSpawner * speedSpawner;
 ParticleSpawner * slowSpawner;
-ParticleSpawner * buildSpawner;
+//ParticleSpawner * buildSpawner;
 ParticleSpawner * blindSpawner;
-//ParticleSpawner * searchSpawner;
+ParticleSpawner * searchSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -1666,20 +1666,22 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 			playerGeometry = model.getCarryGeometry();
 		}
 		else if (inventory != ItemModelType::EMPTY) {
-			model.getCarryObject()->Update(true);
 			if (state.moving) {
+				model.getCarryObject()->Update(true);
 				playerGeometry = model.getCarryGeometry();
 			}
 			else {
+				model.getIdleCarryObject()->Update(true);
 				playerGeometry = model.getIdleCarryGeometry();
 			}
 		}
 		else {
-			model.getWalkObject()->Update(true);
 			if (state.moving) {
+				model.getWalkObject()->Update(true);
 				playerGeometry = model.getwalkGeometry();
 			}
 			else {
+				model.getIdleObject()->Update(true);
 				playerGeometry = model.getIdleGeometry();
 			}
 		}
@@ -1978,15 +1980,15 @@ void DisplayCallback(GLFWwindow* window)
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1));
 		slowSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1));
-		buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
-			glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
+		//buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			//state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
+			//glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
 		flashSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position, state.flashedRecently > 0);
 		blindSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position + glm::vec3(0,25.0f,0), state.blinded);
-		//searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-		//	state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
+		searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -2196,7 +2198,7 @@ InGameGraphicsEngine::~InGameGraphicsEngine()
 {
 	delete dustSpawner;
 	delete speedSpawner;
-	//delete searchSpawner;
+	delete searchSpawner;
 	delete slowSpawner;
 	delete blindSpawner;
 	delete flashSpawner;
@@ -2383,9 +2385,9 @@ void InGameGraphicsEngine::MainLoopBegin()
 		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, 10.0f, 0), 3.0f);
 		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
-		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
+		//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 		blindSpawner = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
-		//searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
+		searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
 
 
 		auto setupEnd = high_resolution_clock::now();

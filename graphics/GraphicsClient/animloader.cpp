@@ -1,6 +1,6 @@
 #include "animloader.h"
 
-#define FRAME_TIME_MODIFIER 2.0f
+#define FRAME_TIME_MODIFIER 1.0f
 
 bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer) {
 	// create the scene from which assimp will gather information about the file
