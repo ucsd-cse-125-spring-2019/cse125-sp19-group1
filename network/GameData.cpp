@@ -47,7 +47,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 		encodedData << " " << p.first;
 	}
 	encodedData << std::endl;
-	std::cout << encodedData.str() << std::endl;
+	//std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
 
@@ -152,7 +152,7 @@ void GameData::addDecodeFunctions()
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
 	decodingFunctions["gameState"] = &GameData::decodeGameState;
 	decodingFunctions["blindChef"] = &GameData::decodeBlindChef;
-	decodingFunctions["slowChef"] = &GameData::decodeBlindChef;
+	decodingFunctions["slowChef"] = &GameData::decodeSlowChef;
  	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;
 	decodingFunctions["chefVision"] = &GameData::decodeChefVision;
 	decodingFunctions["winType"] = &GameData::decodeWinType;
@@ -162,6 +162,7 @@ void GameData::addDecodeFunctions()
 void GameData::decodeSlowChef(std::string value)
 {
 	slowChef = std::stoi(value);
+	std::cout << "SLOW CHEF SERVER DECODE " << slowChef << std::endl;
 }
 
 void GameData::decodeBlindChef(std::string value)
