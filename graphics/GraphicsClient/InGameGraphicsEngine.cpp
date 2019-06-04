@@ -121,7 +121,7 @@
  // #define DEBUG_NO_UI
 
 // Uncomment to make gates always animate so that you don't have to play through
-// #define DEBUG_GATE_ANIMATION
+ // #define DEBUG_GATE_ANIMATION
 
 // Set to 0 to disable gate animation
 #define ENABLE_GATE_ANIMATION 0
@@ -147,19 +147,19 @@ static glm::mat4 orthoP;
 static const struct PlayerModelSettings {
 	const char *walkModelPath;     // filesystem path to a model geometry file
 	const char *walkTexturePath;   // filesystem path to a texture file
-	int walkAnimIndex;             // index of the preferred animation (optional specification for weird cases)
+	float walkAnimMultiplier;		   // multiply each keyframe by this amount to modify animation speed
 	const char *idleModelPath;
 	const char *idleTexturePath;
-	int idleAnimIndex;
+	float idleAnimMultiplier;
 	const char *carryModelPath;    // filesystem path to a model geometry file
 	const char *carryTexturePath;  // filesystem path to a texture file
-	int carryAnimIndex;            // index of the preferred animation (optional specification for weird cases)
+	float carryAnimMultiplier;
 	const char *idleCarryModelPath;
 	const char *idleCarryTexturePath;
-	int idleCarryAnimIndex;
+	float idleCarryAnimMultiplier;
 	const char *actionModelPath;   // filesystem path to a model geometry file
 	const char *actionTexturePath; // filesystem path to a texture file
-	int actionAnimIndex;           // index of the preferred animation (optional specification for weird cases)
+	float actionAnimMultiplier;
 	const char *title;             // name for use in debug messages, maybe user-visible too
 	const char *name;              // name for use in debug messages, maybe user-visible too
 	ModelType modelType;           // A unique ID, like ModelType::CHEF
@@ -209,18 +209,17 @@ static const struct PlayerModelSettings {
 	}
 } playerModelSettings[] = {
 #ifndef DEBUG_LOAD_LESS
-	// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_IDLE_MDL_PATH,		 nullptr,		   -1,			   CAT_CARRY_MDL_PATH,       nullptr,          -1,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_IDLE_MDL_PATH,		 nullptr,		   -1,			   DOG_CARRY_MDL_PATH,       nullptr,          -1,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	// walkModelPath          walkTexturePath    walkAnimMultiplier 	idleModelPath			idleTexturePath		idleAnimMultiplier	carryModelPath           carryTexturePath  carryAnimMultiplier	idleCarryModelPath				idleCarryTexturePath	idleCarryAnimMultiplier	  actionModelPath           actionTexturePath  actionAnimMultiplier  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,                  CHEF_IDLE_PATH,			 nullptr,		    1.0f,		        nullptr,                 nullptr,          1.0f,			    CHEF_IDLE_PATH,					nullptr,			    1.0f,					  CHEF_WITH_NET_PATH,       nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  0.5f,                  RACCOON_IDLE_MDL_PATH,	 nullptr,		    1.0f,		        RACCOON_CARRY_MDL_PATH,  nullptr,          1.0f,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			    1.0f,					  RACCOON_SEARCH_MDL_PATH,  nullptr,           1.0f,                 "Raccoon",  "Hung",       ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 0.f,-1.2f),    glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      0.5f,                  CAT_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        CAT_CARRY_MDL_PATH,      nullptr,          1.0f,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  CAT_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      0.5f,                  DOG_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        DOG_CARRY_MDL_PATH,      nullptr,          1.0f,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  DOG_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 #else
-	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,				nullptr,		   -1,			   nullptr,                  nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,			      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	// walkModelPath          walkTexturePath    walkAnimMultiplier		idleModelPath			idleTexturePath		idleAnimMultiplier	carryModelPath           carryTexturePath  carryAnimMultiplier	idleCarryModelPath				idleCarrTexturePath		idleCarryAnimMultiplier   actionModelPath           actionTexturePath  actionAnimMultiplier  title       name          modelType        attachSkel scale   translate					 carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,                 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,                  nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,	   glm::vec3(0.f),				 glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,				    nullptr,           1.0f,                 "Raccoon",  "Hung",       ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 0.f, -1.2f),	 glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,				    nullptr,           1.0f,                 "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),				 glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,			        nullptr,           1.0f,                 "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),			     glm::vec3(0.f, 5.5f, 3.5f) },
 #endif
 };
 
@@ -234,10 +233,12 @@ static const struct PlayerModelSettings {
 #define DOOR_FILENAMES ANIM_AND_TEX("betterdoor_build", "betterdoor.ppm")
 #define VENT_FILENAMES ANIM_AND_TEX("vent_build", "vent.png")
 #define WINDOW_FILENAMES ANIM_AND_TEX("window_build", "window.png")
+#define WINDOW_SCALE glm::vec3(11.904f, 6.626f, 0.92f)
 #else
 #define DOOR_FILENAMES MDL_SAME_TEX("door")
 #define VENT_FILENAMES MDL_SAME_TEX("vent")
 #define WINDOW_FILENAMES MDL_SAME_TEX("window")
+#define WINDOW_SCALE glm::vec3(1.f)
 #endif
 
 static const struct ItemModelSettings {
@@ -245,48 +246,48 @@ static const struct ItemModelSettings {
 	const char *texturePath;     // filesystem path to a texture file
 	const char *name;            // name for use in debug messages, maybe user-visible too
 	ItemModelType id;            // A unique ID, like ItemModelType::apple
-	float scale;                 // scale adjustment
+	glm::vec3 scale;                 // scale adjustment
 	glm::vec3 translate;         // position adjustment
 	glm::vec3 rotation;          // rotation
 	bool wallRotate;             // auto-rotate away from any wall on this tile
 	glm::vec3 carryTranslate;    // translation while being carried
 	glm::vec3 carryRotate;       // rotation while being carried
 } itemModelSettings[] = {
-	// model and texture paths                             name                    id                               scale  translate                      rotate                            wallRotate  carryTranslate               carryRotate
-	{ MDL_SAME_TEX("apple"),                               "apple",                ItemModelType::apple,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_AND_TEX("banana", "bananagreen"),                "green banana",         ItemModelType::bananaGreen,       1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_AND_TEX("banana", "bananaperfect"),              "perfect banana",       ItemModelType::bananaPerfect,     1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_AND_TEX("banana", "bananaveryveryripe"),         "very ripe banana",     ItemModelType::bananaVeryRipe,    1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
-	{ MDL_SAME_TEX("box"),                                 "box",                  ItemModelType::box,              1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,             0.6f,  glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
-	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
-	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              1.f,  glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
-	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,             0.3f,  glm::vec3(0.f),                glm::vec3(0.f),                   false },
-	{ MDL_AND_TEX("key", "key1"),                          "key #1",               ItemModelType::key1,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("key", "key2"),                          "key #2",               ItemModelType::key2,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("key", "key3"),                          "key #3",               ItemModelType::key3,             0.5f,  glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),          "bathroom key drop",    ItemModelType::keyDropBathroom,  2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),         "front exit key drop",  ItemModelType::keyDropFrontExit, 2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,      2.5f,  glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("painting"),                            "wall painting",        ItemModelType::painting,         1.8f,  glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
-	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("plate"),                               "plate",                ItemModelType::plate,             1.f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
-	{ MDL_SAME_TEX("plunger"),                             "plunger",              ItemModelType::plunger,          0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("restaurantchair"),                     "restaurant chair",     ItemModelType::restaurantChair,  0.7f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
-	{ MDL_SAME_TEX("rope"),                                "rope",                 ItemModelType::rope,             1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver1"),          "screwdriver #1",       ItemModelType::screwdriver1,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver2"),          "screwdriver #2",       ItemModelType::screwdriver2,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_AND_TEX("screwdriver", "screwdriver3"),          "screwdriver #3",       ItemModelType::screwdriver3,   0.225f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
-	{ MDL_SAME_TEX("stove"),                               "stove",                ItemModelType::stove,           1.45f,  glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("toilet"),                              "toilet",               ItemModelType::toilet,           0.6f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("toiletpaper"),                         "toilet paper",         ItemModelType::toiletPaper,      0.9f,  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
-	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,             2.5f,  glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
-	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            1.f,  glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,            1.5f,  glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	// model and texture paths                             name                    id                               scale                translate                      rotate                            wallRotate  carryTranslate               carryRotate
+	{ MDL_SAME_TEX("apple"),                               "apple",                ItemModelType::apple,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_AND_TEX("banana", "bananagreen"),                "green banana",         ItemModelType::bananaGreen,       glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaperfect"),              "perfect banana",       ItemModelType::bananaPerfect,     glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_AND_TEX("banana", "bananaveryveryripe"),         "very ripe banana",     ItemModelType::bananaVeryRipe,    glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.75f, 0.f) },
+	{ MDL_SAME_TEX("box"),                                 "box",                  ItemModelType::box,               glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,              glm::vec3(0.6f),    glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
+	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              glm::vec3(1.f),     glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
+	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,              glm::vec3(0.3f),    glm::vec3(0.f),                glm::vec3(0.f),                   false },
+	{ MDL_AND_TEX("key", "key1"),                          "key #1",               ItemModelType::key1,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key2"),                          "key #2",               ItemModelType::key2,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("key", "key3"),                          "key #3",               ItemModelType::key3,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),          "bathroom key drop",    ItemModelType::keyDropBathroom,   glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),         "front exit key drop",  ItemModelType::keyDropFrontExit,  glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,       glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
+	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("painting"),                            "wall painting",        ItemModelType::painting,          glm::vec3(1.8f),    glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
+	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("plate"),                               "plate",                ItemModelType::plate,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
+	{ MDL_SAME_TEX("plunger"),                             "plunger",              ItemModelType::plunger,           glm::vec3(0.7f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
+	{ MDL_SAME_TEX("restaurantchair"),                     "restaurant chair",     ItemModelType::restaurantChair,   glm::vec3(0.7f),    glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.75f) },
+	{ MDL_SAME_TEX("rope"),                                "rope",                 ItemModelType::rope,              glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(-0.5f, 0.f, 0.f),    glm::vec3(GLM_H_PI, 0.f, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver1"),          "screwdriver #1",       ItemModelType::screwdriver1,      glm::vec3(0.225f),  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver2"),          "screwdriver #2",       ItemModelType::screwdriver2,      glm::vec3(0.225f),  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_AND_TEX("screwdriver", "screwdriver3"),          "screwdriver #3",       ItemModelType::screwdriver3,      glm::vec3(0.225f),  glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(-1.f, 0.25f, 0.3f), glm::vec3(0.f, GLM_H_PI, 0.f) },
+	{ MDL_SAME_TEX("stove"),                               "stove",                ItemModelType::stove,             glm::vec3(1.45f),   glm::vec3(0.f, 0.f, -0.225f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toilet"),                              "toilet",               ItemModelType::toilet,            glm::vec3(0.6f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("toiletpaper"),                         "toilet paper",         ItemModelType::toiletPaper,       glm::vec3(0.9f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.5f) },
+	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,              glm::vec3(2.5f),    glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
+	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            WINDOW_SCALE,       glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,             glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
 };
 
 struct ItemModel {
@@ -686,7 +687,7 @@ void resetEnvObjs()
 			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
 
-			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), settings.scale);
 
 			auto modelAngles = settings.rotation;
 			auto modelRotate = glm::rotate(scale, modelAngles.y, glm::vec3(0.f, 1.f, 0.f));
@@ -755,6 +756,11 @@ void resetItems()
 			tileTranslate.y = (tile->getHeight()) * 0.5f * TILE_LEVEL_OFFSET * TILE_SCALE;
 			tileTranslate.z = (z + 0.5f) * TILE_STRIDE * TILE_SCALE;
 
+			// If on a ramp, give a slight height boost
+			if (tile->getHeight() & 1) {
+				tileTranslate.y += 4.f;
+			}
+
 			if (tile->getTileType() == TileType::OBJECT) {
 				if (((ObjectTile *)tile)->getModel() == ItemModelType::table) {
 					tileTranslate.y += 9.25f;
@@ -769,7 +775,7 @@ void resetItems()
 			modelTranslate.y *= TILE_LEVEL_OFFSET * TILE_SCALE;
 			modelTranslate.z *= TILE_STRIDE * TILE_SCALE;
 
-			auto scale = glm::scale(glm::translate(rotate, modelTranslate), glm::vec3(settings.scale));
+			auto scale = glm::scale(glm::translate(rotate, modelTranslate), settings.scale);
 
 #define ITEM_ROTATION_PERIOD 5.25
 			auto t = glfwGetTime();
@@ -896,7 +902,9 @@ void updateBoxVisibility()
 				gateHistory[num] = 1;
 #endif
 
-				itemModels[static_cast<unsigned>(gate->getModel())].object->Update(gateHistory[num] != 0);
+				auto index = static_cast<unsigned>(gate->getModel());
+				//cout << "Calling update(" << (gateHistory[num] != 0) << ") on model " << index << " (" << itemModels[index].settings->name << ")\n";
+				itemModels[index].object->Update(gateHistory[num] != 0);
 			}
 
 			//Update UI to express keys already placed
@@ -1662,8 +1670,14 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case Action::NONE:
 	default:
 		if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
-			model.getCarryObject()->Update(true);
-			playerGeometry = model.getCarryGeometry();
+			if (state.moving) {
+				model.getCarryObject()->Update(true);
+				playerGeometry = model.getCarryGeometry();
+			}
+			else {
+				model.getIdleCarryObject()->Update(true);
+				playerGeometry = model.getIdleCarryGeometry();
+			}
 		}
 		else if (inventory != ItemModelType::EMPTY) {
 			if (state.moving) {
@@ -1818,7 +1832,6 @@ void printPoint(float x, float y, const glm::mat4 &transform)
 #define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
 #define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
 #define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
-#define MINIMAP_PING_INTERVAL 15.0
 #define MINIMAP_PING_DURATION 2.25
 #define MINIMAP_PING_FINAL_RADIUS (9.f * TILE_SIZE_SERVER)
 #define MINIMAP_PING_BEGIN_RADIUS (0.5f * TILE_SIZE_SERVER)
@@ -2077,51 +2090,68 @@ void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis) {
 void LoadModels()
 {
 	// Load models
-	cout << "Loading models..." << endl;
+	cout << "Loading models...\n";
 
 	using namespace std::chrono;
 	auto modelLoadingStart = high_resolution_clock::now();
 
 	thread playerLoadingThreads[sizeof(playerModelSettings) / sizeof(playerModelSettings[0])];
+	thread actionLoadingThread;
 
 	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
 		playerLoadingThreads[threadIdx] = thread([&]() {
-			cout << "\tloading " << setting.title << endl;
-
 			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
-
 			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
 
+			cout << "\tloading " << setting.title << " walk" << endl;
 			model.settings = &setting;
-			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, false);
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimMultiplier, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
+			cout << "\tfinished loading " << setting.title << " walk" << endl;
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
-				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, false);
+				cout << "\tloading " << setting.title << " carry" << endl;
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimMultiplier, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
-			}
-			if (setting.actionModelPath || setting.actionTexturePath) {
-				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, false);
-				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
-				model.actionGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " carry" << endl;
 			}
 			if (setting.idleModelPath || setting.idleTexturePath) {
-				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, false);
+				cout << "\tloading " << setting.title << " idle" << endl;
+				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, setting.idleAnimMultiplier, false);
 				model.idleGeometry = new Geometry(model.idleObject, objShaderProgram);
 				model.idleGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " idle" << endl;
 			}
 			if (setting.idleCarryModelPath || setting.idleCarryTexturePath) {
-				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, false);
+				cout << "\tloading " << setting.title << " idle carry" << endl;
+				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, setting.idleCarryAnimMultiplier, false);
 				model.idleCarryGeometry = new Geometry(model.idleCarryObject, objShaderProgram);
 				model.idleCarryGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " idle carry" << endl;
 			}
+
 		});
 
 		++threadIdx;
 	}
+
+	actionLoadingThread = thread([&]() {
+		for (auto &setting : playerModelSettings) {
+			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+			
+			if (setting.actionModelPath || setting.actionTexturePath) {
+				cout << "\tloading " << setting.title << " action" << endl;
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimMultiplier, false);
+				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
+				model.actionGeometry->t = transform;
+				cout << "\tfinished loading " << setting.title << " action" << endl;
+			}
+		}
+	});
 
 	size_t largestIdx = 0;
 	for (auto &setting : itemModelSettings) {
@@ -2152,29 +2182,32 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, 1.0f, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
+
+			cout << "\tfinished loading " << setting.name << endl;
 		}
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, 1.0f, false);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, 1.0f, false);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
 	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, false);
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, 1.0f, false);
 	}
 
 	itemLoadingThread.join();
 	for (auto &t : playerLoadingThreads) {
 		t.join();
 	}
+	actionLoadingThread.join();
 
 	auto modelLoadingEnd = high_resolution_clock::now();
 	std::chrono::duration<float> modelLoadingDuration = modelLoadingEnd - modelLoadingStart;
@@ -2327,7 +2360,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 	}
 
 	if (!solidColorObject) {
-		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false);
+		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false, 1.0f);
 		solidColorObject->SetDepthTest(false);
 	}
 

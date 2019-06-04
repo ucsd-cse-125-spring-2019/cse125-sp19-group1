@@ -9,7 +9,7 @@
 #include <stdio.h> 
 
 // server address info (modify desktop ip as needed)
-#define DESKTOP_IP "128.54.70.13"
+#define DESKTOP_IP "128.54.70.15"
 #define LOCAL_HOST "127.0.0.1"
 #define SERVER_IP_ADDRESS LOCAL_HOST
 

@@ -2,6 +2,9 @@
 #ifndef GAME_CONFIGS_H
 #define GAME_CONFIGS_H
 
+// Minimap
+#define MINIMAP_PING_INTERVAL 10.0
+
 // Player data
 #define CHEF_SPAWN_ROW 0
 #define CHEF_SPAWN_COL 1
