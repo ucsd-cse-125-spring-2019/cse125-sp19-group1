@@ -162,7 +162,6 @@ void GameData::addDecodeFunctions()
 void GameData::decodeSlowChef(std::string value)
 {
 	slowChef = std::stoi(value);
-	std::cout << "SLOW CHEF SERVER DECODE " << slowChef << std::endl;
 }
 
 void GameData::decodeBlindChef(std::string value)
