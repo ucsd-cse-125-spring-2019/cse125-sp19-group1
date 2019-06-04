@@ -123,7 +123,13 @@ void ServerGame::receiveFromClients()
 							player->setModelType(gameData->getAvailableCharacter());
 						}
 						else
+						{
 							player->setModelType(ModelType::CHEF);
+							Location chefLocation(CHEF_SPAWN_COL * TILE_SIZE + TILE_SIZE/2, 0, CHEF_SPAWN_ROW * TILE_SIZE + TILE_SIZE / 2);
+							Tile * tile = gameData->getTile(chefLocation);
+							chefLocation.setY(tile->getHeight() / 2 * TILE_HEIGHT);
+							player->setLocation(chefLocation);
+						}
 
 					}
 					gameData->setGameState(GameState::IN_GAME);

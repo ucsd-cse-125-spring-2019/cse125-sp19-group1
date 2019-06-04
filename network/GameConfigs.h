@@ -3,6 +3,8 @@
 #define GAME_CONFIGS_H
 
 // Player data
+#define CHEF_SPAWN_ROW 0
+#define CHEF_SPAWN_COL 1
 #define SWING_RADIUS 10
 #define VISION_RADIUS 85.0f
 #define ITEM_SLOWDOWN_MULTIPLIER 0.8
