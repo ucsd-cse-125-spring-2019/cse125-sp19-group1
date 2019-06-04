@@ -121,6 +121,11 @@ void UICanvas::setItem(UIType item) {
 	visibleItems[PROMPT_DROP_ITEM] = true;
 }
 
+void UICanvas::setItemChef(UIType item) {
+	removeItems();
+	visibleItems[item] = true;
+}
+
 void UICanvas::removeItems() {
 	visibleItems[RACCOON_ITEM] = false;
 	visibleItems[CAT_ITEM] = false;

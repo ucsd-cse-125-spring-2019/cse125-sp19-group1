@@ -127,6 +127,7 @@ public:
 	void setAngerRatio(float newAngerRatio);
 	void setVisible(UIType item, bool visible);
 	void setItem(UIType item);
+	void setItemChef(UIType item);
 	void removeItems();
 	UICanvas(GLuint shaderProgram);
 	~UICanvas();

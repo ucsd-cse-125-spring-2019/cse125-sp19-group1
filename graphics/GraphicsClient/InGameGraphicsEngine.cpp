@@ -1333,15 +1333,15 @@ void updateUIElements(GameData * gameData) {
 	if (currPlayer->isChef()) {
 		if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
 			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::CAT) {
-			uiCanvas->setItem(UICanvas::CAT_ITEM);
+			uiCanvas->setItemChef(UICanvas::CAT_ITEM);
 		}
 		else if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
 			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::DOG) {
-			uiCanvas->setItem(UICanvas::DOG_ITEM);
+			uiCanvas->setItemChef(UICanvas::DOG_ITEM);
 		}
 		else if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
 			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::RACOON) {
-			uiCanvas->setItem(UICanvas::RACCOON_ITEM);
+			uiCanvas->setItemChef(UICanvas::RACCOON_ITEM);
 		}
 		else {
 
@@ -1633,9 +1633,6 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		state.movingSpeed = 1;
 		break;
 	case PowerUp::CHEF_SLOW:
-		if (networkPlayer->getModelType() == ModelType::CHEF) {
-			state.movingSpeed = -1;
-		}
 		break;
 	case PowerUp::FLASH:
 		state.flashedRecently = 6;
@@ -1653,6 +1650,9 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	}
 	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->blindChef) {
 		state.blinded = true;
+	}
+	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->slowChef) {
+		state.movingSpeed = -1;
 	}
 	playerGeometry->draw(V, P, state.transform);
 
