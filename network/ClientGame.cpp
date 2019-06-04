@@ -211,14 +211,24 @@ void ClientGame::update()
 		ModelType model = player->getModelType();
 		WinType wt = gameData->getWT();
 		Location loc = player->getLocation();
+		int pNum = player->getPlayerNum();
+		std::map<int, bool>::iterator miniIt;
 
 		soundSystem->setListenerLocation(loc.getX(), loc.getY(), loc.getZ());
+		if (miniIt == playerDoingStuff.end()) {
+			playerDoingStuff.insert(std::pair<int, bool>(pNum, false));
+		}
 
 		// sounds that originate from THIS player
 		if (player->isChef()) 
 		{
-			if (player->getAction() == Action::SWING_NET) {
+			if (player->getAction() == Action::SWING_NET && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_net);
+				playerDoingStuff[pNum] = true;
+			}
+			else if (player->getAction() == Action::NONE) {
+				soundSystem->pauseSoundEffect();
+				playerDoingStuff[pNum] = false;
 			}
 
 			if (wt == WinType::CHEF_WIN) {
@@ -229,9 +239,11 @@ void ClientGame::update()
 			if (player->getAction() == Action::NONE) {
 				soundSystem->pauseSoundEffect();
 				soundSystem->pauseSoundQueue();
+				playerDoingStuff[pNum] = false;
 			}
-			else if (player->getAction() == Action::OPEN_BOX) {
+			else if (player->getAction() == Action::OPEN_BOX && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_search_item);
+				playerDoingStuff[pNum] = true;
 				// uncomment the below if you want to test using the sound queue
 				// soundSystem->pushSoundQueue(sound_yay);
 				// soundSystem->pushSoundQueue(sound_chef);
@@ -240,7 +252,7 @@ void ClientGame::update()
 				// for testing
 				// soundSystem->playOtherPlayersSounds(sound_other_keydrop, 1, 0, 0, 0, true);
 			}
-			else if (player->getAction() == Action::CONSTRUCT_GATE) {
+			else if (player->getAction() == Action::CONSTRUCT_GATE && playerDoingStuff.at(pNum) == false) {
 				GateTile* gateTile = gameData->getGateTile(loc);
 				int gateNum = gateTile ? gateTile->getGateNum() : 0;
 				if (gateNum == 1) { //door
@@ -252,12 +264,15 @@ void ClientGame::update()
 				else if (gateNum == 3){ //vent
 					soundSystem->playSoundEffect(sound_vent_screw);
 				}
+				playerDoingStuff[pNum] = true;
 			}
-			else if (player->getAction() == Action::UNLOCK_JAIL) {
+			else if (player->getAction() == Action::UNLOCK_JAIL && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_jail_unlock);
+				playerDoingStuff[pNum] = true;
 			}
-			else if (player->getAction() == Action::KEY_DROP) {
+			else if (player->getAction() == Action::KEY_DROP && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_keydrop);
+				playerDoingStuff[pNum] = true;
 			}
 
 			if (wt != WinType::NONE) {
@@ -321,7 +336,7 @@ void ClientGame::update()
 					playerDoingStuff.at(curPlayerNum) = false;
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
 				}
-				else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(it->first) == false) {
+				else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playOtherPlayersSounds(sound_other_net, curPlayerNum, locX, locY, locZ);
 					playerDoingStuff.at(curPlayerNum) = true;
 				}
