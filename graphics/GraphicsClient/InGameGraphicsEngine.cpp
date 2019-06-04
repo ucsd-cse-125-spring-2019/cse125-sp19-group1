@@ -46,6 +46,8 @@
 #define CHEF_WITH_NET_PATH (MODELS_PATH "chefSwing.fbx")
 #define CHEF_MDL_PATH     (MODELS_PATH "chef.fbx")
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
+#define NET_MDL_PATH      (MODELS_PATH "net.fbx")
+#define NET_TEX_PATH      (TEXTURES_PATH "net.png")
 
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
@@ -210,7 +212,7 @@ static const struct PlayerModelSettings {
 } playerModelSettings[] = {
 #ifndef DEBUG_LOAD_LESS
 	// walkModelPath          walkTexturePath    walkAnimMultiplier 	idleModelPath			idleTexturePath		idleAnimMultiplier	carryModelPath           carryTexturePath  carryAnimMultiplier	idleCarryModelPath				idleCarryTexturePath	idleCarryAnimMultiplier	  actionModelPath           actionTexturePath  actionAnimMultiplier  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,                  CHEF_IDLE_PATH,			 nullptr,		    1.0f,		        nullptr,                 nullptr,          1.0f,			    CHEF_IDLE_PATH,					nullptr,			    1.0f,					  CHEF_WITH_NET_PATH,       nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,                  CHEF_IDLE_PATH,			 nullptr,		    1.0f,		        nullptr,                 nullptr,          1.0f,			    CHEF_IDLE_PATH,					nullptr,			    1.0f,					  CHEF_WITH_NET_PATH,       nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 0.f, 0.f) },
 	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  0.5f,                  RACCOON_IDLE_MDL_PATH,	 nullptr,		    1.0f,		        RACCOON_CARRY_MDL_PATH,  nullptr,          1.0f,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			    1.0f,					  RACCOON_SEARCH_MDL_PATH,  nullptr,           1.0f,                 "Raccoon",  "Hung",       ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 0.f,-1.2f),    glm::vec3(0.f, 5.5f, 3.75f) },
 	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      0.5f,                  CAT_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        CAT_CARRY_MDL_PATH,      nullptr,          1.0f,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  CAT_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      0.5f,                  DOG_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        DOG_CARRY_MDL_PATH,      nullptr,          1.0f,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  DOG_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
@@ -288,6 +290,7 @@ static const struct ItemModelSettings {
 	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,              glm::vec3(2.5f),    glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
 	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            WINDOW_SCALE,       glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,             glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
+    { MDL_SAME_TEX("net"),								   "net",				   ItemModelType::net,				 glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 0.f) },
 };
 
 struct ItemModel {
@@ -372,6 +375,7 @@ static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 static FBXObject * tileModel = nullptr;
 static FBXObject * wallModel = nullptr;
 static FBXObject * animatedBoxObjects[MAX_PLAYERS] = {nullptr};
+static FBXObject * netModel = nullptr;
 
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
@@ -382,6 +386,7 @@ static GLuint uiTexture;
 
 static Geometry * tileGeometry;
 static Geometry * wallGeometry;
+static Geometry * netGeometry;
 static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
@@ -1118,7 +1123,7 @@ void InGameGraphicsEngine::MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 			if (p->getAction() == Action::SWING_NET) {
-				state.angle = state.angle + 4;
+				state.angle = state.angle + 5;
 				state.restrictRotation = true;
 			}
 			else {
@@ -1670,6 +1675,9 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case Action::SWING_NET:
 		model.getActionObject()->Update(true);
 		playerGeometry = model.getActionGeometry();
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			inventory = ItemModelType::net;
+		}
 		break;
 
 	case Action::NONE:

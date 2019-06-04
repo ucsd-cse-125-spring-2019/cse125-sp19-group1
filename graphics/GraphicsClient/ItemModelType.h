@@ -40,6 +40,7 @@ enum class ItemModelType {
 	vent,
 	window,
 	table,
+	net,
 };
 
 #endif
