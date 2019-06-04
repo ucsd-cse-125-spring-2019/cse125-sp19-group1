@@ -1620,9 +1620,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		state.flashedRecently = 6;
 		break;
 	case PowerUp::CHEF_BLIND:
-		if (networkPlayer->getModelType() == ModelType::CHEF) {
-			state.blinded = true;
-		}
+
 		state.movingSpeed = 0;
 		break;
 	case PowerUp::INSTA_SEARCH:
@@ -1631,6 +1629,9 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	default:
 		state.flashedRecently = 0;
 		break;
+	}
+	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->blindChef) {
+		state.blinded = true;
 	}
 	playerGeometry->draw(V, P, state.transform);
 
