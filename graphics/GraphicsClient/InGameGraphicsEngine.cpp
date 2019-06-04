@@ -2101,10 +2101,10 @@ void LoadModels()
 
 	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
-		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
-		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
-
 		playerLoadingThreads[threadIdx] = thread([&]() {
+			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+
 			cout << "\tloading " << setting.title << " walk" << endl;
 			model.settings = &setting;
 			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, false);
