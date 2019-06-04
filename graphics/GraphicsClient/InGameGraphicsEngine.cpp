@@ -210,8 +210,8 @@ static const struct PlayerModelSettings {
 } playerModelSettings[] = {
 #ifndef DEBUG_LOAD_LESS
 	// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				CHEF_IDLE_PATH,					nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 0.f,-1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
 	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_IDLE_MDL_PATH,		 nullptr,		   -1,			   CAT_CARRY_MDL_PATH,       nullptr,          -1,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_IDLE_MDL_PATH,		 nullptr,		   -1,			   DOG_CARRY_MDL_PATH,       nullptr,          -1,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 #else
@@ -404,9 +404,9 @@ ParticleSpawner * dustSpawner;
 ParticleSpawner * flashSpawner;
 ParticleSpawner * speedSpawner;
 ParticleSpawner * slowSpawner;
-ParticleSpawner * buildSpawner;
+//ParticleSpawner * buildSpawner;
 ParticleSpawner * blindSpawner;
-//ParticleSpawner * searchSpawner;
+ParticleSpawner * searchSpawner;
 
 
 extern ClientGame * sharedClient;
@@ -1662,24 +1662,32 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case Action::NONE:
 	default:
 		if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
-			model.getCarryObject()->Update(true);
-			playerGeometry = model.getCarryGeometry();
-		}
-		else if (inventory != ItemModelType::EMPTY) {
-			model.getCarryObject()->Update(true);
 			if (state.moving) {
+				model.getCarryObject()->Update(true);
 				playerGeometry = model.getCarryGeometry();
 			}
 			else {
+				model.getIdleCarryObject()->Update(true);
+				playerGeometry = model.getIdleCarryGeometry();
+			}
+		}
+		else if (inventory != ItemModelType::EMPTY) {
+			if (state.moving) {
+				model.getCarryObject()->Update(true);
+				playerGeometry = model.getCarryGeometry();
+			}
+			else {
+				model.getIdleCarryObject()->Update(true);
 				playerGeometry = model.getIdleCarryGeometry();
 			}
 		}
 		else {
-			model.getWalkObject()->Update(true);
 			if (state.moving) {
+				model.getWalkObject()->Update(true);
 				playerGeometry = model.getwalkGeometry();
 			}
 			else {
+				model.getIdleObject()->Update(true);
 				playerGeometry = model.getIdleGeometry();
 			}
 		}
@@ -1721,7 +1729,9 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->slowChef) {
 		state.movingSpeed = -1;
 	}
-	playerGeometry->draw(V, P, state.transform);
+	if (notHidden) {
+		playerGeometry->draw(V, P, state.transform);
+	}
 
 
 	// Prepare to draw a special copy of an item (either carried or thrown)
@@ -1814,7 +1824,6 @@ void printPoint(float x, float y, const glm::mat4 &transform)
 #define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
 #define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
 #define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
-#define MINIMAP_PING_INTERVAL 15.0
 #define MINIMAP_PING_DURATION 2.25
 #define MINIMAP_PING_FINAL_RADIUS (9.f * TILE_SIZE_SERVER)
 #define MINIMAP_PING_BEGIN_RADIUS (0.5f * TILE_SIZE_SERVER)
@@ -1978,15 +1987,15 @@ void DisplayCallback(GLFWwindow* window)
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1));
 		slowSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1));
-		buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
-			glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
+		//buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			//state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
+			//glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
 		flashSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position, state.flashedRecently > 0);
 		blindSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position + glm::vec3(0,25.0f,0), state.blinded);
-		//searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
-		//	state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
+		searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
 	}
 
 	glEnable(GL_DEPTH_TEST);
@@ -2196,7 +2205,7 @@ InGameGraphicsEngine::~InGameGraphicsEngine()
 {
 	delete dustSpawner;
 	delete speedSpawner;
-	//delete searchSpawner;
+	delete searchSpawner;
 	delete slowSpawner;
 	delete blindSpawner;
 	delete flashSpawner;
@@ -2383,9 +2392,9 @@ void InGameGraphicsEngine::MainLoopBegin()
 		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, 10.0f, 0), 3.0f);
 		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
 		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
-		buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
+		//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 		blindSpawner = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
-		//searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
+		searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
 
 
 		auto setupEnd = high_resolution_clock::now();
