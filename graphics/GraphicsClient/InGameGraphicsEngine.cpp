@@ -1648,6 +1648,12 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		state.flashedRecently = 0;
 		break;
 	}
+	if (sharedClient->getGameData()->getBlindChef()) {
+		std::cerr << "ChefBlind gotten" << std::endl;
+	}
+	if (sharedClient->getGameData()->getSlowChef()) {
+		std::cerr << "ChefSlow gotten" << std::endl;
+	}
 	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->blindChef) {
 		state.blinded = true;
 	}
