@@ -42,7 +42,7 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 
 	std::cout << anim->mDuration << " VS " << modifiedDuration << std::endl;
 
-	newAnimation->setEndTime(modifiedDuration);
+	//newAnimation->setEndTime(modifiedDuration);
 
 	*animPlayer = new AnimationPlayer(skel, newAnimation);
 	return true;

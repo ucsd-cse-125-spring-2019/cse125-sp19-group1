@@ -1723,7 +1723,9 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->slowChef) {
 		state.movingSpeed = -1;
 	}
-	playerGeometry->draw(V, P, state.transform);
+	if (notHidden) {
+		playerGeometry->draw(V, P, state.transform);
+	}
 
 
 	// Prepare to draw a special copy of an item (either carried or thrown)
