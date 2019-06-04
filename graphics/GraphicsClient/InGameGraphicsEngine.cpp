@@ -1343,6 +1343,10 @@ void updateUIElements(GameData * gameData) {
 			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::RACOON) {
 			uiCanvas->setItem(UICanvas::RACCOON_ITEM);
 		}
+		else {
+
+			uiCanvas->removeItems();
+		}
 
 		if (currPlayer->isChef()) {
 			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, true);

@@ -216,6 +216,9 @@ void ServerGame::receiveFromClients()
 								//update jail with animal
 								std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
 								jailTile->placeAnimalInJail(animal);
+								player->setCaughtAnimalId(-1);
+								player->setCaughtAnimalType(ModelType::DEFAULT);
+
 								player->setCaughtAnimal(false);
 
 								//update animal's location to jail
