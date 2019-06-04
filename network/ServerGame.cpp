@@ -270,7 +270,7 @@ void ServerGame::receiveFromClients()
 											}
 											else {
 												ItemModelType itemName = iter2->second->getInventory();
-												
+												gameData->getAtlas()->returnItemToSpawn(itemName, loc.getZ(), loc.getX());
 											}
 
 											if (gameData->getChefAnger() >= CHEF_MAX_ANGER && !animalCaught)
