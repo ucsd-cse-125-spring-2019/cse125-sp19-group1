@@ -5,12 +5,14 @@
 // used for multi-threading
 #include <process.h>
 #include <ctime>
+#include <chrono>
+#define FPS 60
 
 void serverLoop(void *);
 
 ServerGame * server;
-int elapsedTime = 0;
-int elapsedTime2 = 0;
+std::chrono::time_point<std::chrono::system_clock> timeStamp = std::chrono::system_clock::now();
+
 
 int main()
 {
@@ -19,28 +21,19 @@ int main()
     server = new ServerGame();
 
 	serverLoop((void*)12);
+	auto now = std::chrono::system_clock::now();
 }
 
-void readDataLoop(void * arg)
-{
-	while (true)
-	{
-		if (clock() - elapsedTime2 > 1000.0 / 30)
-		{
-			elapsedTime2 = clock();
-			server->update();
-		}
-	}
-}
 void serverLoop(void * arg) 
 { 
     while(true) 
     {
-		if (clock() - elapsedTime > 1000.0 / 30)
+		auto now = std::chrono::system_clock::now();
+		std::chrono::duration<double> elapsed_seconds = now - timeStamp;
+		if (elapsed_seconds.count() > 1000.0 / FPS)
 		{
-			elapsedTime = clock();
+			timeStamp = std::chrono::system_clock::now();
 			server->update();
-			//server->sendActionPackets();
 		}
     }
 }

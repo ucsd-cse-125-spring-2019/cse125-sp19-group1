@@ -19,10 +19,9 @@ class SoundSystem
 private:
 	FMOD::System * system;
 	FMOD::Channel * not3DChannel[2];
-	FMOD::Channel * threeDeeChannel[3];
-	bool threeDeeChannelPlayedBefore[3];
+	FMOD::Channel * threeDeeChannel[4];
+	bool threeDeeChannelPlayedBefore[4];
 	int threeDeeChannelTaken;
-	std::map<int, int> otherPlayerChannels;
 	std::queue<Sound *> soundQueue;
 	bool hasAudioDriver;
 	bool continueQueue;

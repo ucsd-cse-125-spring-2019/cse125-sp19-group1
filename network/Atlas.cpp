@@ -145,6 +145,7 @@ Atlas::Atlas()
 				BoxTile * boxTile = new BoxTile(wall, height);
 				tileRow.push_back(boxTile);
 				boxLocations.push_back(std::pair<int, int>(row, col));
+				allBoxLocations.push_back(std::pair<int, int>(row, col));
 				boxTiles.push_back(boxTile);
 			}
 				break;
@@ -653,7 +654,23 @@ bool Atlas::checkDroppedItems()
 
 	return updateClient;
 }
-
+void Atlas::unlockAllGates()
+{
+	for (auto gatePair : gateMap)
+	{
+		gatePair.second->updateKeyProgress();
+		gatePair.second->updateKeyProgress();
+		gatePair.second->updateKeyProgress();
+	}
+}
+void Atlas::openAllBoxes()
+{
+	for (auto locationPair: allBoxLocations)
+	{
+		Location boxLoc(locationPair.second * TILE_SIZE, 0, locationPair.first * TILE_SIZE);
+		updateBoxLayout(boxLoc);
+	}
+}
 bool Atlas::checkBoxRespawn()
 {
 	bool updateClient = false;

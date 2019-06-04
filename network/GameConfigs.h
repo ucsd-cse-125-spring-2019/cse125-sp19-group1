@@ -3,11 +3,13 @@
 #define GAME_CONFIGS_H
 
 // Player data
+#define CHEF_SPAWN_ROW 0
+#define CHEF_SPAWN_COL 1
 #define SWING_RADIUS 10
 #define VISION_RADIUS 85.0f
 #define ITEM_SLOWDOWN_MULTIPLIER 0.8
 #define CAKE_SLOWDOWN_MULTIPLIER 0.5
-#define CHEF_ANGER_INTERVAL 5
+#define CHEF_ANGER_INTERVAL 7
 #define CHEF_MAX_ANGER 60
 #define CHEF_MAX_VISION 100
 #define ABILITY_CHARGE_TIME 0.0
@@ -31,7 +33,7 @@
 // Item data
 #define MAX_ITEMS 14
 #define ITEM_DROP_DURATION 10
-#define POWERUP_DROP_CHANCE 4 // drop chance is 1 divided by the value shown here
+#define POWERUP_DROP_CHANCE 1 // drop chance is 1 divided by the value shown here
 #define TIME_TO_RESPAWN_BOX 10
 
 // Player interact data

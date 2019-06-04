@@ -55,6 +55,7 @@ public:
 	std::vector<Location> playerSpawnLocations;
 	std::vector<Item> itemLocations;
 	std::vector<std::pair<int, int>> boxLocations;
+	std::vector<std::pair<int, int>> allBoxLocations;
 	std::vector<std::pair<int, int>> jailLocations;
 	std::map<ItemModelType, Item> itemsMap;
 	std::map <int, GateTile *> gateMap;
@@ -66,6 +67,8 @@ public:
 	bool checkBoxRespawn();
 	void updateDroppedItem(ItemModelType anItem, Location loc);
 	void updateGateProgress(int gateNum);
+	void unlockAllGates();
+	void openAllBoxes();
 
 	std::vector<std::vector<Tile *>> getServerTileLayout() { return tileLayout; }
 
