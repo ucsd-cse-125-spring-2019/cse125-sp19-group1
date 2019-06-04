@@ -210,8 +210,8 @@ static const struct PlayerModelSettings {
 } playerModelSettings[] = {
 #ifndef DEBUG_LOAD_LESS
 	// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				CHEF_IDLE_PATH,					nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 0.f,-1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
 	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_IDLE_MDL_PATH,		 nullptr,		   -1,			   CAT_CARRY_MDL_PATH,       nullptr,          -1,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_IDLE_MDL_PATH,		 nullptr,		   -1,			   DOG_CARRY_MDL_PATH,       nullptr,          -1,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 #else
@@ -1662,8 +1662,14 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case Action::NONE:
 	default:
 		if (networkPlayer->getModelType() == ModelType::CHEF && networkPlayer->hasCaughtAnimal()) {
-			model.getCarryObject()->Update(true);
-			playerGeometry = model.getCarryGeometry();
+			if (state.moving) {
+				model.getCarryObject()->Update(true);
+				playerGeometry = model.getCarryGeometry();
+			}
+			else {
+				model.getIdleCarryObject()->Update(true);
+				playerGeometry = model.getIdleCarryGeometry();
+			}
 		}
 		else if (inventory != ItemModelType::EMPTY) {
 			if (state.moving) {
