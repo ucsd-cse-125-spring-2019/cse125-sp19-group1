@@ -687,6 +687,18 @@ bool Atlas::checkBoxRespawn()
 	}
 	return updateClient;
 }
+void Atlas::returnItemToSpawn(ItemModelType anItem)
+{
+	if (itemsMap.count(anItem) > 0)
+	{
+		Item & temp = itemsMap.at(anItem);
+		int spawnRow, spawnCol;
+		temp.getSpawnLocation(spawnRow, spawnCol);
+		returnItemToSpawn(temp.getName(), spawnRow, spawnCol);
+	}
+}
+
+
 // Recursive function to return items back to spawn if they cannot find an adjacent free tile
 void Atlas::returnItemToSpawn(ItemModelType anItem, int spawnRow, int spawnCol)
 {
