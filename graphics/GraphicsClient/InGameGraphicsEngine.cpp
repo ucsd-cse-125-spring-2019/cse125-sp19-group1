@@ -1469,9 +1469,9 @@ void InGameGraphicsEngine::IdleCallback()
 
 	/* TODO: waiting for server implementation */
 
-	if (clock() - elapsedTime > 1000.0 / 60)
+	/*if (clock() - elapsedTime > 1000.0 / 60)
 	{
-		elapsedTime = clock();
+		elapsedTime = clock();*/
 		resetIdempotentFlush();
 		SendPackets();
 		sharedClient->update();
@@ -1534,7 +1534,7 @@ void InGameGraphicsEngine::IdleCallback()
 		else {
 			fog->setFogDistance(gameData->getPlayer(sharedClient->getMyID())->getVisionRadius());
 		}
-	}
+	//}
 
 }
 
