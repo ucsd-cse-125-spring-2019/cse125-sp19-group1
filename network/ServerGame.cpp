@@ -130,7 +130,7 @@ void ServerGame::receiveFromClients()
 							chefLocation.setY(tile->getHeight() / 2 * TILE_HEIGHT);
 							player->setLocation(chefLocation);
 						}
-
+						updateHeight(iter->first);
 					}
 					gameData->setGameState(GameState::IN_GAME);
 				}
