@@ -15,7 +15,7 @@ void Transform::removeAllChildren() {
 	children.clear();
 }
 
-void Transform::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model)
+void Transform::draw(const glm::mat4 &V, const glm::mat4 &P, glm::mat4 model)
 {
 	if (!hidden) {
 		glm::mat4 new_t = model * offset;

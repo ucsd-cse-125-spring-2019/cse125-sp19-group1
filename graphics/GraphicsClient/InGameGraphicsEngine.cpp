@@ -53,6 +53,9 @@
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
 
+#define PLAYER_MDL_CLIP_RADIUS 60.f
+#define ITEM_MDL_CLIP_RADIUS 60.f
+
 #define CHEF_FOG_DISTANCE 85.0f
 #define RACCOON_FOG_DISTANCE 75
 #define WALL_MDL_PATH     (MODELS_PATH "wall.fbx")
@@ -528,7 +531,8 @@ static glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation
 static const glm::vec3 cam_overhead_angle(-10.f, 50.f, -30.f);   // camera's preferred offset from cam_look_at
 static bool thirdPersonView = false;
 
-static glm::vec3 light_center = glm::vec3(0.f);
+glm::vec3 ingame_light_center = glm::vec3(0.f);
+float ingame_light_radius;
 
 static int cameraClientId = -1;
 
@@ -545,7 +549,6 @@ void DisplayCallback(GLFWwindow* window);
 void UpdateView();
 glm::vec3 TrackballMapping(double x, double y, int width, int height);
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis);
-bool iAmCaught();
 
 void toggleClient(); // from Tester.cpp
 
@@ -915,9 +918,12 @@ void updateBoxVisibility()
 				gateHistory[num] = 1;
 #endif
 
-				auto index = static_cast<unsigned>(gate->getModel());
-				//cout << "Calling update(" << (gateHistory[num] != 0) << ") on model " << index << " (" << itemModels[index].settings->name << ")\n";
-				itemModels[index].object->Update(gateHistory[num] != 0);
+				glm::vec3 position((x + 0.5f) * TILE_SIZE_SERVER, 0.f, (y + 0.5f) * TILE_SIZE_SERVER);
+				if (glm::distance(position, ingame_light_center) > ingame_light_radius + ITEM_MDL_CLIP_RADIUS) {
+					auto index = static_cast<unsigned>(gate->getModel());
+					//cout << "Calling update(" << (gateHistory[num] != 0) << ") on model " << index << " (" << itemModels[index].settings->name << ")\n";
+					itemModels[index].object->Update(gateHistory[num] != 0);
+				}
 			}
 
 			//Update UI to express keys already placed
@@ -1298,7 +1304,7 @@ static bool iAmJailed()
 
 void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 	
-	light_center = newPlayerPos;
+	ingame_light_center = newPlayerPos;
 	
 	if (!sharedClient || !sharedClient->getGameData())
 		return;
@@ -1316,9 +1322,9 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 #endif
 
 	if (sharedClient->getGameData()->getWT() != WinType::NONE) {
-		light_center = LookAtForWT(sharedClient->getGameData()->getWT());
+		ingame_light_center = LookAtForWT(sharedClient->getGameData()->getWT());
 
-		look_target = limitLookAt(light_center);
+		look_target = limitLookAt(ingame_light_center);
 		cam_target = look_target + cam_overhead_angle;
 		look_speed = 0.3f;
 		cam_speed = 0.15f;
@@ -1341,7 +1347,7 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 		Player *networkPlayer = allPlayers.at(cameraClientId);
 		auto loc = networkPlayer->getLocation();
 		auto position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
-		light_center = position;
+		ingame_light_center = position;
 		look_target = limitLookAt(position);
 		cam_target = look_target + cam_overhead_angle;
 		look_speed = 0.3f;
@@ -1632,12 +1638,8 @@ void InGameGraphicsEngine::IdleCallback()
 		updateUIElements(gameData);
 		Player *networkPlayer = gameData->getPlayer(sharedClient->getMyID());
 		if (networkPlayer) {
-			if (networkPlayer->isChef()) {
-				fog->setFogDistance(gameData->chefVision);
-			}
-			else {
-				fog->setFogDistance(networkPlayer->getVisionRadius());
-			}
+			ingame_light_radius = networkPlayer->isChef() ? gameData->chefVision : networkPlayer->getVisionRadius();
+			fog->setFogDistance(ingame_light_radius);
 		}
 	//}
 
@@ -2027,7 +2029,7 @@ void DisplayCallback(GLFWwindow* window)
 
 	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
-	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
+	fog->draw(objShaderProgram, P * V * glm::vec4(ingame_light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
 
 
@@ -2160,6 +2162,7 @@ void LoadModels()
 			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimMultiplier, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
+			model.walkObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
 			cout << "\tfinished loading " << setting.title << " walk" << endl;
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
@@ -2167,6 +2170,7 @@ void LoadModels()
 				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimMultiplier, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
+				model.carryObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
 				cout << "\tfinished loading " << setting.title << " carry" << endl;
 			}
 			if (setting.idleModelPath || setting.idleTexturePath) {
@@ -2174,6 +2178,7 @@ void LoadModels()
 				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, setting.idleAnimMultiplier, false);
 				model.idleGeometry = new Geometry(model.idleObject, objShaderProgram);
 				model.idleGeometry->t = transform;
+				model.idleObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
 				cout << "\tfinished loading " << setting.title << " idle" << endl;
 			}
 			if (setting.idleCarryModelPath || setting.idleCarryTexturePath) {
@@ -2181,6 +2186,7 @@ void LoadModels()
 				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, setting.idleCarryAnimMultiplier, false);
 				model.idleCarryGeometry = new Geometry(model.idleCarryObject, objShaderProgram);
 				model.idleCarryGeometry->t = transform;
+				model.idleCarryObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
 				cout << "\tfinished loading " << setting.title << " idle carry" << endl;
 			}
 
@@ -2199,6 +2205,7 @@ void LoadModels()
 				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimMultiplier, false);
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
 				model.actionGeometry->t = transform;
+				model.actionObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
 				cout << "\tfinished loading " << setting.title << " action" << endl;
 			}
 		}
@@ -2235,6 +2242,7 @@ void LoadModels()
 			m.settings = &setting;
 			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, 1.0f, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
+			m.object->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
 			cout << "\tfinished loading " << setting.name << endl;
 		}
@@ -2242,9 +2250,11 @@ void LoadModels()
 
 	cout << "\tloading " << "tile" << endl;
 	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, 1.0f, false);
+	//tileModel->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
 	cout << "\tloading " << "wall" << endl;
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, 1.0f, false);
+	//wallModel->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
@@ -2252,6 +2262,7 @@ void LoadModels()
 	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
 	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
 		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, 1.0f, false);
+		animatedBoxObjects[i]->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 	}
 
 	itemLoadingThread.join();

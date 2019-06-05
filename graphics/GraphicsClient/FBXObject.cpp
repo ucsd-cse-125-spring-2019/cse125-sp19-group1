@@ -1,5 +1,9 @@
 #include "FBXObject.h"
 
+// From InGameGraphicsEngine
+extern glm::vec3 ingame_light_center;
+extern float ingame_light_radius;
+
 FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, float animMultiplier, bool setupRendering, GLint filtering) {
 	// initialize variables
 	Init(attachSkel);
@@ -28,6 +32,7 @@ void FBXObject::Init(bool attachSkel) {
 	animPlayer = NULL;
 	animTimer = 0.0f;
 	texNum = 0;
+	clipRadius = 0.0f;
 	if (attachSkel)
 		skel = new Skeleton();
 }
@@ -149,6 +154,14 @@ glm::vec3 FBXObject::GetPosition() {
 	return glm::vec3(x, y, z);
 }
 
+float FBXObject::GetClipRadius() {
+	return clipRadius;
+}
+
+void FBXObject::SetClipRadius(float newClipRadius) {
+	clipRadius = newClipRadius;
+}
+
 std::vector<glm::vec3> * FBXObject::GetVertices() {
 	return &vertices;
 }
@@ -204,6 +217,13 @@ void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 
 {
 	if (!renderingIsSetup)
 		return;
+
+	if (clipRadius > 0.f) {
+		float distToLight = glm::distance(glm::vec3(model[3]), ingame_light_center);
+		if (distToLight > ingame_light_radius + clipRadius) {
+			return;  // clipped because it's not visible
+		}
+	}
 
 	if (depthTest) {
 		glEnable(GL_DEPTH_TEST);

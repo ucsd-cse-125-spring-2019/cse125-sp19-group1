@@ -44,6 +44,8 @@ private:
 
 	int texWidth;
 	int texHeight;
+	float clipRadius;
+	bool pauseAnimationIfClipped;
 
 	// Luma values
 	glm::vec3 default_amb = glm::vec3(0.08725f, 0.0795f, 0.0245f);
@@ -74,12 +76,14 @@ public:
 	std::vector<unsigned int> * GetIndices();
 	std::vector<glm::vec2> * GetUVs();
 	void GetTextureSize(int &width, int &height);
+	float GetClipRadius();
 	// setters
 	void SetAmbient(glm::vec3 newAmb);
 	void SetDiffuse(glm::vec3 newDiff);
 	void SetSpecular(glm::vec3 newSpec);
 	void SetShine(float newShine);
 	void SetDepthTest(bool depthTestEnabled);
+	void SetClipRadius(float clipRadius);
 	// rendering
 	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model);
 	void Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 * P, glm::mat4 model, GLuint textureOverride);

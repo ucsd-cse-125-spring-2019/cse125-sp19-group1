@@ -21,7 +21,7 @@ public:
 	bool hidden;
 	Geometry(FBXObject * fbx, GLint shaderProgram);
 	//~Geometry();
-	void draw(glm::mat4 V, glm::mat4 P, glm::mat4 model);
+	void draw(const glm::mat4 &V, const glm::mat4 &P, glm::mat4 model);
 	void addChild(Node * child);
 	void removeAllChildren();
 	bool decrementRefCount();

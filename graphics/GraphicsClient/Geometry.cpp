@@ -10,9 +10,9 @@ Geometry::Geometry(FBXObject * fbx, GLint shaderProgram) {
 	hidden = false;
 }
 
-void Geometry::draw(glm::mat4 V, glm::mat4 P, glm::mat4 model) {
+void Geometry::draw(const glm::mat4 &V, const glm::mat4 &P, glm::mat4 model) {
 	if (!hidden) {
-		fbx->Draw(shaderProgram, &(V), &P, (model * t));
+		fbx->Draw(shaderProgram, &V, &P, (model * t));
 	}
 }
 
