@@ -116,6 +116,10 @@ void ServerGame::receiveFromClients()
 			case GO_TO_CREDITS_EVENT:
 				gameData->setGameState(GameState::END_CREDITS);
 				break;
+			case SET_DONE_LOADING_EVENT:
+				printf("server received SET_DONE_LOADING event packet from client\n");
+				gameData->setGameState(GameState::IN_GAME);
+				break;
 			case DONE_LOADING_EVENT:
 				printf("server received DONE_LOADING event packet from client\n");
 				gameData->getPlayer(playerID)->setDoneLoading(true);
@@ -269,7 +273,8 @@ void ServerGame::receiveFromClients()
 
 										Location tLoc = iter2->second->getLocation();
 
-										if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
+										//if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
+										if (loc.distanceTo(tLoc) < player->getCatchRadius() && gameData->getAtlas()->hasWallInBetween(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
 										{
 
 											if (!(gameData->getAtlas()->tileHasItem(loc)))

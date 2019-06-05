@@ -54,6 +54,7 @@ public:
 	float		getVisionRadius() { return visionRadius; }
 	Direction	getFacingDirection() const;
 	bool		isDoneLoading() const;
+	int			getCatchRadius() const;
 
 	// Setters
 	void setPlayerID(int id);

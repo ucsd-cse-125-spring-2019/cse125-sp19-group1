@@ -138,6 +138,11 @@ bool Player::isCaught() const {
 	return caughtStatus;
 }
 
+int Player::getCatchRadius() const
+{
+	return catchRadius;
+}
+
 bool Player::inRange(Location & myLoc, Location & theirLoc) 
 {
 	double dist = sqrt(pow(myLoc.getX() - theirLoc.getX(), 2) +

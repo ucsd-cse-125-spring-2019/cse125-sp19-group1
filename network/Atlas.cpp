@@ -399,7 +399,7 @@ void Atlas::detectObjectCollision(Location & loc) {
 
 }
 
-bool Atlas::canReachDestination(Location currentLoc, Location & destinationLoc)
+bool Atlas::canMoveToDestination(Location currentLoc, Location & destinationLoc)
 {
 	int currRow = 0;
 	int currCol = 0;
@@ -631,6 +631,343 @@ bool Atlas::canReachDestination(Location currentLoc, Location & destinationLoc)
 	return true;
 }
 
+bool Atlas::hasWallInBetween(Location currentLoc, Location & destinationLoc)
+{
+	int currRow = 0;
+	int currCol = 0;
+	int destRow = 0;
+	int destCol = 0;
+
+	getMapCoords(currentLoc, currRow, currCol);
+	getMapCoords(destinationLoc, destRow, destCol);
+
+	if (destRow < 0 || destRow > tileLayout.size())
+		return false;
+
+	if (destCol < 0 || destCol > tileLayout[destRow].size())
+		return false;
+
+	if (currRow >= tileLayout.size())
+		currRow = tileLayout.size() - 1;
+	else if (currRow < 0)
+		currRow = 0;
+
+	if (currCol >= tileLayout[currRow].size())
+		currCol = tileLayout[currRow].size() - 1;
+	else if (currCol < 0)
+		currCol = 0;
+
+	int rowDiff = destRow - currRow;
+	int colDiff = destCol - currCol;
+
+	if (rowDiff != 0 && colDiff != 0)
+	{
+		Tile * tile = tileLayout[currRow][currCol];
+		bool xDir = true;
+		bool zDir = true;
+		std::bitset<4> wall(tile->getWall());
+		if (rowDiff < 0) // Check up wall
+		{
+			if (wall[2])
+				zDir = false;
+		}
+		else if (rowDiff > 0) // check down wall
+		{
+			if (wall[1])
+				zDir = false;
+		}
+
+		if (colDiff < 0) // check left wall
+		{
+			if (wall[3])
+				xDir = false;
+
+		}
+		else if (colDiff > 0) // check right wall
+		{
+			if (wall[0])
+				xDir = false;
+		}
+		if (xDir || zDir) // the corner has only 1 of 2 walls so target can be reached
+			return true;
+		else
+			return false;
+	}
+	else if (rowDiff != 0 || colDiff != 0)
+	{
+		Tile * tile = tileLayout[currRow][currCol];
+		bool xDir = true;
+		bool zDir = true;
+		std::bitset<4> wall(tile->getWall());
+		////check left wall
+		//if (wall[3]) {
+		////check up wall
+		//if (wall[2]) {
+		////check down wall
+		//if (wall[1]) {
+		////check right wall
+		//if (wall[0]) {
+
+		if (rowDiff < 0) // Check up wall
+		{
+			if(wall[2])
+				return false;
+		}
+		else if (rowDiff > 0) // check down wall
+		{
+			if (wall[1])
+				return false;
+		}
+
+		if (colDiff < 0) // check left wall
+		{
+			if (wall[3])
+				return false;
+			
+		}
+		else if (colDiff > 0) // check right wall
+		{
+			if (wall[0])
+				return false;
+		}
+	}
+	else // within same tile = no walls to check
+	{
+		return true;
+	}
+}
+
+bool Atlas::canReachTarget(Location currentLoc, Location & targetLoc)
+{
+	int currRow = 0;
+	int currCol = 0;
+	int targetRow = 0;
+	int destCol = 0;
+
+	getMapCoords(currentLoc, currRow, currCol);
+	getMapCoords(targetLoc, targetRow, destCol);
+
+	if (targetRow < 0 || targetRow > tileLayout.size())
+		return false;
+
+	if (destCol < 0 || destCol > tileLayout[targetRow].size())
+		return false;
+
+	if (currRow >= tileLayout.size())
+		currRow = tileLayout.size() - 1;
+	else if (currRow < 0)
+		currRow = 0;
+
+	if (currCol >= tileLayout[currRow].size())
+		currCol = tileLayout[currRow].size() - 1;
+	else if (currCol < 0)
+		currCol = 0;
+
+	int rowDiff = targetRow - currRow;
+	int colDiff = destCol - currCol;
+
+	if (rowDiff != 0 || colDiff != 0)
+	{
+		Tile * tile = tileLayout[targetRow][destCol];
+		bool moveX = true;
+		bool moveZ = true;
+
+		if (rowDiff < 0)
+		{
+			if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+			{
+				moveZ = false;
+			}
+		}
+		else if (rowDiff > 0)
+		{
+			if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+			{
+				moveZ = false;
+			}
+		}
+
+		if (colDiff < 0)
+		{
+			if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+			{
+				moveX = false;
+			}
+		}
+		else if (colDiff > 0)
+		{
+			if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+			{
+				moveX = false;
+			}
+		}
+
+		if (!moveX && !moveZ)
+		{
+			moveX = moveZ = true;
+			// At a corner of the current tile
+			// Positive row diff means 
+			if (rowDiff < 0 && currRow > 0)
+			{
+				tile = tileLayout[currRow - 1][currCol];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveZ = false;
+				}
+			}
+			else if (rowDiff > 0 && currRow < tileLayout.size() - 1)
+			{
+				tile = tileLayout[currRow + 1][currCol];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveZ = false;
+				}
+			}
+
+			if (colDiff < 0 && currCol > 0)
+			{
+				tile = tileLayout[currRow][currCol - 1];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveX = false;
+				}
+			}
+			else if (colDiff > 0 && currCol < tileLayout[currRow].size() - 1)
+			{
+				tile = tileLayout[currRow][currCol + 1];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveX = false;
+				}
+			}
+			if (!moveX && !moveZ)
+				return false;
+			else if (!moveX)
+			{
+				targetLoc.setX(currentLoc.getX());
+			}
+			else if (!moveZ)
+			{
+				targetLoc.setZ(currentLoc.getZ());
+			}
+			else if (moveX && moveZ) // cant allow both to be true b/c they were false to be able to enter this if case
+			{
+				// randomly select one direction to move in if moving into the corner
+				int randNum = rand() % 2;
+				switch (randNum)
+				{
+				case 0: targetLoc.setX(currentLoc.getX()); break;
+				case 1: targetLoc.setZ(currentLoc.getZ()); break;
+				}
+			}
+
+		}
+		else if (!moveX)
+		{
+			targetLoc.setX(currentLoc.getX());
+		}
+		else if (!moveZ)
+		{
+			targetLoc.setZ(currentLoc.getZ());
+		}
+	}
+	// Check within the same tile
+	if (rowDiff == 0 && colDiff == 0)
+	{
+		Location locDiff = currentLoc - targetLoc;
+		Location destWithPlayerRadius;
+
+		bool moveX = true;
+		bool moveZ = true;
+
+		if (locDiff.getX() < 0)
+		{
+			destWithPlayerRadius = Location(targetLoc.getX() - PLAYER_RADIUS, targetLoc.getY(), targetLoc.getZ());
+			int destWithPlayerRadiusRow = 0;
+			int destWithPlayerRadiusCol = 0;
+			getMapCoords(destWithPlayerRadius, destWithPlayerRadiusRow, destWithPlayerRadiusCol);
+			int rowDiff = currRow - destWithPlayerRadiusRow;
+			int colDiff = currCol - destWithPlayerRadiusCol;
+
+			if (rowDiff != 0 || colDiff != 0)
+			{
+				Tile * tile = tileLayout[targetRow][destCol];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveX = false;
+				}
+			}
+		}
+		else if (locDiff.getX() > 0)
+		{
+			destWithPlayerRadius = Location(targetLoc.getX() + PLAYER_RADIUS, targetLoc.getY(), targetLoc.getZ());
+			int destWithPlayerRadiusRow = 0;
+			int destWithPlayerRadiusCol = 0;
+			getMapCoords(destWithPlayerRadius, destWithPlayerRadiusRow, destWithPlayerRadiusCol);
+			int rowDiff = currRow - destWithPlayerRadiusRow;
+			int colDiff = currCol - destWithPlayerRadiusCol;
+
+			if (rowDiff != 0 || colDiff != 0)
+			{
+				Tile * tile = tileLayout[targetRow][destCol];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveX = false;
+				}
+			}
+		}
+
+		if (locDiff.getZ() < 0)
+		{
+			destWithPlayerRadius = Location(targetLoc.getX(), targetLoc.getY(), targetLoc.getZ() - PLAYER_RADIUS);
+			int destWithPlayerRadiusRow = 0;
+			int destWithPlayerRadiusCol = 0;
+			getMapCoords(destWithPlayerRadius, destWithPlayerRadiusRow, destWithPlayerRadiusCol);
+			int rowDiff = currRow - destWithPlayerRadiusRow;
+			int colDiff = currCol - destWithPlayerRadiusCol;
+
+			if (rowDiff != 0 || colDiff != 0)
+			{
+				Tile * tile = tileLayout[targetRow][destCol];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveZ = false;
+				}
+			}
+		}
+		else if (locDiff.getZ() > 0)
+		{
+			destWithPlayerRadius = Location(targetLoc.getX(), targetLoc.getY(), targetLoc.getZ() + PLAYER_RADIUS);
+			int destWithPlayerRadiusRow = 0;
+			int destWithPlayerRadiusCol = 0;
+			getMapCoords(destWithPlayerRadius, destWithPlayerRadiusRow, destWithPlayerRadiusCol);
+			int rowDiff = currRow - destWithPlayerRadiusRow;
+			int colDiff = currCol - destWithPlayerRadiusCol;
+
+			if (rowDiff != 0 || colDiff != 0)
+			{
+				Tile * tile = tileLayout[targetRow][destCol];
+				if ((tile->getTileType() == TileType::OBJECT && dynamic_cast<ObjectTile*>(tile)->getModel() != ItemModelType::painting) || tile->getTileType() == TileType::JAIL)
+				{
+					moveZ = false;
+				}
+			}
+		}
+
+		if (!moveX && !moveZ)
+			return false;
+		else if (!moveX)
+		{
+			targetLoc.setX(currentLoc.getX());
+		}
+		else if (!moveZ)
+		{
+			targetLoc.setZ(currentLoc.getZ());
+		}
+
+	}
+	return true;
+}
 
 ItemModelType Atlas::getTileItem(Location & loc)
 {
