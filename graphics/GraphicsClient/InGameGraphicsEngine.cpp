@@ -406,13 +406,13 @@ static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;
 
-ParticleSpawner * dustSpawner;
-ParticleSpawner * flashSpawner;
-ParticleSpawner * speedSpawner;
-ParticleSpawner * slowSpawner;
+ParticleSpawner * dustSpawner[MAX_PLAYERS];
+ParticleSpawner * flashSpawner[MAX_PLAYERS];
+ParticleSpawner * speedSpawner[MAX_PLAYERS];
+ParticleSpawner * slowSpawner[MAX_PLAYERS];
 //ParticleSpawner * buildSpawner;
-ParticleSpawner * blindSpawner;
-ParticleSpawner * searchSpawner;
+ParticleSpawner * blindSpawner[MAX_PLAYERS];
+ParticleSpawner * searchSpawner[MAX_PLAYERS];
 
 
 extern ClientGame * sharedClient;
@@ -440,6 +440,7 @@ struct PlayerState {
 	float angle;                // angle it's currently facing (should be approaching targetAngle)
 	glm::vec3 position;         // position, important for faking targetAngle above
 	int id;                     // the player ID from the server
+	int number;					// the player's assigned number from the server
 	unsigned geometryIdx;       // index into playerGeometry
 	char moving;				// bool indicating whether or not the model should animate
 	char building;				// bool indicating whether or not model is doing iteraction animation
@@ -475,7 +476,7 @@ struct PlayerState {
 
 	PlayerState(int newId, const Player *p) : PlayerState() {
 		id = newId;
-
+		number = p->getPlayerNum();
 		const auto location = p->getLocation();
 		position.x = location.getX();
 		position.y = location.getY();
@@ -2034,20 +2035,20 @@ void DisplayCallback(GLFWwindow* window)
 	}
 
 	for (const auto &state : players) {
-		dustSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+		dustSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0));
-		speedSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+		speedSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1));
-		slowSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+		slowSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1));
 		//buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			//state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
 			//glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
-		flashSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+		flashSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position, state.flashedRecently > 0);
-		blindSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+		blindSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position + glm::vec3(0,25.0f,0), state.blinded);
-		searchSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
+		searchSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position + glm::vec3(-5, 10.0f, 0), state.instantSearch);
 	}
 
@@ -2461,14 +2462,15 @@ void InGameGraphicsEngine::MainLoopBegin()
 		}
 
 		//particle setup
-		dustSpawner = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0,1.0f,0));
-		flashSpawner = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, 10.0f, 0), 3.0f);
-		speedSpawner = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
-		slowSpawner = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
-		//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
-		blindSpawner = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
-		searchSpawner = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
-
+		for (int i = 0; i < MAX_PLAYERS; i++) {
+			dustSpawner[i] = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0, 1.0f, 0));
+			flashSpawner[i] = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, 10.0f, 0), 3.0f);
+			speedSpawner[i] = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
+			slowSpawner[i] = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
+			//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
+			blindSpawner[i] = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
+			searchSpawner[i] = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
+		}
 
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;

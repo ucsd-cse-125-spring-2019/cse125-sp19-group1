@@ -42,8 +42,8 @@ private:
 	GLuint particles_color_buffer;
 	GLfloat* g_particule_position_size_data;
 	GLubyte* g_particule_color_data;
-	const int MaxParticles = 500;
-	Particle ParticlesContainer[500]; 
+	const int MaxParticles = 50;
+	Particle ParticlesContainer[50]; 
 	int LastUsedParticle = 0;
 	int ParticlesCount = 0;
 	float timeSinceLastSpawn = 0.0f;
