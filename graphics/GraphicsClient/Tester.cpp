@@ -35,7 +35,7 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
-#define DEBUG_CLIENTS
+//#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
 static ClientGame * clients[4] = { nullptr };
 
@@ -478,7 +478,7 @@ int main(void)
 			sharedClient->update();
 
 		// Send done loading event only if client is on loading screen, game state = loading, and in game engine is fully loaded
-		if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::LOADING && targetEngine == (AbstractGraphicsEngine*)loadingEngine)
+		if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::LOADING && currentEngine == (AbstractGraphicsEngine*)loadingEngine)
 			sharedClient->sendPackets(DONE_LOADING_EVENT);
 		auto finish = high_resolution_clock::now();
 
