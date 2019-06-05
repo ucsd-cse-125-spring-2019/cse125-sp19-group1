@@ -46,6 +46,8 @@
 #define CHEF_WITH_NET_PATH (MODELS_PATH "chefSwing.fbx")
 #define CHEF_MDL_PATH     (MODELS_PATH "chef.fbx")
 #define CHEF_TEX_PATH     (TEXTURES_PATH "chef.ppm")
+#define NET_MDL_PATH      (MODELS_PATH "net.fbx")
+#define NET_TEX_PATH      (TEXTURES_PATH "net.png")
 
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
@@ -115,13 +117,13 @@
 // #define DEBUG_CARRY
 
 // Uncomment to skip loading player animations
- // #define DEBUG_LOAD_LESS
+// #define DEBUG_LOAD_LESS
 
 // Uncomment to skip loading UI
- // #define DEBUG_NO_UI
+// #define DEBUG_NO_UI
 
 // Uncomment to make gates always animate so that you don't have to play through
- // #define DEBUG_GATE_ANIMATION
+// #define DEBUG_GATE_ANIMATION
 
 // Set to 0 to disable gate animation
 #define ENABLE_GATE_ANIMATION 0
@@ -147,19 +149,19 @@ static glm::mat4 orthoP;
 static const struct PlayerModelSettings {
 	const char *walkModelPath;     // filesystem path to a model geometry file
 	const char *walkTexturePath;   // filesystem path to a texture file
-	int walkAnimIndex;             // index of the preferred animation (optional specification for weird cases)
+	float walkAnimMultiplier;		   // multiply each keyframe by this amount to modify animation speed
 	const char *idleModelPath;
 	const char *idleTexturePath;
-	int idleAnimIndex;
+	float idleAnimMultiplier;
 	const char *carryModelPath;    // filesystem path to a model geometry file
 	const char *carryTexturePath;  // filesystem path to a texture file
-	int carryAnimIndex;            // index of the preferred animation (optional specification for weird cases)
+	float carryAnimMultiplier;
 	const char *idleCarryModelPath;
 	const char *idleCarryTexturePath;
-	int idleCarryAnimIndex;
+	float idleCarryAnimMultiplier;
 	const char *actionModelPath;   // filesystem path to a model geometry file
 	const char *actionTexturePath; // filesystem path to a texture file
-	int actionAnimIndex;           // index of the preferred animation (optional specification for weird cases)
+	float actionAnimMultiplier;
 	const char *title;             // name for use in debug messages, maybe user-visible too
 	const char *name;              // name for use in debug messages, maybe user-visible too
 	ModelType modelType;           // A unique ID, like ModelType::CHEF
@@ -209,18 +211,17 @@ static const struct PlayerModelSettings {
 	}
 } playerModelSettings[] = {
 #ifndef DEBUG_LOAD_LESS
-	// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            CHEF_IDLE_PATH,			 nullptr,		   -1,				nullptr,                 nullptr,          -1,				CHEF_IDLE_PATH,					nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            RACCOON_IDLE_MDL_PATH,	 nullptr,		   -1,			   RACCOON_CARRY_MDL_PATH,   nullptr,          -1,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			-1,					RACCOON_SEARCH_MDL_PATH,  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 0.f,-1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            CAT_IDLE_MDL_PATH,		 nullptr,		   -1,			   CAT_CARRY_MDL_PATH,       nullptr,          -1,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					CAT_SEARCH_MDL_PATH,      nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            DOG_IDLE_MDL_PATH,		 nullptr,		   -1,			   DOG_CARRY_MDL_PATH,       nullptr,          -1,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			-1,					DOG_SEARCH_MDL_PATH,      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	// walkModelPath          walkTexturePath    walkAnimMultiplier 	idleModelPath			idleTexturePath		idleAnimMultiplier	carryModelPath           carryTexturePath  carryAnimMultiplier	idleCarryModelPath				idleCarryTexturePath	idleCarryAnimMultiplier	  actionModelPath           actionTexturePath  actionAnimMultiplier  title       name          modelType        attachSkel scale   translate                     carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,                  CHEF_IDLE_PATH,			 nullptr,		    1.0f,		        nullptr,                 nullptr,          1.0f,			    CHEF_IDLE_PATH,					nullptr,			    1.0f,					  CHEF_WITH_NET_PATH,       nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 0.f, 0.f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  0.5f,                  RACCOON_IDLE_MDL_PATH,	 nullptr,		    1.0f,		        RACCOON_CARRY_MDL_PATH,  nullptr,          1.0f,				RACCOON_IDLE_CARRY_MDL_PATH,	nullptr,			    1.0f,					  RACCOON_SEARCH_MDL_PATH,  nullptr,           1.0f,                 "Raccoon",  "Hung",       ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 0.f,-1.2f),    glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      0.5f,                  CAT_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        CAT_CARRY_MDL_PATH,      nullptr,          1.0f,				CAT_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  CAT_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      0.5f,                  DOG_IDLE_MDL_PATH,		 nullptr,		    1.0f,		        DOG_CARRY_MDL_PATH,      nullptr,          1.0f,				DOG_IDLE_CARRY_MDL_PATH,		nullptr,			    1.0f,					  DOG_SEARCH_MDL_PATH,      nullptr,           1.0f,                 "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
 #else
-	// walkModelPath          walkTexturePath    walkAnimIndex  carryModelPath           carryTexturePath  carryAnimIndex  actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-// walkModelPath          walkTexturePath    walkAnimIndex	idleModelPath			idleTexturePath		idleAnimIndex	carryModelPath           carryTexturePath  carryAnimIndex	idleCarryModelPath				idleCarrTexturePath	idleCarryAnimIndex	actionModelPath           actionTexturePath  actionAnimIndex  title       name          modelType        attachSkel scale   translate                     carryPosition
-	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     -1,            nullptr,				nullptr,		   -1,			   nullptr,                  nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,                  nullptr,           -1,              "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Raccoon",  "Hung",       ModelType::RACOON,  true,  0.5f,    glm::vec3(0.f, 4.0f, -1.2f),  glm::vec3(0.f, 5.5f, 3.75f) },
-	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,				  nullptr,           -1,              "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
-	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      -1,            nullptr,				nullptr,		   -1,			   nullptr,					 nullptr,          -1,				nullptr,						nullptr,			-1,					nullptr,			      nullptr,           -1,              "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),               glm::vec3(0.f, 5.5f, 3.5f) },
+	// walkModelPath          walkTexturePath    walkAnimMultiplier		idleModelPath			idleTexturePath		idleAnimMultiplier	carryModelPath           carryTexturePath  carryAnimMultiplier	idleCarryModelPath				idleCarrTexturePath		idleCarryAnimMultiplier   actionModelPath           actionTexturePath  actionAnimMultiplier  title       name          modelType        attachSkel scale   translate					 carryPosition
+	{ CHEF_WALK_PATH,         CHEF_TEX_PATH,     0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,                 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,                  nullptr,           1.0f,                 "Chef",     "Cheoffrey",  ModelType::CHEF,    true,   1.f,	   glm::vec3(0.f),				 glm::vec3(0.f, 5.5f, 3.5f) },
+	{ RACCOON_WALK_MDL_PATH,  RACCOON_TEX_PATH,  0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,				    nullptr,           1.0f,                 "Raccoon",  "Hung",       ModelType::RACOON,  true,   0.5f,   glm::vec3(0.f, 0.f, -1.2f),	 glm::vec3(0.f, 5.5f, 3.75f) },
+	{ CAT_WALK_MDL_PATH,      CAT_TEX_PATH,      0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,				    nullptr,           1.0f,                 "Cat",      "Kate",       ModelType::CAT,     true,   1.f,    glm::vec3(0.f),				 glm::vec3(0.f, 5.5f, 3.5f) },
+	{ DOG_WALK_MDL_PATH,      DOG_TEX_PATH,      0.5f,					nullptr,				nullptr,		    1.0f,			    nullptr,				 nullptr,          1.0f,				nullptr,						nullptr,				1.0f,					  nullptr,			        nullptr,           1.0f,                 "Dog",      "Richard",    ModelType::DOG,     true,   1.f,    glm::vec3(0.f),			     glm::vec3(0.f, 5.5f, 3.5f) },
 #endif
 };
 
@@ -247,7 +248,7 @@ static const struct ItemModelSettings {
 	const char *texturePath;     // filesystem path to a texture file
 	const char *name;            // name for use in debug messages, maybe user-visible too
 	ItemModelType id;            // A unique ID, like ItemModelType::apple
-	glm::vec3 scale;                 // scale adjustment
+	glm::vec3 scale;             // scale adjustment
 	glm::vec3 translate;         // position adjustment
 	glm::vec3 rotation;          // rotation
 	bool wallRotate;             // auto-rotate away from any wall on this tile
@@ -289,6 +290,7 @@ static const struct ItemModelSettings {
 	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,              glm::vec3(2.5f),    glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
 	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            WINDOW_SCALE,       glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,             glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
+    { MDL_SAME_TEX("net"),                                 "net",                  ItemModelType::net,               glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 0.f) },
 };
 
 struct ItemModel {
@@ -373,6 +375,7 @@ static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 static FBXObject * tileModel = nullptr;
 static FBXObject * wallModel = nullptr;
 static FBXObject * animatedBoxObjects[MAX_PLAYERS] = {nullptr};
+static FBXObject * netModel = nullptr;
 
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
@@ -383,6 +386,7 @@ static GLuint uiTexture;
 
 static Geometry * tileGeometry;
 static Geometry * wallGeometry;
+static Geometry * netGeometry;
 static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
@@ -507,22 +511,24 @@ struct PlayerState {
 	}
 };
 
-Transform * root = nullptr;
-std::vector<PlayerState> players;
-Transform * floorTransform = nullptr;
-Transform * envObjsTransform = nullptr;
-Transform * allItemsTransform = nullptr;
+static Transform * root = nullptr;
+static std::vector<PlayerState> players;
+static Transform * floorTransform = nullptr;
+static Transform * envObjsTransform = nullptr;
+static Transform * allItemsTransform = nullptr;
 
 // Default camera parameters
-glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
-glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camera looks at
-glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
-const glm::vec3 cam_angle(-10.f, 50.f, -30.f);  // camera's preferred offset from cam_look_at
+static glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
+static glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camera looks at
+static glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
+static const glm::vec3 cam_angle(-10.f, 50.f, -30.f);   // camera's preferred offset from cam_look_at
 
-glm::vec3 light_center = glm::vec3(0.f);
+static glm::vec3 light_center = glm::vec3(0.f);
+
+static int cameraClientId = -1;
 
 bool mouseRotation = false;
-glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
+glm::vec2 prevPos = glm::vec2(0.0f);
 float scaleDownMouseOps = 30.0f;
 float scaleUpAngle = 4.0f;
 float scaleMouseWheel = 1.05f;
@@ -536,6 +542,7 @@ glm::vec3 TrackballMapping(double x, double y, int width, int height);
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis);
 bool iAmCaught();
 
+void toggleClient(); // from Tester.cpp
 
 static PlayerState *getMyState()
 {
@@ -1001,16 +1008,17 @@ void reloadMap()
 				(z == clippedZ && (tileLayout[z][x]->getWall() & DirectionBitmask::northSide)))
 			{
 				// Calculate the altitude of the wall
-				int height = 1;
+				float height = 0.f;
+				float scaleY = 1.f;
 				if (z == 0 || z != clippedZ) {
-					height = tileLayout[clippedZ][x]->getHeight();
+					scaleY = 1.f + 0.25f * tileLayout[clippedZ][x]->getHeight();
 				} else {
-					height = max(tileLayout[z - 1][x]->getHeight(), tileLayout[z][x]->getHeight());
+					scaleY = 1.f + 0.25f * max(tileLayout[z - 1][x]->getHeight(), tileLayout[z][x]->getHeight());
 				}
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
 				// translate to the edge between tiles
-				row[x] = new Transform(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)));
+				row[x] = new Transform(glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(x * TILE_STRIDE, y, (z - 0.5f) * TILE_STRIDE)), glm::vec3(1.f, scaleY, 1.f)));
 				row[x]->addChild(wallGeometry);
 				floorTransform->addChild(row[x]);
 			}
@@ -1030,12 +1038,13 @@ void reloadMap()
 				(x == clippedX && (tileLayout[z][x]->getWall() & DirectionBitmask::westSide)))
 			{
 				// Calculate the altitude of the wall
-				int height = 1;
+				float height = 0.f;
+				float scaleY = 1.f;
 				if (x == 0 || x != clippedX) {
-					height = tileLayout[z][clippedX]->getHeight();
+					scaleY = 1.f + 0.25f * tileLayout[z][clippedX]->getHeight();
 				}
 				else {
-					height = max(tileLayout[z][x - 1]->getHeight(), tileLayout[z][x]->getHeight());
+					scaleY = 1.f + 0.25f * max(tileLayout[z][x - 1]->getHeight(), tileLayout[z][x]->getHeight());
 				}
 				float y = TILE_STRIDE * 0.9f + (height / 2) * TILE_LEVEL_OFFSET;
 
@@ -1043,7 +1052,7 @@ void reloadMap()
 				const auto translate = glm::translate(glm::mat4(1.0f), glm::vec3((x - 0.5f) * TILE_STRIDE, y, z * TILE_STRIDE));
 				// 90 degree rotation
 				const auto rotate = glm::rotate(translate, glm::half_pi<float>(), glm::vec3(0.f, 1.f, 0.f));
-				row[x] = new Transform(rotate);
+				row[x] = new Transform(glm::scale(rotate, glm::vec3(1.f, scaleY, 1.f)));
 				row[x]->addChild(wallGeometry);
 				floorTransform->addChild(row[x]);
 			}
@@ -1117,11 +1126,12 @@ void InGameGraphicsEngine::MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 			if (p->getAction() == Action::SWING_NET) {
-				state.angle = state.angle + 4;
+				state.angle = state.angle + 0.0675f * glm::two_pi<float>();
 				state.restrictRotation = true;
 			}
 			else {
 				state.restrictRotation = false;
+				state.angle = fmod(state.angle, glm::two_pi<float>());
 			}
 		}
 #ifdef DUMMY_ID
@@ -1154,13 +1164,13 @@ void InGameGraphicsEngine::MovePlayers()
 					state.setTargetAngle(glm::atan(-dir.x, dir.z));
 				}
 			}
-		}
 
-		// Animate state.angle towards state.targetAngle
-		state.angle += (state.targetAngle - state.angle) * 0.375f;
-		if (abs(state.targetAngle - state.angle) < 0.01) {
-			// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
-			state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
+			// Animate state.angle towards state.targetAngle
+			state.angle += (state.targetAngle - state.angle) * 0.375f;
+			if (abs(state.targetAngle - state.angle) < 0.01) {
+				// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
+				state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
+			}
 		}
 
 		state.transform = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
@@ -1258,13 +1268,26 @@ static glm::vec3 limitLookAt(glm::vec3 lookAt) {
 	return lookAt;
 }
 
-static bool iAmCaught()
+static bool isBeingCarriedByChef(int id)
+{
+	for (auto pair : sharedClient->getGameData()->getAllPlayers()) {
+		auto chef = pair.second;
+		if (chef->isChef() && chef->getCaughtAnimalId() == id) return true;
+	}
+
+	return false;
+}
+
+static bool iAmJailed()
 {
 #ifdef DEBUG_CAUGHT
 	return true;
 #else
-	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
-	return allPlayers.count(sharedClient->getMyID()) && allPlayers.at(sharedClient->getMyID())->isCaught();
+	auto gameData = sharedClient->getGameData();
+	if (!gameData) return false;
+
+	auto me = gameData->getPlayer(sharedClient->getMyID());
+	return me->isCaught() && !isBeingCarriedByChef(sharedClient->getMyID());
 #endif
 }
 
@@ -1281,6 +1304,12 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 	glm::vec3 cam_target = look_target + cam_angle;
 	float look_speed = 0.3f, cam_speed = 0.3f;
 
+#ifdef DEBUG_CAUGHT
+	bool watchOthersEnabled = true;
+#else
+	bool watchOthersEnabled = iAmJailed();
+#endif
+
 	if (sharedClient->getGameData()->getWT() != WinType::NONE) {
 		light_center = LookAtForWT(sharedClient->getGameData()->getWT());
 
@@ -1293,32 +1322,25 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 			quit = true;
 		}
 	}
-	else if (iAmCaught()) {
-		for (auto &player : players) {
-#ifdef DEBUG_CAUGHT
-			if (player.id != sharedClient->getMyID()) {
-
-				light_center = player.position;
-				look_target = limitLookAt(player.position);
-				cam_target = look_target + cam_angle;
-				look_speed = 0.3f;
-				cam_speed = 0.15f;
-				break;
+	else if (watchOthersEnabled) {
+		if (allPlayers.count(cameraClientId) <= 0) {
+			cameraClientId = sharedClient->getMyID();
+			for (auto pair : allPlayers) {
+				if (pair.first != sharedClient->getMyID() && !pair.second->isChef() && !pair.second->isCaught()) {
+					cameraClientId = pair.first;
+					break;
+				}
 			}
-#else
-			if (player.geometryIdx != static_cast<unsigned>(ModelType::CHEF) 
-				&& allPlayers.count(player.id)
-				&& !allPlayers.at(player.id)->isCaught()) {
-
-				light_center = player.position;
-				look_target = limitLookAt(player.position);
-				cam_target = look_target + cam_angle;
-				look_speed = 0.3f;
-				cam_speed = 0.15f;
-				break;
-			}
-#endif
 		}
+
+		Player *networkPlayer = allPlayers.at(cameraClientId);
+		auto loc = networkPlayer->getLocation();
+		auto position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
+		light_center = position;
+		look_target = limitLookAt(position);
+		cam_target = look_target + cam_angle;
+		look_speed = 0.3f;
+		cam_speed = 0.3f;
 	}
 
 	cam_look_at += (look_target - cam_look_at) * look_speed;
@@ -1588,11 +1610,14 @@ void InGameGraphicsEngine::IdleCallback()
 		//raccoonModel->Rotate(glm::pi<float>()/1000, 0.0f, 1.0f, 0.0f);
 
 		updateUIElements(gameData);
-		if (gameData->getAllPlayers()[sharedClient->getMyID()]->isChef()) {
-			fog->setFogDistance(gameData->chefVision);
-		}
-		else {
-			fog->setFogDistance(gameData->getPlayer(sharedClient->getMyID())->getVisionRadius());
+		Player *networkPlayer = gameData->getPlayer(sharedClient->getMyID());
+		if (networkPlayer) {
+			if (networkPlayer->isChef()) {
+				fog->setFogDistance(gameData->chefVision);
+			}
+			else {
+				fog->setFogDistance(networkPlayer->getVisionRadius());
+			}
 		}
 	//}
 
@@ -1666,6 +1691,9 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case Action::SWING_NET:
 		model.getActionObject()->Update(true);
 		playerGeometry = model.getActionGeometry();
+		if (networkPlayer->getModelType() == ModelType::CHEF) {
+			inventory = ItemModelType::net;
+		}
 		break;
 
 	case Action::NONE:
@@ -1936,7 +1964,7 @@ static void DrawMinimap()
 			chefPosition.z = 0.f;
 		}
 
-		if (networkPlayerMe->isChef() != isChefState) {
+		if (!networkPlayerMe || networkPlayerMe->isChef() != isChefState) {
 			continue;
 		}
 
@@ -2101,34 +2129,34 @@ void LoadModels()
 
 	unsigned threadIdx = 0;
 	for (auto &setting : playerModelSettings) {
-		auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
-		glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
-
 		playerLoadingThreads[threadIdx] = thread([&]() {
+			auto &model = playerModels[static_cast<unsigned>(setting.modelType)];
+			glm::mat4 transform = glm::scale(glm::translate(glm::mat4(1.f), setting.translate), glm::vec3(setting.scale));
+
 			cout << "\tloading " << setting.title << " walk" << endl;
 			model.settings = &setting;
-			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, false);
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimMultiplier, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
 			cout << "\tfinished loading " << setting.title << " walk" << endl;
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
 				cout << "\tloading " << setting.title << " carry" << endl;
-				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, false);
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimMultiplier, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
 				cout << "\tfinished loading " << setting.title << " carry" << endl;
 			}
 			if (setting.idleModelPath || setting.idleTexturePath) {
 				cout << "\tloading " << setting.title << " idle" << endl;
-				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, false);
+				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, setting.idleAnimMultiplier, false);
 				model.idleGeometry = new Geometry(model.idleObject, objShaderProgram);
 				model.idleGeometry->t = transform;
 				cout << "\tfinished loading " << setting.title << " idle" << endl;
 			}
 			if (setting.idleCarryModelPath || setting.idleCarryTexturePath) {
 				cout << "\tloading " << setting.title << " idle carry" << endl;
-				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, false);
+				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, setting.idleCarryAnimMultiplier, false);
 				model.idleCarryGeometry = new Geometry(model.idleCarryObject, objShaderProgram);
 				model.idleCarryGeometry->t = transform;
 				cout << "\tfinished loading " << setting.title << " idle carry" << endl;
@@ -2146,7 +2174,7 @@ void LoadModels()
 			
 			if (setting.actionModelPath || setting.actionTexturePath) {
 				cout << "\tloading " << setting.title << " action" << endl;
-				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, false);
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimMultiplier, false);
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
 				model.actionGeometry->t = transform;
 				cout << "\tfinished loading " << setting.title << " action" << endl;
@@ -2183,7 +2211,7 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, 1.0f, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 
 			cout << "\tfinished loading " << setting.name << endl;
@@ -2191,17 +2219,17 @@ void LoadModels()
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, 1.0f, false);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, 1.0f, false);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
 	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
 	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, false);
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, 1.0f, false);
 	}
 
 	itemLoadingThread.join();
@@ -2361,7 +2389,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 	}
 
 	if (!solidColorObject) {
-		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false);
+		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false, 1.0f);
 		solidColorObject->SetDepthTest(false);
 	}
 
@@ -2511,8 +2539,39 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		}
 
 		if (key == GLFW_KEY_SPACE) {
-			// interact key press
-			sharedClient->sendPackets(INTERACT_EVENT);
+			if (iAmJailed()) {
+				auto gameData = sharedClient->getGameData();
+				if (gameData) {
+					const auto &allPlayers = gameData->getAllPlayers();
+					bool cameraClientSeen = false;
+					int firstId = -1;
+					int nextId = -1;
+
+					for (auto pair : allPlayers) {
+						if (pair.first == cameraClientId) {
+							cameraClientSeen = true;
+						}
+						else if (!pair.second->isChef()) {
+							if (firstId == -1)
+								firstId = pair.first;
+
+							if (cameraClientSeen && nextId == -1)
+								nextId = pair.first;
+						}
+					}
+
+					if (nextId != -1) {
+						cameraClientId = nextId;
+					}
+					else if (firstId != -1) {
+						cameraClientId = firstId;
+					}
+				}
+			}
+			else {
+				// interact key press
+				sharedClient->sendPackets(INTERACT_EVENT);
+			}
 		}
 
 		if (key == GLFW_KEY_ENTER) {
@@ -2561,6 +2620,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 				fake_carried_idx++;
 			}
 #endif
+		}
+		if (key == GLFW_KEY_TAB) {
+			(void)toggleClient();
 		}
 
 	}

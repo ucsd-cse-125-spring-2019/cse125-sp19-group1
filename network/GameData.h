@@ -125,6 +125,7 @@ public:
 	Tile * getAdjacentTile(Location loc, Direction dir, Location & tileLoc);
 	JailTile * getAdjacentJailTile(Location loc, Direction dir, Location & tileLoc);
 	ObjectTile * getObjectTile(Location loc);
+	Tile * getAdjacentTileNotThroughWalls(Location loc, Location & tileLoc);
 
 protected:
 	GameState gameState;

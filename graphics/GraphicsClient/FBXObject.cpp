@@ -1,10 +1,10 @@
 #include "FBXObject.h"
 
-FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, bool setupRendering, GLint filtering) {
+FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, float animMultiplier, bool setupRendering, GLint filtering) {
 	// initialize variables
 	Init(attachSkel);
 	// read in the model and its texture from the given files
-	Parse(path);
+	Parse(path, animMultiplier);
 
 	this->texPath = texPath;
 	this->filtering = filtering;
@@ -32,11 +32,11 @@ void FBXObject::Init(bool attachSkel) {
 		skel = new Skeleton();
 }
 
-void FBXObject::Parse(const char *filepath)
+void FBXObject::Parse(const char *filepath, float animMultiplier)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data,
 	// and potentially load in a Skeleton (if expecting a Skeleton)
-	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer);
+	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer, animMultiplier);
 	//std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	if (animPlayer != NULL) {
 		LoadMatrices(filepath);
@@ -99,7 +99,7 @@ void FBXObject::PrintMatrix(glm::mat4 * matrix) {
 }
 
 void FBXObject::PrintSkeleton() {
-	if (hasSkel)
+	if (skel != NULL)
 		skel->PrintBoneStructure();
 }
 

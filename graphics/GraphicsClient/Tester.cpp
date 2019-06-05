@@ -2,6 +2,8 @@
 // Tester.cpp
 ////////////////////////////////////////
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "Tester.h"
 #include "InGameGraphicsEngine.h"
 #include "LoadingGraphicsEngine.h"
@@ -35,9 +37,18 @@ static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
 //#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
-ClientGame * sharedClient2 = nullptr;
-ClientGame * sharedClient3 = nullptr;
-ClientGame * sharedClient4 = nullptr;
+static ClientGame * clients[4] = { nullptr };
+
+void toggleClient() {
+	for (int i = 0; i < 4; i++) {
+		if (sharedClient == clients[i]) {
+			sharedClient = clients[(i + 1) % 4];
+			break;
+		}
+	}
+}
+#else
+void toggleClient() {}
 #endif
 
 void ErrorCallback(int error, const char* description)
@@ -118,12 +129,16 @@ void Init(GLFWwindow *window)
 	lobbyEngine->MainLoopBegin();
 
 	server = new ServerGame();
-	sharedClient = new ClientGame();
+	
 #ifdef DEBUG_CLIENTS
-	sharedClient2 = new ClientGame();
-	sharedClient3 = new ClientGame();
-	sharedClient4 = new ClientGame();
+	for (auto &client : clients) {
+		client = new ClientGame();
+	}
+	sharedClient = clients[0];
+#else
+	sharedClient = new ClientGame();
 #endif
+
 	inGameEngine = new InGameGraphicsEngine();
 
 #define CUTSCENES_DIR "../2D Elements/"
@@ -313,6 +328,16 @@ void SetupCallbacks()
 
 int main(void)
 {
+#ifndef DEBUG_CLIENTS
+	cout << "Enter an IP address to connect to [or leave blank to connect to localhost]: ";
+	string newIp;
+	getline(cin, newIp);
+	if (newIp.size()) {
+		strncpy(serverIpAddress, newIp.c_str(), sizeof(serverIpAddress));
+		serverIpAddress[sizeof(serverIpAddress) - 1] = '\0';
+	}
+#endif
+
 	// Create the GLFW window
 	window = CreateWindowFrame(1600, 900);
 	// Print OpenGL and GLSL versions

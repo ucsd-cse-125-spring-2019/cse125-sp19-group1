@@ -1,8 +1,6 @@
 #include "animloader.h"
 
-#define FRAME_TIME_MODIFIER 1.0f
-
-bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer) {
+bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier) {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
 
@@ -38,17 +36,16 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	std::vector<AnimationChannel*> * channels = newAnimation->GetChannels();
 
 	channels->reserve(anim->mNumChannels);
-	float modifiedDuration = convertChannels(anim, channels);
+	float modifiedDuration = convertChannels(anim, channels, animMultiplier);
 
-	std::cout << anim->mDuration << " VS " << modifiedDuration << std::endl;
-
-	//newAnimation->setEndTime(modifiedDuration);
+	if (animMultiplier != 1.0f)
+		newAnimation->setEndTime(modifiedDuration);
 
 	*animPlayer = new AnimationPlayer(skel, newAnimation);
 	return true;
 }
 
-float convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * channels) {
+float convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * channels, float animMultiplier) {
 
 	//assumes there are no keyframes individually holding position/rotation/scaling info
 	float latestTime = 0.0f;
@@ -60,7 +57,7 @@ float convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * chan
 		channels->push_back(newChannel);
 		for (int j = 0; j < currChannel->mNumPositionKeys; j++) {
 			aiVectorKey positionKey = currChannel->mPositionKeys[j];
-			float keyTime = positionKey.mTime / FRAME_TIME_MODIFIER;
+			float keyTime = positionKey.mTime * animMultiplier;
 			if (keyTime > latestTime)
 				latestTime = keyTime;
 			glm::vec3 positionVec = glm::vec3();
