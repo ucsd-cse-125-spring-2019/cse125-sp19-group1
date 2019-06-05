@@ -66,7 +66,7 @@ public:
 	void setLocation(Location aLoc);
 	bool getHidden();
 	void setHidden(bool hide);
-	void setSpeedMultiplier(double multiplier);
+	void modifySpeedMultiplier(double multiplier);
 	void setInteracting(bool interact);
 	void setCaughtStatus(bool caught);
 	void setCaughtAnimal(bool caught);
@@ -112,6 +112,8 @@ public:
 	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
 	void updateChefMultiplier(int anger);
 
+	void resetSpeedMultiplier();
+	void setDefaultSpeedMultiplier(double multiplier);
 	//player interaction/power-up methods
 	bool ghost = false;
 	bool getGhost() { return ghost; }
@@ -184,6 +186,7 @@ protected:
 	bool		hidden = false;
 	float		visionRadius;
 	double		speedMultiplier;
+	double		defaultSpeedMultiplier;
 
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> unlockJailStartTime;

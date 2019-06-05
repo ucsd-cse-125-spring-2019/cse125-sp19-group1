@@ -3,7 +3,8 @@
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 
 Player::Player(int anID, int aPlayerNum, Location aLoc) : playerID(anID), playerNum(aPlayerNum), location(aLoc), inventory(ItemModelType::EMPTY),
-	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(1.0), selectedAnimal(true), doneLoading(false)
+	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(DEFAULT_SPEED_MULTIPLIER), selectedAnimal(true), doneLoading(false),
+	defaultSpeedMultiplier(DEFAULT_SPEED_MULTIPLIER)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
@@ -35,6 +36,14 @@ void Player::setFacingDirection(Direction dir)
 void Player::setPlayerID(int id)
 {
 	playerID = id;
+}
+void Player::resetSpeedMultiplier()
+{
+	speedMultiplier = defaultSpeedMultiplier;
+}
+void Player::setDefaultSpeedMultiplier(double multiplier)
+{
+	defaultSpeedMultiplier = multiplier;
 }
 void Player::setModelType(ModelType type)
 {
@@ -185,9 +194,9 @@ void Player::setSlowStartTime()
 	slowStartTime = std::chrono::system_clock::now();
 }
 
-void Player::setSpeedMultiplier(double multiplier)
+void Player::modifySpeedMultiplier(double multiplier)
 {
-	speedMultiplier = multiplier;
+	speedMultiplier *= multiplier;
 }
 
 double Player::getSpeedMultiplier() const

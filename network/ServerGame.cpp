@@ -282,7 +282,7 @@ void ServerGame::receiveFromClients()
 												ItemModelType itemName = iter2->second->getInventory();
 												gameData->getAtlas()->updateTileItem(loc, itemName);
 												iter2->second->setInventory(ItemModelType::EMPTY);
-												iter2->second->setSpeedMultiplier(1.0);
+												iter2->second->resetSpeedMultiplier();
 
 												gameData->getAtlas()->updateDroppedItem(itemName, loc);
 											}
@@ -293,7 +293,7 @@ void ServerGame::receiveFromClients()
 												gameData->getAtlas()->returnItemToSpawn(tileItem);
 												gameData->getAtlas()->updateTileItem(loc, playerItem);
 												iter2->second->setInventory(ItemModelType::EMPTY);
-												iter2->second->setSpeedMultiplier(1.0);
+												iter2->second->resetSpeedMultiplier();
 												gameData->getAtlas()->updateDroppedItem(playerItem, loc);
 											}
 
@@ -365,14 +365,17 @@ void ServerGame::receiveFromClients()
 									std::cout << "table has cake!" << std::endl;
 									player->setInventory(objectTile->getItem());
 									objectTile->setItem(ItemModelType::EMPTY);
-									player->setSpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
+									player->modifySpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
 
 
 								}
 								else if (item != ItemModelType::EMPTY)
 								{
 									player->setInventory(item);
-									player->setSpeedMultiplier(ITEM_SLOWDOWN_MULTIPLIER);
+									if(item == ItemModelType::cake)
+										player->modifySpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
+									else
+										player->modifySpeedMultiplier(ITEM_SLOWDOWN_MULTIPLIER);
 									gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
 								}
 							}
@@ -384,7 +387,7 @@ void ServerGame::receiveFromClients()
 									gameData->updateGateProgress(keyDropTile->getGateNum());
 									player->setAction(Action::KEY_DROP);
 									player->setInventory(ItemModelType::EMPTY);
-									player->setSpeedMultiplier(1.0);
+									player->resetSpeedMultiplier();
 									sendActionPackets();
 									player->setAction(Action::NONE);
 								}
@@ -673,7 +676,7 @@ void ServerGame::receiveFromClients()
 							ItemModelType itemName = player->getInventory();
 							gameData->getAtlas()->updateTileItem(loc, itemName);
 							player->setInventory(ItemModelType::EMPTY);
-							player->setSpeedMultiplier(1.0);
+							player->resetSpeedMultiplier();
 
 							gameData->getAtlas()->updateDroppedItem(itemName, loc);
 						}
@@ -1045,7 +1048,7 @@ void ServerGame::receiveFromClients()
 						}
 						if (powerUp) {
 							player->setInventory(ItemModelType::EMPTY);
-							player->setSpeedMultiplier(1.0);
+							player->resetSpeedMultiplier();
 							sendActionPackets();
 						}
 					}
