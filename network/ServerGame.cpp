@@ -113,6 +113,9 @@ void ServerGame::receiveFromClients()
 				printf("server received ENTER event packet from client\n");
 				
 				break;
+			case GO_TO_CREDITS_EVENT:
+				gameData->setGameState(GameState::END_CREDITS);
+				break;
 			case DONE_LOADING_EVENT:
 				printf("server received DONE_LOADING event packet from client\n");
 				gameData->getPlayer(playerID)->setDoneLoading(true);
@@ -735,7 +738,10 @@ void ServerGame::receiveFromClients()
 	if (gameData->getGameState() == GameState::IN_GAME)
 	{
 
-
+		if (chefWin || animalWin)
+		{
+			gameData->setGameState(GameState::WIN_CUTSCENE);
+		}
 		gameData->getAtlas()->checkDroppedItems();
 		if (gameData->getAtlas()->checkBoxRespawn())
 		{

@@ -18,7 +18,7 @@ enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
 
 enum class WinType { NONE = 0, DOOR = 1, TOILET = 2, VENT = 3, CHEF_WIN = 4 };
 
-enum class GameState { IN_LOBBY, IN_GAME, LOADING};
+enum class GameState { IN_LOBBY, IN_GAME, LOADING, WIN_CUTSCENE, END_CREDITS};
 
 class GameData
 {

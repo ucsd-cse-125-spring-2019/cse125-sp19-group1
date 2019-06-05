@@ -75,6 +75,12 @@ void PlayAgainGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 	double now = glfwGetTime();
 
+	// Transition to lobby if a player has hit space for the end credits
+	sharedClient->update();
+	if (sharedClient->getGameData()->getGameState() == GameState::IN_LOBBY)
+	{
+		quit = true;
+	}
 #define START_PERIOD 0.8
 	float alpha = sinf((now / START_PERIOD) * glm::pi<double>()) * 0.5f + 0.5f;
 
