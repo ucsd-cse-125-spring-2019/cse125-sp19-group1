@@ -22,7 +22,7 @@
 #define RACCOON_IDLE_MDL_PATH	(ANIMATIONS_PATH "raccoonIdle.dae")
 #define RACCOON_CARRY_MDL_PATH  (ANIMATIONS_PATH "raccoonNewWalkWithItem.dae")
 #define RACCOON_IDLE_CARRY_MDL_PATH (ANIMATIONS_PATH "raccoonIdleWithItem.dae")
-#define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearchNoEars.dae")
+#define RACCOON_SEARCH_MDL_PATH (ANIMATIONS_PATH "raccoonSearch.dae")
 #define RACCOON_MDL_PATH        (MODELS_PATH "raccoon.fbx")
 #define RACCOON_TEX_PATH        (TEXTURES_PATH "raccoon.ppm")
 
