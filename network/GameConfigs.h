@@ -24,7 +24,7 @@
 #define DEFAULT_VISION 60
 #define DEFAULT_CHEF_VISION_MULT 1
 #define LIMIT_CHEF_VISION_MULT 0.4
-#define DEFAULT_SPEED_MULTIPLIER 3
+#define DEFAULT_SPEED_MULTIPLIER 1
 
 // Tile data
 #define TILE_SIZE 20
@@ -48,6 +48,7 @@
 // DELAY = time to wait before you can act again
 #define SWING_NET_DELAY 0.5
 #define UNLOCK_JAIL_DELAY 0.25
+#define KEY_DROP_DELAY 0.25
 // COOLDOWN = time to wait before you can do this action again
 #define UNLOCK_JAIL_COOLDOWN 0.5
 

@@ -388,8 +388,8 @@ void ServerGame::receiveFromClients()
 									player->setAction(Action::KEY_DROP);
 									player->setInventory(ItemModelType::EMPTY);
 									player->resetSpeedMultiplier();
-									sendActionPackets();
-									player->setAction(Action::NONE);
+									player->setInteracting(true);
+									player->setActionStartTime();
 								}
 							}
 							else if (GateTile * gateTile = gameData->getGateTile(loc))
@@ -909,6 +909,18 @@ void ServerGame::receiveFromClients()
 						if (!player->isChef())
 						{
 							if (seconds > UNLOCK_JAIL_DELAY) {
+								player->setInteracting(false);
+								player->setAction(Action::NONE);
+								sendActionPackets();
+							}
+						}
+					}
+					else if (player->getAction() == Action::KEY_DROP)
+					{
+						double seconds = player->getInteractingTime(0);
+						if (!player->isChef())
+						{
+							if (seconds > KEY_DROP_DELAY) {
 								player->setInteracting(false);
 								player->setAction(Action::NONE);
 								sendActionPackets();
