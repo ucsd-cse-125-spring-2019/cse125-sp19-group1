@@ -1146,11 +1146,10 @@ void ServerGame::updateMovement2(Direction dir, int id)
 }
 void ServerGame::updateMovement(int dir, int id)
 {
-	/*if (gameData->getPlayer(id)->isInteracting() ||
-		gameData->getPlayer(id)->isCaught() ||
+	if (gameData->getPlayer(id)->isCaught() ||
 		gameData->getPlayer(id)->getHidden()) {
 		return;
-	}*/
+	}
 
 	switch (dir)
 	{
