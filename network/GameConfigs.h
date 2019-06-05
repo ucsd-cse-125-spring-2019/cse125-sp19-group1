@@ -40,6 +40,7 @@
 #define TIME_TO_RESPAWN_BOX 10
 
 // Player interact data
+#define DISTANCE_TO_CONSTRUCT_GATE 10
 #define TIME_TO_OPEN_BOX 1.5 // in seconds
 #define TIME_TO_CONSTRUCT_GATE 10
 #define HITS_TO_OPEN_JAIL 3
