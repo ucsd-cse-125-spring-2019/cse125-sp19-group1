@@ -9,6 +9,8 @@
 
 typedef FMOD::Sound Sound;
 
+#define DISTANCE_FACTOR 3.0
+
 /*
  * Channel 0: sound effects specific to yourself
  * Channel 1: background music
@@ -58,5 +60,7 @@ public:
 	void playSoundsInQueue();
 	void playSoundsInQueueThread();
 	void pauseSoundQueue();
+
+	void errorCheck(FMOD_RESULT result);
 };
 

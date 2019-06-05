@@ -240,7 +240,7 @@ void ClientGame::update()
 		else {
 			if (player->getAction() == Action::NONE) {
 				soundSystem->pauseSoundEffect();
-				soundSystem->pauseSoundQueue();
+				// soundSystem->pauseSoundQueue();
 				playerDoingStuff[pNum] = false;
 			}
 			else if (player->getAction() == Action::OPEN_BOX && playerDoingStuff.at(pNum) == false) {
@@ -274,30 +274,37 @@ void ClientGame::update()
 			}
 			else if (player->getAction() == Action::KEY_DROP && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_keydrop);
+				//soundSystem->pushSoundQueue(sound_keydrop);
+				//soundSystem->playSoundsInQueue();
 				playerDoingStuff[pNum] = true;
 			}
 
-			if (wt != WinType::NONE) {
+			if (wt != WinType::NONE  && playerDoingStuff.at(pNum) == false) {
 				if (wt == WinType::DOOR) {
 					// soundSystem->playSoundEffect(sound_door);
 					soundSystem->pushSoundQueue(sound_door);
 					soundSystem->pushSoundQueue(sound_yay);
 					soundSystem->playSoundsInQueue();
+					playerDoingStuff[pNum] = true;
 				}
 				else if (wt == WinType::TOILET) {
 					// soundSystem->playSoundEffect(sound_window);
 					soundSystem->pushSoundQueue(sound_window);
 					soundSystem->pushSoundQueue(sound_yay);
 					soundSystem->playSoundsInQueue();
+					playerDoingStuff[pNum] = true;
+
 				} 
 				else if (wt == WinType::VENT) {
 					// soundSystem->playSoundEffect(sound_vent_screw);
 					soundSystem->pushSoundQueue(sound_vent_drop);
 					soundSystem->pushSoundQueue(sound_yay);
 					soundSystem->playSoundsInQueue();
+					playerDoingStuff[pNum] = true;
 				}
 				else if (wt == WinType::CHEF_WIN) {
 					soundSystem->playSoundEffect(sound_chef);
+					playerDoingStuff[pNum] = true;
 				}
 			}
 
