@@ -2617,14 +2617,6 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 			}
 		}
 
-		if (key == GLFW_KEY_ENTER) {
-			// interact key press
-			sharedClient->sendPackets(READY_EVENT);
-		}
-		if (key == GLFW_KEY_O) {
-			// interact key press
-			sharedClient->sendPackets(START_EVENT);
-		}
 		if (key == GLFW_KEY_D) {
 			sharedClient->sendPackets(DROP_EVENT);
 		}
