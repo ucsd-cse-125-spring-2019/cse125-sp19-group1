@@ -74,6 +74,7 @@ public:
 	void setCaughtAnimalType(ModelType type);
 	void setActionStartTime();
 	void setUnlockJailStartTime();
+	void setDestroyPowerUpStartTime();
 	void setAction(Action anAction);
 	void setPowerUp(PowerUp aPowerUp);
 	void setFacingDirection(Direction dir);
@@ -190,6 +191,7 @@ protected:
 
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> unlockJailStartTime;
+	std::chrono::time_point<std::chrono::system_clock> destroyPowerUpStartTime;
 
 	std::chrono::time_point<std::chrono::system_clock> speedStartTime;
 	std::chrono::time_point<std::chrono::system_clock> searchStartTime;

@@ -880,16 +880,31 @@ void ServerGame::receiveFromClients()
 				}
 
 				if (player->isInteracting())
-
 				{
 					double seconds = player->getInteractingTime(0);
 					if (player->isChef())
 					{
-						if (seconds > SWING_NET_DELAY) {
-							std::cout << "CAN SWING AGAIN" << std::endl;
-							player->setInteracting(false);
-							player->setAction(Action::NONE);
-							sendActionPackets();
+
+						if (player->getAction() == Action::SWING_NET)
+						{
+							if (seconds > SWING_NET_DELAY) {
+								std::cout << "CAN SWING AGAIN" << std::endl;
+								player->setInteracting(false);
+								player->setAction(Action::NONE);
+								sendActionPackets();
+							}
+						}
+						
+						else if (player->getAction() == Action::DESTROY_POWERUP)
+						{
+							double destroyPowerUpSeconds = player->getInteractingTime(2);
+							if (destroyPowerUpSeconds > DESTROY_POWERUP_DELAY)
+							{
+								player->setAction(Action::NONE);
+								player->setInteracting(false);
+								sendActionPackets();
+							}
+							
 						}
 					}
 					else if (player->getAction() == Action::OPEN_BOX)
@@ -1065,6 +1080,13 @@ void ServerGame::receiveFromClients()
 						}
 					}
 				}
+
+				double destroyPowerUpSeconds = player->getInteractingTime(2);
+				if (destroyPowerUpSeconds > DESTROY_POWERUP_DELAY && player->getAction() == Action::DESTROY_POWERUP)
+				{
+					player->setAction(Action::NONE);
+					sendActionPackets();
+				}
 			}
 		}
 	}
@@ -1110,6 +1132,7 @@ void ServerGame::initNewClient()
 
 void ServerGame::updateMovement2(Direction dir, int id)
 {
+	Player * player = gameData->getPlayer(id);
 	if (gameData->getPlayer(id)->isInteracting() ||
 		gameData->getPlayer(id)->isCaught() ||
 		gameData->getPlayer(id)->getHidden()) {
@@ -1167,7 +1190,7 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		Location tileCenter = Location(col * TILE_SIZE + TILE_SIZE / 2, 0, row  * TILE_SIZE + TILE_SIZE / 2);
 		
 		
-		if (gameData->getAtlas()->isItemPowerUp(tile->getItem()))
+		if (tile->getItem() != ItemModelType::EMPTY && gameData->getAtlas()->isItemPowerUp(tile->getItem()))
 		{
 
 			// Get distance from tile center to player, ignoring y value
@@ -1177,8 +1200,8 @@ void ServerGame::updateMovement2(Direction dir, int id)
 			if (dist < PLAYER_RADIUS*2) {
 				tile->setItem(ItemModelType::EMPTY);
 				gameData->getPlayer(id)->setAction(Action::DESTROY_POWERUP);
-				sendActionPackets();
-				gameData->getPlayer(id)->setAction(Action::NONE);
+				player->setDestroyPowerUpStartTime();
+				player->setInteracting(true);
 			}
 		}
 	}

@@ -177,6 +177,10 @@ void Player::setUnlockJailStartTime() {
 	unlockJailStartTime = std::chrono::system_clock::now();
 }
 
+void Player::setDestroyPowerUpStartTime() {
+	destroyPowerUpStartTime = std::chrono::system_clock::now();
+}
+
 void Player::setSpeedStartTime()
 {
 	speedStartTime = std::chrono::system_clock::now();
@@ -211,6 +215,10 @@ double Player::getInteractingTime(int opt)
 	if (opt == 1) 
 	{
 		elapsed_seconds = now - unlockJailStartTime;
+	}
+	else if (opt == 2) 
+	{
+		elapsed_seconds = now - destroyPowerUpStartTime;
 	}
 	return elapsed_seconds.count();
 }

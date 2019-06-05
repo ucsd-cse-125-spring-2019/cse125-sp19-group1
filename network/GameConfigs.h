@@ -49,6 +49,7 @@
 #define SWING_NET_DELAY 0.5
 #define UNLOCK_JAIL_DELAY 0.25
 #define KEY_DROP_DELAY 0.25
+#define DESTROY_POWERUP_DELAY 0.1
 // COOLDOWN = time to wait before you can do this action again
 #define UNLOCK_JAIL_COOLDOWN 0.5
 
