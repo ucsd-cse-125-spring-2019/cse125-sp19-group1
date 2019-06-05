@@ -35,7 +35,7 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
-//#define DEBUG_CLIENTS
+#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
 static ClientGame * clients[4] = { nullptr };
 
@@ -382,9 +382,15 @@ int main(void)
 			}
 		} 
 		else if (currentEngine == loadingEngine) {
+#ifdef DEBUG_CLIENTS
+			if (inGameEngine->fullyLoaded) {
+				targetEngine = inGameEngine;
+			}
+#else
 			if (inGameEngine->fullyLoaded && sharedClient->gameData->getAllPlayersLoaded()) {
 				targetEngine = inGameEngine;
 			}
+#endif
 		}
 		
 		if (currentEngine->ShouldFadeout()) {
