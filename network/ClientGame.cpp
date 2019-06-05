@@ -11,7 +11,7 @@
 #define SOUNDS_DOOR			(SOUNDS_PATH "frontexit_door_short.mp3")
 #define SOUNDS_DOOR_UNLOCK	(SOUNDS_PATH "frontexit_unlock_short.mp3")
 #define SOUNDS_FOUND_ITEM	(SOUNDS_PATH "found_item_short.mp3")
-#define SOUNDS_NET			(SOUNDS_PATH "pop.mp3")	// FIXME placeholder for swoosh
+#define SOUNDS_NET			(SOUNDS_PATH "NetSwoosh.mp3")	// FIXME placeholder for swoosh
 #define SOUNDS_RACCOON_UP	(SOUNDS_PATH "RaccoonDownUp.mp3")
 #define SOUNDS_RACCOON_DOWN	(SOUNDS_PATH "RaccoonUpDown.mp3")
 #define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
