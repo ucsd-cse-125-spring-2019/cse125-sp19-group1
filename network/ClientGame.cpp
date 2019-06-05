@@ -26,7 +26,8 @@
 
 // Paths for background music loops
 #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
-
+#define SONG_LOOP			(SOUNDS_PATH "Song_Loop.mp3")
+#define LOBBY_LOOP			(SOUNDS_PATH "Lobby_Loop.mp3")
 static SoundSystem * soundSystem;
 
 // sounds specific to player (NOT 3D)
