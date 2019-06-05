@@ -357,7 +357,7 @@ int main(void)
 			}
 		} 
 		else if (currentEngine == loadingEngine) {
-			if (inGameEngine->fullyLoaded) {
+			if (inGameEngine->fullyLoaded && sharedClient->gameData->getAllPlayersLoaded()) {
 				targetEngine = inGameEngine;
 			}
 		}
@@ -392,7 +392,7 @@ int main(void)
 							targetEngine = startingCutscenes[i + 1];
 						}
 						else {
-							targetEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
+							targetEngine = (inGameEngine->fullyLoaded) && sharedClient->gameData->getAllPlayersLoaded() ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
 						}
 						break;
 					}
@@ -442,6 +442,13 @@ int main(void)
 		
 		server->update();
 
+		// Only update client from tester.cpp while game is loading
+		if(sharedClient->gameData->getGameState() == GameState::LOADING)
+			sharedClient->update();
+
+		// Send done loading event only if client is on loading screen, game state = loading, and in game engine is fully loaded
+		if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::LOADING && targetEngine == (AbstractGraphicsEngine*)loadingEngine)
+			sharedClient->sendPackets(DONE_LOADING_EVENT);
 		auto finish = high_resolution_clock::now();
 
 		// Limit to no more than 60fps

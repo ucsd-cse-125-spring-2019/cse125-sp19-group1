@@ -182,7 +182,7 @@ void LobbyGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	auto gameData = sharedClient->getGameData();
 	sharedClient->update();
 
-	if (sharedClient->getGameData()->getGameState() == GameState::IN_GAME)
+	if (sharedClient->getGameData()->getGameState() != GameState::IN_LOBBY)
 		quit = true;
 	std::map < int, Player * > &players = gameData->getAllPlayers();
 	if(gameData->getPlayer(sharedClient->getMyID()))

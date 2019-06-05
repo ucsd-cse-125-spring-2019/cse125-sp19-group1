@@ -18,7 +18,7 @@ enum class ClientType { SERVER_SIDE, CLIENT_SIDE};
 
 enum class WinType { NONE = 0, DOOR = 1, TOILET = 2, VENT = 3, CHEF_WIN = 4 };
 
-enum class GameState { IN_LOBBY, IN_GAME };
+enum class GameState { IN_LOBBY, IN_GAME, LOADING};
 
 class GameData
 {
@@ -58,6 +58,7 @@ public:
 	void decodeWinType(std::string value);
 	void decodeBlindChef(std::string value);
 	void decodeSlowChef(std::string value);
+	void decodeAllPlayersLoaded(std::string value);
 
 	Player * getPlayer(int anID);
 	std::map < int, Player * > & getAllPlayers();
@@ -107,6 +108,9 @@ public:
 	bool countdownDone();
 	bool countdownStarted();
 
+	bool getAllPlayersLoaded();
+	void checkAllPlayersLoaded();
+
 	GameState getGameState();
 	void setGameState(GameState state);
 
@@ -130,5 +134,7 @@ protected:
 	std::vector<ModelType> availableCharacters{ ModelType::RACOON, ModelType::CAT, ModelType::DOG };
 
 	int playerNum;
+	int doneLoadingCount;
+	bool allPlayersLoaded;
 private:
 };
