@@ -282,7 +282,7 @@ void ServerGame::receiveFromClients()
 												ItemModelType itemName = iter2->second->getInventory();
 												gameData->getAtlas()->updateTileItem(loc, itemName);
 												iter2->second->setInventory(ItemModelType::EMPTY);
-												iter2->second->setSpeedMultiplier(1.0);
+												iter2->second->resetSpeedMultiplier();
 
 												gameData->getAtlas()->updateDroppedItem(itemName, loc);
 											}
@@ -293,7 +293,7 @@ void ServerGame::receiveFromClients()
 												gameData->getAtlas()->returnItemToSpawn(tileItem);
 												gameData->getAtlas()->updateTileItem(loc, playerItem);
 												iter2->second->setInventory(ItemModelType::EMPTY);
-												iter2->second->setSpeedMultiplier(1.0);
+												iter2->second->resetSpeedMultiplier();
 												gameData->getAtlas()->updateDroppedItem(playerItem, loc);
 											}
 
@@ -365,14 +365,17 @@ void ServerGame::receiveFromClients()
 									std::cout << "table has cake!" << std::endl;
 									player->setInventory(objectTile->getItem());
 									objectTile->setItem(ItemModelType::EMPTY);
-									player->setSpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
+									player->modifySpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
 
 
 								}
 								else if (item != ItemModelType::EMPTY)
 								{
 									player->setInventory(item);
-									player->setSpeedMultiplier(ITEM_SLOWDOWN_MULTIPLIER);
+									if(item == ItemModelType::cake)
+										player->modifySpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
+									else
+										player->modifySpeedMultiplier(ITEM_SLOWDOWN_MULTIPLIER);
 									gameData->getAtlas()->updateTileItem(loc, ItemModelType::EMPTY);
 								}
 							}
@@ -384,9 +387,9 @@ void ServerGame::receiveFromClients()
 									gameData->updateGateProgress(keyDropTile->getGateNum());
 									player->setAction(Action::KEY_DROP);
 									player->setInventory(ItemModelType::EMPTY);
-									player->setSpeedMultiplier(1.0);
-									sendActionPackets();
-									player->setAction(Action::NONE);
+									player->resetSpeedMultiplier();
+									player->setInteracting(true);
+									player->setActionStartTime();
 								}
 							}
 							else if (GateTile * gateTile = gameData->getGateTile(loc))
@@ -673,7 +676,7 @@ void ServerGame::receiveFromClients()
 							ItemModelType itemName = player->getInventory();
 							gameData->getAtlas()->updateTileItem(loc, itemName);
 							player->setInventory(ItemModelType::EMPTY);
-							player->setSpeedMultiplier(1.0);
+							player->resetSpeedMultiplier();
 
 							gameData->getAtlas()->updateDroppedItem(itemName, loc);
 						}
@@ -877,16 +880,31 @@ void ServerGame::receiveFromClients()
 				}
 
 				if (player->isInteracting())
-
 				{
 					double seconds = player->getInteractingTime(0);
 					if (player->isChef())
 					{
-						if (seconds > SWING_NET_DELAY) {
-							std::cout << "CAN SWING AGAIN" << std::endl;
-							player->setInteracting(false);
-							player->setAction(Action::NONE);
-							sendActionPackets();
+
+						if (player->getAction() == Action::SWING_NET)
+						{
+							if (seconds > SWING_NET_DELAY) {
+								std::cout << "CAN SWING AGAIN" << std::endl;
+								player->setInteracting(false);
+								player->setAction(Action::NONE);
+								sendActionPackets();
+							}
+						}
+						
+						else if (player->getAction() == Action::DESTROY_POWERUP)
+						{
+							double destroyPowerUpSeconds = player->getInteractingTime(2);
+							if (destroyPowerUpSeconds > DESTROY_POWERUP_DELAY)
+							{
+								player->setAction(Action::NONE);
+								player->setInteracting(false);
+								sendActionPackets();
+							}
+							
 						}
 					}
 					else if (player->getAction() == Action::OPEN_BOX)
@@ -906,6 +924,18 @@ void ServerGame::receiveFromClients()
 						if (!player->isChef())
 						{
 							if (seconds > UNLOCK_JAIL_DELAY) {
+								player->setInteracting(false);
+								player->setAction(Action::NONE);
+								sendActionPackets();
+							}
+						}
+					}
+					else if (player->getAction() == Action::KEY_DROP)
+					{
+						double seconds = player->getInteractingTime(0);
+						if (!player->isChef())
+						{
+							if (seconds > KEY_DROP_DELAY) {
 								player->setInteracting(false);
 								player->setAction(Action::NONE);
 								sendActionPackets();
@@ -1045,10 +1075,17 @@ void ServerGame::receiveFromClients()
 						}
 						if (powerUp) {
 							player->setInventory(ItemModelType::EMPTY);
-							player->setSpeedMultiplier(1.0);
+							player->resetSpeedMultiplier();
 							sendActionPackets();
 						}
 					}
+				}
+
+				double destroyPowerUpSeconds = player->getInteractingTime(2);
+				if (destroyPowerUpSeconds > DESTROY_POWERUP_DELAY && player->getAction() == Action::DESTROY_POWERUP)
+				{
+					player->setAction(Action::NONE);
+					sendActionPackets();
 				}
 			}
 		}
@@ -1095,6 +1132,7 @@ void ServerGame::initNewClient()
 
 void ServerGame::updateMovement2(Direction dir, int id)
 {
+	Player * player = gameData->getPlayer(id);
 	if (gameData->getPlayer(id)->isInteracting() ||
 		gameData->getPlayer(id)->isCaught() ||
 		gameData->getPlayer(id)->getHidden()) {
@@ -1152,7 +1190,7 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		Location tileCenter = Location(col * TILE_SIZE + TILE_SIZE / 2, 0, row  * TILE_SIZE + TILE_SIZE / 2);
 		
 		
-		if (gameData->getAtlas()->isItemPowerUp(tile->getItem()))
+		if (tile->getItem() != ItemModelType::EMPTY && gameData->getAtlas()->isItemPowerUp(tile->getItem()))
 		{
 
 			// Get distance from tile center to player, ignoring y value
@@ -1162,8 +1200,8 @@ void ServerGame::updateMovement2(Direction dir, int id)
 			if (dist < PLAYER_RADIUS*2) {
 				tile->setItem(ItemModelType::EMPTY);
 				gameData->getPlayer(id)->setAction(Action::DESTROY_POWERUP);
-				sendActionPackets();
-				gameData->getPlayer(id)->setAction(Action::NONE);
+				player->setDestroyPowerUpStartTime();
+				player->setInteracting(true);
 			}
 		}
 	}

@@ -11,7 +11,7 @@
 #define SWING_RADIUS 10
 #define VISION_RADIUS 85.0f
 #define ITEM_SLOWDOWN_MULTIPLIER 0.8
-#define CAKE_SLOWDOWN_MULTIPLIER 0.5
+#define CAKE_SLOWDOWN_MULTIPLIER 0.7
 #define CHEF_ANGER_INTERVAL 7
 #define CHEF_MAX_ANGER 60
 #define CHEF_MAX_VISION 100
@@ -24,6 +24,7 @@
 #define DEFAULT_VISION 60
 #define DEFAULT_CHEF_VISION_MULT 1
 #define LIMIT_CHEF_VISION_MULT 0.4
+#define DEFAULT_SPEED_MULTIPLIER 1
 
 // Tile data
 #define TILE_SIZE 20
@@ -47,6 +48,8 @@
 // DELAY = time to wait before you can act again
 #define SWING_NET_DELAY 0.5
 #define UNLOCK_JAIL_DELAY 0.25
+#define KEY_DROP_DELAY 0.25
+#define DESTROY_POWERUP_DELAY 0.1
 // COOLDOWN = time to wait before you can do this action again
 #define UNLOCK_JAIL_COOLDOWN 0.5
 
