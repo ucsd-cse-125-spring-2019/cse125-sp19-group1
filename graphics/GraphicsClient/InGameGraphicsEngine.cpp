@@ -2484,10 +2484,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 		//particle setup
 		for (int i = 0; i < MAX_PLAYERS; i++) {
-			dustSpawner[i] = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0, 1.0f, 0));
+			dustSpawner[i] = new ParticleSpawner(DUST_PARTICLE_TEX, glm::vec3(0, 1.0f, 0), 1.0, 125,3.3f);
 			flashSpawner[i] = new ParticleSpawner(FLASH_PARTICLE_TEX, glm::vec3(0, 10.0f, 0), 3.0f);
-			speedSpawner[i] = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0));
-			slowSpawner[i] = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0));
+			speedSpawner[i] = new ParticleSpawner(SPEED_PARTICLE_TEX, glm::vec3(0, 2.5f, 0), 1.0, 125, 3.3f);
+			slowSpawner[i] = new ParticleSpawner(SLOW_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 1.0, 125, 3.3f);
 			//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 			blindSpawner[i] = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
 			searchSpawner[i] = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
