@@ -116,6 +116,10 @@ void ServerGame::receiveFromClients()
 			case GO_TO_CREDITS_EVENT:
 				gameData->setGameState(GameState::END_CREDITS);
 				break;
+			case SET_DONE_LOADING_EVENT:
+				printf("server received SET_DONE_LOADING event packet from client\n");
+				gameData->setGameState(GameState::IN_GAME);
+				break;
 			case DONE_LOADING_EVENT:
 				printf("server received DONE_LOADING event packet from client\n");
 				gameData->getPlayer(playerID)->setDoneLoading(true);
@@ -269,7 +273,8 @@ void ServerGame::receiveFromClients()
 
 										Location tLoc = iter2->second->getLocation();
 
-										if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
+										//if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
+										if (loc.distanceTo(tLoc) < player->getCatchRadius() && gameData->getAtlas()->hasWallInBetween(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
 										{
 
 											if (!(gameData->getAtlas()->tileHasItem(loc)))
@@ -388,9 +393,55 @@ void ServerGame::receiveFromClients()
 							{
 								if (gateTile->hasAllKeys() && !gateTile->isOpen())
 								{
-									player->setAction(Action::CONSTRUCT_GATE);
-									player->setInteracting(true);
-									player->setActionStartTime();
+									bool isFacingGate = false;
+									std::bitset<4> wall(gateTile->getWall());
+									Direction facingDirection = player->getFacingDirection();
+									int gateRow = 0;
+									int gateCol = 0;
+									gameData->getAtlas()->getMapCoords(loc, gateRow, gateCol);
+									Location gateLoc(0, gateTile->getHeight() / 2 * TILE_HEIGHT, 0);
+									//check left wall
+									if (wall[3]) {
+										if (facingDirection == Direction::EAST ||
+											facingDirection == Direction::NORTHEAST ||
+											facingDirection == Direction::SOUTHEAST)
+											isFacingGate = true;
+										gateLoc.setX(gateCol * TILE_SIZE);
+										gateLoc.setZ(gateRow * TILE_SIZE + TILE_SIZE/2);
+									}
+									//check up wall
+									else if (wall[2]) {
+										if (facingDirection == Direction::SOUTH ||
+											facingDirection == Direction::SOUTHEAST ||
+											facingDirection == Direction::SOUTHWEST)
+											isFacingGate = true;
+										gateLoc.setX(gateCol * TILE_SIZE + TILE_SIZE / 2);
+										gateLoc.setZ(gateRow * TILE_SIZE);
+									}
+									//check down wall
+									else if (wall[1]) {
+										if (facingDirection == Direction::NORTH ||
+											facingDirection == Direction::NORTHEAST ||
+											facingDirection == Direction::NORTHWEST)
+											isFacingGate = true;
+										gateLoc.setX(gateCol * TILE_SIZE + TILE_SIZE / 2);
+										gateLoc.setZ(gateRow * TILE_SIZE + TILE_SIZE);
+									}
+									//check right wall
+									else if (wall[0]) {
+										if (facingDirection == Direction::WEST ||
+											facingDirection == Direction::NORTHWEST||
+											facingDirection == Direction::SOUTHWEST)
+											isFacingGate = true;
+										gateLoc.setX(gateCol * TILE_SIZE + TILE_SIZE);
+										gateLoc.setZ(gateRow * TILE_SIZE + TILE_SIZE / 2);
+									}
+									if (isFacingGate && loc.distanceTo(gateLoc) < DISTANCE_TO_CONSTRUCT_GATE)
+									{
+										player->setAction(Action::CONSTRUCT_GATE);
+										player->setInteracting(true);
+										player->setActionStartTime();
+									}
 								}
 								if (gateTile->hasAllKeys() && gateTile->isOpen())
 								{
@@ -1141,11 +1192,10 @@ void ServerGame::updateMovement2(Direction dir, int id)
 }
 void ServerGame::updateMovement(int dir, int id)
 {
-	/*if (gameData->getPlayer(id)->isInteracting() ||
-		gameData->getPlayer(id)->isCaught() ||
+	if (gameData->getPlayer(id)->isCaught() ||
 		gameData->getPlayer(id)->getHidden()) {
 		return;
-	}*/
+	}
 
 	switch (dir)
 	{
@@ -1159,131 +1209,28 @@ void ServerGame::updateMovement(int dir, int id)
 		break;
 	}
 
-	//updateCollision(id);
-	//updateHeight(id);
 }
 
 void ServerGame::updateRightEvent(int id)
 {
 	moveRight = true;
 
-	/*float SPEED = sSpeed;
-	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHEAST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHEAST) {
-		SPEED = dSpeed;
-	}
-	moveRight = true;
-	Location loc = gameData->getPlayer(id)->getLocation();
-
-	if (gameData->getPlayer(id)->isChef()) 
-	{
-		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX() + (SPEED*multiplier), loc.getY(), loc.getZ());
-	}
-	else 
-	{
-		if (gameData->getPlayer(id)->getGhost()) 
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
-		}
-		else 
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), loc.getZ());
-		}
-	}
-
-	updatePlayerCollision(id, 0);*/
 }
 
 void ServerGame::updateBackwardEvent(int id)
 {
 	moveBackward = true;
-
-	/*float SPEED = sSpeed;
-	if (gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHWEST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHEAST) {
-		SPEED = dSpeed;
-	}
-	moveBackward = true;
-	Location loc = gameData->getPlayer(id)->getLocation();
-
-	if (gameData->getPlayer(id)->isChef())
-	{
-		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - (SPEED*multiplier));
-	}
-	else
-	{
-		if (gameData->getPlayer(id)->getGhost()) 
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER);
-		}
-		else
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier());
-		}
-	}
-
-	updatePlayerCollision(id, 1);*/
 }
 
 void ServerGame::updateForwardEvent(int id)
 {
 	moveForward = true;
-
-	/*float SPEED = sSpeed;
-	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHEAST || gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHWEST) {
-		SPEED = dSpeed;
-	}
-	moveForward = true;
-	Location loc = gameData->getPlayer(id)->getLocation();
-
-	if (gameData->getPlayer(id)->isChef())
-	{
-		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + (SPEED*multiplier));
-	}
-	else
-	{
-		if (gameData->getPlayer(id)->getGhost())
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER);
-		}
-		else
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX(), loc.getY(), loc.getZ() + SPEED * gameData->getPlayer(id)->getSpeedMultiplier());
-		}
-	}
-	updatePlayerCollision(id, 2);*/
 }
 
 void ServerGame::updateLeftEvent(int id)
 {
 	moveLeft = true;
 
-	/*float SPEED = sSpeed;
-	if (gameData->getPlayer(id)->getFacingDirection() == Direction::NORTHWEST || gameData->getPlayer(id)->getFacingDirection() == Direction::SOUTHWEST) {
-		SPEED = dSpeed;
-	}
-	moveLeft = true;
-	Location loc = gameData->getPlayer(id)->getLocation();
-
-	if (gameData->getPlayer(id)->isChef())
-	{
-		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX() - (SPEED*multiplier), loc.getY(), loc.getZ());
-	}
-	else
-	{
-		if (gameData->getPlayer(id)->getGhost())
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER, loc.getY(), loc.getZ());
-		}
-		else 
-		{
-			gameData->getPlayer(id)->setLocation(loc.getX() - SPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), loc.getZ());
-		}
-	}
-
-	updatePlayerCollision(id, 3);*/
 }
 
 void ServerGame::updateHeight(int id)

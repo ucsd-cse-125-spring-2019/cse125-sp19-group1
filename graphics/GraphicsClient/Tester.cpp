@@ -383,7 +383,7 @@ int main(void)
 		} 
 		else if (currentEngine == loadingEngine) {
 #ifdef DEBUG_CLIENTS
-			if (inGameEngine->fullyLoaded) {
+			if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::IN_GAME) {
 				targetEngine = inGameEngine;
 			}
 #else
@@ -479,7 +479,15 @@ int main(void)
 
 		// Send done loading event only if client is on loading screen, game state = loading, and in game engine is fully loaded
 		if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::LOADING && currentEngine == (AbstractGraphicsEngine*)loadingEngine)
+		{
+
+#ifdef DEBUG_CLIENTS
+			sharedClient->sendPackets(SET_DONE_LOADING_EVENT);
+
+#else
 			sharedClient->sendPackets(DONE_LOADING_EVENT);
+#endif
+		}
 		auto finish = high_resolution_clock::now();
 
 		// Limit to no more than 60fps

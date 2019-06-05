@@ -54,6 +54,7 @@ public:
 	float		getVisionRadius() { return visionRadius; }
 	Direction	getFacingDirection() const;
 	bool		isDoneLoading() const;
+	int			getCatchRadius() const;
 
 	// Setters
 	void setPlayerID(int id);
@@ -138,6 +139,7 @@ public:
 	void decodeCaughtAnimal(std::string value);
 	void decodeCaughtAnimalID(std::string value);
 	void decodeCaughtAnimalType(std::string value);
+	void decodeFacingDirection(std::string value);
 
 	// Encode functions
 	void addEncodeFunctions();
@@ -154,6 +156,7 @@ public:
 	std::string encodeCaughtAnimal();
 	std::string encodeCaughtAnimalID();
 	std::string encodeCaughtAnimalType();
+	std::string encodeFacingDirection();
 
 protected:
 	Action		action;

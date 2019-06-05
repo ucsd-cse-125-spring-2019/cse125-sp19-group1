@@ -72,7 +72,9 @@ public:
 	void unlockAllGates();
 	void openAllBoxes();
 
-	bool canReachDestination(Location currentLoc, Location & destinationLoc);
+	bool canMoveToDestination(Location currentLoc, Location & destinationLoc);
+	bool canReachTarget(Location currentLoc, Location & targetLoc);
+	bool hasWallInBetween(Location currentLoc, Location & destinationLoc);
 	std::vector<std::vector<Tile *>> getServerTileLayout() { return tileLayout; }
 
 	std::vector<ItemModelType> itemList = 

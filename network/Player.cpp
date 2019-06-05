@@ -25,7 +25,12 @@ PowerUp Player::getPowerUp() const { return powerUp; }
 
 
 Direction Player::getFacingDirection() const { return facingDirection; }
-void Player::setFacingDirection(Direction dir) { facingDirection = dir; }
+void Player::setFacingDirection(Direction dir)
+{
+	facingDirection = dir;
+	dirtyVariablesMap["facingDirection"] = true;
+
+}
 
 void Player::setPlayerID(int id)
 {
@@ -136,6 +141,11 @@ void Player::setCaughtAnimalId(int id)
 
 bool Player::isCaught() const {
 	return caughtStatus;
+}
+
+int Player::getCatchRadius() const
+{
+	return catchRadius;
 }
 
 bool Player::inRange(Location & myLoc, Location & theirLoc) 
@@ -364,6 +374,10 @@ void Player::decodeCaughtAnimalType(std::string value)
 {
 	caughtAnimalType = static_cast<ModelType>(std::stoi(value));
 }
+void Player::decodeFacingDirection(std::string value)
+{
+	facingDirection = static_cast<Direction>(std::stoi(value));
+}
 
 void Player::addDecodeFunctions()
 {
@@ -380,6 +394,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["caughtAnimal"] = &Player::decodeCaughtAnimal;
 	decodingFunctions["caughtAnimalID"] = &Player::decodeCaughtAnimalID;
 	decodingFunctions["caughtAnimalType"] = &Player::decodeCaughtAnimalType;
+	decodingFunctions["facingDirection"] = &Player::decodeFacingDirection;
 
 }
 
@@ -398,6 +413,7 @@ void Player::addEncodeFunctions()
 	encodingFunctions["caughtAnimal"] = &Player::encodeCaughtAnimal;
 	encodingFunctions["caughtAnimalID"] = &Player::encodeCaughtAnimalID;
 	encodingFunctions["caughtAnimalType"] = &Player::encodeCaughtAnimalType;
+	encodingFunctions["facingDirection"] = &Player::encodeFacingDirection;
 
 
 	dirtyVariablesMap["playerNum"] = true;
@@ -413,6 +429,7 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["caughtAnimal"] = true;
 	dirtyVariablesMap["caughtAnimalID"] = true;
 	dirtyVariablesMap["caughtAnimalType"] = true;
+	dirtyVariablesMap["facingDirection"] = true;
 
 }
 std::string Player::encodePlayerNum() {
@@ -497,6 +514,13 @@ std::string Player::encodeCaughtAnimalID() {
 std::string Player::encodeCaughtAnimalType() {
 	std::stringstream encodedData;
 	encodedData << "caughtAnimalType: " << static_cast<int>(caughtAnimalType) << std::endl;
+
+	return encodedData.str();
+}
+
+std::string Player::encodeFacingDirection() {
+	std::stringstream encodedData;
+	encodedData << "facingDirection: " << static_cast<int>(facingDirection) << std::endl;
 
 	return encodedData.str();
 }
