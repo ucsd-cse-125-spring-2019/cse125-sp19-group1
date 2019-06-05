@@ -1077,6 +1077,25 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
 		gameData->getPlayer(id)->setLocation(loc.getX() + (xSPEED*multiplier), loc.getY(), 
 												loc.getZ() + (zSPEED*multiplier));
+
+		Location loc = gameData->getPlayer(id)->getLocation();
+		Tile * tile = gameData->getTile(loc);
+		int row = 0;
+		int col = 0;
+
+		gameData->getAtlas()->getMapCoords(loc, row, col);
+		Location tileCenter = Location(col * TILE_SIZE + TILE_SIZE / 2, 0, row  * TILE_SIZE + TILE_SIZE / 2);
+		
+		
+		if (gameData->getAtlas()->isItemPowerUp(tile->getItem()))
+		{
+			// Only remove powerup item if the chef is near the center of tile where the item is
+			double dist = sqrt(pow(loc.getX() - tileCenter.getX(), 2) +
+				pow(loc.getZ() - tileCenter.getZ(), 2));
+			if (dist < PLAYER_RADIUS*2) {
+				tile->setItem(ItemModelType::EMPTY);
+			}
+		}
 	}
 	else
 	{
