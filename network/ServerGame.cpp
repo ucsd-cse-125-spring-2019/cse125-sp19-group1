@@ -1125,18 +1125,18 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		}
 		else
 		{
-			//gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
-			//										loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
-			
-			destLoc = Location(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
+			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
 													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
+			
+			//destLoc = Location(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
+			//										loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
 		}
 	}
 
-	if (gameData->getAtlas()->canReachDestination(loc, destLoc))
-		gameData->getPlayer(id)->setLocation(destLoc);
+	//if (gameData->getAtlas()->canReachDestination(loc, destLoc))
+	//	gameData->getPlayer(id)->setLocation(destLoc);
 	updatePlayerCollision(id, dir);
-	//updateCollision(id);
+	updateCollision(id);
 	updateHeight(id);
 }
 void ServerGame::updateMovement(int dir, int id)
