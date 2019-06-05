@@ -35,7 +35,7 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
-//#define DEBUG_CLIENTS
+#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
 static ClientGame * clients[4] = { nullptr };
 
@@ -382,9 +382,15 @@ int main(void)
 			}
 		} 
 		else if (currentEngine == loadingEngine) {
+#ifdef DEBUG_CLIENTS
 			if (inGameEngine->fullyLoaded) {
 				targetEngine = inGameEngine;
 			}
+#else
+			if (inGameEngine->fullyLoaded && sharedClient->gameData->getAllPlayersLoaded()) {
+				targetEngine = inGameEngine;
+			}
+#endif
 		}
 		
 		if (currentEngine->ShouldFadeout()) {
@@ -417,7 +423,7 @@ int main(void)
 							targetEngine = startingCutscenes[i + 1];
 						}
 						else {
-							targetEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
+							targetEngine = (inGameEngine->fullyLoaded) && sharedClient->gameData->getAllPlayersLoaded() ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
 						}
 						break;
 					}
@@ -467,6 +473,13 @@ int main(void)
 		
 		server->update();
 
+		// Only update client from tester.cpp while game is loading
+		if(sharedClient->gameData->getGameState() == GameState::LOADING)
+			sharedClient->update();
+
+		// Send done loading event only if client is on loading screen, game state = loading, and in game engine is fully loaded
+		if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::LOADING && targetEngine == (AbstractGraphicsEngine*)loadingEngine)
+			sharedClient->sendPackets(DONE_LOADING_EVENT);
 		auto finish = high_resolution_clock::now();
 
 		// Limit to no more than 60fps

@@ -21,6 +21,7 @@ ServerGame::ServerGame(void)
     // set up the server network to listen 
     network = new ServerNetwork(); 
 	gameData = new GameData(SERVER_GAMEDATA);
+
 }
  
 void ServerGame::update() 
@@ -112,6 +113,14 @@ void ServerGame::receiveFromClients()
 				printf("server received ENTER event packet from client\n");
 				
 				break;
+			case DONE_LOADING_EVENT:
+				printf("server received DONE_LOADING event packet from client\n");
+				gameData->getPlayer(playerID)->setDoneLoading(true);
+				gameData->checkAllPlayersLoaded();
+				if(gameData->getAllPlayersLoaded())
+					gameData->setGameState(GameState::IN_GAME);
+
+				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
 				{
@@ -132,7 +141,8 @@ void ServerGame::receiveFromClients()
 						}
 						updateHeight(iter->first);
 					}
-					gameData->setGameState(GameState::IN_GAME);
+					gameData->setGameState(GameState::LOADING);
+
 				}
 				break;
 			case SELECT_EVENT:
@@ -670,8 +680,10 @@ void ServerGame::receiveFromClients()
 					animalWin = false;
 					gameData->setWT(WinType::NONE);
 					resetGame();
+					gameData->setGameState(GameState::IN_LOBBY);
 				}
-				gameData->setGameState(GameState::IN_LOBBY);
+				
+
 				break;
 			}
 

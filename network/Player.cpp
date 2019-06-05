@@ -3,7 +3,7 @@
 Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
 
 Player::Player(int anID, int aPlayerNum, Location aLoc) : playerID(anID), playerNum(aPlayerNum), location(aLoc), inventory(ItemModelType::EMPTY),
-	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(1.0), selectedAnimal(true)
+	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(1.0), selectedAnimal(true), doneLoading(false)
 {
 	addEncodeFunctions();
 	addDecodeFunctions();
@@ -110,6 +110,14 @@ void Player::setCaughtStatus(bool caught) {
 bool Player::hasCaughtAnimal() const {
 
 	return caughtAnimal;
+}
+void Player::setDoneLoading(bool status) {
+
+	doneLoading = status;
+}
+
+bool Player::isDoneLoading() const {
+	return doneLoading;
 }
 
 int Player::getCaughtAnimalId() const 
