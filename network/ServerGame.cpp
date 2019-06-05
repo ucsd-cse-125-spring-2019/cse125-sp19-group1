@@ -995,6 +995,7 @@ void ServerGame::receiveFromClients()
 						if (powerUp) {
 							player->setInventory(ItemModelType::EMPTY);
 							player->setSpeedMultiplier(1.0);
+							sendActionPackets();
 						}
 					}
 				}
