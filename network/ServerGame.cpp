@@ -995,6 +995,7 @@ void ServerGame::receiveFromClients()
 						if (powerUp) {
 							player->setInventory(ItemModelType::EMPTY);
 							player->setSpeedMultiplier(1.0);
+							sendActionPackets();
 						}
 					}
 				}
@@ -1043,6 +1044,12 @@ void ServerGame::initNewClient()
 
 void ServerGame::updateMovement2(Direction dir, int id)
 {
+	if (gameData->getPlayer(id)->isInteracting() ||
+		gameData->getPlayer(id)->isCaught() ||
+		gameData->getPlayer(id)->getHidden()) {
+		return;
+	}
+
 	Location loc = gameData->getPlayer(id)->getLocation();
 	float xSPEED = 0.0f;
 	float zSPEED = 0.0f;
@@ -1078,6 +1085,7 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		break;
 	}
 
+	Location destLoc;
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
@@ -1095,9 +1103,11 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		
 		if (gameData->getAtlas()->isItemPowerUp(tile->getItem()))
 		{
+
+			// Get distance from tile center to player, ignoring y value
+			double dist = tileCenter.distanceTo(Location(loc.getX(), 0, loc.getZ()));
+
 			// Only remove powerup item if the chef is near the center of tile where the item is
-			double dist = sqrt(pow(loc.getX() - tileCenter.getX(), 2) +
-				pow(loc.getZ() - tileCenter.getZ(), 2));
 			if (dist < PLAYER_RADIUS*2) {
 				tile->setItem(ItemModelType::EMPTY);
 				gameData->getPlayer(id)->setAction(Action::DESTROY_POWERUP);
@@ -1117,19 +1127,25 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		{
 			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
 													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
+			
+			//destLoc = Location(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
+			//										loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
 		}
 	}
+
+	//if (gameData->getAtlas()->canReachDestination(loc, destLoc))
+	//	gameData->getPlayer(id)->setLocation(destLoc);
 	updatePlayerCollision(id, dir);
 	updateCollision(id);
 	updateHeight(id);
 }
 void ServerGame::updateMovement(int dir, int id)
 {
-	if (gameData->getPlayer(id)->isInteracting() ||
+	/*if (gameData->getPlayer(id)->isInteracting() ||
 		gameData->getPlayer(id)->isCaught() ||
 		gameData->getPlayer(id)->getHidden()) {
 		return;
-	}
+	}*/
 
 	switch (dir)
 	{
@@ -1143,8 +1159,8 @@ void ServerGame::updateMovement(int dir, int id)
 		break;
 	}
 
-	updateCollision(id);
-	updateHeight(id);
+	//updateCollision(id);
+	//updateHeight(id);
 }
 
 void ServerGame::updateRightEvent(int id)
