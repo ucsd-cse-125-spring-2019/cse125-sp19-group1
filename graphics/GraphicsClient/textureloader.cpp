@@ -178,6 +178,62 @@ HRESULT loadWICBitmap(LPCWSTR path, IWICBitmap **bitmap) {
 	return hr;
 }
 
+
+void ReleaseWicImage(const WicImage *image) {
+	if (!image) return;
+
+	((IWICBitmapLock *)image->lock)->Release();
+	((IWICBitmap *)image->textureBitmap)->Release();
+}
+
+bool LoadWicImage(const wchar_t *filename, WicImage *image) {
+	HRESULT		hr;
+
+	// On first call instantiate WIC factory class
+	if (!wicFactory) {
+
+		hr = CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory));
+
+		// Validate wicFactory before proceeding
+		if (!SUCCEEDED(hr))
+			return -1;
+	}
+
+
+	IWICBitmap			*textureBitmap = NULL;
+	IWICBitmapLock		*lock = NULL;
+
+	hr = loadWICBitmap(filename, &textureBitmap);
+
+	UINT w = 0, h = 0;
+
+	if (SUCCEEDED(hr))
+		hr = textureBitmap->GetSize(&w, &h);
+
+	WICRect rect = { 0, 0, w, h };
+
+	if (SUCCEEDED(hr)) {
+		hr = textureBitmap->Lock(&rect, WICBitmapLockRead, &lock);
+	}
+
+	UINT bufferSize = 0;
+	BYTE *buffer = NULL;
+
+	if (SUCCEEDED(hr))
+		hr = lock->GetDataPointer(&bufferSize, &buffer);
+
+	if (SUCCEEDED(hr)) {
+		image->textureBitmap = textureBitmap;
+		image->lock = lock;
+		image->buffer = buffer;
+		image->width = w;
+		image->height = h;
+	}
+
+	return SUCCEEDED(hr);
+}
+
+
 GLuint wicLoadTexture(const std::wstring& filename, int *texWidth, int *texHeight, GLint filtering) {
 	HRESULT		hr;
 

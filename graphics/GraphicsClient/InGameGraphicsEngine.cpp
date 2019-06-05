@@ -12,6 +12,7 @@
 #include "FBXObject.h"
 #include "UIObject.h"
 #include "ParticleSpawner.h"
+#include "Skybox.h"
 
 #include "TwoDeeGraphicsEngine.h"  // for createObjectForTexture()
 
@@ -376,6 +377,8 @@ static FBXObject * tileModel = nullptr;
 static FBXObject * wallModel = nullptr;
 static FBXObject * animatedBoxObjects[MAX_PLAYERS] = {nullptr};
 static FBXObject * netModel = nullptr;
+
+static Skybox *skybox = nullptr;
 
 static UICanvas * uiCanvas = nullptr;
 static GLuint objShaderProgram;
@@ -2020,6 +2023,8 @@ void DisplayCallback(GLFWwindow* window)
 	glViewport(0, 0, windowWidth, windowHeight);
 	//glDepthMask(GL_TRUE);
 
+	skybox->Draw(P, V);
+
 	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	fog->draw(objShaderProgram, P * V * glm::vec4(light_center, 1.0f));
@@ -2358,6 +2363,7 @@ void InGameGraphicsEngine::CleanUp()
 	if (light)            delete light;
 	if (solidColorObject) delete solidColorObject;
 	if (mapPingObject)    delete mapPingObject;
+	if (skybox)           delete skybox;
 
 	deallocFloor();
 
@@ -2376,6 +2382,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 	}
 	if (!fog) {
 		fog = new FogGenerator(CHEF_FOG_DISTANCE);
+	}
+
+	if (!skybox) {
+		skybox = new Skybox();
 	}
 
 	if (!twoDeeShader) {

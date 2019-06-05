@@ -130,6 +130,9 @@
     <ClCompile Include="ParticleSpawner.cpp">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\network\Atlas.h">
@@ -300,6 +303,9 @@
     <ClInclude Include="ParticleSpawner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">
@@ -333,6 +339,12 @@
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
     <None Include="solidcolor.vert">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
+    <None Include="skyboxShader.frag">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
+    <None Include="skyboxShader.vert">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
   </ItemGroup>
