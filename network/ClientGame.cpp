@@ -8,7 +8,7 @@
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
-#define SOUNDS_EXIT_DOOR	(SOUNDS_PATH "door_ya_combo.mp3")
+#define SOUNDS_EXIT_DOOR	(SOUNDS_PATH "door_yay_combo.mp3")
 #define SOUNDS_DOOR_UNLOCK	(SOUNDS_PATH "frontexit_unlock_short.mp3")
 #define SOUNDS_FOUND_ITEM	(SOUNDS_PATH "found_item_short.mp3")
 #define SOUNDS_NET			(SOUNDS_PATH "pop.mp3")	// FIXME placeholder for swoosh
