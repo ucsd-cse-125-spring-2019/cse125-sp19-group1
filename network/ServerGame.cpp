@@ -1100,6 +1100,9 @@ void ServerGame::updateMovement2(Direction dir, int id)
 				pow(loc.getZ() - tileCenter.getZ(), 2));
 			if (dist < PLAYER_RADIUS*2) {
 				tile->setItem(ItemModelType::EMPTY);
+				gameData->getPlayer(id)->setAction(Action::DESTROY_POWERUP);
+				sendActionPackets();
+				gameData->getPlayer(id)->setAction(Action::NONE);
 			}
 		}
 	}
