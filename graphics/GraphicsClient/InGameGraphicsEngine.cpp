@@ -521,7 +521,8 @@ static Transform * allItemsTransform = nullptr;
 static glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
 static glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camera looks at
 static glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
-static const glm::vec3 cam_angle(-10.f, 50.f, -30.f);   // camera's preferred offset from cam_look_at
+static const glm::vec3 cam_overhead_angle(-10.f, 50.f, -30.f);   // camera's preferred offset from cam_look_at
+static bool thirdPersonView = false;
 
 static glm::vec3 light_center = glm::vec3(0.f);
 
@@ -1185,7 +1186,7 @@ void InGameGraphicsEngine::InitCamera(const glm::vec3 &newPlayerPos) {
 	cam_look_at.z = newPlayerPos.z;
 	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
 
-	cam_pos = cam_look_at + cam_angle;
+	cam_pos = cam_look_at + cam_overhead_angle;
 
 	UpdateView();
 }
@@ -1301,7 +1302,7 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
 
 	glm::vec3 look_target = limitLookAt(newPlayerPos);
-	glm::vec3 cam_target = look_target + cam_angle;
+	glm::vec3 cam_target = look_target + cam_overhead_angle;
 	float look_speed = 0.3f, cam_speed = 0.3f;
 
 #ifdef DEBUG_CAUGHT
@@ -1314,7 +1315,7 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 		light_center = LookAtForWT(sharedClient->getGameData()->getWT());
 
 		look_target = limitLookAt(light_center);
-		cam_target = look_target + cam_angle;
+		cam_target = look_target + cam_overhead_angle;
 		look_speed = 0.3f;
 		cam_speed = 0.15f;
 
@@ -1338,9 +1339,24 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 		auto position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 		light_center = position;
 		look_target = limitLookAt(position);
-		cam_target = look_target + cam_angle;
+		cam_target = look_target + cam_overhead_angle;
 		look_speed = 0.3f;
 		cam_speed = 0.3f;
+	}
+	else if (thirdPersonView) {
+		auto myState = getMyState();
+		if (myState) {
+#define THIRD_PERSON_DIST 15.f
+			float camAngle = fmodf(myState->targetAngle + glm::three_over_two_pi<float>(), glm::two_pi<float>());
+
+			cam_target.x = myState->position.x - THIRD_PERSON_DIST * cosf(camAngle);
+			cam_target.y = myState->position.y + 25.f;
+			cam_target.z = myState->position.z + THIRD_PERSON_DIST * sinf(camAngle);
+
+			look_target.x = myState->position.x;
+			look_target.y = myState->position.y + 23.f;
+			look_target.z = myState->position.z;
+		}
 	}
 
 	cam_look_at += (look_target - cam_look_at) * look_speed;
@@ -2361,6 +2377,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 		fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	}
 
+	if (!twoDeeShader) {
+		twoDeeShader = TwoDeeGraphicsEngine::retainShader();
+	}
+
 #ifndef DEBUG_NO_UI
 	if (!uiCanvas) {
 		cout << "Loading UICanvas... ";
@@ -2370,10 +2390,6 @@ void InGameGraphicsEngine::MainLoopBegin()
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
 		cout << "done constructing UICanvas in " << setupDuration.count() << " seconds\n";
-	}
-
-	if (!twoDeeShader) {
-		twoDeeShader = TwoDeeGraphicsEngine::retainShader();
 	}
 
 	if (!animalStartingPrompt) {
@@ -2524,18 +2540,22 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_UP) {
 			directions |= DirectionBitmask::northSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
 			directions |= DirectionBitmask::southSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
 			directions |= DirectionBitmask::westSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
 			directions |= DirectionBitmask::eastSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_SPACE) {
@@ -2623,6 +2643,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		}
 		if (key == GLFW_KEY_TAB) {
 			(void)toggleClient();
+		}
+		if (key == GLFW_KEY_V) {
+			thirdPersonView = !thirdPersonView;
 		}
 
 	}
