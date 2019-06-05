@@ -1,9 +1,9 @@
 #pragma once
-
+#include <cmath>
 struct Location
 {
 public:
-	Location(float argX = 10.0f, float argY = 0.0f, float argZ = 10.0f) : x(argX), y(argY), z(argZ) {}
+	Location(float argX = 0.0f, float argY = 0.0f, float argZ = 0.0f) : x(argX), y(argY), z(argZ) {}
 	
 	float getX() const { return x; }
 	float getY() const { return y; }
@@ -25,6 +25,22 @@ public:
 		return x == loc.x && y == loc.y && z == loc.z;
 	}
 
+	Location operator -(const Location & loc) const
+	{
+		return Location(x - loc.x, y - loc.y, z - loc.z);
+	}
+
+	double distanceTo(const Location & loc) const
+	{
+		
+		double xdiff = pow(x - loc.x, 2);
+		double ydiff = pow(y - loc.y, 2);
+		double zdiff = pow(z - loc.z, 2);
+
+		return sqrt(pow(x - loc.x, 2) 
+			      + pow(y - loc.y, 2)
+			      + pow(z - loc.z, 2));
+	}
 protected:
 	float x;
 	float y;
