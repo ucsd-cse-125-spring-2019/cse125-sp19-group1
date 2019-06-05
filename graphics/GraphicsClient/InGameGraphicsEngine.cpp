@@ -248,7 +248,7 @@ static const struct ItemModelSettings {
 	const char *texturePath;     // filesystem path to a texture file
 	const char *name;            // name for use in debug messages, maybe user-visible too
 	ItemModelType id;            // A unique ID, like ItemModelType::apple
-	glm::vec3 scale;                 // scale adjustment
+	glm::vec3 scale;             // scale adjustment
 	glm::vec3 translate;         // position adjustment
 	glm::vec3 rotation;          // rotation
 	bool wallRotate;             // auto-rotate away from any wall on this tile
@@ -290,7 +290,7 @@ static const struct ItemModelSettings {
 	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,              glm::vec3(2.5f),    glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
 	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            WINDOW_SCALE,       glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,             glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
-    { MDL_SAME_TEX("net"),								   "net",				   ItemModelType::net,				 glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 0.f) },
+    { MDL_SAME_TEX("net"),                                 "net",                  ItemModelType::net,               glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 0.f) },
 };
 
 struct ItemModel {
@@ -540,6 +540,7 @@ glm::vec3 TrackballMapping(double x, double y, int width, int height);
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis);
 bool iAmCaught();
 
+void toggleClient(); // from Tester.cpp
 
 static PlayerState *getMyState()
 {
@@ -1123,11 +1124,12 @@ void InGameGraphicsEngine::MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 			if (p->getAction() == Action::SWING_NET) {
-				state.angle = state.angle + 5;
+				state.angle = state.angle + 0.0675f * glm::two_pi<float>();
 				state.restrictRotation = true;
 			}
 			else {
 				state.restrictRotation = false;
+				state.angle = fmod(state.angle, glm::two_pi<float>());
 			}
 		}
 #ifdef DUMMY_ID
@@ -1160,13 +1162,13 @@ void InGameGraphicsEngine::MovePlayers()
 					state.setTargetAngle(glm::atan(-dir.x, dir.z));
 				}
 			}
-		}
 
-		// Animate state.angle towards state.targetAngle
-		state.angle += (state.targetAngle - state.angle) * 0.375f;
-		if (abs(state.targetAngle - state.angle) < 0.01) {
-			// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
-			state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
+			// Animate state.angle towards state.targetAngle
+			state.angle += (state.targetAngle - state.angle) * 0.375f;
+			if (abs(state.targetAngle - state.angle) < 0.01) {
+				// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
+				state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
+			}
 		}
 
 		state.transform = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
@@ -1948,7 +1950,7 @@ static void DrawMinimap()
 			chefPosition.z = 0.f;
 		}
 
-		if (networkPlayerMe->isChef() != isChefState) {
+		if (!networkPlayerMe || networkPlayerMe->isChef() != isChefState) {
 			continue;
 		}
 
@@ -2573,6 +2575,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 				fake_carried_idx++;
 			}
 #endif
+		}
+		if (key == GLFW_KEY_TAB) {
+			(void)toggleClient();
 		}
 
 	}
