@@ -64,6 +64,7 @@ public:
 	Location & getPlayerSpawnLocation(int id);
 	void getItem(ItemModelType anItem, Item & outputItem);
 
+	bool isItemPowerUp(ItemModelType itemName);
 	bool checkDroppedItems();
 	bool checkBoxRespawn();
 	void updateDroppedItem(ItemModelType anItem, Location loc);

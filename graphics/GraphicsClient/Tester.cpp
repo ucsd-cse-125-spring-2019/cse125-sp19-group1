@@ -37,9 +37,18 @@ static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
 //#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
-ClientGame * sharedClient2 = nullptr;
-ClientGame * sharedClient3 = nullptr;
-ClientGame * sharedClient4 = nullptr;
+static ClientGame * clients[4] = { nullptr };
+
+void toggleClient() {
+	for (int i = 0; i < 4; i++) {
+		if (sharedClient == clients[i]) {
+			sharedClient = clients[(i + 1) % 4];
+			break;
+		}
+	}
+}
+#else
+void toggleClient() {}
 #endif
 
 void ErrorCallback(int error, const char* description)
@@ -120,12 +129,16 @@ void Init(GLFWwindow *window)
 	lobbyEngine->MainLoopBegin();
 
 	server = new ServerGame();
-	sharedClient = new ClientGame();
+	
 #ifdef DEBUG_CLIENTS
-	sharedClient2 = new ClientGame();
-	sharedClient3 = new ClientGame();
-	sharedClient4 = new ClientGame();
+	for (auto &client : clients) {
+		client = new ClientGame();
+	}
+	sharedClient = clients[0];
+#else
+	sharedClient = new ClientGame();
 #endif
+
 	inGameEngine = new InGameGraphicsEngine();
 
 #define CUTSCENES_DIR "../2D Elements/"
@@ -315,6 +328,7 @@ void SetupCallbacks()
 
 int main(void)
 {
+#ifndef DEBUG_CLIENTS
 	cout << "Enter an IP address to connect to [or leave blank to connect to localhost]: ";
 	string newIp;
 	getline(cin, newIp);
@@ -322,6 +336,7 @@ int main(void)
 		strncpy(serverIpAddress, newIp.c_str(), sizeof(serverIpAddress));
 		serverIpAddress[sizeof(serverIpAddress) - 1] = '\0';
 	}
+#endif
 
 	// Create the GLFW window
 	window = CreateWindowFrame(1600, 900);
@@ -367,9 +382,15 @@ int main(void)
 			}
 		} 
 		else if (currentEngine == loadingEngine) {
+#ifdef DEBUG_CLIENTS
 			if (inGameEngine->fullyLoaded) {
 				targetEngine = inGameEngine;
 			}
+#else
+			if (inGameEngine->fullyLoaded && sharedClient->gameData->getAllPlayersLoaded()) {
+				targetEngine = inGameEngine;
+			}
+#endif
 		}
 		
 		if (currentEngine->ShouldFadeout()) {
@@ -402,7 +423,7 @@ int main(void)
 							targetEngine = startingCutscenes[i + 1];
 						}
 						else {
-							targetEngine = (inGameEngine->fullyLoaded) ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
+							targetEngine = (inGameEngine->fullyLoaded) && sharedClient->gameData->getAllPlayersLoaded() ? (AbstractGraphicsEngine*)inGameEngine : (AbstractGraphicsEngine*)loadingEngine;
 						}
 						break;
 					}
@@ -452,6 +473,13 @@ int main(void)
 		
 		server->update();
 
+		// Only update client from tester.cpp while game is loading
+		if(sharedClient->gameData->getGameState() == GameState::LOADING)
+			sharedClient->update();
+
+		// Send done loading event only if client is on loading screen, game state = loading, and in game engine is fully loaded
+		if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::LOADING && currentEngine == (AbstractGraphicsEngine*)loadingEngine)
+			sharedClient->sendPackets(DONE_LOADING_EVENT);
 		auto finish = high_resolution_clock::now();
 
 		// Limit to no more than 60fps

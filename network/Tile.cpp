@@ -2,7 +2,7 @@
 
 // Default constructor
 Tile::Tile(TileType aType, int aWallLayout, int aHeight, ItemModelType anItem) :
-	tileType(aType), wall(aWallLayout), height(aHeight), itemName(anItem), dirty(true) {}
+	tileType(aType), wall(aWallLayout), height(aHeight), itemName(ItemModelType::orange), dirty(true) {}
 
 // Getters
 TileType	Tile::getTileType() { return tileType; }

@@ -53,6 +53,7 @@ public:
 	double		getSpeedMultiplier() const;
 	float		getVisionRadius() { return visionRadius; }
 	Direction	getFacingDirection() const;
+	bool		isDoneLoading() const;
 
 	// Setters
 	void setPlayerID(int id);
@@ -75,6 +76,7 @@ public:
 	void setAction(Action anAction);
 	void setPowerUp(PowerUp aPowerUp);
 	void setFacingDirection(Direction dir);
+	void setDoneLoading(bool status);
 
 	void setSpeedStartTime();
 	void setSearchStartTime();
@@ -171,6 +173,7 @@ protected:
 	bool		openingJail;
 	bool		openingGate;
 	bool		openingBox;
+	bool		doneLoading;
 
 	bool		caughtAnimal = false;
 	int			caughtAnimalID;

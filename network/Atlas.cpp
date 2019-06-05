@@ -654,6 +654,11 @@ bool Atlas::checkDroppedItems()
 
 	return updateClient;
 }
+
+bool Atlas::isItemPowerUp(ItemModelType itemName)
+{
+	return itemsMap.count(itemName) == 0;
+}
 void Atlas::unlockAllGates()
 {
 	for (auto gatePair : gateMap)

@@ -21,6 +21,7 @@ ServerGame::ServerGame(void)
     // set up the server network to listen 
     network = new ServerNetwork(); 
 	gameData = new GameData(SERVER_GAMEDATA);
+
 }
  
 void ServerGame::update() 
@@ -112,6 +113,14 @@ void ServerGame::receiveFromClients()
 				printf("server received ENTER event packet from client\n");
 				
 				break;
+			case DONE_LOADING_EVENT:
+				printf("server received DONE_LOADING event packet from client\n");
+				gameData->getPlayer(playerID)->setDoneLoading(true);
+				gameData->checkAllPlayersLoaded();
+				if(gameData->getAllPlayersLoaded())
+					gameData->setGameState(GameState::IN_GAME);
+
+				break;
 			case START_EVENT:
 				printf("server received START event packet from client\n");
 				{
@@ -132,7 +141,8 @@ void ServerGame::receiveFromClients()
 						}
 						updateHeight(iter->first);
 					}
-					gameData->setGameState(GameState::IN_GAME);
+					gameData->setGameState(GameState::LOADING);
+
 				}
 				break;
 			case SELECT_EVENT:
@@ -670,8 +680,10 @@ void ServerGame::receiveFromClients()
 					animalWin = false;
 					gameData->setWT(WinType::NONE);
 					resetGame();
+					gameData->setGameState(GameState::IN_LOBBY);
 				}
-				gameData->setGameState(GameState::IN_LOBBY);
+				
+
 				break;
 			}
 
@@ -1065,6 +1077,25 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
 		gameData->getPlayer(id)->setLocation(loc.getX() + (xSPEED*multiplier), loc.getY(), 
 												loc.getZ() + (zSPEED*multiplier));
+
+		Location loc = gameData->getPlayer(id)->getLocation();
+		Tile * tile = gameData->getTile(loc);
+		int row = 0;
+		int col = 0;
+
+		gameData->getAtlas()->getMapCoords(loc, row, col);
+		Location tileCenter = Location(col * TILE_SIZE + TILE_SIZE / 2, 0, row  * TILE_SIZE + TILE_SIZE / 2);
+		
+		
+		if (gameData->getAtlas()->isItemPowerUp(tile->getItem()))
+		{
+			// Only remove powerup item if the chef is near the center of tile where the item is
+			double dist = sqrt(pow(loc.getX() - tileCenter.getX(), 2) +
+				pow(loc.getZ() - tileCenter.getZ(), 2));
+			if (dist < PLAYER_RADIUS*2) {
+				tile->setItem(ItemModelType::EMPTY);
+			}
+		}
 	}
 	else
 	{

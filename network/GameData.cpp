@@ -14,6 +14,8 @@ GameData::GameData(int serverInit)
 	countdownCompleted = false;
 	playerNum = 1;
 	gameState = GameState::IN_LOBBY;
+	doneLoadingCount = 0;
+	allPlayersLoaded = false;
 }
 
 std::string GameData::encodeGameData(bool newPlayerInit)
@@ -40,6 +42,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "slowChef:" << getSlowChef() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
 	encodedData << "gameState: " << static_cast<int>(gameState) << std::endl;
+	encodedData << "allPlayersLoaded: " << allPlayersLoaded << std::endl;
 	encodedData << "disconnectedClients:";
 	
 	for (auto p : disconnectedPlayers)
@@ -72,6 +75,26 @@ ModelType GameData::getAvailableCharacter()
 	return ModelType::CHEF;
 }
 
+bool GameData::getAllPlayersLoaded()
+{
+	return allPlayersLoaded;
+}
+
+void GameData::checkAllPlayersLoaded()
+{
+	doneLoadingCount = 0;
+	for (auto iter : players)
+	{
+		if (iter.second->isDoneLoading())
+			doneLoadingCount++;
+	}
+	if (doneLoadingCount >= players.size())
+	{
+		allPlayersLoaded = true;
+	}
+	else
+		allPlayersLoaded = false;
+}
 void GameData::updateGateProgress(int gateNum)
 {
 	getAtlas()->updateGateProgress(gateNum);
@@ -156,7 +179,13 @@ void GameData::addDecodeFunctions()
  	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;
 	decodingFunctions["chefVision"] = &GameData::decodeChefVision;
 	decodingFunctions["winType"] = &GameData::decodeWinType;
+	decodingFunctions["allPlayersLoaded"] = &GameData::decodeAllPlayersLoaded;
 
+}
+
+void GameData::decodeAllPlayersLoaded(std::string value)
+{
+	allPlayersLoaded = value == "1";
 }
 
 void GameData::decodeSlowChef(std::string value)

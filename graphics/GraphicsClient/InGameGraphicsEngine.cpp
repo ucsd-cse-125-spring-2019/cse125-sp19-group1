@@ -248,7 +248,7 @@ static const struct ItemModelSettings {
 	const char *texturePath;     // filesystem path to a texture file
 	const char *name;            // name for use in debug messages, maybe user-visible too
 	ItemModelType id;            // A unique ID, like ItemModelType::apple
-	glm::vec3 scale;                 // scale adjustment
+	glm::vec3 scale;             // scale adjustment
 	glm::vec3 translate;         // position adjustment
 	glm::vec3 rotation;          // rotation
 	bool wallRotate;             // auto-rotate away from any wall on this tile
@@ -290,7 +290,7 @@ static const struct ItemModelSettings {
 	{ VENT_FILENAMES,                                      "vent",                 ItemModelType::vent,              glm::vec3(2.5f),    glm::vec3(0.f, 0.1f, -0.455f), glm::vec3(0.f),                   true },
 	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            WINDOW_SCALE,       glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,             glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
-    { MDL_SAME_TEX("net"),								   "net",				   ItemModelType::net,				 glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 0.f) },
+    { MDL_SAME_TEX("net"),                                 "net",                  ItemModelType::net,               glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 0.f) },
 };
 
 struct ItemModel {
@@ -512,22 +512,25 @@ struct PlayerState {
 	}
 };
 
-Transform * root = nullptr;
-std::vector<PlayerState> players;
-Transform * floorTransform = nullptr;
-Transform * envObjsTransform = nullptr;
-Transform * allItemsTransform = nullptr;
+static Transform * root = nullptr;
+static std::vector<PlayerState> players;
+static Transform * floorTransform = nullptr;
+static Transform * envObjsTransform = nullptr;
+static Transform * allItemsTransform = nullptr;
 
 // Default camera parameters
-glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
-glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camera looks at
-glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
-const glm::vec3 cam_angle(-10.f, 50.f, -30.f);  // camera's preferred offset from cam_look_at
+static glm::vec3 cam_pos(45.0f, 60.0f, 45.0f);          // e  | Position of camera
+static glm::vec3 cam_look_at(0.0f, 0.0f, 0.0f);         // d  | This is where the camera looks at
+static glm::vec3 cam_up(0.0f, 1.0f, 0.0f);              // up | What orientation "up" is
+static const glm::vec3 cam_overhead_angle(-10.f, 50.f, -30.f);   // camera's preferred offset from cam_look_at
+static bool thirdPersonView = false;
 
-glm::vec3 light_center = glm::vec3(0.f);
+static glm::vec3 light_center = glm::vec3(0.f);
+
+static int cameraClientId = -1;
 
 bool mouseRotation = false;
-glm::vec2 prevPos = glm::vec2(0.0f, 0.0f);
+glm::vec2 prevPos = glm::vec2(0.0f);
 float scaleDownMouseOps = 30.0f;
 float scaleUpAngle = 4.0f;
 float scaleMouseWheel = 1.05f;
@@ -541,6 +544,7 @@ glm::vec3 TrackballMapping(double x, double y, int width, int height);
 void TrackballRotation(float rotationAngle, glm::vec3 rotationAxis);
 bool iAmCaught();
 
+void toggleClient(); // from Tester.cpp
 
 static PlayerState *getMyState()
 {
@@ -1124,11 +1128,12 @@ void InGameGraphicsEngine::MovePlayers()
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
 			if (p->getAction() == Action::SWING_NET) {
-				state.angle = state.angle + 5;
+				state.angle = state.angle + 0.0675f * glm::two_pi<float>();
 				state.restrictRotation = true;
 			}
 			else {
 				state.restrictRotation = false;
+				state.angle = fmod(state.angle, glm::two_pi<float>());
 			}
 		}
 #ifdef DUMMY_ID
@@ -1161,13 +1166,13 @@ void InGameGraphicsEngine::MovePlayers()
 					state.setTargetAngle(glm::atan(-dir.x, dir.z));
 				}
 			}
-		}
 
-		// Animate state.angle towards state.targetAngle
-		state.angle += (state.targetAngle - state.angle) * 0.375f;
-		if (abs(state.targetAngle - state.angle) < 0.01) {
-			// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
-			state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
+			// Animate state.angle towards state.targetAngle
+			state.angle += (state.targetAngle - state.angle) * 0.375f;
+			if (abs(state.targetAngle - state.angle) < 0.01) {
+				// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
+				state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
+			}
 		}
 
 		state.transform = glm::rotate(newOffset, state.angle, glm::vec3(0.f, 1.f, 0.f));
@@ -1182,7 +1187,7 @@ void InGameGraphicsEngine::InitCamera(const glm::vec3 &newPlayerPos) {
 	cam_look_at.z = newPlayerPos.z;
 	cam_look_at.y = TILE_LEVEL_OFFSET * TILE_SCALE + TILE_HEIGHT_ADJUST;
 
-	cam_pos = cam_look_at + cam_angle;
+	cam_pos = cam_look_at + cam_overhead_angle;
 
 	UpdateView();
 }
@@ -1265,13 +1270,26 @@ static glm::vec3 limitLookAt(glm::vec3 lookAt) {
 	return lookAt;
 }
 
-static bool iAmCaught()
+static bool isBeingCarriedByChef(int id)
+{
+	for (auto pair : sharedClient->getGameData()->getAllPlayers()) {
+		auto chef = pair.second;
+		if (chef->isChef() && chef->getCaughtAnimalId() == id) return true;
+	}
+
+	return false;
+}
+
+static bool iAmJailed()
 {
 #ifdef DEBUG_CAUGHT
 	return true;
 #else
-	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
-	return allPlayers.count(sharedClient->getMyID()) && allPlayers.at(sharedClient->getMyID())->isCaught();
+	auto gameData = sharedClient->getGameData();
+	if (!gameData) return false;
+
+	auto me = gameData->getPlayer(sharedClient->getMyID());
+	return me->isCaught() && !isBeingCarriedByChef(sharedClient->getMyID());
 #endif
 }
 
@@ -1285,14 +1303,20 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
 
 	glm::vec3 look_target = limitLookAt(newPlayerPos);
-	glm::vec3 cam_target = look_target + cam_angle;
+	glm::vec3 cam_target = look_target + cam_overhead_angle;
 	float look_speed = 0.3f, cam_speed = 0.3f;
+
+#ifdef DEBUG_CAUGHT
+	bool watchOthersEnabled = true;
+#else
+	bool watchOthersEnabled = iAmJailed();
+#endif
 
 	if (sharedClient->getGameData()->getWT() != WinType::NONE) {
 		light_center = LookAtForWT(sharedClient->getGameData()->getWT());
 
 		look_target = limitLookAt(light_center);
-		cam_target = look_target + cam_angle;
+		cam_target = look_target + cam_overhead_angle;
 		look_speed = 0.3f;
 		cam_speed = 0.15f;
 
@@ -1300,31 +1324,39 @@ void InGameGraphicsEngine::MoveCamera(const glm::vec3 &newPlayerPos) {
 			quit = true;
 		}
 	}
-	else if (iAmCaught()) {
-		for (auto &player : players) {
-#ifdef DEBUG_CAUGHT
-			if (player.id != sharedClient->getMyID()) {
-
-				light_center = player.position;
-				look_target = limitLookAt(player.position);
-				cam_target = look_target + cam_angle;
-				look_speed = 0.3f;
-				cam_speed = 0.15f;
-				break;
+	else if (watchOthersEnabled) {
+		if (allPlayers.count(cameraClientId) <= 0) {
+			cameraClientId = sharedClient->getMyID();
+			for (auto pair : allPlayers) {
+				if (pair.first != sharedClient->getMyID() && !pair.second->isChef() && !pair.second->isCaught()) {
+					cameraClientId = pair.first;
+					break;
+				}
 			}
-#else
-			if (player.geometryIdx != static_cast<unsigned>(ModelType::CHEF) 
-				&& allPlayers.count(player.id)
-				&& !allPlayers.at(player.id)->isCaught()) {
+		}
 
-				light_center = player.position;
-				look_target = limitLookAt(player.position);
-				cam_target = look_target + cam_angle;
-				look_speed = 0.3f;
-				cam_speed = 0.15f;
-				break;
-			}
-#endif
+		Player *networkPlayer = allPlayers.at(cameraClientId);
+		auto loc = networkPlayer->getLocation();
+		auto position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
+		light_center = position;
+		look_target = limitLookAt(position);
+		cam_target = look_target + cam_overhead_angle;
+		look_speed = 0.3f;
+		cam_speed = 0.3f;
+	}
+	else if (thirdPersonView) {
+		auto myState = getMyState();
+		if (myState) {
+#define THIRD_PERSON_DIST 15.f
+			float camAngle = fmodf(myState->targetAngle + glm::three_over_two_pi<float>(), glm::two_pi<float>());
+
+			cam_target.x = myState->position.x - THIRD_PERSON_DIST * cosf(camAngle);
+			cam_target.y = myState->position.y + 25.f;
+			cam_target.z = myState->position.z + THIRD_PERSON_DIST * sinf(camAngle);
+
+			look_target.x = myState->position.x;
+			look_target.y = myState->position.y + 23.f;
+			look_target.z = myState->position.z;
 		}
 	}
 
@@ -1949,7 +1981,7 @@ static void DrawMinimap()
 			chefPosition.z = 0.f;
 		}
 
-		if (networkPlayerMe->isChef() != isChefState) {
+		if (!networkPlayerMe || networkPlayerMe->isChef() != isChefState) {
 			continue;
 		}
 
@@ -2346,6 +2378,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 		fog = new FogGenerator(CHEF_FOG_DISTANCE);
 	}
 
+	if (!twoDeeShader) {
+		twoDeeShader = TwoDeeGraphicsEngine::retainShader();
+	}
+
 #ifndef DEBUG_NO_UI
 	if (!uiCanvas) {
 		cout << "Loading UICanvas... ";
@@ -2355,10 +2391,6 @@ void InGameGraphicsEngine::MainLoopBegin()
 		auto setupEnd = high_resolution_clock::now();
 		std::chrono::duration<float> setupDuration = setupEnd - setupStart;
 		cout << "done constructing UICanvas in " << setupDuration.count() << " seconds\n";
-	}
-
-	if (!twoDeeShader) {
-		twoDeeShader = TwoDeeGraphicsEngine::retainShader();
 	}
 
 	if (!animalStartingPrompt) {
@@ -2510,23 +2542,58 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_UP) {
 			directions |= DirectionBitmask::northSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_DOWN) {
 			directions |= DirectionBitmask::southSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_LEFT) {
 			directions |= DirectionBitmask::westSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_RIGHT) {
 			directions |= DirectionBitmask::eastSide;
+			thirdPersonView = false;
 		}
 
 		if (key == GLFW_KEY_SPACE) {
-			// interact key press
-			sharedClient->sendPackets(INTERACT_EVENT);
+			if (iAmJailed()) {
+				auto gameData = sharedClient->getGameData();
+				if (gameData) {
+					const auto &allPlayers = gameData->getAllPlayers();
+					bool cameraClientSeen = false;
+					int firstId = -1;
+					int nextId = -1;
+
+					for (auto pair : allPlayers) {
+						if (pair.first == cameraClientId) {
+							cameraClientSeen = true;
+						}
+						else if (!pair.second->isChef()) {
+							if (firstId == -1)
+								firstId = pair.first;
+
+							if (cameraClientSeen && nextId == -1)
+								nextId = pair.first;
+						}
+					}
+
+					if (nextId != -1) {
+						cameraClientId = nextId;
+					}
+					else if (firstId != -1) {
+						cameraClientId = firstId;
+					}
+				}
+			}
+			else {
+				// interact key press
+				sharedClient->sendPackets(INTERACT_EVENT);
+			}
 		}
 
 		if (key == GLFW_KEY_ENTER) {
@@ -2575,6 +2642,12 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 				fake_carried_idx++;
 			}
 #endif
+		}
+		if (key == GLFW_KEY_TAB) {
+			(void)toggleClient();
+		}
+		if (key == GLFW_KEY_V) {
+			thirdPersonView = !thirdPersonView;
 		}
 
 	}
