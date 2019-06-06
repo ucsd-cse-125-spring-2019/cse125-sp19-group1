@@ -302,8 +302,12 @@ void ClientGame::update()
 		else {
 			if (player->getAction() == Action::NONE) {
 				soundSystem->pauseSoundEffect();
-				// soundSystem->pauseSoundQueue();
 				playerDoingStuff[pNum] = false;
+
+				if (player->isCaught() == false && playerIsCaught.at(pNum)) {
+					soundSystem->playSoundEffect(sound_jail_escape, true);
+					playerIsCaught[pNum] = false;
+				}
 			}
 			else if (player->getAction() == Action::OPEN_BOX && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_search_item);
@@ -421,7 +425,10 @@ void ClientGame::update()
 					playerDoingStuff.at(curPlayerNum) = false;
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
 
-					if (curPlayer->isCaught() == false && playerIsCaught)
+					if (curPlayer->isCaught() == false && playerIsCaught.at(curPlayerNum)) {
+						soundSystem->playSoundEffect(sound_jail_escape, true);
+						playerIsCaught[curPlayerNum] = false;
+					}
 				}
 				else if (curPlayer->getAction() == Action::OPEN_BOX && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playOtherPlayersSounds(sound_other_search_item, curPlayerNum, locX, locY, locZ);
