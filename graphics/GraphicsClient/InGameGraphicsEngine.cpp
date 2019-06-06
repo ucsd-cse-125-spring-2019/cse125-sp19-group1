@@ -1606,6 +1606,7 @@ void updateUIElements(GameData * gameData) {
 			gameData->getGateTile(currPlayer->getLocation())->getKeyProgress() == 3) {
 			uiCanvas->setVisible(UICanvas::PROMPT_GET_CAKE, false);
 			uiCanvas->setVisible(UICanvas::PROMPT_BUILD_EXIT, true);
+			uiCanvas->setVisible(UICanvas::PROMPT_DROP_ITEM, false);
 		}
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_GET_CAKE, false);

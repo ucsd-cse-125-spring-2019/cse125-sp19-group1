@@ -26,8 +26,14 @@
 
 // Paths for background music loops
 #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
-#define SONG_LOOP			(SOUNDS_PATH "Song_Loop.mp3")
-#define LOBBY_LOOP			(SOUNDS_PATH "Lobby_Loop.mp3")
+#define SONG_LOOP			(SOUNDS_PATH "Song_Loop.mp3") //placeholder
+#define LOBBY_LOOP			(SOUNDS_PATH "LobbyLoop.wav")
+#define INSTRUCTIONS_A	    (SOUNDS_PATH "Instructions1.mp3")
+#define INSTRUCTIONS_B      (SOUNDS_PATH "Instructions2.mp3")
+#define LOOP_A				(SOUNDS_PATH "LoopA.wav")
+#define LOOP_B				(SOUNDS_PATH "LoopB.wav")
+#define TRANSITION_C		(SOUNDS_PATH "TransitionC.wav")
+#define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.mp3")
 static SoundSystem * soundSystem;
 
 // sounds specific to player (NOT 3D)
@@ -117,7 +123,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
 		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
 
-		soundSystem->createBackgroundMusic(&background_music, LOBBY_LOOP);
+		soundSystem->createBackgroundMusic(&background_music, TRANSITION_C);
 		soundSystem->playBackgroundMusic(background_music, true); // FIXME: uncomment
 	}
 
