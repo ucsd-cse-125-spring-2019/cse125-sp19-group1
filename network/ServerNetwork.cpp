@@ -83,6 +83,11 @@ ServerNetwork::ServerNetwork(void)
     }
 }
 
+ServerNetwork::~ServerNetwork()
+{
+
+}
+
 // accept new connections
 bool ServerNetwork::acceptNewClient(unsigned int & id)
 {

@@ -35,6 +35,7 @@ enum PacketTypes {
 	SET_DONE_LOADING_EVENT,
 	GO_TO_CREDITS_EVENT,
 	PLAYER_DASH_EVENT,
+	REMOVE_WALLS_EVENT,
 };
 
 struct Packet {

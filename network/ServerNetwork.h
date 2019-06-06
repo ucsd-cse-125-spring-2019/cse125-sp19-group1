@@ -19,7 +19,7 @@ class ServerNetwork
 public:
  
     ServerNetwork(void);
-    ~ServerNetwork(void);
+    ~ServerNetwork();
  
     // Socket to listen for new connections
     SOCKET ListenSocket;

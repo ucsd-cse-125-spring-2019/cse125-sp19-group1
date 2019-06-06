@@ -36,7 +36,7 @@ public:
  
     // ctor/dtor
     ClientNetwork(void);
-    ~ClientNetwork(void);
+    ~ClientNetwork();
 
 	int receivePackets(char *);
 };

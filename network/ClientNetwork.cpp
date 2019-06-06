@@ -108,6 +108,11 @@ ClientNetwork::ClientNetwork(void)
 
 }
 
+ClientNetwork::~ClientNetwork()
+{
+
+}
+
 int ClientNetwork::receivePackets(char * recvbuf)
 {
 	iResult = NetworkServices::receiveMessage(ConnectSocket, recvbuf, MAX_PACKET_SIZE);

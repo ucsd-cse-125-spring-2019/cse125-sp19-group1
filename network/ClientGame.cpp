@@ -132,6 +132,12 @@ ClientGame::ClientGame(void)
 
 	NetworkServices::sendMessage(network->ConnectSocket, packet_data, packet_size);
 }
+ClientGame::~ClientGame()
+{
+	delete gameData;
+	delete network;
+	delete soundSystem;
+}
 
 //Sending packet information
 void ClientGame::sendActionPackets()

@@ -10,7 +10,7 @@ class ServerGame
 public:
 
 	ServerGame(void);
-	~ServerGame(void);
+	~ServerGame();
 
     void update();
 	void receiveFromClients();

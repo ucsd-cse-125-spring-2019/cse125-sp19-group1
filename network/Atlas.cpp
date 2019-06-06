@@ -273,6 +273,16 @@ Atlas::Atlas()
 	std::cout << "end atlas constructor\n";
 }
 
+Atlas::~Atlas()
+{
+	for (auto tileRow : tileLayout)
+	{
+		for (auto * tile : tileRow)
+		{
+			delete tile;
+		}
+	}
+}
 void Atlas::detectWallCollision(Location & loc) {
 	// find which tile player is in
 	int row = (int)(loc.getZ() / TILE_SIZE);
@@ -1417,4 +1427,9 @@ std::string Atlas::encodeTileLayoutData(bool newPlayerInit)
 	encodedData << std::endl;
 	return encodedData.str();
 
+}
+
+void Atlas::removeWalls(int row, int col)
+{
+	tileLayout[row][col]->setWall(0);
 }

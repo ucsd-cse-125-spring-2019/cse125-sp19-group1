@@ -30,7 +30,7 @@ class ClientGame
 
 public:
 	ClientGame();
-	~ClientGame(void);
+	~ClientGame();
 
 	ClientNetwork* network;
 

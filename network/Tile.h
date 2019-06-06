@@ -13,7 +13,6 @@ public:
 	// Constructor with default values if no params set
 	Tile(TileType aType = TileType::DEFAULT, int aWallLayout = 0, int aHeight = 0, ItemModelType anItem = ItemModelType::EMPTY);
 
-
 	bool isDirty();
 	int getWall();
 	int getHeight();
@@ -23,6 +22,7 @@ public:
 	// Setters
 	void setItem(ItemModelType anItem);
 	void setDirty();
+	void setWall(int val);
 
 	// Encode/Decode functions - overridden in subclasses
 	virtual std::string encodeTileData();

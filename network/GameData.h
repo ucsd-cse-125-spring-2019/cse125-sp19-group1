@@ -25,7 +25,7 @@ class GameData
 public:
 	GameData();
 	GameData(int serverInit);
-
+	~GameData();
 	std::vector<Location> initLocs =
 	{
 		Location(5 + TILE_SIZE * 0, 0, 5 + TILE_SIZE * 0),

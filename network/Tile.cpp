@@ -12,6 +12,7 @@ ItemModelType	Tile::getItem()		{ return itemName; }
 bool		Tile::isDirty()		{ return dirty; }
 
 // Setters
+void Tile::setWall(int val) { wall = val; setDirty(); }
 void Tile::setItem(ItemModelType anItem) { itemName = anItem; setDirty(); }
 void Tile::setDirty() { dirty = true; }
 

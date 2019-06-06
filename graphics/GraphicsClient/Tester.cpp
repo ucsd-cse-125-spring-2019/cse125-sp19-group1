@@ -228,6 +228,8 @@ void CleanUp() {
 		delete cutscene;
 	}
 	startingCutscenes.clear();
+	delete server;
+	delete sharedClient;
 }
 
 void ResizeCallback(GLFWwindow* window, int newWidth, int newHeight)

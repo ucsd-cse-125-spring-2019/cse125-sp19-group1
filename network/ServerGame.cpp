@@ -23,6 +23,12 @@ ServerGame::ServerGame(void)
 	gameData = new GameData(SERVER_GAMEDATA);
 
 }
+ServerGame::~ServerGame()
+{
+	delete network;
+	delete gameData;
+}
+
  
 void ServerGame::update() 
 {
@@ -108,6 +114,18 @@ void ServerGame::receiveFromClients()
 
 			case ACTION_EVENT:
 				printf("server received action event packet from client\n");
+				break;
+			case REMOVE_WALLS_EVENT:
+				printf("server received remove walls event packet from client\n");
+				{
+					if (Player * player = gameData->getPlayer(playerID))
+					{
+						int row, col;
+						Location loc = player->getLocation();
+						gameData->getAtlas()->getMapCoords(loc, row, col);
+						gameData->getAtlas()->removeWalls(row, col);
+					}
+				}
 				break;
 			case PLAYER_DASH_EVENT:
 				printf("server received PlayerDash event packet from client\n");
@@ -1525,6 +1543,7 @@ void ServerGame::updateCollision(int id)
 void ServerGame::resetGame() 
 {
 	std::cout << "CALLING RESET GAME" << std::endl;
+	delete gameData;
 	gameData = new GameData(SERVER_GAMEDATA);
 
 	//reset players

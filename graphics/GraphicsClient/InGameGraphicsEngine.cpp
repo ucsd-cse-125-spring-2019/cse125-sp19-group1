@@ -2710,6 +2710,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		if (key == GLFW_KEY_F9) {
 			sharedClient->sendPackets(UNLOCK_ALL_GATES_EVENT);
 		}
+		if (key == GLFW_KEY_F5) {
+			sharedClient->sendPackets(REMOVE_WALLS_EVENT);
+		}
 
 		if (key == GLFW_KEY_UP) {
 			directions |= DirectionBitmask::northSide;

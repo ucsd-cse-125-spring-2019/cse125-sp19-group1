@@ -18,6 +18,24 @@ GameData::GameData(int serverInit)
 	allPlayersLoaded = false;
 }
 
+GameData::~GameData()
+{
+	if (atlas)
+		delete atlas;
+
+	for (auto iter : players)
+	{
+		delete iter.second;
+	}
+
+	for (auto tileRow : clientTileLayout)
+	{
+		for (auto * tile : tileRow)
+		{
+			delete tile;
+		}
+	}
+}
 std::string GameData::encodeGameData(bool newPlayerInit)
 {
 	std::stringstream encodedData;
@@ -165,8 +183,11 @@ void GameData::removePlayer(int anID, ClientType type)
 	{
 
 	}
-	if(players.count(anID) > 0)
+	if (players.count(anID) > 0)
+	{
+		delete players.at(anID);
 		players.erase(anID);
+	}
 }
 
 void GameData::addDecodeFunctions()
