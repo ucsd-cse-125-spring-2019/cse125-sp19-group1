@@ -21,7 +21,7 @@ int main()
     server = new ServerGame();
 
 	serverLoop((void*)12);
-	auto now = std::chrono::system_clock::now();
+	auto timeStamp = std::chrono::system_clock::now();
 }
 
 void serverLoop(void * arg) 
@@ -30,7 +30,7 @@ void serverLoop(void * arg)
     {
 		auto now = std::chrono::system_clock::now();
 		std::chrono::duration<double> elapsed_seconds = now - timeStamp;
-		if (elapsed_seconds.count() > 1000.0 / FPS)
+		if (elapsed_seconds.count() > 1.0 / FPS)
 		{
 			timeStamp = std::chrono::system_clock::now();
 			server->update();
