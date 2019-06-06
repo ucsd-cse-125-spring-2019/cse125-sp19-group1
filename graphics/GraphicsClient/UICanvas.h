@@ -1,7 +1,7 @@
 
 #include "UIObject.h"
 
-#define NUM_ITEMS 57
+#define NUM_ITEMS 58
 #define CANVAS_PATH    "../Canvas/"
 
 #define CANVAS_MDL_PATH		(CANVAS_PATH "canvas.fbx")
@@ -62,6 +62,7 @@
 #define PROMPT_DROP_ITEM_TEX (CANVAS_PATH "promptDropItem.png")
 #define ANGRY_METER_1_TEX (CANVAS_PATH "angry1.png")
 #define ANGRY_METER_2_TEX (CANVAS_PATH "angry2.png")
+#define SPEED_METER_TEX (CANVAS_PATH "speedBoost.png")
 
 
 #ifndef UICANVAS_H
@@ -126,12 +127,15 @@ public:
 		PROMPT_DROP_ITEM = 54,
 		ANGRY_METER_1 = 55,
 		ANGRY_METER_2 = 56,
+		SPEED_BOOST = 57,
 	};
 	void draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
 	void setAngerRatio(float newAngerRatio);
+	void setBoostRatio(float newBoostRatio);
 	void setVisible(UIType item, bool visible);
 	void setItem(UIType item);
 	void setItemChef(UIType item);
+	void setBoostVisible(bool visible);
 	void removeItems();
 	UICanvas(GLuint shaderProgram);
 	~UICanvas();
@@ -140,6 +144,8 @@ private:
 	class UIObject *uiItems[NUM_ITEMS];
 	GLuint shaderProgram;
 	float angerRatio;
+	float boostRatio;
+	int boostVisible;
 
 };
 
