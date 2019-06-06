@@ -1400,6 +1400,10 @@ void updateUIElements(GameData * gameData) {
 
 	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
 	std::map<int, Player*> players = gameData->getAllPlayers();
+	if (gameData->getChefAnger() >= CHEF_MAX_ANGER){
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, false);
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_2, true);
+	}
 	//check if animals are caught
 	//activates when animal is first in net.
 	for (auto it = players.begin(); it != players.end(); ++it) {
