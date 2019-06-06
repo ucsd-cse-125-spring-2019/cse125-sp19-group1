@@ -56,6 +56,5 @@ public:
 	// any audio drivers and crash the game.
 	bool shouldIgnoreSound();
 
-	void errorCheck(FMOD_RESULT result);
 };
 
