@@ -50,7 +50,12 @@ SoundSystem::SoundSystem()
 		fprintf(stdout, "SoundSystem ERROR %d: CANNOT INITIALIZE SOUNDSYSTEM\n", result);
 	}
 
-	result = system->set3DListenerAttributes(NULL, NULL, NULL, NULL, NULL);
+	FMOD_VECTOR forwardOrientation;
+	forwardOrientation.x = 0.0;
+	forwardOrientation.y = 0.0;
+	forwardOrientation.z = 1.0;
+
+	result = system->set3DListenerAttributes(NULL, NULL, NULL, &forwardOrientation, NULL);
 	if (result != FMOD_OK) {
 		fprintf(stdout, "SoundSystem ERROR %d: CANNOT SET PLAYER POSITION\n", result);
 	}
@@ -78,7 +83,7 @@ void SoundSystem::setListenerLocation(float x, float y, float z)
 	loc.y = y;
 	loc.z = z;
 
-	result = system->set3DListenerAttributes(NULL, &loc, NULL, NULL, NULL);
+	result = system->set3DListenerAttributes(NULL, &loc, NULL, &forwardOrientation, NULL);
 	if (result != FMOD_OK) {
 		std::cerr << "setListenerLocation ERROR: cannot set player position - ";
 		errorCheck(result);
@@ -276,7 +281,7 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 	}
 
 	result = system->playSound(pSound, 0, false, &not3DChannel[1]);
-	not3DChannel[1]->setVolume(0.05f);
+	not3DChannel[1]->setVolume(0.2f);
 
 	if (result != FMOD_OK) {
 		std::cerr << "playBackgroundMusic ERROR: cannot play background music - ";
