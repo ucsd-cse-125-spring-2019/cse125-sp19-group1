@@ -3,7 +3,8 @@
 #define GAME_CONFIGS_H
 
 // Minimap
-#define MINIMAP_PING_INTERVAL 10.0
+#define MINIMAP_PING_INTERVAL_NO_ANGER 15.0
+#define MINIMAP_PING_INTERVAL_FULL_ANGER 3.0
 
 // Player data
 #define CHEF_SPAWN_ROW 0

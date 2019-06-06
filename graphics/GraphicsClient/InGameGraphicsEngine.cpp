@@ -1401,7 +1401,7 @@ void updateUIElements(GameData * gameData) {
 		return;
 	}
 
-	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
+	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/CHEF_MAX_ANGER);
 	std::map<int, Player*> players = gameData->getAllPlayers();
 	if (gameData->getChefAnger() >= CHEF_MAX_ANGER){
 		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, false);
@@ -2009,9 +2009,26 @@ static void DrawMinimap()
 	}
 
 	// Draw a ping originating from the chef
+
+	static double ping_start = 0.0;
+	static bool pinging = false;
 	double now = glfwGetTime();
-	float pingPhase = fmod(now, MINIMAP_PING_INTERVAL) / MINIMAP_PING_DURATION;
-	if (foundChef && pingPhase >= 0.0 && pingPhase <= 1.0) {
+	double angerFraction = gameData->getChefAnger() / (double)CHEF_MAX_ANGER;
+	double interval = MINIMAP_PING_INTERVAL_NO_ANGER + angerFraction * (MINIMAP_PING_INTERVAL_FULL_ANGER - MINIMAP_PING_INTERVAL_NO_ANGER);
+
+	if (!pinging && now >= ping_start + interval) {
+		// It's time (or possibly overdue) for a ping!
+		ping_start = now;
+		pinging = true;
+	}
+	else if (pinging && now > ping_start + MINIMAP_PING_DURATION) {
+		// Done pinging
+		pinging = false;
+	}
+
+	if (foundChef && pinging) {
+		float pingPhase = (now - ping_start) / MINIMAP_PING_DURATION;
+
 		glUseProgram(twoDeeShader);
 		auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
 		glUniform1f(uAlpha, (1.f - pingPhase) * (1.f - pingPhase));
@@ -2581,9 +2598,10 @@ void InGameGraphicsEngine::ResizeCallback(GLFWwindow* window, int newWidth, int 
 	if (windowHeight > 0)
 	{
 		P = glm::perspective(45.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4000.0f);
-		V = glm::lookAt(cam_pos, cam_look_at, cam_up);
 
 		orthoP = glm::ortho(-1.f, 1.f, -1.f, 1.f);
+
+		UpdateView();
 	}
 }
 
