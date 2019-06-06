@@ -233,8 +233,9 @@ void ClientGame::update()
 				playerDoingStuff[pNum] = false;
 			}
 
-			if (wt == WinType::CHEF_WIN) {
+			if (wt == WinType::CHEF_WIN && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_chef);
+				playerDoingStuff[pNum] = true;
 			}
 		}
 		else {
