@@ -35,7 +35,9 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
-#define DEBUG_CLIENTS
+
+//
+//#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
 static ClientGame * clients[4] = { nullptr };
 
