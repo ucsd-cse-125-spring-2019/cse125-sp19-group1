@@ -6,7 +6,6 @@
 
 #include "Transform.h"
 #include "Geometry.h"
-#include "SoundSystem.h"
 #include "DirLight.h"
 #include "FogGenerator.h"
 #include "FBXObject.h"
@@ -438,8 +437,7 @@ static vector<vector<Transform *>> westWalls;
 static vector<vector<Transform *>> envObjs;
 static vector<vector<AnimatedItem>> itemTransforms;
 
-static SoundSystem * soundSystem;
-static Sound * sound_door;
+/*static Sound * sound_door;
 static Sound * sound_door_unlock;
 static Sound * sound_found_item;
 static Sound * sound_net;
@@ -449,7 +447,7 @@ static Sound * sound_search_item;
 static Sound * sound_toilet;
 static Sound * sound_vent_screw;
 static Sound * sound_window;
-static Sound * sound_yay;
+static Sound * sound_yay;*/
 
 ParticleSpawner * dustSpawner[MAX_PLAYERS];
 ParticleSpawner * flashSpawner[MAX_PLAYERS];
@@ -2473,15 +2471,15 @@ InGameGraphicsEngine::~InGameGraphicsEngine()
 
 void InGameGraphicsEngine::StartLoading()  // may launch a thread and return immediately
 {
-	soundSystem = new SoundSystem();
+	//soundSystem = new SoundSystem();
 
-	// If no audio device is plugged in, sound system will refuse to create sounds
+	/*// If no audio device is plugged in, sound system will refuse to create sounds
 	if (!(soundSystem->shouldIgnoreSound())) {
 		fprintf(stdout, "createSound before: sound_toilet=%p\n", sound_toilet);
 		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		fprintf(stdout, "createSound after: sound_toilet=%p\n", sound_toilet);
 		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
-	}
+	}*/
 
 	// load the shader program
 	if (!objShaderProgram) {
