@@ -20,6 +20,7 @@ SoundSystem::SoundSystem()
 	system->getNumDrivers(&driverCount);
 	not3DChannel[0] = 0;
 	not3DChannel[1] = 0;
+	not3DChannel[2] = 0;
 	threeDeeChannel[0] = 0;
 	threeDeeChannel[1] = 0;
 	threeDeeChannel[2] = 0;
@@ -49,7 +50,12 @@ SoundSystem::SoundSystem()
 		fprintf(stdout, "SoundSystem ERROR %d: CANNOT INITIALIZE SOUNDSYSTEM\n", result);
 	}
 
-	result = system->set3DListenerAttributes(NULL, NULL, NULL, NULL, NULL);
+	FMOD_VECTOR forwardOrientation;
+	forwardOrientation.x = 0.0;
+	forwardOrientation.y = 0.0;
+	forwardOrientation.z = -1.0;
+
+	result = system->set3DListenerAttributes(NULL, NULL, NULL, &forwardOrientation, NULL);
 	if (result != FMOD_OK) {
 		fprintf(stdout, "SoundSystem ERROR %d: CANNOT SET PLAYER POSITION\n", result);
 	}
@@ -66,14 +72,21 @@ SoundSystem::~SoundSystem()
 void SoundSystem::setListenerLocation(float x, float y, float z)
 {
 	FMOD_RESULT result;
+	FMOD_VECTOR forwardOrientation;
 	FMOD_VECTOR loc;
+
+	forwardOrientation.x = 0.0;
+	forwardOrientation.y = 0.0;
+	forwardOrientation.z = -1.0;
+
 	loc.x = x;
 	loc.y = y;
 	loc.z = z;
 
-	result = system->set3DListenerAttributes(NULL, &loc, NULL, NULL, NULL);
+	result = system->set3DListenerAttributes(NULL, &loc, NULL, &forwardOrientation, NULL);
 	if (result != FMOD_OK) {
-		fprintf(stdout, "setListenerLocation ERROR %d: CANNOT SET PLAYER POSITION\n", result);
+		std::cerr << "setListenerLocation ERROR: cannot set player position - ";
+		errorCheck(result);
 	}
 }
 
@@ -83,7 +96,8 @@ void SoundSystem::update()
 
 	result = system->update();
 	if (result != FMOD_OK) {
-		fprintf(stdout, "update ERROR %d: CANNOT UPDATE 3D SOUND CALCULATIONS\n", result);
+		std::cerr << "update ERROR: cannot update 3D sound calcs - ";
+		errorCheck(result);
 	}
 
 }
@@ -95,28 +109,21 @@ void SoundSystem::createSoundEffect(Sound ** pSound, const char* pFile)
 
 	// check if file exists
 	if (stat(pFile, &buffer) != 0) {
-		fprintf(stdout, "createSound ERROR: FILE DOES NOT EXIST\n");
+		std::cerr << "createSound ERROR: FILE DOES NOT EXIST\n";
 	}
 
-	fprintf(stdout, "createSound: before system->createSound pSound=%d\n", pSound);
+	fprintf(stderr, "createSound: before system->createSound pSound=%d\n", pSound);
 	// can also use FMOD_CREATESAMPLE to load entire sound
 	// and decompress it in memory to speed up playback
 	result = system->createSound(pFile, FMOD_DEFAULT, 0, pSound);
 	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_UNINITIALIZED) {
-			fprintf(stdout, "createSound ERROR: FMOD_ERR_UNINITIALIZED\n");
-		}
-		else if (result == FMOD_ERR_UNSUPPORTED) {
-			fprintf(stdout, "createSound ERROR: FMOD_ERR_UNSUPPORTED\n");
-		}
-		else {
-			fprintf(stdout, "createSound ERROR %d: COULD NOT CREATE SOUND %s\n", result, pFile);
-		}
+		std::cerr << "createSoundEffect ERROR: could not create sound - ";
+		errorCheck(result);
 	}
-	else {
-		fprintf(stdout, "createSound: Able to create sound %s\n", pFile);
-		fprintf(stdout, "createSound: pSound=%d\n", pSound);
-	}
+	// else {
+	//	fprintf(stderr, "createSound: Able to create sound %s\n", pFile);
+	//	fprintf(stderr, "createSound: pSound=%d\n", pSound);
+	// }
 }
 
 void SoundSystem::createOtherPlayersSounds(Sound ** pSound, const char* pFile)
@@ -126,27 +133,20 @@ void SoundSystem::createOtherPlayersSounds(Sound ** pSound, const char* pFile)
 
 	// check if file exists
 	if (stat(pFile, &buffer) != 0) {
-		fprintf(stdout, "createSound ERROR: FILE DOES NOT EXIST\n");
+		fprintf(stderr, "createOtherPlayerSounds ERROR: FILE DOES NOT EXIST\n");
 	}
 
-	fprintf(stdout, "createSound: before system->createSound pSound=%d\n", pSound);
+	fprintf(stderr, "createOtherPlayerSounds: before system->createSound pSound=%d\n", pSound);
 	// can also use FMOD_CREATESAMPLE to load entire sound
 	// and decompress it in memory to speed up playback
 	result = system->createSound(pFile, FMOD_3D, 0, pSound);
 	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_UNINITIALIZED) {
-			fprintf(stdout, "createOtherPlayersSounds ERROR: FMOD_ERR_UNINITIALIZED\n");
-		}
-		else if (result == FMOD_ERR_UNSUPPORTED) {
-			fprintf(stdout, "createOtherPlayersSounds ERROR: FMOD_ERR_UNSUPPORTED\n");
-		}
-		else {
-			fprintf(stdout, "createOtherPlayersSounds ERROR %d: COULD NOT CREATE SOUND %s\n", result, pFile);
-		}
+		std::cerr << "createOtherPlayerSounds ERROR: could not create sound - ";
+		errorCheck(result);
 	}
 	else {
-		fprintf(stdout, "createOtherPlayersSounds: Able to create sound %s\n", pFile);
-		fprintf(stdout, "createOtherPlayersSounds: pSound=%d\n", pSound);
+		fprintf(stderr, "createOtherPlayersSounds: Able to create sound %s\n", pFile);
+		fprintf(stderr, "createOtherPlayersSounds: pSound=%d\n", pSound);
 	}
 }
 
@@ -157,32 +157,25 @@ void SoundSystem::createBackgroundMusic(Sound ** pSound, const char* pFile)
 
 	// check if file exists
 	if (stat(pFile, &buffer) != 0) {
-		fprintf(stdout, "createSound ERROR: FILE DOES NOT EXIST\n");
+		fprintf(stderr, "createBackgroundMusic ERROR: FILE DOES NOT EXIST\n");
 	}
 
-	fprintf(stdout, "createSound: before system->createSound pSound=%d\n", pSound);
+	fprintf(stderr, "createBackgroundMusic: before system->createSound pSound=%d\n", pSound);
 	// using FMOD_CREATESAMPLE since background music is larger file
 	result = system->createSound(pFile, FMOD_CREATESAMPLE, 0, pSound);
 	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_UNINITIALIZED) {
-			fprintf(stdout, "createSound ERROR: FMOD_ERR_UNINITIALIZED\n");
-		}
-		else if (result == FMOD_ERR_UNSUPPORTED) {
-			fprintf(stdout, "createSound ERROR: FMOD_ERR_UNSUPPORTED\n");
-		}
-		else {
-			fprintf(stdout, "createSound ERROR %d: COULD NOT CREATE SOUND %s\n", result, pFile);
-		}
+		std::cerr << "createBackground Music ERROR: could not create sound - ";
+		errorCheck(result);
 	}
 	else {
-		fprintf(stdout, "createSound: Able to create sound %s\n", pFile);
-		fprintf(stdout, "createSound: pSound=%d\n", pSound);
+		fprintf(stderr, "createSound: Able to create sound %s\n", pFile);
+		fprintf(stderr, "createSound: pSound=%d\n", pSound);
 	}
 }
 
 // this method will play a sound effect, regardless of other sounds
 // are currently playing
-void SoundSystem::playSoundEffect(Sound * pSound, bool bLoop)
+void SoundSystem::playSoundEffect(Sound * pSound, bool playUntilEnd, bool bLoop)
 {
 	FMOD_RESULT result;
 
@@ -194,16 +187,16 @@ void SoundSystem::playSoundEffect(Sound * pSound, bool bLoop)
 		pSound->setLoopCount(-1);
 	}
 
-	result = system->playSound(pSound, 0, false, &not3DChannel[0]);
-
+	if (playUntilEnd) {
+		result = system->playSound(pSound, 0, false, &not3DChannel[2]);
+	}
+	else {
+		result = system->playSound(pSound, 0, false, &not3DChannel[0]);
+	}
+	
 	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_INVALID_PARAM) {
-			fprintf(stdout, "playSound ERROR: pSound=%d\n", pSound);
-			fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
-		}
-		else {
-			fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
-		}
+		std::cerr << "playSoundEffect ERROR: cannot play sound - ";
+		errorCheck(result);
 	}
 }
 
@@ -218,12 +211,8 @@ void SoundSystem::pauseSoundEffect()
 
 		// TODO: also reset or clear channel
 		if (result != FMOD_OK) {
-			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "pauseSoundEffect ERROR: FMOD_ERR_INVALID_PARAM\n");
-			}
-			else {
-				fprintf(stdout, "pauseSoundEffect ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
-			}
+			std::cerr << "pauseSoundEffect ERROR: cannot pause sound - ";
+			errorCheck(result);
 		}
 	}
 }
@@ -242,21 +231,8 @@ void SoundSystem::pauseOtherPlayersSounds(int playerNum)
 	result = curPlayerChannel->setPaused(true);
 	
 	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_INVALID_PARAM) {
-			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
-		}
-		else if (result == FMOD_ERR_INVALID_HANDLE) {
-			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_HANDLE\n");
-		}
-		else if (result == FMOD_ERR_INVALID_PARAM) {
-			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
-		}
-		else if (result == FMOD_ERR_INVALID_POSITION) {
-			fprintf(stdout, "pauseOtherPlayersSounds ERROR: FMOD_ERR_INVALID_POSITION\n");
-		}
-		else {
-			fprintf(stdout, "pauseOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
-		}
+		std::cerr << "pauseOtherPlayersSounds ERROR: cannot pause other player sounds - ";
+		errorCheck(result);
 	}
 
 }
@@ -272,12 +248,8 @@ void SoundSystem::pauseAllSounds()
 
 		// TODO: also reset or clear channel
 		if (result != FMOD_OK) {
-			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "pauseAllSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
-			}
-			else {
-				fprintf(stdout, "pauseAllSounds ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
-			}
+			std::cerr << "pauseAllSounds ERROR: cannot pause all sounds - ";
+			errorCheck(result);
 		}
 	}
 	result = not3DChannel[1]->isPlaying(&playing);
@@ -286,12 +258,8 @@ void SoundSystem::pauseAllSounds()
 
 		// TODO: also reset or clear channel
 		if (result != FMOD_OK) {
-			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "pauseAllSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
-			}
-			else {
-				fprintf(stdout, "pauseAllSounds ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
-			}
+			std::cerr << "pauseAllSounds ERROR: cannot pause all sounds - ";
+			errorCheck(result);
 		}
 	}
 
@@ -313,16 +281,11 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 	}
 
 	result = system->playSound(pSound, 0, false, &not3DChannel[1]);
-	not3DChannel[1]->setVolume(0.05f);
+	not3DChannel[1]->setVolume(0.2f);
 
 	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_INVALID_PARAM) {
-			fprintf(stdout, "playSound ERROR: pSound=%p\n", pSound);
-			fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
-		}
-		else {
-			fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
-		}
+		std::cerr << "playBackgroundMusic ERROR: cannot play background music - ";
+		errorCheck(result);
 	}
 }
 
@@ -350,17 +313,13 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerNum, float x,
 
 	// haven't played before
 	if (threeDeeChannelPlayedBefore[playerNum - 1] == false) {
-		result = system->playSound(pSound, 0, false, &curPlayerChannel);
-		curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
+		result = system->playSound(pSound, 0, true, &curPlayerChannel);
+		result = curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
+		result = curPlayerChannel->setPaused(false);
 
 		if (result != FMOD_OK) {
-			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "playOtherPlayersSounds ERROR: pSound=%p\n", pSound);
-				fprintf(stdout, "playOtherPlayersSounds ERROR: FMOD_ERR_INVALID_PARAM\n");
-			}
-			else {
-				fprintf(stdout, "playOtherPlayersSounds ERROR %d: COULD NOT PLAY SOUND\n", result);
-			}
+			std::cerr << "playOtherPlayersSounds ERROR: cannot play sounds - ";
+			errorCheck(result);
 		}
 		// threeDeeChannelPlayedBefore[otherPlayerChannels.at(playerID)] = true;
 	}
@@ -418,13 +377,8 @@ void SoundSystem::playSoundEffectNoOverlap(Sound * pSound, bool bLoop)
 		result = system->playSound(pSound, 0, false, &not3DChannel[0]);
 
 		if (result != FMOD_OK) {
-			if (result == FMOD_ERR_INVALID_PARAM) {
-				fprintf(stdout, "playSound ERROR: pSound=%p\n", pSound);
-				fprintf(stdout, "playSound ERROR: FMOD_ERR_INVALID_PARAM\n");
-			}
-			else {
-				fprintf(stdout, "playSound ERROR %d: COULD NOT PLAY SOUND\n", result);
-			}
+			std::cerr << "playSoundEffectNoOverlap ERROR: cannot play sound - ";
+			errorCheck(result);
 		}
 	}
 	
@@ -440,88 +394,52 @@ bool SoundSystem::shouldIgnoreSound()
 	return !hasAudioDriver;
 }
 
-void SoundSystem::pushSoundQueue(Sound * pSound)
-{
-	soundQueue.push(pSound);
-}
-
-void SoundSystem::playSoundsInQueueThread()
-{
-	FMOD_RESULT result;
-	bool playing = false;
-	bool paused = true;
-	Sound * currSound;
-
-	result = not3DChannel[0]->isPlaying(&playing);
-
-	fprintf(stdout, "playSoundsInQueueThread: I'm %d\n", std::this_thread::get_id());
-	fprintf(stdout, "playSoundsInQueueThread: num in queue: %llu, playing=%d\n", soundQueue.size(), playing);
-
-	while ((!soundQueue.empty()) && (continueQueue)) {
-		result = not3DChannel[0]->isPlaying(&playing);
-		result = not3DChannel[0]->getPaused(&paused);
-		
-		// double check if queue is empty due to multithreading
-		if ((!playing || paused) && !soundQueue.empty()) {
-			currSound = soundQueue.front();
-			soundQueue.pop();
-
-			result = system->playSound(currSound, 0, false, &not3DChannel[0]);
-
-			if (result != FMOD_OK) {
-				if (result == FMOD_ERR_INVALID_PARAM) {
-					fprintf(stdout, "playSoundsInQueueThread ERROR: pSound=%p\n", currSound);
-					fprintf(stdout, "playSoundsInQueueThread ERROR: FMOD_ERR_INVALID_PARAM\n");
-				}
-				else {
-					fprintf(stdout, "playSoundsInQueueThread ERROR %d: COULD NOT PLAY SOUND\n", result);
-				}
-			}
+void SoundSystem::errorCheck(FMOD_RESULT result) {
+	if (result != FMOD_OK) {
+		if (result == FMOD_ERR_BADCOMMAND) {
+			std::cerr << "FMOD_ERR_BADCOMMAND\n";
 		}
-	}
-	fprintf(stdout, "playSoundsInQueueThread: stopping now\n");
-}
-
-void SoundSystem::playSoundsInQueue()
-{
-	if (!continueQueue) {
-		fprintf(stdout, "playSoundsInQueue: spawning thread\n");
-		continueQueue = true;
-		std::thread (&SoundSystem::playSoundsInQueueThread, this).detach();
-	}
-}
-
-void SoundSystem::pauseSoundQueue()
-{
-	FMOD_RESULT result;
-	bool playing = false;
-	bool paused = true;
-
-	result = not3DChannel[0]->isPlaying(&playing);
-	result = not3DChannel[0]->getPaused(&paused);
-
-	if (playing || continueQueue || !paused) {
-		fprintf(stdout, "pauseSoundQueue: pausing and emptying queue\n");
-
-		std::lock_guard<std::mutex> lock(m);
-		continueQueue = false;
-
-		if (playing) {
-			result = not3DChannel[0]->setPaused(true);
-
-			while (!soundQueue.empty()) {
-				soundQueue.pop();
-			}
-
-			// TODO: also reset or clear channel
-			if (result != FMOD_OK) {
-				if (result == FMOD_ERR_INVALID_PARAM) {
-					fprintf(stdout, "pauseSoundQueue ERROR: FMOD_ERR_INVALID_PARAM\n");
-				}
-				else {
-					fprintf(stdout, "pauseSoundQueue ERROR %d: COULD NOT PAUSE SOUND EFFECT\n", result);
-				}
-			}
+		else if (result == FMOD_ERR_CHANNEL_STOLEN) {
+			std::cerr << "FMOD_ERR_CHANNEL_STOLEN\n";
+		}
+		else if (result == FMOD_ERR_CHANNEL_ALLOC) {
+			std::cerr << "FMOD_ERR_CHANNEL_ALLOC\n";
+		}
+		else if (result == FMOD_ERR_CHANNEL_STOLEN) {
+			std::cerr << "FMOD_ERR_CHANNEL_STOLEN\n";
+		}
+		else if (result == FMOD_ERR_FILE_BAD) {
+			std::cerr << "FMOD_ERR_FILE_BAD\n";
+		}
+		else if (result == FMOD_ERR_FILE_EOF) {
+			std::cerr << "FMOD_ERR_FILE_EOF\n";
+		}
+		else if (result == FMOD_ERR_FORMAT) {
+			std::cerr << "FMOD_ERR_FORMAT\n";
+		}
+		else if (result == FMOD_ERR_MEMORY) {
+			std::cerr << "FMOD_ERR_MEMORY\n";
+		}
+		else if (result == FMOD_ERR_INITIALIZATION) {
+			std::cerr << "FMOD_ERR_INITIALIZATION\n";
+		}
+		else if (result == FMOD_ERR_INITIALIZED) {
+			std::cerr << "FMOD_ERR_INITIALIZED\n";
+		}
+		else if (result == FMOD_ERR_NEEDS3D) {
+			std::cerr << "FMOD_ERR_NEEDS3D\n";
+		}
+		else if (result == FMOD_ERR_INVALID_HANDLE) {
+			std::cerr << "FMOD_ERR_INVALID_HANDLE\n";
+		}
+		else if (result == FMOD_ERR_INVALID_PARAM) {
+			std::cerr << "FMOD_ERR_INVALID_PARAM\n";
+		}
+		else if (result == FMOD_ERR_INVALID_FLOAT) {
+			std::cerr << "FMOD_ERR_INVALID_FLOAT\n";
+		}
+		else {
+			std::cerr << "FMOD Error Number: " << result << "\n";
 		}
 	}
 }
