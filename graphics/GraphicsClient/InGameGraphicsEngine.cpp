@@ -1585,8 +1585,9 @@ void updateUIElements(GameData * gameData) {
 		//set goals
 
 		//set prompts
-		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::JAIL &&
-			gameData->getJailTile(currPlayer->getLocation())->getCapturedAnimal() != -1 && !currPlayer->isChef()) {
+		Location tempLoc;
+		if (gameData->getAdjacentJailTile(currPlayer->getLocation(),currPlayer->getFacingDirection(),tempLoc) != nullptr &&
+			gameData->getAdjacentJailTile(currPlayer->getLocation(), currPlayer->getFacingDirection(), tempLoc)->getCapturedAnimal() != -1 && !currPlayer->isChef()) {
 			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, true);
 		}
 		else {
