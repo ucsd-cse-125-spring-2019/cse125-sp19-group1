@@ -136,6 +136,32 @@ ClientGame::~ClientGame()
 {
 	delete gameData;
 	delete network;
+
+	soundSystem->releaseSound(sound_exit_door);
+	soundSystem->releaseSound(sound_door_unlock);
+	soundSystem->releaseSound(sound_found_item);
+	soundSystem->releaseSound(sound_net);
+	soundSystem->releaseSound(sound_raccoon_down);
+	soundSystem->releaseSound(sound_raccoon_up);
+	soundSystem->releaseSound(sound_search_item);
+	soundSystem->releaseSound(sound_toilet);
+	soundSystem->releaseSound(sound_vent_screw);
+	soundSystem->releaseSound(sound_exit_window);
+	soundSystem->releaseSound(sound_yay);
+	soundSystem->releaseSound(sound_jail_unlock);
+	soundSystem->releaseSound(sound_keydrop);
+	soundSystem->releaseSound(sound_chef);
+
+	soundSystem->releaseSound(sound_other_found_item);
+	soundSystem->releaseSound(sound_other_jail_unlock);
+	soundSystem->releaseSound(sound_other_search_item);
+	soundSystem->releaseSound(sound_other_net);
+	soundSystem->releaseSound(sound_other_toilet);
+	soundSystem->releaseSound(sound_other_vent_screw);
+	soundSystem->releaseSound(sound_other_door_unlock);
+	
+	soundSystem->releaseSound(background_music);
+
 	delete soundSystem;
 }
 

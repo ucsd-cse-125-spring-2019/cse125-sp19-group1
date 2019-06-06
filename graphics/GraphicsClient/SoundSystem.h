@@ -2,6 +2,7 @@
 #include <queue>
 #include <map>
 #include <thread>
+#include <fmod_errors.h>
 #include "fmod.hpp"
 #include "fmod.h"
 //#include <windows.h>
@@ -11,6 +12,7 @@ typedef FMOD::Sound Sound;
 #define DISTANCE_FACTOR 3.0
 
 /*
+ * 
  * Channel 0: sound effects specific to yourself
  * Channel 1: background music
  * Channel 2: keydrop channel (it shouldn't be paused)
@@ -23,7 +25,7 @@ private:
 	FMOD::Channel * not3DChannel[3];
 	FMOD::Channel * threeDeeChannel[4];
 	bool threeDeeChannelPlayedBefore[4];
-	int threeDeeChannelTaken;
+	// int threeDeeChannelTaken;
 	bool hasAudioDriver;
 	bool continueQueue;
 
