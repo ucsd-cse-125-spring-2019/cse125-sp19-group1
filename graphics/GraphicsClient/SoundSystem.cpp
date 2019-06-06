@@ -67,7 +67,13 @@ SoundSystem::~SoundSystem()
 void SoundSystem::setListenerLocation(float x, float y, float z)
 {
 	FMOD_RESULT result;
+	FMOD_VECTOR forwardOrientation;
 	FMOD_VECTOR loc;
+
+	forwardOrientation.x = 0.0;
+	forwardOrientation.y = 0.0;
+	forwardOrientation.z = 1.0;
+
 	loc.x = x;
 	loc.y = y;
 	loc.z = z;
