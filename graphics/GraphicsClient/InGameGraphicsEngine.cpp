@@ -2032,7 +2032,6 @@ void DisplayCallback(GLFWwindow* window)
 	fog->draw(objShaderProgram, P * V * glm::vec4(ingame_light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
 
-
 	if (envObjsTransform) {
 		envObjsTransform->draw(V, P, glm::mat4(1.0));
 	}

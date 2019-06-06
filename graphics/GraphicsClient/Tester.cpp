@@ -496,7 +496,7 @@ int main(void)
 			this_thread::sleep_for(chrono::microseconds(16666) - frameTime);
 		}
 		
-		//cout << "Frame milliseconds: " << frameTime.count() / 1000.0 << endl;   // print # of milliseconds it took to process this frame
+		cout << "Frame milliseconds: " << frameTime.count() / 1000.0 << endl;   // print # of milliseconds it took to process this frame
 	}
 
 	CleanUp();

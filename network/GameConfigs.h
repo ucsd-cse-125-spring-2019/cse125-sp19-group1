@@ -12,7 +12,7 @@
 #define VISION_RADIUS 85.0f
 #define ITEM_SLOWDOWN_MULTIPLIER 0.8
 #define CAKE_SLOWDOWN_MULTIPLIER 0.7
-#define CHEF_ANGER_INTERVAL 7
+#define CHEF_ANGER_INTERVAL 4
 #define CHEF_MAX_ANGER 60
 #define CHEF_MAX_VISION 100
 #define ABILITY_CHARGE_TIME 0.0
@@ -42,7 +42,7 @@
 
 // Player interact data
 #define DISTANCE_TO_CONSTRUCT_GATE 10
-#define TIME_TO_OPEN_BOX 1.5 // in seconds
+#define TIME_TO_OPEN_BOX 1.2 // in seconds
 #define TIME_TO_CONSTRUCT_GATE 10
 #define HITS_TO_OPEN_JAIL 3
 // DELAY = time to wait before you can act again
