@@ -1401,6 +1401,7 @@ void updateUIElements(GameData * gameData) {
 	}
 
 	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/CHEF_MAX_ANGER);
+
 	std::map<int, Player*> players = gameData->getAllPlayers();
 	if (gameData->getChefAnger() >= CHEF_MAX_ANGER){
 		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, false);
@@ -1411,6 +1412,9 @@ void updateUIElements(GameData * gameData) {
 	for (auto it = players.begin(); it != players.end(); ++it) {
 		//std::cerr << "In caught loop" << "\n";
 		Player * currPlayer = it->second;
+		if (currPlayer->getPlayerNum() == currState->number) {
+			uiCanvas->setBoostRatio((float)currPlayer->getDashCooldown() / PLAYER_DASH_COOLDOWN);
+		}
 		if (currPlayer->isCaught()) {
 			if (currPlayer->getModelType() == ModelType::CAT) {
 				uiCanvas->setVisible(uiCanvas->CAT_HAPPY, false);
