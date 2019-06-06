@@ -274,7 +274,7 @@ void ClientGame::update()
 				playerDoingStuff[pNum] = true;
 			}
 			else if (player->getAction() == Action::KEY_DROP && playerDoingStuff.at(pNum) == false) {
-				soundSystem->playSoundEffect(sound_keydrop);
+				soundSystem->playSoundEffect(sound_keydrop, true);
 				playerDoingStuff[pNum] = true;
 			}
 
