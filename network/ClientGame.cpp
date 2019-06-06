@@ -391,6 +391,11 @@ void ClientGame::update()
 					playerDoingStuff.at(curPlayerNum) = false;
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
 
+				}
+				else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(curPlayerNum) == false) {
+					soundSystem->playOtherPlayersSounds(sound_other_net, curPlayerNum, locX, locY, locZ);
+					playerDoingStuff.at(curPlayerNum) = true;
+
 					if (curPlayer->getCaughtAnimalType() == ModelType::RACOON) {
 						soundSystem->playSoundEffect(sound_raccoon_up, true);
 					}
@@ -400,11 +405,6 @@ void ClientGame::update()
 					else if (curPlayer->getCaughtAnimalType() == ModelType::DOG) {
 						soundSystem->playSoundEffect(sound_dog, true);
 					}
-
-				}
-				else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(curPlayerNum) == false) {
-					soundSystem->playOtherPlayersSounds(sound_other_net, curPlayerNum, locX, locY, locZ);
-					playerDoingStuff.at(curPlayerNum) = true;
 				}
 			}
 			else {
