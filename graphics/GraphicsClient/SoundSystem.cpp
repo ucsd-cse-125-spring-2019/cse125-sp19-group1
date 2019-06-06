@@ -3,6 +3,10 @@
 #include <sys/stat.h>
 
 #define NULL 0
+#define PRIORITY_MAX 0
+#define PRIORITY_HIGH 32
+#define PRIORITY_DEFAULT 128
+#define PRIORITY_LOWEST 256
 
 SoundSystem::SoundSystem()
 {
@@ -200,16 +204,35 @@ void SoundSystem::pauseSoundEffect()
 	FMOD_RESULT result;
 	bool playing = false;
 	result = not3DChannel[0]->isPlaying(&playing);
-	if (result != FMOD_OK) {
+	if (result != FMOD_OK && result != FMOD_ERR_INVALID_HANDLE) {
 		std::cerr << "pauseSoundEffect ERROR: isPlaying - " << FMOD_ErrorString(result) << "\n";
 	}
 
-	if (playing) {
+	if (playing && result != FMOD_ERR_INVALID_HANDLE) {
 		result = not3DChannel[0]->setPaused(true);
 
 		// TODO: also reset or clear channel
 		if (result != FMOD_OK) {
 			std::cerr << "pauseSoundEffect ERROR: cannot pause sound - " << FMOD_ErrorString(result) << "\n";
+		}
+	}
+}
+
+void SoundSystem::pauseBackgroundMusic()
+{
+	FMOD_RESULT result;
+	bool playing = false;
+	result = not3DChannel[1]->isPlaying(&playing);
+	if (result != FMOD_OK && result != FMOD_ERR_INVALID_HANDLE) {
+		std::cerr << "pauseBackgroundMusic ERROR: isPlaying - " << FMOD_ErrorString(result) << "\n";
+	}
+
+	if (playing && result != FMOD_ERR_INVALID_HANDLE) {
+		result = not3DChannel[1]->setPaused(true);
+
+		// TODO: also reset or clear channel
+		if (result != FMOD_OK) {
+			std::cerr << "pauseBackgroundMusic ERROR: cannot pause sound - " << FMOD_ErrorString(result) << "\n";
 		}
 	}
 }
@@ -228,11 +251,12 @@ void SoundSystem::pauseOtherPlayersSounds(int playerNum)
 	// fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
 	
 	result = curPlayerChannel->isPlaying(&playing);
-	if (result != FMOD_OK) {
+	// if it's finished playing, the channel might have been released internally
+	if (result != FMOD_OK && result != FMOD_ERR_INVALID_HANDLE) {
 		std::cerr << "pauseOtherPlayersSounds ERROR: isPlaying - " << FMOD_ErrorString(result) << "\n";
 	}
 
-	if (playing) {
+	if (playing && result != FMOD_ERR_INVALID_HANDLE) {
 		result = curPlayerChannel->setPaused(true);
 
 		if (result != FMOD_OK) {
@@ -250,8 +274,11 @@ void SoundSystem::pauseAllSounds()
 	// pausing all the not3DChannels
 	for (int i = 0; i < 3; i++) {
 		result = not3DChannel[i]->isPlaying(&playing);
+		if (result != FMOD_OK && result != FMOD_ERR_INVALID_HANDLE) {
+			std::cerr << "pauseAllSounds ERROR: isPlaying - " << FMOD_ErrorString(result) << "\n";
+		}
 
-		if (playing) {
+		if (playing && result != FMOD_ERR_INVALID_HANDLE) {
 			result = not3DChannel[i]->setPaused(true);
 
 			// TODO: also reset or clear channel
@@ -289,8 +316,10 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 		pSound->setLoopCount(-1);
 	}
 
-	result = system->playSound(pSound, 0, false, &not3DChannel[1]);
-	not3DChannel[1]->setVolume(0.2f);
+	result = system->playSound(pSound, 0, true, &not3DChannel[1]);
+	result = not3DChannel[1]->setVolume(0.1f);
+	result = not3DChannel[1]->setPriority(PRIORITY_MAX);
+	result = not3DChannel[1]->setPaused(false);
 
 	if (result != FMOD_OK) {
 		std::cerr << "playBackgroundMusic ERROR: cannot play background music - " << FMOD_ErrorString(result) << "\n";
