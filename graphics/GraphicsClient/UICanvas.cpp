@@ -117,6 +117,9 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	visibleItems[ANGRY_METER_1] = true;
 	uiItems[ANGRY_METER_2] = new UIObject(ANGRY_METER_2_TEX);
 	visibleItems[ANGRY_METER_2] = false;
+	uiItems[SPEED_BOOST] = new UIObject(SPEED_METER_TEX);
+	visibleItems[SPEED_BOOST] = true;
+	boostVisible = true;
 }
 
 void UICanvas::setItem(UIType item) {
@@ -162,15 +165,36 @@ void UICanvas::setAngerRatio(float newAngerRatio) {
 	this->angerRatio = newAngerRatio;
 }
 
+void UICanvas::setBoostRatio(float newBoostRatio) {
+	this->boostRatio = newBoostRatio;
+}
+
 void UICanvas::setVisible(UIType item, bool visible) {
 	visibleItems[item] = visible;
+}
+
+void UICanvas::setBoostVisible(bool visible) {
+	if (!visible) {
+		setVisible(UICanvas::SPEED_BOOST, false);
+		boostVisible = 0;
+	}
+	else {
+		setVisible(UICanvas::SPEED_BOOST, true);
+		boostVisible = 1;
+	}
 }
 
 void UICanvas::draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model) {
 	glDisable(GL_DEPTH_TEST);
 	glUseProgram(shaderProgram);
 	GLuint uAngryRatio = glGetUniformLocation(shaderProgram, "ratioAngry");
+	GLuint uBoostRatio = glGetUniformLocation(shaderProgram, "ratioBoost");
+	GLuint uBoostVisible = glGetUniformLocation(shaderProgram, "boostVisible");
+
+
 	glUniform1f(uAngryRatio, (this->angerRatio));
+	glUniform1f(uBoostRatio, (this->boostRatio));
+	glUniform1i(uBoostVisible, (this->boostVisible));
 	for (int i = 0; i < NUM_ITEMS; i++) {
 		if (visibleItems[i]) {
 			uiItems[i]->draw(shaderProgram, V, P, model);
