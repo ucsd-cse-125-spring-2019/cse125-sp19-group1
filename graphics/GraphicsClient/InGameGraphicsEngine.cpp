@@ -53,6 +53,8 @@
 #define TILE_MDL_PATH     (MODELS_PATH "tile.fbx")
 #define TILE_TEX_PATH     (TEXTURES_PATH "tile.png")
 
+#define SAND_TEX_PATH     (TEXTURES_PATH "Sand_001_COLOR.png")
+
 #define PLAYER_MDL_CLIP_RADIUS 60.f
 #define ITEM_MDL_CLIP_RADIUS 60.f
 
@@ -380,6 +382,7 @@ static FBXObject * tileModel = nullptr;
 static FBXObject * wallModel = nullptr;
 static FBXObject * animatedBoxObjects[MAX_PLAYERS] = {nullptr};
 static FBXObject * netModel = nullptr;
+static FBXObject * sandModel = nullptr;
 
 static Skybox *skybox = nullptr;
 
@@ -2020,6 +2023,15 @@ static void DrawMinimap()
 	}
 }
 
+static void DrawSandTile(int x, int z)
+{
+	glm::vec3 position((x + 0.5f) * TILE_SIZE_SERVER, -5.f, (z + 0.5f) * TILE_SIZE_SERVER);
+
+	auto rotate = glm::rotate(glm::translate(identityMat, position), glm::half_pi<float>(), glm::vec3(1.f, 0.f, 0.f));
+	glm::mat4 modelTrans = glm::scale(rotate, glm::vec3(TILE_SCALE));
+	sandModel->Draw(objShaderProgram, &V, &P, modelTrans);
+}
+
 void DisplayCallback(GLFWwindow* window)
 {
 	// Clear the color and depth buffers
@@ -2072,6 +2084,38 @@ void DisplayCallback(GLFWwindow* window)
 		}
 		//particleEffects for powerups
 
+	}
+
+#define SAND_MARGIN_X 6
+#define SAND_MARGIN_Z 6
+
+	// Don't fog the sand
+	fog->setFogDistance(100.f);
+	fog->draw(objShaderProgram, cam_look_at);
+
+	int mapWidth = 0;
+	for (unsigned z = 0; z < floorArray.size(); z++) {
+		if (mapWidth < floorArray[z].size())
+			mapWidth = floorArray[z].size();
+	}
+
+	for (int z = -SAND_MARGIN_Z; z <= -1; z++) {
+		for (int x = -SAND_MARGIN_X; x < mapWidth + SAND_MARGIN_X; x++) {
+			DrawSandTile(x, z);
+		}
+	}
+	for (int z = 0; z < floorArray.size(); z++) {
+		for (int x = -SAND_MARGIN_X; x < 0; x++) {
+			DrawSandTile(x, z);
+		}
+		for (int x = mapWidth; x < mapWidth + SAND_MARGIN_X; x++) {
+			DrawSandTile(x, z);
+		}
+	}
+	for (int z = floorArray.size(); z <= floorArray.size() + SAND_MARGIN_Z; z++) {
+		for (int x = -SAND_MARGIN_X; x < mapWidth + SAND_MARGIN_X; x++) {
+			DrawSandTile(x, z);
+		}
 	}
 
 	// Draw the starting prompt
@@ -2259,6 +2303,10 @@ void LoadModels()
 	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, 1.0f, -1, false);
 	//wallModel->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
+	cout << "\tloading " << "sand" << endl;
+	sandModel = new FBXObject(CANVAS_MDL_PATH, SAND_TEX_PATH, false, 1.0f, false, GL_LINEAR);
+	//sandModel->SetClipRadius(200.f);
+
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
 	wallGeometry = new Geometry(wallModel, objShaderProgram);
 
@@ -2372,6 +2420,7 @@ void InGameGraphicsEngine::CleanUp()
 
 	if (tileModel)        delete tileModel;
 	if (wallModel)        delete wallModel;
+	if (sandModel)        delete sandModel;
 	if (tileGeometry)     delete tileGeometry;
 	if (wallGeometry)     delete wallGeometry;
 	if (light)            delete light;
@@ -2453,6 +2502,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 		cout << "\twall... ";
 		wallModel->RenderingSetup();
+		cout << "done\n";
+
+		cout << "\tsand... ";
+		sandModel->RenderingSetup();
 		cout << "done\n";
 
 		cout << "\tPlayer models... ";
