@@ -1,5 +1,7 @@
 #include "animloader.h"
 
+#define TOTAL_DUR_MULTIPLIER 0.8f
+
 bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier, int animIndex) {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
@@ -41,7 +43,7 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	float modifiedDuration = convertChannels(anim, channels, animMultiplier);
 
 	if (animMultiplier != 1.0f)
-		newAnimation->setEndTime(modifiedDuration);
+		newAnimation->setEndTime(anim->mDuration * TOTAL_DUR_MULTIPLIER);
 
 	*animPlayer = new AnimationPlayer(skel, newAnimation);
 	return true;
