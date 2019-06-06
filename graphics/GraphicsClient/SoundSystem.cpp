@@ -20,6 +20,7 @@ SoundSystem::SoundSystem()
 	system->getNumDrivers(&driverCount);
 	not3DChannel[0] = 0;
 	not3DChannel[1] = 0;
+	not3DChannel[2] = 0;
 	threeDeeChannel[0] = 0;
 	threeDeeChannel[1] = 0;
 	threeDeeChannel[2] = 0;
@@ -163,7 +164,7 @@ void SoundSystem::createBackgroundMusic(Sound ** pSound, const char* pFile)
 
 // this method will play a sound effect, regardless of other sounds
 // are currently playing
-void SoundSystem::playSoundEffect(Sound * pSound, bool bLoop)
+void SoundSystem::playSoundEffect(Sound * pSound, bool playUntilEnd, bool bLoop)
 {
 	FMOD_RESULT result;
 
@@ -175,8 +176,13 @@ void SoundSystem::playSoundEffect(Sound * pSound, bool bLoop)
 		pSound->setLoopCount(-1);
 	}
 
-	result = system->playSound(pSound, 0, false, &not3DChannel[0]);
-
+	if (playUntilEnd) {
+		result = system->playSound(pSound, 0, false, &not3DChannel[2]);
+	}
+	else {
+		result = system->playSound(pSound, 0, false, &not3DChannel[0]);
+	}
+	
 	if (result != FMOD_OK) {
 		std::cerr << "playSoundEffect ERROR: cannot play sound - ";
 		errorCheck(result);

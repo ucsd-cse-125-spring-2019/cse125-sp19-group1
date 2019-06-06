@@ -41,7 +41,7 @@ public:
 	void createBackgroundMusic(Sound ** pSound, const char* pFile);
 	void playBackgroundMusic(Sound * pSound, bool bLoop = false);
 	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop = false);
-	void playSoundEffect(Sound * pSound, bool bLoop = false);
+	void playSoundEffect(Sound * pSound, bool playUntilEnd = false, bool bLoop = false);
 	void pauseOtherPlayersSounds(int playerID);
 	void pauseSoundEffect();
 	void playSoundEffectNoOverlap(Sound * pSound, bool bLoop = false);
