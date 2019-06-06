@@ -113,6 +113,10 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	visibleItems[PROMPT_GET_CAKE] = false;
 	uiItems[PROMPT_DROP_ITEM] = new UIObject(PROMPT_DROP_ITEM_TEX);
 	visibleItems[PROMPT_DROP_ITEM] = false;
+	uiItems[ANGRY_METER_1] = new UIObject(ANGRY_METER_1_TEX);
+	visibleItems[ANGRY_METER_1] = true;
+	uiItems[ANGRY_METER_2] = new UIObject(ANGRY_METER_2_TEX);
+	visibleItems[ANGRY_METER_2] = false;
 }
 
 void UICanvas::setItem(UIType item) {

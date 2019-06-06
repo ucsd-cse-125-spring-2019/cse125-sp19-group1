@@ -1400,6 +1400,10 @@ void updateUIElements(GameData * gameData) {
 
 	uiCanvas->setAngerRatio(((float)gameData->getChefAnger())/60.0f);
 	std::map<int, Player*> players = gameData->getAllPlayers();
+	if (gameData->getChefAnger() >= CHEF_MAX_ANGER){
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, false);
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_2, true);
+	}
 	//check if animals are caught
 	//activates when animal is first in net.
 	for (auto it = players.begin(); it != players.end(); ++it) {
@@ -2031,7 +2035,6 @@ void DisplayCallback(GLFWwindow* window)
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	fog->draw(objShaderProgram, P * V * glm::vec4(ingame_light_center, 1.0f));
 	root->draw(V, P, glm::mat4(1.0));
-
 
 	if (envObjsTransform) {
 		envObjsTransform->draw(V, P, glm::mat4(1.0));

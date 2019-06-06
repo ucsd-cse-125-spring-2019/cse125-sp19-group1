@@ -119,7 +119,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
 		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
 
-		soundSystem->createBackgroundMusic(&background_music, SONG_LOOP);
+		soundSystem->createBackgroundMusic(&background_music, LOBBY_LOOP);
 		soundSystem->playBackgroundMusic(background_music, true); // FIXME: uncomment
 	}
 

@@ -1,7 +1,7 @@
 
 #include "UIObject.h"
 
-#define NUM_ITEMS 55
+#define NUM_ITEMS 57
 #define CANVAS_PATH    "../Canvas/"
 
 #define CANVAS_MDL_PATH		(CANVAS_PATH "canvas.fbx")
@@ -60,6 +60,8 @@
 #define PROMPT_KEY_TEX (CANVAS_PATH "promptDeliverKey.png")
 #define PROMPT_GET_CAKE_TEX (CANVAS_PATH "promptGetCake.png")
 #define PROMPT_DROP_ITEM_TEX (CANVAS_PATH "promptDropItem.png")
+#define ANGRY_METER_1_TEX (CANVAS_PATH "angry1.png")
+#define ANGRY_METER_2_TEX (CANVAS_PATH "angry2.png")
 
 
 #ifndef UICANVAS_H
@@ -122,6 +124,8 @@ public:
 		PROMPT_KEY = 52,
 		PROMPT_GET_CAKE = 53,
 		PROMPT_DROP_ITEM = 54,
+		ANGRY_METER_1 = 55,
+		ANGRY_METER_2 = 56,
 	};
 	void draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
 	void setAngerRatio(float newAngerRatio);
