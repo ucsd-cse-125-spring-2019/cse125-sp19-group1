@@ -68,6 +68,7 @@ static Sound * background_music;
 
 // VERY HACKY FIX....
 std::map<int, bool> playerDoingStuff; // true if currently doing something
+std::map<int, bool> playerIsCaught;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
@@ -266,6 +267,10 @@ void ClientGame::update()
 		if (miniIt == playerDoingStuff.end()) {
 			playerDoingStuff.insert(std::pair<int, bool>(pNum, false));
 		}
+		miniIt = playerIsCaught.find(pNum);
+		if (miniIt == playerIsCaught.end()) {
+			playerIsCaught.insert(std::pair<int, bool>(pNum, false));
+		}
 
 		// sounds that originate from THIS player
 		if (player->isChef()) 
@@ -380,6 +385,10 @@ void ClientGame::update()
 			if (miniIt2 == playerDoingStuff.end()) {
 				playerDoingStuff.insert(std::pair<int, bool>(curPlayerNum, false));
 			}
+			miniIt2 = playerIsCaught.find(curPlayerNum);
+			if (miniIt2 == playerIsCaught.end()) {
+				playerIsCaught.insert(std::pair<int, bool>(curPlayerNum, false));
+			}
 
 			locX = curPlayerLoc.getX();
 			locY = curPlayerLoc.getY();
@@ -411,6 +420,8 @@ void ClientGame::update()
 				if (curPlayer->getAction() == Action::NONE) {
 					playerDoingStuff.at(curPlayerNum) = false;
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
+
+					if (curPlayer->isCaught() == false && playerIsCaught)
 				}
 				else if (curPlayer->getAction() == Action::OPEN_BOX && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playOtherPlayersSounds(sound_other_search_item, curPlayerNum, locX, locY, locZ);
