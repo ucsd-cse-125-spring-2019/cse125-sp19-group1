@@ -35,7 +35,7 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
-//#define DEBUG_CLIENTS
+#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
 static ClientGame * clients[4] = { nullptr };
 
@@ -503,6 +503,8 @@ int main(void)
 	// Destroy the window
 	glfwDestroyWindow(window);
 	// Terminate GLFW
+	glfwTerminate();
+	glfwTerminate();
 	glfwTerminate();
 
 	return EXIT_SUCCESS;

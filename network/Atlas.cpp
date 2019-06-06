@@ -200,7 +200,11 @@ Atlas::Atlas()
 				}
 				else if (objectNum2 != "0")
 				{
-					tileRow.push_back(new ObjectTile(static_cast<ItemModelType>(std::stoi(objectNum2)), wall, height));
+					ObjectTile * ot = new ObjectTile(static_cast<ItemModelType>(std::stoi(objectNum2)), wall, height);
+					if (static_cast<ItemModelType>(std::stoi(objectNum2)) == ItemModelType::painting) {
+						ot->setBearBuff(true);
+					}
+					tileRow.push_back(ot);
 				}
 				break;
 			case TileType::DEFAULT: default:

@@ -110,6 +110,10 @@ public:
 	bool getBlindChef() { return blindChef; }
 	void setBlindChef(bool blind) { blindChef = blind; }
 
+	bool bearBuff = false;
+	bool getBearBuff();
+	void setBearBuff(bool aBearBuff);
+
 	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
 	void updateChefMultiplier(int anger);
 
