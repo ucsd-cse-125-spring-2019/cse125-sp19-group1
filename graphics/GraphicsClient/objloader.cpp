@@ -2,7 +2,7 @@
 
 // load a model (and possibly a Skeleton, if the model is expected to have one)
 bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, std::vector<unsigned int> * indices, 
-	std::vector<glm::vec2> * uvs, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier) 
+	std::vector<glm::vec2> * uvs, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier, int animIndex) 
 {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
@@ -22,7 +22,7 @@ bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm:
 	// if the Skeleton pointer is not null, it means we want a Skeleton, so we must load the proper data
 	if (skel) {
 		loadSkeleton(mesh, scene->mRootNode, vertices, normals, skel);
-		loadAnimation((aiScene*)scene, skel, animPlayer, animMultiplier);
+		loadAnimation((aiScene*)scene, skel, animPlayer, animMultiplier, animIndex);
 		std::cerr << "Trying to get animPlayer pointer:" << *animPlayer << "\n";
 	}
 

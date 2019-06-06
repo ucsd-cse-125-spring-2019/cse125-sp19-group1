@@ -4,11 +4,11 @@
 extern glm::vec3 ingame_light_center;
 extern float ingame_light_radius;
 
-FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, float animMultiplier, bool setupRendering, GLint filtering) {
+FBXObject::FBXObject(const char * path, const char * texPath, bool attachSkel, float animMultiplier, int animIndex, bool setupRendering, GLint filtering) {
 	// initialize variables
 	Init(attachSkel);
 	// read in the model and its texture from the given files
-	Parse(path, animMultiplier);
+	Parse(path, animMultiplier, animIndex);
 
 	this->texPath = texPath;
 	this->filtering = filtering;
@@ -37,11 +37,11 @@ void FBXObject::Init(bool attachSkel) {
 		skel = new Skeleton();
 }
 
-void FBXObject::Parse(const char *filepath, float animMultiplier)
+void FBXObject::Parse(const char *filepath, float animMultiplier, int animIndex)
 {
 	// Populate the face indices, vertices, and normals vectors with the object data,
 	// and potentially load in a Skeleton (if expecting a Skeleton)
-	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer, animMultiplier);
+	load(filepath, &vertices, &normals, &indices, &uvs, skel, &animPlayer, animMultiplier, animIndex);
 	//std::cerr << "Printing animPlayer pointer" << animPlayer << "\n";
 	if (animPlayer != NULL) {
 		LoadMatrices(filepath);

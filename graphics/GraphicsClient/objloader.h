@@ -18,7 +18,7 @@
 #include <assimp/postprocess.h> // Post processing flags
 
 bool load(const char * path, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals,
-	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier);
+	std::vector<unsigned int> * faces, std::vector<glm::vec2> * uvs, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier, int animIndex);
 void loadSkeleton(aiMesh * mesh, aiNode * root, std::vector<glm::vec3> * vertices, std::vector<glm::vec3> * normals, Skeleton * skel);
 void traverseSkeleton(aiNode * currRoot, Skeleton * skel);
 void assignIDs(Skeleton * skel);

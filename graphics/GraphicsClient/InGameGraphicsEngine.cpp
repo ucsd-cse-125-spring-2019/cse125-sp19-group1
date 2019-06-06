@@ -127,7 +127,7 @@
 // #define DEBUG_NO_UI
 
 // Uncomment to make gates always animate so that you don't have to play through
-// #define DEBUG_GATE_ANIMATION
+//#define DEBUG_GATE_ANIMATION
 
 // Set to 0 to disable gate animation
 #define ENABLE_GATE_ANIMATION 0
@@ -919,7 +919,7 @@ void updateBoxVisibility()
 #endif
 
 				glm::vec3 position((x + 0.5f) * TILE_SIZE_SERVER, 0.f, (y + 0.5f) * TILE_SIZE_SERVER);
-				if (glm::distance(position, ingame_light_center) > ingame_light_radius + ITEM_MDL_CLIP_RADIUS) {
+				if (glm::distance(position, ingame_light_center) < ingame_light_radius + ITEM_MDL_CLIP_RADIUS) {
 					auto index = static_cast<unsigned>(gate->getModel());
 					//cout << "Calling update(" << (gateHistory[num] != 0) << ") on model " << index << " (" << itemModels[index].settings->name << ")\n";
 					itemModels[index].object->Update(gateHistory[num] != 0);
@@ -2159,7 +2159,7 @@ void LoadModels()
 
 			cout << "\tloading " << setting.title << " walk" << endl;
 			model.settings = &setting;
-			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimMultiplier, false);
+			model.walkObject = new FBXObject(setting.walkModelPath, setting.walkTexturePath, setting.attachSkel, setting.walkAnimMultiplier, -1, false);
 			model.walkGeometry = new Geometry(model.walkObject, objShaderProgram);
 			model.walkGeometry->t = transform;
 			model.walkObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
@@ -2167,7 +2167,7 @@ void LoadModels()
 
 			if (setting.carryModelPath || setting.carryTexturePath) {
 				cout << "\tloading " << setting.title << " carry" << endl;
-				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimMultiplier, false);
+				model.carryObject = new FBXObject(setting.getCarryModelPath(), setting.getCarryTexturePath(), setting.attachSkel, setting.carryAnimMultiplier, -1, false);
 				model.carryGeometry = new Geometry(model.carryObject, objShaderProgram);
 				model.carryGeometry->t = transform;
 				model.carryObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
@@ -2175,7 +2175,7 @@ void LoadModels()
 			}
 			if (setting.idleModelPath || setting.idleTexturePath) {
 				cout << "\tloading " << setting.title << " idle" << endl;
-				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, setting.idleAnimMultiplier, false);
+				model.idleObject = new FBXObject(setting.getIdleModelPath(), setting.getIdleTexturePath(), setting.attachSkel, setting.idleAnimMultiplier, -1, false);
 				model.idleGeometry = new Geometry(model.idleObject, objShaderProgram);
 				model.idleGeometry->t = transform;
 				model.idleObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
@@ -2183,7 +2183,7 @@ void LoadModels()
 			}
 			if (setting.idleCarryModelPath || setting.idleCarryTexturePath) {
 				cout << "\tloading " << setting.title << " idle carry" << endl;
-				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, setting.idleCarryAnimMultiplier, false);
+				model.idleCarryObject = new FBXObject(setting.getIdleCarryModelPath(), setting.getIdleCarryTexturePath(), setting.attachSkel, setting.idleCarryAnimMultiplier, -1, false);
 				model.idleCarryGeometry = new Geometry(model.idleCarryObject, objShaderProgram);
 				model.idleCarryGeometry->t = transform;
 				model.idleCarryObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
@@ -2202,7 +2202,7 @@ void LoadModels()
 			
 			if (setting.actionModelPath || setting.actionTexturePath) {
 				cout << "\tloading " << setting.title << " action" << endl;
-				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimMultiplier, false);
+				model.actionObject = new FBXObject(setting.getActionModelPath(), setting.getActionTexturePath(), setting.attachSkel, setting.actionAnimMultiplier, -1, false);
 				model.actionGeometry = new Geometry(model.actionObject, objShaderProgram);
 				model.actionGeometry->t = transform;
 				model.actionObject->SetClipRadius(PLAYER_MDL_CLIP_RADIUS);
@@ -2240,7 +2240,7 @@ void LoadModels()
 
 			auto &m = itemModels[static_cast<size_t>(setting.id)];
 			m.settings = &setting;
-			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, 1.0f, false);
+			m.object = new FBXObject(setting.modelPath, setting.texturePath, animated, 1.0f, 0, false);
 			m.geometry = new Geometry(m.object, objShaderProgram);
 			m.object->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
@@ -2249,11 +2249,11 @@ void LoadModels()
 	});
 
 	cout << "\tloading " << "tile" << endl;
-	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, 1.0f, false);
+	tileModel = new FBXObject(TILE_MDL_PATH, TILE_TEX_PATH, false, 1.0f, -1, false);
 	//tileModel->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
 	cout << "\tloading " << "wall" << endl;
-	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, 1.0f, false);
+	wallModel = new FBXObject(WALL_MDL_PATH, WALL_TEX_PATH, false, 1.0f, -1, false);
 	//wallModel->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
@@ -2261,7 +2261,7 @@ void LoadModels()
 
 	cout << "\t" << MAX_PLAYERS << " copies of animated box\n";
 	for (unsigned i = 0; i < MAX_PLAYERS; ++i) {
-		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, 1.0f, false);
+		animatedBoxObjects[i] = new FBXObject(BOX_SEARCH_MDL_PATH, TEXTURES_PATH "box.png", true, 1.0f, -1, false);
 		animatedBoxObjects[i]->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 	}
 
@@ -2427,7 +2427,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 	}
 
 	if (!solidColorObject) {
-		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false, 1.0f);
+		solidColorObject = new FBXObject(CANVAS_MDL_PATH, nullptr, false, 1.0f, -1);
 		solidColorObject->SetDepthTest(false);
 	}
 

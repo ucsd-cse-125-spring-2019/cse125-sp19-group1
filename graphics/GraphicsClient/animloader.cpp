@@ -1,6 +1,6 @@
 #include "animloader.h"
 
-bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier) {
+bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier, int animIndex) {
 	// create the scene from which assimp will gather information about the file
 	Assimp::Importer importer;
 
@@ -20,7 +20,9 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	}
 
 	aiAnimation * anim;
-	if (scene->mNumAnimations > 1)
+	if (animIndex != -1 && animIndex < scene->mNumAnimations)
+		anim = scene->mAnimations[animIndex];
+	else if (scene->mNumAnimations > 1)
 		anim = scene->mAnimations[1];
 	else
 		anim = scene->mAnimations[0];
