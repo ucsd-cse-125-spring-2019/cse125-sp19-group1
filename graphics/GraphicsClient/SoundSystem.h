@@ -1,7 +1,6 @@
 #pragma once
 #include <queue>
 #include <map>
-#include <mutex>
 #include <thread>
 #include "fmod.hpp"
 #include "fmod.h"
@@ -14,20 +13,19 @@ typedef FMOD::Sound Sound;
 /*
  * Channel 0: sound effects specific to yourself
  * Channel 1: background music
+ * Channel 2: keydrop channel (it shouldn't be paused)
  * ChannelGroup otherPlayerSounds: sounds produced by other players (not self)
  */
 class SoundSystem
 {
 private:
 	FMOD::System * system;
-	FMOD::Channel * not3DChannel[2];
+	FMOD::Channel * not3DChannel[3];
 	FMOD::Channel * threeDeeChannel[4];
 	bool threeDeeChannelPlayedBefore[4];
 	int threeDeeChannelTaken;
-	std::queue<Sound *> soundQueue;
 	bool hasAudioDriver;
 	bool continueQueue;
-	std::mutex m;
 
 public:
 	SoundSystem();
@@ -55,11 +53,6 @@ public:
 	// sound code with this, it will complain that there aren't 
 	// any audio drivers and crash the game.
 	bool shouldIgnoreSound();
-
-	void pushSoundQueue(Sound * pSound);
-	void playSoundsInQueue();
-	void playSoundsInQueueThread();
-	void pauseSoundQueue();
 
 	void errorCheck(FMOD_RESULT result);
 };
