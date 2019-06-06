@@ -396,6 +396,11 @@ void Player::decodeFacingDirection(std::string value)
 	facingDirection = static_cast<Direction>(std::stoi(value));
 }
 
+void Player::decodeFacingDirection(std::string value)
+{
+	bearBuff = std::stoi(value);
+}
+
 void Player::addDecodeFunctions()
 {
 	decodingFunctions["playerNum"] = &Player::decodePlayerNum;

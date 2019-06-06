@@ -143,6 +143,8 @@ public:
 	void decodeCaughtAnimalID(std::string value);
 	void decodeCaughtAnimalType(std::string value);
 	void decodeFacingDirection(std::string value);
+	void decodeBearBuff(std::string value);
+
 
 	// Encode functions
 	void addEncodeFunctions();
@@ -160,6 +162,7 @@ public:
 	std::string encodeCaughtAnimalID();
 	std::string encodeCaughtAnimalType();
 	std::string encodeFacingDirection();
+	std::string encodeBearBuff();
 
 protected:
 	Action		action;
