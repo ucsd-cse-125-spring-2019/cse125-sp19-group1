@@ -17,6 +17,7 @@
 #include "TwoDeeGraphicsEngine.h"  // for createObjectForTexture()
 
 #include <thread>
+#include <unordered_map>
 
 #define RACCOON_WALK_MDL_PATH   (ANIMATIONS_PATH "raccoonNewWalk.dae")
 #define RACCOON_IDLE_MDL_PATH	(ANIMATIONS_PATH "raccoonIdle.dae")
@@ -100,7 +101,6 @@
 #define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
 
-
 #define MAX_PLAYERS 4
 
 // Uncomment to render a repeating pattern of all environment objects
@@ -148,6 +148,35 @@ unsigned fake_carried_idx = 1;
 #define RACCOON_IDX  (static_cast<unsigned>(ModelType::RACOON))
 #define CAT_IDX      (static_cast<unsigned>(ModelType::CAT))
 #define DOG_IDX      (static_cast<unsigned>(ModelType::DOG))
+
+#define MINIMAP_MARGIN_LEFT 0.02f
+#define MINIMAP_MARGIN_BOTTOM ((windowWidth / (float)windowHeight) * 0.02f)
+#define MINIMAP_SCREEN_WIDTH 0.275f
+#define MINIMAP_WALL_WIDTH (TILE_SIZE_SERVER * 0.2f)
+#define MINIMAP_ALPHA 1.f
+#define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
+#define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
+#define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
+#define MINIMAP_JAIL_COLOR 1.f, 0.5f, 0.5f, 0.5f
+#define MINIMAP_PING_DURATION 2.25
+#define MINIMAP_PING_FINAL_RADIUS (9.f * TILE_SIZE_SERVER)
+#define MINIMAP_PING_BEGIN_RADIUS (0.475f * TILE_SIZE_SERVER)
+#define MINIMAP_JAIL_PING_INTERVAL 3.0
+#define MINIMAP_ANIMAL_PING_INTERVAL 20.0
+
+struct MapPing {
+	glm::vec3 position;
+	double startTime;
+	double interval;
+
+	MapPing() {}
+
+	MapPing(glm::vec3 newPosition, double newInterval = MINIMAP_ANIMAL_PING_INTERVAL)
+		: position(newPosition.x, newPosition.z, 0.f), interval(newInterval) {
+		startTime = glfwGetTime();
+	}
+};
+unordered_map<int, MapPing> allPings;
 
 static const glm::mat4 identityMat(1.f);
 static glm::mat4 orthoP;
@@ -1179,7 +1208,7 @@ void InGameGraphicsEngine::MovePlayers()
 			}
 
 			// Animate state.angle towards state.targetAngle
-			state.angle += (state.targetAngle - state.angle) * 0.375f;
+			state.angle += (state.targetAngle - state.angle) * 0.2f;
 			if (abs(state.targetAngle - state.angle) < 0.01) {
 				// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
 				state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
@@ -1881,17 +1910,58 @@ void printPoint(float x, float y, const glm::mat4 &transform)
 	printf("(%f, %f)", newPoint.x, newPoint.y);
 }
 
-#define MINIMAP_MARGIN_LEFT 0.02f
-#define MINIMAP_MARGIN_BOTTOM ((windowWidth / (float)windowHeight) * 0.02f)
-#define MINIMAP_SCREEN_WIDTH 0.275f
-#define MINIMAP_WALL_WIDTH (TILE_SIZE_SERVER * 0.2f)
-#define MINIMAP_ALPHA 1.f
-#define MINIMAP_BG_COLOR 0.5f, 0.5f, 0.5f, 0.525f
-#define MINIMAP_WALL_COLOR 0.f, 0.f, 0.f, 1.f
-#define MINIMAP_GATE_COLOR 1.f, 1.f, 1.f, 0.5f
-#define MINIMAP_PING_DURATION 2.25
-#define MINIMAP_PING_FINAL_RADIUS (9.f * TILE_SIZE_SERVER)
-#define MINIMAP_PING_BEGIN_RADIUS (0.5f * TILE_SIZE_SERVER)
+static void DrawPings(const glm::mat4 &viewMat)
+{
+	glUseProgram(twoDeeShader);
+	auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
+
+	double now = glfwGetTime();
+
+	for (const auto &pair : allPings) {
+		const auto &ping = pair.second;
+		if (now > ping.startTime + MINIMAP_PING_DURATION) {
+			continue;
+		}
+
+		float pingPhase = (now - ping.startTime) / MINIMAP_PING_DURATION;
+
+		glUniform1f(uAlpha, (1.f - pingPhase) * (1.f - pingPhase));
+
+		const float radius = MINIMAP_PING_BEGIN_RADIUS + pingPhase * (MINIMAP_PING_FINAL_RADIUS - MINIMAP_PING_BEGIN_RADIUS);
+		const auto transform = glm::scale(glm::translate(identityMat, ping.position), glm::vec3(radius, radius, 1.f));
+
+		mapPingObject->Draw(twoDeeShader, &identityMat, &orthoP, viewMat * transform);
+	}
+}
+
+static void GarbageCollectPings()
+{
+	auto gameData = sharedClient->getGameData();
+	double now = glfwGetTime();
+
+	double angerFraction = gameData->getChefAnger() / (double)CHEF_MAX_ANGER;
+	double chefInterval = MINIMAP_PING_INTERVAL_NO_ANGER + angerFraction * (MINIMAP_PING_INTERVAL_FULL_ANGER - MINIMAP_PING_INTERVAL_NO_ANGER);
+
+	vector<int> toRemoveIDs;
+	for (const auto &pair : allPings) {
+		const auto &ping = pair.second;
+		Player *networkPlayer = gameData ? gameData->getPlayer(pair.first) : nullptr;
+
+		double garbageCollectAge = MINIMAP_PING_DURATION;
+		if (networkPlayer) {
+			garbageCollectAge = networkPlayer->isChef() ? chefInterval : ping.interval;
+		}
+
+		if (now > ping.startTime + garbageCollectAge) {
+			toRemoveIDs.push_back(pair.first);
+		}
+	}
+
+	for (auto toRemove : toRemoveIDs) {
+		allPings.erase(toRemove);
+	}
+}
+
 static void DrawMinimap()
 {
 	GameData *gameData = nullptr;
@@ -1934,15 +2004,24 @@ static void DrawMinimap()
 
 	int z;
 
-	// Draw gates
+	// Draw gates and jails
 	z = 0;
 	for (const auto &row : tileLayout) {
 		int x = 0;
 		for (auto tile : row) {
-			if (tile && tile->getTileType() == TileType::GATE) {
+			if (tile) {
 				const float centerX = (x + 0.5f) * TILE_SIZE_SERVER;
 				const float centerZ = (z + 0.5f) * TILE_SIZE_SERVER;
-				fillRect(centerX, centerZ, TILE_SIZE_SERVER, TILE_SIZE_SERVER, MINIMAP_GATE_COLOR);
+
+				switch (tile->getTileType())
+				{
+				case TileType::GATE:
+					fillRect(centerX, centerZ, TILE_SIZE_SERVER, TILE_SIZE_SERVER, MINIMAP_GATE_COLOR);
+					break;
+				case TileType::JAIL:
+					fillRect(centerX, centerZ, TILE_SIZE_SERVER, TILE_SIZE_SERVER, MINIMAP_JAIL_COLOR);
+					break;
+				}
 			}
 			++x;
 		}
@@ -1980,20 +2059,40 @@ static void DrawMinimap()
 	}
 
 	// Draw dots for players you have permission to see the position of
-	bool foundChef = false;
-	glm::vec3 chefPosition(0.f);
 	auto networkPlayerMe = gameData->getPlayer(sharedClient->getMyID());
 	for (const auto &state : players) {
-		bool isChefState = state.geometryIdx == static_cast<unsigned>(ModelType::CHEF);
-		if (isChefState) {
-			foundChef = true;
-			chefPosition.x = state.position.x;
-			chefPosition.y = state.position.z;
-			chefPosition.z = 0.f;
-		}
-
-		if (!networkPlayerMe || networkPlayerMe->isChef() != isChefState) {
+		auto networkPlayer = gameData->getPlayer(state.id);
+		if (!networkPlayer) {
 			continue;
+		}
+		
+		bool isChefState = state.geometryIdx == static_cast<unsigned>(ModelType::CHEF);
+
+		if (state.id != sharedClient->getMyID()) {
+			if (networkPlayerMe->isChef()) {
+				if (!allPings.count(state.id)) {
+					allPings.emplace(state.id, MapPing(state.position));
+				}
+				// The chef sees only those in jail and not being carried
+				if (!networkPlayer->isCaught() || networkPlayerMe->getCaughtAnimalId() == state.id) {
+					continue;
+				}
+
+				if (networkPlayer->getAction() == Action::UNLOCK_JAIL) {
+					if (!allPings.count(state.id) || allPings.at(state.id).interval != MINIMAP_JAIL_PING_INTERVAL) {
+						allPings[state.id] = MapPing(state.position, MINIMAP_JAIL_PING_INTERVAL);
+					}
+				}
+			}
+			else {
+				// Animals see only other animals
+				if (isChefState) {
+					if (!allPings.count(state.id)) {
+						allPings.emplace(make_pair(state.id, MapPing(state.position)));
+					}
+					continue;
+				}
+			}
 		}
 
 		if (state.geometryIdx == static_cast<unsigned>(ModelType::CHEF)) {
@@ -2003,40 +2102,13 @@ static void DrawMinimap()
 			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.3f, 0.6f, 0.95f, 1.f);
 		}
 		else {
-			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.25f, 0.55f, 0.95f, 0.85f);
+			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.25f, 0.45f, 0.75f, 0.85f);
 		}
 	}
 
-	// Draw a ping originating from the chef
-
-	static double ping_start = 0.0;
-	static bool pinging = false;
-	double now = glfwGetTime();
-	double angerFraction = gameData->getChefAnger() / (double)CHEF_MAX_ANGER;
-	double interval = MINIMAP_PING_INTERVAL_NO_ANGER + angerFraction * (MINIMAP_PING_INTERVAL_FULL_ANGER - MINIMAP_PING_INTERVAL_NO_ANGER);
-
-	if (!pinging && now >= ping_start + interval) {
-		// It's time (or possibly overdue) for a ping!
-		ping_start = now;
-		pinging = true;
-	}
-	else if (pinging && now > ping_start + MINIMAP_PING_DURATION) {
-		// Done pinging
-		pinging = false;
-	}
-
-	if (foundChef && pinging) {
-		float pingPhase = (now - ping_start) / MINIMAP_PING_DURATION;
-
-		glUseProgram(twoDeeShader);
-		auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
-		glUniform1f(uAlpha, (1.f - pingPhase) * (1.f - pingPhase));
-
-		const float radius = MINIMAP_PING_BEGIN_RADIUS + pingPhase * (MINIMAP_PING_FINAL_RADIUS - MINIMAP_PING_BEGIN_RADIUS);
-		const auto transform = glm::scale(glm::translate(identityMat, chefPosition), glm::vec3(radius, radius, 1.f));
-
-		mapPingObject->Draw(twoDeeShader, &identityMat, &orthoP, viewMat * transform);
-	}
+	// Handle pings
+	DrawPings(viewMat);
+	GarbageCollectPings();
 }
 
 static void DrawSandTile(int x, int z)
@@ -2109,8 +2181,8 @@ void DisplayCallback(GLFWwindow* window)
 #define SAND_MARGIN_Z 6
 
 	// Don't fog the sand
-	fog->setFogDistance(100.f);
-	fog->draw(objShaderProgram, cam_look_at);
+	fog->setFogDistance(ingame_light_radius * 2.f);
+	fog->draw(objShaderProgram, P * V * glm::vec4(ingame_light_center, 1.0f));
 
 	int mapWidth = 0;
 	for (unsigned z = 0; z < floorArray.size(); z++) {
@@ -2585,6 +2657,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 	// Reset everything
 	deallocFloor();
 	players.clear();
+	allPings.clear();
 }
 
 void InGameGraphicsEngine::MainLoopEnd()
