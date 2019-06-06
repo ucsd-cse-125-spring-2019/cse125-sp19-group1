@@ -454,22 +454,21 @@ struct PlayerState {
 	char moving;				// bool indicating whether or not the model should animate
 	char building;				// bool indicating whether or not model is doing iteraction animation
 	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
-	int movingSpeed;			// -1 = slow, 0 = normal, 1 = fast
+	int movingSpeed = 0;			// -1 = slow, 0 = normal, 1 = fast
 	int flashedRecently;		//counts down to fire a burst of flash particles
-	bool blinded; //will activate if player is blinded: should only activate on chef
-	bool instantSearch; //will activate if player has instant search. 
-	bool restrictRotation;
+	bool blinded = false; //will activate if player is blinded: should only activate on chef
+	bool instantSearch = false; //will activate if player has instant search. 
+	bool restrictRotation = false;
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
 	double carryStopTime;
 	Location carryStopLoc;
-	bool animatingInventory;
+	bool animatingInventory = false;
 
 	PlayerState() : position(0.f), transform(1.f) {
 		angle = targetAngle = 0.f;
 		geometryIdx = 0;
-		animatingInventory = false;
 		previousInventory = ItemModelType::EMPTY;
 	}
 
@@ -521,7 +520,6 @@ struct PlayerState {
 	}
 };
 
-static Transform * root = nullptr;
 static std::vector<PlayerState> players;
 static Transform * floorTransform = nullptr;
 static Transform * envObjsTransform = nullptr;
@@ -963,7 +961,6 @@ void reloadMap()
 		const glm::vec3 transAmount(TILE_STRIDE / 2, TILE_HEIGHT_ADJUST, TILE_STRIDE / 2);
 		const auto scale = glm::scale(glm::mat4(1.0f), glm::vec3(TILE_SCALE));
 		floorTransform = new Transform(glm::translate(scale, transAmount));
-		root->addChild(floorTransform);
 	}
 
 	// Floor tiles
@@ -1090,6 +1087,8 @@ void deallocFloor()
 
 		row.resize(0);
 	}
+
+	floorArray.clear();
 }
 
 glm::vec3 directionBitmaskToVector(int bitmask) {
@@ -1139,7 +1138,7 @@ void InGameGraphicsEngine::MovePlayers()
 			const auto loc = p->getLocation();
 
 			state.position = glm::vec3(loc.getX(), loc.getY(), loc.getZ());
-			if (p->getAction() == Action::SWING_NET) {
+			if (p->getAction() == Action::SWING_NET && p->isChef()) {
 				state.angle = state.angle + 0.0675f * glm::two_pi<float>();
 				state.restrictRotation = true;
 			}
@@ -2063,7 +2062,10 @@ void DisplayCallback(GLFWwindow* window)
 	//glUseProgram(objShaderProgram);
 	light->draw(objShaderProgram, &cam_pos, cam_look_at);
 	fog->draw(objShaderProgram, P * V * glm::vec4(ingame_light_center, 1.0f));
-	root->draw(V, P, glm::mat4(1.0));
+
+	if (floorTransform) {
+		floorTransform->draw(V, P, glm::mat4(1.0));
+	}
 
 	if (envObjsTransform) {
 		envObjsTransform->draw(V, P, glm::mat4(1.0));
@@ -2116,7 +2118,7 @@ void DisplayCallback(GLFWwindow* window)
 			mapWidth = floorArray[z].size();
 	}
 
-	for (int z = -SAND_MARGIN_Z; z <= -1; z++) {
+	for (int z = -SAND_MARGIN_Z; z < 0; z++) {
 		for (int x = -SAND_MARGIN_X; x < mapWidth + SAND_MARGIN_X; x++) {
 			DrawSandTile(x, z);
 		}
@@ -2125,7 +2127,7 @@ void DisplayCallback(GLFWwindow* window)
 		for (int x = -SAND_MARGIN_X; x < 0; x++) {
 			DrawSandTile(x, z);
 		}
-		for (int x = mapWidth; x < mapWidth + SAND_MARGIN_X; x++) {
+		for (int x = floorArray[z].size(); x < mapWidth + SAND_MARGIN_X; x++) {
 			DrawSandTile(x, z);
 		}
 	}
@@ -2392,8 +2394,6 @@ void InGameGraphicsEngine::StartLoading()  // may launch a thread and return imm
 		particleShaderProgram = LoadShaders(PARTICLE_VERT_SHADER_PATH, PARTICLE_FRAG_SHADER_PATH);
 	}
 
-	root = new Transform(glm::mat4(1.0));
-
 	needsRenderingSetup = true;
 
 	auto finish = [](bool *finishedFlag) {
@@ -2448,7 +2448,6 @@ void InGameGraphicsEngine::CleanUp()
 	deallocFloor();
 
 	if (floorTransform)   delete floorTransform;
-	if (root)             delete root;
 
 	glDeleteProgram(objShaderProgram);
 	glDeleteProgram(solidColorShader);
@@ -2582,6 +2581,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 	gameData->startGameClock();
 
 	mainLoopBeginTime = glfwGetTime();
+
+	// Reset everything
+	deallocFloor();
+	players.clear();
 }
 
 void InGameGraphicsEngine::MainLoopEnd()
@@ -2735,6 +2738,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		}
 		if (key == GLFW_KEY_V) {
 			thirdPersonView = !thirdPersonView;
+		}
+		if (key == GLFW_KEY_S) {
+			sharedClient->sendPackets(PLAYER_DASH_EVENT);
 		}
 
 	}

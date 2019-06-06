@@ -186,6 +186,16 @@ void Player::setDestroyPowerUpStartTime() {
 	destroyPowerUpStartTime = std::chrono::system_clock::now();
 }
 
+void Player::setDashStartTime()
+{
+	dashStartTime = std::chrono::system_clock::now();
+}
+void Player::setDashCooldownStartTime()
+{
+	dashCooldownStartTime = std::chrono::system_clock::now();
+	dashCooldown = PLAYER_DASH_COOLDOWN;
+	dirtyVariablesMap["dashCooldown"] = true;
+}
 void Player::setSpeedStartTime()
 {
 	speedStartTime = std::chrono::system_clock::now();
@@ -228,6 +238,36 @@ double Player::getInteractingTime(int opt)
 	return elapsed_seconds.count();
 }
 
+double Player::getDashTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - dashStartTime;
+	return elapsed_seconds.count();
+}
+void Player::updateDashCooldownTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - dashCooldownStartTime;
+
+	if (dashCooldown > 0)
+	{
+		dashCooldown = (int)(round(PLAYER_DASH_COOLDOWN - elapsed_seconds.count()));
+		dirtyVariablesMap["dashCooldown"] = true;
+	}
+}
+
+void Player::setDashReady(bool ready)
+{
+	dashReady = ready;
+}
+bool Player::isDashReady()
+{
+	return dashReady;
+}
+int Player::getDashCooldown()
+{
+	return dashCooldown;
+}
 double Player::getSpeedTime()
 {
 	auto now = std::chrono::system_clock::now();
@@ -271,32 +311,32 @@ void Player::updateChefMultiplier(int anger)
 {
 	if (anger < 12) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER;
 		catchRadius = 12;
 	}
 	else if (anger < 24) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.05;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER;
 		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.10;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.05;
 		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.15;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.10;
 		//catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.2;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.15;
 		//catchRadius = 18;
 	}
 	else 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.25;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.2;
 		//catchRadius = 20;
 	}
 
@@ -409,6 +449,10 @@ void Player::decodeFacingDirection(std::string value)
 	facingDirection = static_cast<Direction>(std::stoi(value));
 }
 
+void Player::decodeDashCooldown(std::string value)
+{
+	dashCooldown = std::stoi(value);
+}
 void Player::decodeBearBuff(std::string value)
 {
 	bearBuff = std::stoi(value);
@@ -432,6 +476,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["caughtAnimalID"] = &Player::decodeCaughtAnimalID;
 	decodingFunctions["caughtAnimalType"] = &Player::decodeCaughtAnimalType;
 	decodingFunctions["facingDirection"] = &Player::decodeFacingDirection;
+	decodingFunctions["dashCooldown"] = &Player::decodeDashCooldown;
 	decodingFunctions["bearBuff"] = &Player::decodeBearBuff;
 
 }
@@ -452,6 +497,7 @@ void Player::addEncodeFunctions()
 	encodingFunctions["caughtAnimalID"] = &Player::encodeCaughtAnimalID;
 	encodingFunctions["caughtAnimalType"] = &Player::encodeCaughtAnimalType;
 	encodingFunctions["facingDirection"] = &Player::encodeFacingDirection;
+	encodingFunctions["dashCooldown"] = &Player::encodeDashCooldown;
 	encodingFunctions["bearBuff"] = &Player::encodeBearBuff;
 
 
@@ -469,6 +515,9 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["caughtAnimalID"] = true;
 	dirtyVariablesMap["caughtAnimalType"] = true;
 	dirtyVariablesMap["facingDirection"] = true;
+	dirtyVariablesMap["dashCooldown"] = true;
+	dirtyVariablesMap["bearBuff"] = true;
+
 }
 std::string Player::encodePlayerNum() {
 	std::stringstream encodedData;
@@ -563,6 +612,12 @@ std::string Player::encodeFacingDirection() {
 	return encodedData.str();
 }
 
+std::string Player::encodeDashCooldown() {
+	std::stringstream encodedData;
+	encodedData << "dashCooldown: " << dashCooldown << std::endl;
+
+	return encodedData.str();
+}
 std::string Player::encodeBearBuff() {
 	std::stringstream encodedData;
 	encodedData << "bearBuff: " << (int)bearBuff << std::endl;

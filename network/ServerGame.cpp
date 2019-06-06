@@ -109,9 +109,26 @@ void ServerGame::receiveFromClients()
 			case ACTION_EVENT:
 				printf("server received action event packet from client\n");
 				break;
-			case READY_EVENT:
-				printf("server received ENTER event packet from client\n");
-				
+			case PLAYER_DASH_EVENT:
+				printf("server received PlayerDash event packet from client\n");
+				{
+					if (Player * player = gameData->getPlayer(playerID))
+					{
+						
+						if (player->getDashCooldown() <= 0 )
+						{
+
+							player->setDashing(true);
+							player->setDashStartTime();
+							player->setDashCooldownStartTime();
+							player->setDashReady(false);
+
+
+						}
+
+					}
+					
+				}
 				break;
 			case GO_TO_CREDITS_EVENT:
 				gameData->setGameState(GameState::END_CREDITS);
@@ -858,7 +875,16 @@ void ServerGame::receiveFromClients()
 		{
 			if (Player * player = gameData->getPlayer(iter->first))
 			{
-
+				int prevDashCooldown = player->getDashCooldown();
+				player->updateDashCooldownTime();
+				// Only send dash cooldown updates when it is visibly updated int-wise
+				if (!player->isDashReady() && player->getDashCooldown() >= 0 && prevDashCooldown != player->getDashCooldown())
+				{
+					sendActionPackets();
+					// Set dash to ready so that updates stop getting sent
+					if (player->getDashCooldown() <= 0)
+						player->setDashReady(true);
+				}
 				Location loc = player->getLocation();
 
 				if (player->isChef()) {
@@ -897,6 +923,12 @@ void ServerGame::receiveFromClients()
 					player->setPowerUp(PowerUp::NONE);
 				}
 
+
+				if (player->isDashing() && player->getDashTime() > MAX_PLAYER_DASH_TIME)
+				{
+
+					player->setDashing(false);
+				}
 				if (player->isInteracting())
 				{
 					double seconds = player->getInteractingTime(0);
@@ -1158,6 +1190,7 @@ void ServerGame::updateMovement2(Direction dir, int id)
 	}
 
 	Location loc = gameData->getPlayer(id)->getLocation();
+	double dashMultiplier = 1.0f;
 	float xSPEED = 0.0f;
 	float zSPEED = 0.0f;
 	switch (dir)
@@ -1225,15 +1258,17 @@ void ServerGame::updateMovement2(Direction dir, int id)
 	}
 	else
 	{
+		if (player->isDashing())
+			dashMultiplier = PLAYER_DASH_MULTIPLIER;
 		if (gameData->getPlayer(id)->getGhost())
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER, loc.getY(),
-													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
+			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier, loc.getY(),
+													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier);
 		}
 		else
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
-													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
+			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * dashMultiplier, loc.getY(),
+													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * dashMultiplier);
 			
 			//destLoc = Location(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
 			//										loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
