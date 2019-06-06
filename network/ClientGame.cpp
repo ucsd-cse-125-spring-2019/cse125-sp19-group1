@@ -225,6 +225,18 @@ void ClientGame::update()
 			if (player->getAction() == Action::SWING_NET && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_net);
 				playerDoingStuff[pNum] = true;
+
+				if (player->getCaughtAnimalType() == ModelType::RACOON) {
+					soundSystem->playSoundEffect(sound_raccoon_up);
+				}
+				else if (player->getCaughtAnimalType() == ModelType::CAT) {
+					// TODO
+					// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
+				}
+				else if (player->getCaughtAnimalType() == ModelType::DOG) {
+					// TODO
+					// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
+				}
 			}
 			else if (player->getAction() == Action::NONE) {
 				soundSystem->pauseSoundEffect();
@@ -273,20 +285,6 @@ void ClientGame::update()
 			}
 			else if (player->getAction() == Action::KEY_DROP && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_keydrop, true);
-				playerDoingStuff[pNum] = true;
-			}
-			else if (player->isCaught() && playerDoingStuff.at(pNum) == false) {
-				if (player->getModelType() == ModelType::RACOON) {
-					soundSystem->playSoundEffect(sound_raccoon_up);
-				}
-				else if (player->getModelType() == ModelType::CAT) {
-					// TODO
-					// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
-				}
-				else if (player->getModelType() == ModelType::DOG) {
-					// TODO
-					// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
-				}
 				playerDoingStuff[pNum] = true;
 			}
 
@@ -346,6 +344,19 @@ void ClientGame::update()
 				if (curPlayer->getAction() == Action::NONE) {
 					playerDoingStuff.at(curPlayerNum) = false;
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
+
+					if (curPlayer->getCaughtAnimalType() == ModelType::RACOON) {
+						soundSystem->playSoundEffect(sound_raccoon_up);
+					}
+					else if (curPlayer->getCaughtAnimalType() == ModelType::CAT) {
+						// TODO
+						// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
+					}
+					else if (curPlayer->getCaughtAnimalType() == ModelType::DOG) {
+						// TODO
+						// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
+					}
+
 				}
 				else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playOtherPlayersSounds(sound_other_net, curPlayerNum, locX, locY, locZ);
@@ -381,20 +392,6 @@ void ClientGame::update()
 				else if (curPlayer->getAction() == Action::KEY_DROP && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playSoundEffect(sound_keydrop, true);
 					playerDoingStuff.at(curPlayerNum) = true;
-				}
-				else if (curPlayer->isCaught() && playerDoingStuff.at(curPlayerNum) == false) {
-					if (curPlayer->getModelType() == ModelType::RACOON) {
-						soundSystem->playSoundEffect(sound_raccoon_up);
-					}
-					else if (curPlayer->getModelType() == ModelType::CAT) {
-						// TODO
-						// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
-					}
-					else if (curPlayer->getModelType() == ModelType::DOG) {
-						// TODO
-						// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
-					}
-					playerDoingStuff[curPlayerNum] = true;
 				}
 			}
 
