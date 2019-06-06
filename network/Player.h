@@ -108,7 +108,7 @@ public:
 
 	//chef interaction/power-up methods
 	double chefSpeedMultiplier = 1.0;
-	double slowedSpeed = 0.5;
+	double slowedSpeed = 0.4;
 	bool slowChef = false;
 	bool getSlowChef() { return slowChef; }
 	void setSlowChef(bool slow) { slowChef = slow; }

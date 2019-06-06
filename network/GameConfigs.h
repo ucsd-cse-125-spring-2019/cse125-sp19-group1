@@ -28,6 +28,7 @@
 #define DEFAULT_CHEF_VISION_MULT 1
 #define LIMIT_CHEF_VISION_MULT 0.4
 #define DEFAULT_SPEED_MULTIPLIER 1.3
+#define DEFAULT_CHEF_SPEED_MULTIPLIER 0.7
 #define PLAYER_DASH_MULTIPLIER 3
 #define MAX_PLAYER_DASH_TIME 0.1
 
@@ -47,7 +48,7 @@
 
 // Player interact data
 #define DISTANCE_TO_CONSTRUCT_GATE 10
-#define TIME_TO_OPEN_BOX 1.0 // in seconds
+#define TIME_TO_OPEN_BOX 0.75 // in seconds
 #define TIME_TO_CONSTRUCT_GATE 10
 #define HITS_TO_OPEN_JAIL 3
 // DELAY = time to wait before you can act again

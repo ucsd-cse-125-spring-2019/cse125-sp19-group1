@@ -311,32 +311,32 @@ void Player::updateChefMultiplier(int anger)
 {
 	if (anger < 12) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER;
 		catchRadius = 12;
 	}
 	else if (anger < 24) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.05;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER;
 		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.10;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.05;
 		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.15;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.10;
 		//catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.2;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.15;
 		//catchRadius = 18;
 	}
 	else 
 	{
-		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.25;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.2;
 		//catchRadius = 20;
 	}
 
