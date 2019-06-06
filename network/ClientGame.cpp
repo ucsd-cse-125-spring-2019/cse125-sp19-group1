@@ -51,7 +51,6 @@ static Sound * sound_chef;
 static Sound * sound_other_found_item;
 static Sound * sound_other_search_item;
 static Sound * sound_other_jail_unlock;
-static Sound * sound_other_keydrop;
 static Sound * sound_other_net;
 static Sound * sound_other_toilet;
 static Sound * sound_other_vent_screw;
@@ -112,7 +111,6 @@ ClientGame::ClientGame(void)
 
 		soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
 		soundSystem->createOtherPlayersSounds(&sound_other_jail_unlock, SOUNDS_JAIL_UNLOCK);
-		soundSystem->createOtherPlayersSounds(&sound_other_keydrop, SOUNDS_KEYDROP);
 		soundSystem->createOtherPlayersSounds(&sound_other_search_item, SOUNDS_SEARCH_ITEM);
 		soundSystem->createOtherPlayersSounds(&sound_other_net, SOUNDS_NET);
 		soundSystem->createOtherPlayersSounds(&sound_other_toilet, SOUNDS_TOILET);
@@ -274,8 +272,21 @@ void ClientGame::update()
 				playerDoingStuff[pNum] = true;
 			}
 			else if (player->getAction() == Action::KEY_DROP && playerDoingStuff.at(pNum) == false) {
-				std::cerr << "CALLING PLAYSOUND FOR KEYDROP\n";
 				soundSystem->playSoundEffect(sound_keydrop, true);
+				playerDoingStuff[pNum] = true;
+			}
+			else if (player->isCaught() && playerDoingStuff.at(pNum) == false) {
+				if (player->getModelType() == ModelType::RACOON) {
+					soundSystem->playSoundEffect(sound_raccoon_up);
+				}
+				else if (player->getModelType() == ModelType::CAT) {
+					// TODO
+					// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
+				}
+				else if (player->getModelType() == ModelType::DOG) {
+					// TODO
+					// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
+				}
 				playerDoingStuff[pNum] = true;
 			}
 
@@ -363,12 +374,27 @@ void ClientGame::update()
 					}
 					playerDoingStuff.at(curPlayerNum) = true;
 				}
-				else if (player->getAction() == Action::UNLOCK_JAIL && playerDoingStuff.at(curPlayerNum) == false) {
+				else if (curPlayer->getAction() == Action::UNLOCK_JAIL && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playOtherPlayersSounds(sound_other_jail_unlock, curPlayerNum, locX, locY, locZ);
 					playerDoingStuff.at(curPlayerNum) = true;
 				}
-				else if (player->getAction() == Action::KEY_DROP) {
-					soundSystem->playOtherPlayersSounds(sound_other_keydrop, curPlayerNum, locX, locY, locZ);
+				else if (curPlayer->getAction() == Action::KEY_DROP && playerDoingStuff.at(curPlayerNum) == false) {
+					soundSystem->playSoundEffect(sound_keydrop, true);
+					playerDoingStuff.at(curPlayerNum) = true;
+				}
+				else if (curPlayer->isCaught() && playerDoingStuff.at(curPlayerNum) == false) {
+					if (curPlayer->getModelType() == ModelType::RACOON) {
+						soundSystem->playSoundEffect(sound_raccoon_up);
+					}
+					else if (curPlayer->getModelType() == ModelType::CAT) {
+						// TODO
+						// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
+					}
+					else if (curPlayer->getModelType() == ModelType::DOG) {
+						// TODO
+						// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
+					}
+					playerDoingStuff[curPlayerNum] = true;
 				}
 			}
 
