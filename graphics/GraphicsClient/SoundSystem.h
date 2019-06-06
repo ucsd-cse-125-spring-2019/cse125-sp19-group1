@@ -24,7 +24,6 @@ private:
 	FMOD::System * system;
 	FMOD::Channel * not3DChannel[3];
 	FMOD::Channel * threeDeeChannel[4];
-	bool threeDeeChannelPlayedBefore[4];
 	// int threeDeeChannelTaken;
 	bool hasAudioDriver;
 	bool continueQueue;
