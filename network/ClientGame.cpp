@@ -259,7 +259,7 @@ void ClientGame::update()
 				playerDoingStuff[pNum] = true;
 
 				if (player->getCaughtAnimalType() == ModelType::RACOON) {
-					soundSystem->playSoundEffect(sound_raccoon_up);
+					soundSystem->playSoundEffect(sound_raccoon_up, true);
 				}
 				else if (player->getCaughtAnimalType() == ModelType::CAT) {
 					// TODO
@@ -378,7 +378,7 @@ void ClientGame::update()
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
 
 					if (curPlayer->getCaughtAnimalType() == ModelType::RACOON) {
-						soundSystem->playSoundEffect(sound_raccoon_up);
+						soundSystem->playSoundEffect(sound_raccoon_up, true);
 					}
 					else if (curPlayer->getCaughtAnimalType() == ModelType::CAT) {
 						// TODO
