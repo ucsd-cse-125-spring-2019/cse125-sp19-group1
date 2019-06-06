@@ -120,17 +120,11 @@ void Init(GLFWwindow *window)
 	loadingEngine->MainLoopBegin();
 	loadingEngine->temporarilySuppressAnimation = true;
 	loadingEngine->MainLoopCallback(window);
-	loadingEngine->MainLoopEnd();
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 
-	// Now that we have something on-screen, make sure the lobby loads first before slow shader compilation
-	lobbyEngine = new LobbyGraphicsEngine();
-	lobbyEngine->StartLoading();
-	lobbyEngine->MainLoopBegin();
-
 	server = new ServerGame();
-	
+
 #ifdef DEBUG_CLIENTS
 	for (auto &client : clients) {
 		client = new ClientGame();
@@ -139,6 +133,22 @@ void Init(GLFWwindow *window)
 #else
 	sharedClient = new ClientGame();
 #endif
+
+	lobbyEngine = new LobbyGraphicsEngine();
+	lobbyEngine->StartLoading();
+
+	// Now that we have something on-screen, make sure the first screen loads before slow shader compilation
+	sharedClient->update();
+	if (sharedClient->getGameData()->getGameState() == GameState::IN_GAME) {
+		currentEngine = loadingEngine;
+	}
+	else {
+		currentEngine = lobbyEngine;
+
+		// In this order so that the reference counted passthrough shader won't get recompiled
+		lobbyEngine->MainLoopBegin();
+		loadingEngine->MainLoopEnd();
+	}
 
 	inGameEngine = new InGameGraphicsEngine();
 
@@ -160,12 +170,6 @@ void Init(GLFWwindow *window)
 	//animalsWinCutscene->showSkippableMsg = false;
 	
 	playAgainEngine = new PlayAgainGraphicsEngine();
-
-	sharedClient->update();
-	if(sharedClient->getGameData()->getGameState() == GameState::IN_GAME)
-		currentEngine = loadingEngine;
-	else
-		currentEngine = lobbyEngine;
 
 	chefWinsCutscene->StartLoading();
 	animalsWinCutscene->StartLoading();
