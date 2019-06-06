@@ -161,18 +161,25 @@ unsigned fake_carried_idx = 1;
 #define MINIMAP_PING_DURATION 2.25
 #define MINIMAP_PING_FINAL_RADIUS (9.f * TILE_SIZE_SERVER)
 #define MINIMAP_PING_BEGIN_RADIUS (0.475f * TILE_SIZE_SERVER)
-#define MINIMAP_JAIL_PING_INTERVAL 3.0
+#define MINIMAP_JAIL_PING_INTERVAL 2.5
 #define MINIMAP_ANIMAL_PING_INTERVAL 20.0
+#define MINIMAP_ANIMAL_ME_DOT_COLOR      0.3f,  0.6f, 0.95f,   1.f  /* rgba */
+#define MINIMAP_ANIMAL_OTHER_DOT_COLOR  0.25f, 0.45f, 0.75f, 0.85f  /* rgba */
+#define MINIMAP_CHEF_DOT_COLOR          0.95f,  0.4f,  0.2f,   1.f  /* rgba */
+#define MINIMAP_ANIMAL_PING_COLOR       0.25f, 0.45f, 0.75f  /* rgb, no alpha */
+#define MINIMAP_JAIL_PING_COLOR         0.95f,  0.4f,  0.2f  /* rgb, no alpha */
+#define MINIMAP_CHEF_PING_COLOR         0.95f,  0.4f,  0.2f  /* rgb, no alpha */
 
 struct MapPing {
 	glm::vec3 position;
+	glm::vec3 fillColor;
 	double startTime;
 	double interval;
 
 	MapPing() {}
 
-	MapPing(glm::vec3 newPosition, double newInterval = MINIMAP_ANIMAL_PING_INTERVAL)
-		: position(newPosition.x, newPosition.z, 0.f), interval(newInterval) {
+	MapPing(glm::vec3 newPosition, glm::vec3 newFillColor, double newInterval = MINIMAP_ANIMAL_PING_INTERVAL)
+		: position(newPosition.x, newPosition.z, 0.f), fillColor(newFillColor), interval(newInterval) {
 		startTime = glfwGetTime();
 	}
 };
@@ -468,6 +475,7 @@ static GLuint twoDeeShader = 0;
 static FBXObject *animalStartingPrompt = nullptr;
 static FBXObject *chefStartingPrompt = nullptr;
 
+static GLuint colorizeShader = 0;
 static GLuint solidColorShader = 0;
 static FBXObject *solidColorObject = nullptr;
 static FBXObject *mapPingObject = nullptr;
@@ -1916,8 +1924,9 @@ void printPoint(float x, float y, const glm::mat4 &transform)
 
 static void DrawPings(const glm::mat4 &viewMat)
 {
-	glUseProgram(twoDeeShader);
-	auto uAlpha = glGetUniformLocation(twoDeeShader, "alpha");
+	glUseProgram(colorizeShader);
+	auto uAlpha = glGetUniformLocation(colorizeShader, "alpha");
+	auto uFillColor = glGetUniformLocation(colorizeShader, "fillColor");
 
 	double now = glfwGetTime();
 
@@ -1929,12 +1938,13 @@ static void DrawPings(const glm::mat4 &viewMat)
 
 		float pingPhase = (now - ping.startTime) / MINIMAP_PING_DURATION;
 
+		glUniform3f(uFillColor, ping.fillColor.r, ping.fillColor.g, ping.fillColor.b);
 		glUniform1f(uAlpha, (1.f - pingPhase) * (1.f - pingPhase));
 
 		const float radius = MINIMAP_PING_BEGIN_RADIUS + pingPhase * (MINIMAP_PING_FINAL_RADIUS - MINIMAP_PING_BEGIN_RADIUS);
 		const auto transform = glm::scale(glm::translate(identityMat, ping.position), glm::vec3(radius, radius, 1.f));
 
-		mapPingObject->Draw(twoDeeShader, &identityMat, &orthoP, viewMat * transform);
+		mapPingObject->Draw(colorizeShader, &identityMat, &orthoP, viewMat * transform);
 	}
 }
 
@@ -2075,7 +2085,7 @@ static void DrawMinimap()
 		if (state.id != sharedClient->getMyID()) {
 			if (networkPlayerMe->isChef()) {
 				if (!allPings.count(state.id)) {
-					allPings.emplace(state.id, MapPing(state.position));
+					allPings.emplace(state.id, MapPing(state.position, glm::vec3(MINIMAP_ANIMAL_PING_COLOR)));
 				}
 				// The chef sees only those in jail and not being carried
 				if (!networkPlayer->isCaught() || networkPlayerMe->getCaughtAnimalId() == state.id) {
@@ -2084,7 +2094,7 @@ static void DrawMinimap()
 
 				if (networkPlayer->getAction() == Action::UNLOCK_JAIL) {
 					if (!allPings.count(state.id) || allPings.at(state.id).interval != MINIMAP_JAIL_PING_INTERVAL) {
-						allPings[state.id] = MapPing(state.position, MINIMAP_JAIL_PING_INTERVAL);
+						allPings[state.id] = MapPing(state.position, glm::vec3(MINIMAP_JAIL_PING_COLOR), MINIMAP_JAIL_PING_INTERVAL);
 					}
 				}
 			}
@@ -2092,7 +2102,7 @@ static void DrawMinimap()
 				// Animals see only other animals
 				if (isChefState) {
 					if (!allPings.count(state.id)) {
-						allPings.emplace(make_pair(state.id, MapPing(state.position)));
+						allPings.emplace(make_pair(state.id, MapPing(state.position, glm::vec3(MINIMAP_CHEF_PING_COLOR))));
 					}
 					continue;
 				}
@@ -2100,13 +2110,13 @@ static void DrawMinimap()
 		}
 
 		if (state.geometryIdx == static_cast<unsigned>(ModelType::CHEF)) {
-			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.95f, 0.4f, 0.2f, 1.f);
+			fillRect(state.position.x, state.position.z, 10.f, 10.f, MINIMAP_CHEF_DOT_COLOR);
 		}
 		else if (state.id == sharedClient->getMyID()) {
-			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.3f, 0.6f, 0.95f, 1.f);
+			fillRect(state.position.x, state.position.z, 10.f, 10.f, MINIMAP_ANIMAL_ME_DOT_COLOR);
 		}
 		else {
-			fillRect(state.position.x, state.position.z, 10.f, 10.f, 0.25f, 0.45f, 0.75f, 0.85f);
+			fillRect(state.position.x, state.position.z, 10.f, 10.f, MINIMAP_ANIMAL_OTHER_DOT_COLOR);
 		}
 	}
 
@@ -2527,6 +2537,7 @@ void InGameGraphicsEngine::CleanUp()
 
 	glDeleteProgram(objShaderProgram);
 	glDeleteProgram(solidColorShader);
+	glDeleteProgram(colorizeShader);
 }
 
 void InGameGraphicsEngine::MainLoopBegin()
@@ -2568,6 +2579,10 @@ void InGameGraphicsEngine::MainLoopBegin()
 
 	if (!solidColorShader) {
 		solidColorShader = LoadShaders("./solidcolor.vert", "./solidcolor.frag");
+	}
+
+	if (!colorizeShader) {
+		colorizeShader = LoadShaders("./passthrough.vert", "./colorize.frag");
 	}
 
 	if (!solidColorObject) {

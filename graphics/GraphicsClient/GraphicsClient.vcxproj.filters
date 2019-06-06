@@ -347,6 +347,9 @@
     <None Include="skyboxShader.vert">
       <Filter>Source Files\Client Graphics Rendering</Filter>
     </None>
+    <None Include="colorize.frag">
+      <Filter>Source Files\Client Graphics Rendering</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
