@@ -25,6 +25,8 @@
 #define DEFAULT_CHEF_VISION_MULT 1
 #define LIMIT_CHEF_VISION_MULT 0.4
 #define DEFAULT_SPEED_MULTIPLIER 1
+#define PLAYER_DASH_MULTIPLIER 3
+#define MAX_PLAYER_DASH_TIME 0.1
 
 // Tile data
 #define TILE_SIZE 20
@@ -52,5 +54,6 @@
 #define DESTROY_POWERUP_DELAY 0.1
 // COOLDOWN = time to wait before you can do this action again
 #define UNLOCK_JAIL_COOLDOWN 0.5
+#define PLAYER_DASH_COOLDOWN 5
 
 #endif

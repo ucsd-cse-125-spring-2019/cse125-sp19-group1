@@ -181,6 +181,16 @@ void Player::setDestroyPowerUpStartTime() {
 	destroyPowerUpStartTime = std::chrono::system_clock::now();
 }
 
+void Player::setDashStartTime()
+{
+	dashStartTime = std::chrono::system_clock::now();
+}
+void Player::setDashCooldownStartTime()
+{
+	dashCooldownStartTime = std::chrono::system_clock::now();
+	dashCooldown = PLAYER_DASH_COOLDOWN;
+	dirtyVariablesMap["dashCooldown"] = true;
+}
 void Player::setSpeedStartTime()
 {
 	speedStartTime = std::chrono::system_clock::now();
@@ -223,6 +233,36 @@ double Player::getInteractingTime(int opt)
 	return elapsed_seconds.count();
 }
 
+double Player::getDashTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - dashStartTime;
+	return elapsed_seconds.count();
+}
+void Player::updateDashCooldownTime()
+{
+	auto now = std::chrono::system_clock::now();
+	std::chrono::duration<double> elapsed_seconds = now - dashCooldownStartTime;
+
+	if (dashCooldown > 0)
+	{
+		dashCooldown = (int)(round(PLAYER_DASH_COOLDOWN - elapsed_seconds.count()));
+		dirtyVariablesMap["dashCooldown"] = true;
+	}
+}
+
+void Player::setDashReady(bool ready)
+{
+	dashReady = ready;
+}
+bool Player::isDashReady()
+{
+	return dashReady;
+}
+int Player::getDashCooldown()
+{
+	return dashCooldown;
+}
 double Player::getSpeedTime()
 {
 	auto now = std::chrono::system_clock::now();
@@ -396,6 +436,11 @@ void Player::decodeFacingDirection(std::string value)
 	facingDirection = static_cast<Direction>(std::stoi(value));
 }
 
+void Player::decodeDashCooldown(std::string value)
+{
+	dashCooldown = std::stoi(value);
+}
+
 void Player::addDecodeFunctions()
 {
 	decodingFunctions["playerNum"] = &Player::decodePlayerNum;
@@ -412,6 +457,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["caughtAnimalID"] = &Player::decodeCaughtAnimalID;
 	decodingFunctions["caughtAnimalType"] = &Player::decodeCaughtAnimalType;
 	decodingFunctions["facingDirection"] = &Player::decodeFacingDirection;
+	decodingFunctions["dashCooldown"] = &Player::decodeDashCooldown;
 
 }
 
@@ -431,6 +477,7 @@ void Player::addEncodeFunctions()
 	encodingFunctions["caughtAnimalID"] = &Player::encodeCaughtAnimalID;
 	encodingFunctions["caughtAnimalType"] = &Player::encodeCaughtAnimalType;
 	encodingFunctions["facingDirection"] = &Player::encodeFacingDirection;
+	encodingFunctions["dashCooldown"] = &Player::encodeDashCooldown;
 
 
 	dirtyVariablesMap["playerNum"] = true;
@@ -447,6 +494,7 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["caughtAnimalID"] = true;
 	dirtyVariablesMap["caughtAnimalType"] = true;
 	dirtyVariablesMap["facingDirection"] = true;
+	dirtyVariablesMap["dashCooldown"] = true;
 
 }
 std::string Player::encodePlayerNum() {
@@ -538,6 +586,13 @@ std::string Player::encodeCaughtAnimalType() {
 std::string Player::encodeFacingDirection() {
 	std::stringstream encodedData;
 	encodedData << "facingDirection: " << static_cast<int>(facingDirection) << std::endl;
+
+	return encodedData.str();
+}
+
+std::string Player::encodeDashCooldown() {
+	std::stringstream encodedData;
+	encodedData << "dashCooldown: " << dashCooldown << std::endl;
 
 	return encodedData.str();
 }

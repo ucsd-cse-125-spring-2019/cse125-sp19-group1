@@ -2718,6 +2718,9 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 		if (key == GLFW_KEY_V) {
 			thirdPersonView = !thirdPersonView;
 		}
+		if (key == GLFW_KEY_S) {
+			sharedClient->sendPackets(PLAYER_DASH_EVENT);
+		}
 
 	}
 	else if (action == GLFW_RELEASE) {

@@ -80,11 +80,18 @@ public:
 	void setFacingDirection(Direction dir);
 	void setDoneLoading(bool status);
 
+	void setDashStartTime();
+	void setDashReady(bool ready);
+	void setDashCooldownStartTime();
 	void setSpeedStartTime();
 	void setSearchStartTime();
 	void setVisionStartTime();
 	void setSlowStartTime();
 
+	void updateDashCooldownTime();
+	int getDashCooldown();
+	bool isDashReady();
+	double getDashTime();
 	double getSpeedTime();
 	double getSearchTime();
 	double getVisionTime();
@@ -105,6 +112,8 @@ public:
 	bool slowChef = false;
 	bool getSlowChef() { return slowChef; }
 	void setSlowChef(bool slow) { slowChef = slow; }
+	void setDashing(bool dash) { dashing = dash; }
+	bool isDashing() { return dashing; }
 
 	bool blindChef = false;
 	bool getBlindChef() { return blindChef; }
@@ -143,6 +152,7 @@ public:
 	void decodeCaughtAnimalID(std::string value);
 	void decodeCaughtAnimalType(std::string value);
 	void decodeFacingDirection(std::string value);
+	void decodeDashCooldown(std::string value);
 
 	// Encode functions
 	void addEncodeFunctions();
@@ -160,6 +170,7 @@ public:
 	std::string encodeCaughtAnimalID();
 	std::string encodeCaughtAnimalType();
 	std::string encodeFacingDirection();
+	std::string encodeDashCooldown();
 
 protected:
 	Action		action;
@@ -180,6 +191,8 @@ protected:
 	bool		openingGate;
 	bool		openingBox;
 	bool		doneLoading;
+	bool		dashing;
+	bool		dashReady;
 
 	bool		caughtAnimal = false;
 	int			caughtAnimalID;
@@ -188,6 +201,7 @@ protected:
 	float		visionRadius;
 	double		speedMultiplier;
 	double		defaultSpeedMultiplier;
+	int  		dashCooldown;
 
 	std::chrono::time_point<std::chrono::system_clock> actionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> unlockJailStartTime;
@@ -197,6 +211,8 @@ protected:
 	std::chrono::time_point<std::chrono::system_clock> searchStartTime;
 	std::chrono::time_point<std::chrono::system_clock> visionStartTime;
 	std::chrono::time_point<std::chrono::system_clock> slowStartTime;
+	std::chrono::time_point<std::chrono::system_clock> dashStartTime;
+	std::chrono::time_point<std::chrono::system_clock> dashCooldownStartTime;
 
 	std::map < std::string, bool> dirtyVariablesMap;
 	using decodeFunctionType = void (Player::*)(std::string value);
