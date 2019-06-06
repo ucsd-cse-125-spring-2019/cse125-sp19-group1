@@ -393,8 +393,7 @@ void SoundSystem::playSoundEffectNoOverlap(Sound * pSound, bool bLoop)
 		result = system->playSound(pSound, 0, false, &not3DChannel[0]);
 
 		if (result != FMOD_OK) {
-			std::cerr << "playSoundEffectNoOverlap ERROR: cannot play sound - ";
-			errorCheck(result);
+			std::cerr << "playSoundEffectNoOverlap ERROR: cannot play sound - " << FMOD_ErrorString(result) << "\n";
 		}
 	}
 	
