@@ -127,7 +127,8 @@ void Skybox::Draw(const glm::mat4 &P, const glm::mat4 &V)
 	glUseProgram(shader);
 
 	auto modelview = glm::mat4(glm::mat3(V));  // remove translation from the view matrix
-		
+	modelview[3].y -= 0.15f;
+
 	glUniformMatrix4fv(uProjection, 1, GL_FALSE, &(P[0][0]));
 	glUniformMatrix4fv(uModelview, 1, GL_FALSE, &modelview[0][0]);
 
