@@ -1595,11 +1595,20 @@ void updateUIElements(GameData * gameData) {
 
 		//cake prompt check
 		if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::GATE &&
-			gameData->getGateTile(currPlayer->getLocation())->getKeyProgress() == 3 && !hasItem){
+			gameData->getGateTile(currPlayer->getLocation())->getKeyProgress() == 3 && 
+			gameData->getGateTile(currPlayer->getLocation())->getCurrentConstructTime() >= TIME_TO_CONSTRUCT_GATE){
 			uiCanvas->setVisible(UICanvas::PROMPT_GET_CAKE, true);
+			uiCanvas->setVisible(UICanvas::PROMPT_BUILD_EXIT, false);
+			uiCanvas->setVisible(UICanvas::PROMPT_DROP_ITEM, false);
+		}
+		else if (gameData->getTile(currPlayer->getLocation())->getTileType() == TileType::GATE &&
+			gameData->getGateTile(currPlayer->getLocation())->getKeyProgress() == 3) {
+			uiCanvas->setVisible(UICanvas::PROMPT_GET_CAKE, false);
+			uiCanvas->setVisible(UICanvas::PROMPT_BUILD_EXIT, true);
 		}
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_GET_CAKE, false);
+			uiCanvas->setVisible(UICanvas::PROMPT_BUILD_EXIT, false);
 		}
 
 		uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
@@ -1611,6 +1620,7 @@ void updateUIElements(GameData * gameData) {
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_BOX_SEARCH, false);
 		}
+
 
 	}
 

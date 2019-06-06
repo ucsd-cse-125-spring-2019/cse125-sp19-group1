@@ -119,6 +119,8 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	visibleItems[ANGRY_METER_2] = false;
 	uiItems[SPEED_BOOST] = new UIObject(SPEED_METER_TEX);
 	visibleItems[SPEED_BOOST] = true;
+	uiItems[PROMPT_BUILD_EXIT] = new UIObject(PROMPT_BUILD_EXIT_TEX);
+	visibleItems[PROMPT_BUILD_EXIT] = false;
 	boostVisible = true;
 }
 

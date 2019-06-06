@@ -1,7 +1,7 @@
 
 #include "UIObject.h"
 
-#define NUM_ITEMS 58
+#define NUM_ITEMS 59
 #define CANVAS_PATH    "../Canvas/"
 
 #define CANVAS_MDL_PATH		(CANVAS_PATH "canvas.fbx")
@@ -63,6 +63,7 @@
 #define ANGRY_METER_1_TEX (CANVAS_PATH "angry1.png")
 #define ANGRY_METER_2_TEX (CANVAS_PATH "angry2.png")
 #define SPEED_METER_TEX (CANVAS_PATH "speedBoost.png")
+#define PROMPT_BUILD_EXIT_TEX (CANVAS_PATH "promptBuildExit.png")
 
 
 #ifndef UICANVAS_H
@@ -128,6 +129,8 @@ public:
 		ANGRY_METER_1 = 55,
 		ANGRY_METER_2 = 56,
 		SPEED_BOOST = 57,
+		PROMPT_BUILD_EXIT = 58,
+
 	};
 	void draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model);
 	void setAngerRatio(float newAngerRatio);
