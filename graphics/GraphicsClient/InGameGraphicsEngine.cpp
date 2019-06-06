@@ -2106,6 +2106,10 @@ static void DrawMinimap()
 					}
 					continue;
 				}
+				else if (networkPlayer->isCaught()) {
+					// Animals can't see caught animals
+					continue;
+				}
 			}
 		}
 
