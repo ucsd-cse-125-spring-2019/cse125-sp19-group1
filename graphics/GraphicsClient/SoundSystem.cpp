@@ -53,7 +53,7 @@ SoundSystem::SoundSystem()
 	FMOD_VECTOR forwardOrientation;
 	forwardOrientation.x = 0.0;
 	forwardOrientation.y = 0.0;
-	forwardOrientation.z = 1.0;
+	forwardOrientation.z = -1.0;
 
 	result = system->set3DListenerAttributes(NULL, NULL, NULL, &forwardOrientation, NULL);
 	if (result != FMOD_OK) {
@@ -77,7 +77,7 @@ void SoundSystem::setListenerLocation(float x, float y, float z)
 
 	forwardOrientation.x = 0.0;
 	forwardOrientation.y = 0.0;
-	forwardOrientation.z = 1.0;
+	forwardOrientation.z = -1.0;
 
 	loc.x = x;
 	loc.y = y;
