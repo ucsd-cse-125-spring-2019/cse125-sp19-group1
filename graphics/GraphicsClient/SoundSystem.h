@@ -2,6 +2,7 @@
 #include <queue>
 #include <map>
 #include <thread>
+#include <fmod_errors.h>
 #include "fmod.hpp"
 #include "fmod.h"
 //#include <windows.h>
@@ -11,6 +12,7 @@ typedef FMOD::Sound Sound;
 #define DISTANCE_FACTOR 3.0
 
 /*
+ * 
  * Channel 0: sound effects specific to yourself
  * Channel 1: background music
  * Channel 2: keydrop channel (it shouldn't be paused)
@@ -22,8 +24,7 @@ private:
 	FMOD::System * system;
 	FMOD::Channel * not3DChannel[3];
 	FMOD::Channel * threeDeeChannel[4];
-	bool threeDeeChannelPlayedBefore[4];
-	int threeDeeChannelTaken;
+	// int threeDeeChannelTaken;
 	bool hasAudioDriver;
 	bool continueQueue;
 
@@ -39,9 +40,10 @@ public:
 	void createSoundEffect(Sound ** pSound, const char* pFile);
 	void createOtherPlayersSounds(Sound ** pSound, const char* pFile);
 	void createBackgroundMusic(Sound ** pSound, const char* pFile);
-	void playBackgroundMusic(Sound * pSound, bool bLoop = false);
+	void playBackgroundMusic(Sound * pSound, bool bLoop = true);
 	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop = false);
 	void playSoundEffect(Sound * pSound, bool playUntilEnd = false, bool bLoop = false);
+	void pauseBackgroundMusic();
 	void pauseOtherPlayersSounds(int playerID);
 	void pauseSoundEffect();
 	void playSoundEffectNoOverlap(Sound * pSound, bool bLoop = false);
@@ -54,6 +56,5 @@ public:
 	// any audio drivers and crash the game.
 	bool shouldIgnoreSound();
 
-	void errorCheck(FMOD_RESULT result);
 };
 
