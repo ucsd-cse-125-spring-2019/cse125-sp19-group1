@@ -13,7 +13,10 @@ public:
 
 	// Getter
 	ItemModelType getModel() { return objectType; }
+	bool getBearBuff() { return bearBuff; }
+
 	// Setter
+	void setBearBuff(bool aBearBuff) { bearBuff = aBearBuff; }
 
 	// Encode function
 	virtual std::string encodeTileData()
@@ -23,7 +26,7 @@ public:
 		// Call base class encode function and encode member variables from this class to the stringstream
 		encodedData << Tile::encodeTileData() << " "
 			<< static_cast<int>(objectType);
-
+		
 		return encodedData.str();
 	}
 
@@ -37,6 +40,7 @@ public:
 		std::stringstream valueStream(value);
 		std::string objectType_str;
 
+
 		// Get values from the stream
 		valueStream
 			>> objectType_str;
@@ -47,4 +51,5 @@ public:
 
 protected:
 	ItemModelType objectType;
+	bool bearBuff;
 };

@@ -39,7 +39,12 @@ void Player::setPlayerID(int id)
 }
 void Player::resetSpeedMultiplier()
 {
-	speedMultiplier = defaultSpeedMultiplier;
+	if (bearBuff) {
+		speedMultiplier = defaultSpeedMultiplier + BEAR_BUFF_PLAYER_SPEED_BOOST;
+	}
+	else {
+		speedMultiplier = defaultSpeedMultiplier;
+	}
 }
 void Player::setDefaultSpeedMultiplier(double multiplier)
 {
@@ -291,38 +296,47 @@ double Player::getSlowTime()
 	return elapsed_seconds.count();
 }
 
+bool Player::getBearBuff()
+{
+	return bearBuff;
+}
+
+void Player::setBearBuff(bool aBearBuff) {
+	bearBuff = aBearBuff;
+}
+
 
 //chef interaction/power-up methods
 void Player::updateChefMultiplier(int anger) 
 {
 	if (anger < 12) 
 	{
-		chefSpeedMultiplier = 1.0;
+		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER;
 		catchRadius = 12;
 	}
 	else if (anger < 24) 
 	{
-		chefSpeedMultiplier = 1.05;
+		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.05;
 		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
-		chefSpeedMultiplier = 1.10;
+		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.10;
 		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
-		chefSpeedMultiplier = 1.15;
+		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.15;
 		//catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
-		chefSpeedMultiplier = 1.2;
+		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.2;
 		//catchRadius = 18;
 	}
 	else 
 	{
-		chefSpeedMultiplier = 1.25;
+		chefSpeedMultiplier = DEFAULT_SPEED_MULTIPLIER + 0.25;
 		//catchRadius = 20;
 	}
 
@@ -415,7 +429,6 @@ void Player::decodeVisionRadius(std::string value)
 
 void Player::decodeCaughtStatus(std::string value)
 {
-	std::cout << "decoding caught status " << value << std::endl;
 	caughtStatus = value == "1";
 }
 void Player::decodeCaughtAnimal(std::string value)
@@ -440,6 +453,12 @@ void Player::decodeDashCooldown(std::string value)
 {
 	dashCooldown = std::stoi(value);
 }
+void Player::decodeBearBuff(std::string value)
+{
+	bearBuff = std::stoi(value);
+	dirtyVariablesMap["bearBuff"] = true;
+	std::cout << "BEAR BUFF ACTIVATED WOOOOOOOOO" << std::endl;
+}
 
 void Player::addDecodeFunctions()
 {
@@ -458,6 +477,7 @@ void Player::addDecodeFunctions()
 	decodingFunctions["caughtAnimalType"] = &Player::decodeCaughtAnimalType;
 	decodingFunctions["facingDirection"] = &Player::decodeFacingDirection;
 	decodingFunctions["dashCooldown"] = &Player::decodeDashCooldown;
+	decodingFunctions["bearBuff"] = &Player::decodeBearBuff;
 
 }
 
@@ -478,6 +498,7 @@ void Player::addEncodeFunctions()
 	encodingFunctions["caughtAnimalType"] = &Player::encodeCaughtAnimalType;
 	encodingFunctions["facingDirection"] = &Player::encodeFacingDirection;
 	encodingFunctions["dashCooldown"] = &Player::encodeDashCooldown;
+	encodingFunctions["bearBuff"] = &Player::encodeBearBuff;
 
 
 	dirtyVariablesMap["playerNum"] = true;
@@ -495,6 +516,7 @@ void Player::addEncodeFunctions()
 	dirtyVariablesMap["caughtAnimalType"] = true;
 	dirtyVariablesMap["facingDirection"] = true;
 	dirtyVariablesMap["dashCooldown"] = true;
+	dirtyVariablesMap["bearBuff"] = true;
 
 }
 std::string Player::encodePlayerNum() {
@@ -596,3 +618,10 @@ std::string Player::encodeDashCooldown() {
 
 	return encodedData.str();
 }
+std::string Player::encodeBearBuff() {
+	std::stringstream encodedData;
+	encodedData << "bearBuff: " << (int)bearBuff << std::endl;
+
+	return encodedData.str();
+}
+

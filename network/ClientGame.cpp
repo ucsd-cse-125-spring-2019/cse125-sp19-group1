@@ -8,7 +8,7 @@
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
-#define SOUNDS_DOOR			(SOUNDS_PATH "frontexit_door_short.mp3")
+#define SOUNDS_EXIT_DOOR	(SOUNDS_PATH "door_yay_combo.mp3")
 #define SOUNDS_DOOR_UNLOCK	(SOUNDS_PATH "frontexit_unlock_short.mp3")
 #define SOUNDS_FOUND_ITEM	(SOUNDS_PATH "found_item_short.mp3")
 #define SOUNDS_NET			(SOUNDS_PATH "NetSwoosh.mp3")	// FIXME placeholder for swoosh
@@ -17,8 +17,8 @@
 #define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
 #define SOUNDS_TOILET		(SOUNDS_PATH "bathroom_toilet.mp3")
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
-#define SOUNDS_VENT_DROP	(SOUNDS_PATH "ventexit_drop.mp3")
-#define SOUNDS_WINDOW		(SOUNDS_PATH "bathroom_window.mp3")
+#define SOUNDS_EXIT_VENT	(SOUNDS_PATH "vent_yay_combo.mp3")
+#define SOUNDS_EXIT_WINDOW	(SOUNDS_PATH "window_yay_combo.mp3")
 #define SOUNDS_YAY			(SOUNDS_PATH "Yay.mp3")
 #define SOUNDS_JAIL_UNLOCK	(SOUNDS_PATH "jail_rattle.mp3")
 #define SOUNDS_KEYDROP		(SOUNDS_PATH "keydrop.mp3")
@@ -31,7 +31,7 @@
 static SoundSystem * soundSystem;
 
 // sounds specific to player (NOT 3D)
-static Sound * sound_door;
+static Sound * sound_exit_door;
 static Sound * sound_door_unlock;
 static Sound * sound_found_item;
 static Sound * sound_net;
@@ -40,8 +40,8 @@ static Sound * sound_raccoon_down;
 static Sound * sound_search_item;
 static Sound * sound_toilet;
 static Sound * sound_vent_screw;
-static Sound * sound_vent_drop;
-static Sound * sound_window;
+static Sound * sound_exit_vent;
+static Sound * sound_exit_window;
 static Sound * sound_yay;
 static Sound * sound_jail_unlock;
 static Sound * sound_keydrop;
@@ -94,7 +94,7 @@ ClientGame::ClientGame(void)
 
 	soundSystem = new SoundSystem();
 	if (!(soundSystem->shouldIgnoreSound())) {
-		soundSystem->createSoundEffect(&sound_door, SOUNDS_DOOR);
+		soundSystem->createSoundEffect(&sound_exit_door, SOUNDS_EXIT_DOOR);
 		soundSystem->createSoundEffect(&sound_door_unlock, SOUNDS_DOOR_UNLOCK);
 		soundSystem->createSoundEffect(&sound_found_item, SOUNDS_FOUND_ITEM);
 		soundSystem->createSoundEffect(&sound_net, SOUNDS_NET);
@@ -103,8 +103,8 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
-		soundSystem->createSoundEffect(&sound_vent_drop, SOUNDS_VENT_DROP);
-		soundSystem->createSoundEffect(&sound_window, SOUNDS_WINDOW);
+		soundSystem->createSoundEffect(&sound_exit_vent, SOUNDS_EXIT_VENT);
+		soundSystem->createSoundEffect(&sound_exit_window, SOUNDS_EXIT_WINDOW);
 		soundSystem->createSoundEffect(&sound_yay, SOUNDS_YAY);
 		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
 		soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
@@ -233,14 +233,15 @@ void ClientGame::update()
 				playerDoingStuff[pNum] = false;
 			}
 
-			if (wt == WinType::CHEF_WIN) {
+			if (wt == WinType::CHEF_WIN && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_chef);
+				playerDoingStuff[pNum] = true;
 			}
 		}
 		else {
 			if (player->getAction() == Action::NONE) {
 				soundSystem->pauseSoundEffect();
-				soundSystem->pauseSoundQueue();
+				// soundSystem->pauseSoundQueue();
 				playerDoingStuff[pNum] = false;
 			}
 			else if (player->getAction() == Action::OPEN_BOX && playerDoingStuff.at(pNum) == false) {
@@ -273,31 +274,28 @@ void ClientGame::update()
 				playerDoingStuff[pNum] = true;
 			}
 			else if (player->getAction() == Action::KEY_DROP && playerDoingStuff.at(pNum) == false) {
-				soundSystem->playSoundEffect(sound_keydrop);
+				std::cerr << "CALLING PLAYSOUND FOR KEYDROP\n";
+				soundSystem->playSoundEffect(sound_keydrop, true);
 				playerDoingStuff[pNum] = true;
 			}
 
-			if (wt != WinType::NONE) {
+			if (wt != WinType::NONE  && playerDoingStuff.at(pNum) == false) {
 				if (wt == WinType::DOOR) {
-					// soundSystem->playSoundEffect(sound_door);
-					soundSystem->pushSoundQueue(sound_door);
-					soundSystem->pushSoundQueue(sound_yay);
-					soundSystem->playSoundsInQueue();
+					soundSystem->playSoundEffect(sound_exit_door);
+					playerDoingStuff[pNum] = true;
 				}
 				else if (wt == WinType::TOILET) {
-					// soundSystem->playSoundEffect(sound_window);
-					soundSystem->pushSoundQueue(sound_window);
-					soundSystem->pushSoundQueue(sound_yay);
-					soundSystem->playSoundsInQueue();
+					soundSystem->playSoundEffect(sound_exit_window);
+					playerDoingStuff[pNum] = true;
+
 				} 
 				else if (wt == WinType::VENT) {
-					// soundSystem->playSoundEffect(sound_vent_screw);
-					soundSystem->pushSoundQueue(sound_vent_drop);
-					soundSystem->pushSoundQueue(sound_yay);
-					soundSystem->playSoundsInQueue();
+					soundSystem->playSoundEffect(sound_exit_vent);
+					playerDoingStuff[pNum] = true;
 				}
 				else if (wt == WinType::CHEF_WIN) {
 					soundSystem->playSoundEffect(sound_chef);
+					playerDoingStuff[pNum] = true;
 				}
 			}
 

@@ -12,13 +12,13 @@ public:
 
 	// Constructor with default values if no params set
 	Tile(TileType aType = TileType::DEFAULT, int aWallLayout = 0, int aHeight = 0, ItemModelType anItem = ItemModelType::EMPTY);
-	
-	// Getters
-	TileType	getTileType();
-	int			getWall();
-	int			getHeight();
-	ItemModelType	getItem();
-	bool		isDirty();
+
+
+	bool isDirty();
+	int getWall();
+	int getHeight();
+	ItemModelType getItem();
+	TileType getTileType();
 
 	// Setters
 	void setItem(ItemModelType anItem);
@@ -28,8 +28,8 @@ public:
 	virtual std::string encodeTileData();
 	virtual void decodeTileData(std::string & value);
 
+	//Getters
 	bool isDirty() const;
-	//bool hasBox() const; 
 	int getWall() const;
 	int getHeight() const;
 	ItemModelType getItem() const;
@@ -47,4 +47,5 @@ protected:
 	
 	// Additional variables
 	bool		dirty;
+	bool		bearBuff;
 };

@@ -97,6 +97,8 @@ public:
 	void incrementChefAnger() { chefAnger++; }
 	int getChefAnger() { return chefAnger; }
 
+	void boostChefAnger() { chefAnger += BEAR_BUFF_CHEF_ANGER_BOOST; }
+
 	int getCurrentTime() { return currentTime; }
 	void setCurrentTime() { currentTime = getGameClock(); }
 
