@@ -200,6 +200,9 @@ void SoundSystem::pauseSoundEffect()
 	FMOD_RESULT result;
 	bool playing = false;
 	result = not3DChannel[0]->isPlaying(&playing);
+	if (result != FMOD_OK) {
+		std::cerr << "pauseSoundEffect ERROR: isPlaying - " << FMOD_ErrorString(result) << "\n";
+	}
 
 	if (playing) {
 		result = not3DChannel[0]->setPaused(true);
@@ -214,6 +217,7 @@ void SoundSystem::pauseSoundEffect()
 void SoundSystem::pauseOtherPlayersSounds(int playerNum)
 {
 	FMOD_RESULT result;
+	bool playing = false;
 	FMOD::Channel * curPlayerChannel;
 
 	// if the specific player doesn't have their own channel yet
@@ -222,10 +226,18 @@ void SoundSystem::pauseOtherPlayersSounds(int playerNum)
 	// fprintf(stdout, "pauseOtherPlayersSounds threeDeeChannel size=%d\n", sizeof(threeDeeChannel) / sizeof(threeDeeChannel[0]));
 	// fprintf(stdout, "pauseOtherPlayersSounds curPlayerChannel=%d\n", curPlayerChannel);
 	// fprintf(stdout, "pauseOtherPlayersSounds before playerID=%d channelID=%d", playerID, otherPlayerChannels.at(playerID));
-	result = curPlayerChannel->setPaused(true);
 	
+	result = curPlayerChannel->isPlaying(&playing);
 	if (result != FMOD_OK) {
-		std::cerr << "pauseOtherPlayersSounds ERROR: cannot pause other player sounds - " << FMOD_ErrorString(result) << "\n";
+		std::cerr << "pauseOtherPlayersSounds ERROR: isPlaying - " << FMOD_ErrorString(result) << "\n";
+	}
+
+	if (playing) {
+		result = curPlayerChannel->setPaused(true);
+
+		if (result != FMOD_OK) {
+			std::cerr << "pauseOtherPlayersSounds ERROR: cannot pause other player sounds - " << FMOD_ErrorString(result) << "\n";
+		}
 	}
 
 }
@@ -396,54 +408,4 @@ void SoundSystem::releaseSound(Sound * pSound)
 bool SoundSystem::shouldIgnoreSound()
 {
 	return !hasAudioDriver;
-}
-
-void SoundSystem::errorCheck(FMOD_RESULT result) {
-	if (result != FMOD_OK) {
-		if (result == FMOD_ERR_BADCOMMAND) {
-			std::cerr << "FMOD_ERR_BADCOMMAND\n";
-		}
-		else if (result == FMOD_ERR_CHANNEL_STOLEN) {
-			std::cerr << "FMOD_ERR_CHANNEL_STOLEN\n";
-		}
-		else if (result == FMOD_ERR_CHANNEL_ALLOC) {
-			std::cerr << "FMOD_ERR_CHANNEL_ALLOC\n";
-		}
-		else if (result == FMOD_ERR_CHANNEL_STOLEN) {
-			std::cerr << "FMOD_ERR_CHANNEL_STOLEN\n";
-		}
-		else if (result == FMOD_ERR_FILE_BAD) {
-			std::cerr << "FMOD_ERR_FILE_BAD\n";
-		}
-		else if (result == FMOD_ERR_FILE_EOF) {
-			std::cerr << "FMOD_ERR_FILE_EOF\n";
-		}
-		else if (result == FMOD_ERR_FORMAT) {
-			std::cerr << "FMOD_ERR_FORMAT\n";
-		}
-		else if (result == FMOD_ERR_MEMORY) {
-			std::cerr << "FMOD_ERR_MEMORY\n";
-		}
-		else if (result == FMOD_ERR_INITIALIZATION) {
-			std::cerr << "FMOD_ERR_INITIALIZATION\n";
-		}
-		else if (result == FMOD_ERR_INITIALIZED) {
-			std::cerr << "FMOD_ERR_INITIALIZED\n";
-		}
-		else if (result == FMOD_ERR_NEEDS3D) {
-			std::cerr << "FMOD_ERR_NEEDS3D\n";
-		}
-		else if (result == FMOD_ERR_INVALID_HANDLE) {
-			std::cerr << "FMOD_ERR_INVALID_HANDLE\n";
-		}
-		else if (result == FMOD_ERR_INVALID_PARAM) {
-			std::cerr << "FMOD_ERR_INVALID_PARAM\n";
-		}
-		else if (result == FMOD_ERR_INVALID_FLOAT) {
-			std::cerr << "FMOD_ERR_INVALID_FLOAT\n";
-		}
-		else {
-			std::cerr << "FMOD Error Number: " << result << "\n";
-		}
-	}
 }
