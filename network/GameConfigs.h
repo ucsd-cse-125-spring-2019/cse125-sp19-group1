@@ -15,6 +15,8 @@
 #define CAKE_SLOWDOWN_MULTIPLIER 0.7
 #define CHEF_ANGER_INTERVAL 4
 #define CHEF_MAX_ANGER 60
+#define BEAR_BUFF_CHEF_ANGER_BOOST 10
+#define BEAR_BUFF_PLAYER_SPEED_BOOST 0.15
 #define CHEF_MAX_VISION 100
 #define ABILITY_CHARGE_TIME 0.0
 #define GHOST_MULTIPLIER 1.6
@@ -25,7 +27,7 @@
 #define DEFAULT_VISION 60
 #define DEFAULT_CHEF_VISION_MULT 1
 #define LIMIT_CHEF_VISION_MULT 0.4
-#define DEFAULT_SPEED_MULTIPLIER 1
+#define DEFAULT_SPEED_MULTIPLIER 1.3
 
 // Tile data
 #define TILE_SIZE 20
@@ -43,7 +45,7 @@
 
 // Player interact data
 #define DISTANCE_TO_CONSTRUCT_GATE 10
-#define TIME_TO_OPEN_BOX 1.2 // in seconds
+#define TIME_TO_OPEN_BOX 1.0 // in seconds
 #define TIME_TO_CONSTRUCT_GATE 10
 #define HITS_TO_OPEN_JAIL 3
 // DELAY = time to wait before you can act again

@@ -110,6 +110,10 @@ public:
 	bool getBlindChef() { return blindChef; }
 	void setBlindChef(bool blind) { blindChef = blind; }
 
+	bool bearBuff = false;
+	bool getBearBuff();
+	void setBearBuff(bool aBearBuff);
+
 	double getChefSpeedMultiplier() { return chefSpeedMultiplier; }
 	void updateChefMultiplier(int anger);
 
@@ -143,6 +147,8 @@ public:
 	void decodeCaughtAnimalID(std::string value);
 	void decodeCaughtAnimalType(std::string value);
 	void decodeFacingDirection(std::string value);
+	void decodeBearBuff(std::string value);
+
 
 	// Encode functions
 	void addEncodeFunctions();
@@ -160,6 +166,7 @@ public:
 	std::string encodeCaughtAnimalID();
 	std::string encodeCaughtAnimalType();
 	std::string encodeFacingDirection();
+	std::string encodeBearBuff();
 
 protected:
 	Action		action;
