@@ -268,7 +268,7 @@ GLFWwindow* CreateWindowFrame(int width, int height)
 #endif
 
 	// Create the GLFW window
-	GLFWwindow* window = glfwCreateWindow(width, height, window_title, NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, window_title, glfwGetPrimaryMonitor(), NULL);
 
 	// Check if the window could not be created
 	if (!window)
