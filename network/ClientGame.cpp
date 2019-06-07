@@ -28,12 +28,12 @@
 #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
 #define SONG_LOOP			(SOUNDS_PATH "Song_Loop.mp3") //placeholder
 #define LOBBY_LOOP			(SOUNDS_PATH "LobbyLoop.wav")
-#define INSTRUCTIONS_A	    (SOUNDS_PATH "Instructions1.mp3")
-#define INSTRUCTIONS_B      (SOUNDS_PATH "Instructions2.mp3")
+#define INSTRUCTIONS_A	    (SOUNDS_PATH "Instructions1.wav")
+#define INSTRUCTIONS_B      (SOUNDS_PATH "Instructions2.wav")
 #define LOOP_A				(SOUNDS_PATH "LoopA.wav")
 #define LOOP_B				(SOUNDS_PATH "LoopB.wav")
 #define TRANSITION_C		(SOUNDS_PATH "TransitionC.wav")
-#define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.mp3")
+#define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.wav")
 static SoundSystem * soundSystem;
 
 // sounds specific to player (NOT 3D)
@@ -62,7 +62,13 @@ static Sound * sound_other_toilet;
 static Sound * sound_other_vent_screw;
 static Sound * sound_other_door_unlock;
 
-static Sound * background_music;
+static Sound * lobby_loop;
+static Sound * instructions_one;
+static Sound * instructions_two;
+static Sound * game_loop_one;
+static Sound * game_loop_two;
+static Sound * game_transition_one;
+static Sound * game_loop_three;
 
 // VERY HACKY FIX....
 std::map<int, bool> playerDoingStuff; // true if currently doing something
@@ -123,8 +129,16 @@ ClientGame::ClientGame(void)
 		soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
 		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
 
-		soundSystem->createBackgroundMusic(&background_music, TRANSITION_C);
-		soundSystem->playBackgroundMusic(background_music, true); // FIXME: uncomment
+		soundSystem->createBackgroundMusic(&lobby_loop, LOBBY_LOOP);
+		soundSystem->createBackgroundMusic(&instructions_one, INSTRUCTIONS_A);
+		soundSystem->createBackgroundMusic(&instructions_two, INSTRUCTIONS_B);
+		soundSystem->createBackgroundMusic(&game_loop_one, LOOP_A);
+		soundSystem->createBackgroundMusic(&game_loop_two, LOOP_B);
+		soundSystem->createBackgroundMusic(&game_transition_one, TRANSITION_C);
+		soundSystem->createBackgroundMusic(&game_loop_three, ENDING_LOOP);
+
+
+		soundSystem->playBackgroundMusic(lobby_loop, true); // FIXME: uncomment
 	}
 
 	// send init packet
@@ -166,7 +180,13 @@ ClientGame::~ClientGame()
 	soundSystem->releaseSound(sound_other_vent_screw);
 	soundSystem->releaseSound(sound_other_door_unlock);
 	
-	soundSystem->releaseSound(background_music);
+	soundSystem->releaseSound(lobby_loop);
+	soundSystem->releaseSound(instructions_one);
+	soundSystem->releaseSound(instructions_two);
+	soundSystem->releaseSound(game_loop_one);
+	soundSystem->releaseSound(game_loop_two);
+	soundSystem->releaseSound(game_transition_one);
+	soundSystem->releaseSound(game_loop_three);
 
 	delete soundSystem;
 }
