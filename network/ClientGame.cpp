@@ -366,7 +366,7 @@ void ClientGame::update()
 					soundSystem->playSoundEffect(sound_jail_escape, true);
 					playerIsCaught[pNum] = false;
 				}
-				else if (player->isCaught()) {
+				if (player->isCaught()) {
 					playerIsCaught[pNum] = true;
 				}
 			}
@@ -498,7 +498,7 @@ void ClientGame::update()
 						soundSystem->playSoundEffect(sound_jail_escape, true);
 						playerIsCaught[curPlayerNum] = false;
 					}
-					else if (curPlayer->isCaught()) {
+					if (curPlayer->isCaught()) {
 						playerIsCaught[curPlayerNum] = true;
 					}
 				}
