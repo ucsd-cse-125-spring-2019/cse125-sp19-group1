@@ -28,6 +28,10 @@ GameData::~GameData()
 		delete iter.second;
 	}
 
+	for (auto iter : disconnectedPlayers)
+	{
+		delete iter.second;
+	}
 	for (auto tileRow : clientTileLayout)
 	{
 		for (auto * tile : tileRow)
@@ -185,7 +189,6 @@ void GameData::removePlayer(int anID, ClientType type)
 	}
 	if (players.count(anID) > 0)
 	{
-		delete players.at(anID);
 		players.erase(anID);
 	}
 }
