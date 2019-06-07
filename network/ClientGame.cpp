@@ -141,13 +141,14 @@ ClientGame::ClientGame(void)
 		soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
 		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
 
-		soundSystem->createBackgroundMusic(&lobby_loop, LOBBY_LOOP);
-		soundSystem->createBackgroundMusic(&instructions_one, INSTRUCTIONS_A);
-		soundSystem->createBackgroundMusic(&instructions_two, INSTRUCTIONS_B);
-		soundSystem->createBackgroundMusic(&game_loop_one, LOOP_A);
-		soundSystem->createBackgroundMusic(&game_loop_two, LOOP_B);
-		soundSystem->createBackgroundMusic(&game_transition_one, TRANSITION_C);
-		soundSystem->createBackgroundMusic(&game_loop_three, ENDING_LOOP);
+		soundSystem->createBackgroundMusic(&lobby_loop, LOBBY_LOOP); //loop that plays during the lobby, play instructions_A after the loop ends 
+		soundSystem->createBackgroundMusic(&instructions_one, INSTRUCTIONS_A); //One-time song, stop after plays once, don't start InstructionsB until slide 3 comes in
+		soundSystem->createBackgroundMusic(&instructions_two, INSTRUCTIONS_B); //One-time song, play immediately once slide 3 comes in, transition to Loop A
+		soundSystem->createBackgroundMusic(&game_loop_one, LOOP_A); //Loop, transitions after song ends to loop B
+		soundSystem->createBackgroundMusic(&game_loop_two, LOOP_B); //Loop, transitions after song ends to Transition C
+		soundSystem->createBackgroundMusic(&game_transition_one, TRANSITION_C); // One-time, transitions after song ends to Ending_LOOP
+		soundSystem->createBackgroundMusic(&game_loop_three, ENDING_LOOP); //Loop until game ends
+		//When the game ends, immediately cease music and start playing lobby loop.
 
 
 		soundSystem->playBackgroundMusic(lobby_loop, true); // FIXME: uncomment
