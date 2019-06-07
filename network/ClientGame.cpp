@@ -35,7 +35,7 @@
 #define LOBBY_LOOP			(SOUNDS_PATH "LobbyLoop.wav")
 // #define INSTRUCTIONS_A	    (SOUNDS_PATH "Instructions1.wav")
 // #define INSTRUCTIONS_B      (SOUNDS_PATH "Instructions2.wav")
-#define LOOP_A				(SOUNDS_PATH "LoopA.wav")
+#define LOOP_A				(SOUNDS_PATH "gameLoop.wav")
 // #define LOOP_B				(SOUNDS_PATH "LoopB.wav")
 // #define TRANSITION_C		(SOUNDS_PATH "TransitionC.wav")
 // #define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.wav")
