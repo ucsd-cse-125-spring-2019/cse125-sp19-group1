@@ -63,12 +63,16 @@ SoundSystem::SoundSystem()
 	}
 
 	// 5.0 is kind of like for distance -- very arbitrary and needs playing with
-	result = system->set3DSettings(1.0, 3.0, 1.0);
+	result = system->set3DSettings(1.0, DISTANCE_FACTOR, 1.0);
 }
 
 
 SoundSystem::~SoundSystem()
 {
+	for (int i = 0; i < 2; i++) {
+		backgroundSounds[i]->release();
+	}
+
 	system->release();
 }
 
@@ -149,7 +153,7 @@ void SoundSystem::createOtherPlayersSounds(Sound ** pSound, const char* pFile)
 	}
 }
 
-void SoundSystem::createBackgroundMusic(Sound ** pSound, const char* pFile)
+void SoundSystem::createBackgroundMusic(int spot, const char* pFile)
 {
 	FMOD_RESULT result;
 	struct stat buffer;
@@ -159,16 +163,54 @@ void SoundSystem::createBackgroundMusic(Sound ** pSound, const char* pFile)
 		fprintf(stderr, "createBackgroundMusic ERROR: FILE DOES NOT EXIST\n");
 	}
 
-	fprintf(stderr, "createBackgroundMusic: before system->createSound pSound=%d\n", pSound);
 	// using FMOD_CREATESAMPLE since background music is larger file
-	result = system->createSound(pFile, FMOD_CREATESAMPLE, 0, pSound);
+	// result = system->createSound(pFile, FMOD_CREATESAMPLE, 0, pSound);
+	result = system->createSound(pFile, FMOD_CREATESAMPLE, 0, &backgroundSounds[spot]);
+
 	if (result != FMOD_OK) {
 		std::cerr << "createBackground Music ERROR: could not create sound - " << FMOD_ErrorString(result) << "\n";
 	}
 	else {
 		fprintf(stderr, "createSound: Able to create sound %s\n", pFile);
-		fprintf(stderr, "createSound: pSound=%d\n", pSound);
 	}
+}
+
+void SoundSystem::startBackgroundMusic()
+{
+	FMOD_RESULT result;
+
+	backgroundSounds[0]->setMode(FMOD_LOOP_NORMAL);
+	backgroundSounds[0]->setLoopCount(-1);
+
+	result = system->playSound(backgroundSounds[0], 0, false, &not3DChannel[1]);
+	if (result != FMOD_OK) {
+		std::cerr << "startBackgroundMusic ERROR: cannot play music - " << FMOD_ErrorString(result) << "\n";
+	}
+}
+
+void SoundSystem::nextBackgroundLoop(int toPlay, bool bLoop)
+{
+	FMOD_RESULT result;
+	
+	result = not3DChannel[1]->stop();
+	if (result != FMOD_OK) {
+		std::cerr << "nextBackgroundLoop ERROR: stop - " << FMOD_ErrorString(result) << "\n";
+	}
+	
+	if (bLoop) {
+		backgroundSounds[toPlay]->setMode(FMOD_LOOP_NORMAL);
+		backgroundSounds[toPlay]->setLoopCount(-1);
+	}
+	else {
+		backgroundSounds[toPlay]->setMode(FMOD_LOOP_OFF);
+	}
+
+	result = system->playSound(backgroundSounds[toPlay], 0, false, &not3DChannel[1]);
+
+	if (result != FMOD_OK) {
+		std::cerr << "nextBackgroundLoop ERROR: playSound - " << FMOD_ErrorString(result) << "\n";
+	}
+	
 }
 
 // this method will play a sound effect, regardless of other sounds
