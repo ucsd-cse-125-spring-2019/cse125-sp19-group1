@@ -36,7 +36,7 @@ void ServerGame::update()
     // get new clients
     if(network->acceptNewClient(client_id))
     {
-        printf("client %d has been connected to the server\n",client_id); 
+         printf("client %d has been connected to the server\n",client_id); 
     }
 	receiveFromClients();
 }
@@ -107,16 +107,16 @@ void ServerGame::receiveFromClients()
 				break;
 			case INIT_CONNECTION:
 				newPlayerInit = true;
-				printf("server received init packet from client\n");
+				// printf("server received init packet from client\n");
 				initNewClient();
 				sendInitPackets();
 				break;
 
 			case ACTION_EVENT:
-				printf("server received action event packet from client\n");
+				// printf("server received action event packet from client\n");
 				break;
 			case REMOVE_WALLS_EVENT:
-				printf("server received remove walls event packet from client\n");
+				// printf("server received remove walls event packet from client\n");
 				{
 					if (Player * player = gameData->getPlayer(playerID))
 					{
@@ -128,7 +128,7 @@ void ServerGame::receiveFromClients()
 				}
 				break;
 			case PLAYER_DASH_EVENT:
-				printf("server received PlayerDash event packet from client\n");
+				// printf("server received PlayerDash event packet from client\n");
 				{
 					if (Player * player = gameData->getPlayer(playerID))
 					{
@@ -152,11 +152,11 @@ void ServerGame::receiveFromClients()
 				gameData->setGameState(GameState::END_CREDITS);
 				break;
 			case SET_DONE_LOADING_EVENT:
-				printf("server received SET_DONE_LOADING event packet from client\n");
+				// printf("server received SET_DONE_LOADING event packet from client\n");
 				gameData->setGameState(GameState::IN_GAME);
 				break;
 			case DONE_LOADING_EVENT:
-				printf("server received DONE_LOADING event packet from client\n");
+				// printf("server received DONE_LOADING event packet from client\n");
 				gameData->getPlayer(playerID)->setDoneLoading(true);
 				gameData->checkAllPlayersLoaded();
 				if(gameData->getAllPlayersLoaded())
@@ -164,7 +164,7 @@ void ServerGame::receiveFromClients()
 
 				break;
 			case START_EVENT:
-				printf("server received START event packet from client\n");
+				// printf("server received START event packet from client\n");
 				{
 					for (auto iter = gameData->getAllPlayers().begin(); iter != gameData->getAllPlayers().end(); iter++)
 					{
@@ -188,12 +188,12 @@ void ServerGame::receiveFromClients()
 				}
 				break;
 			case SELECT_EVENT:
-				printf("server received SELECT event packet from client\n");
+				// printf("server received SELECT event packet from client\n");
 				gameData->getPlayer(playerID)->toggleAnimalSelection();
 				break;
 			case SELECT0_EVENT:
 			{
-				printf("server received SELECT0 event packet from client\n");
+				// printf("server received SELECT0 event packet from client\n");
 				//gameData->getPlayer(iter->first)->setModelType(ModelType::DEFAULT);
 				auto iResult = shutdown(iter->second, SD_SEND);
 				if (iResult == SOCKET_ERROR)
@@ -204,19 +204,19 @@ void ServerGame::receiveFromClients()
 			}
 				break;
 			case SELECT1_EVENT:
-				printf("server received SELECT1 event packet from client\n");
+				// printf("server received SELECT1 event packet from client\n");
 				gameData->getPlayer(iter->first)->setModelType(ModelType::CHEF);
 				break;
 			case SELECT2_EVENT:
-				printf("server received SELECT2 event packet from client\n");
+				// printf("server received SELECT2 event packet from client\n");
 				gameData->getPlayer(iter->first)->setModelType(ModelType::RACOON);
 				break;
 			case SELECT3_EVENT:
-				printf("server received SELECT3 event packet from client\n");
+				// printf("server received SELECT3 event packet from client\n");
 				gameData->getPlayer(iter->first)->setModelType(ModelType::CAT);
 				break;
 			case SELECT4_EVENT:
-				printf("server received SELECT4 event packet from client\n");
+				// printf("server received SELECT4 event packet from client\n");
 				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
 				break;
 			case FORWARD_EVENT:
@@ -263,11 +263,11 @@ void ServerGame::receiveFromClients()
 
 						//easter egg
 						if (gameData->getAtlas()->getTileAt(loc)->getTileType() == TileType::OBJECT) {
-							std::cout << "bb: " << player->getBearBuff() << std::endl;
+							 // std::cout << "bb: " << player->getBearBuff() << std::endl;
 							if (dynamic_cast<ObjectTile *> (gameData->getAtlas()->getTileAt(loc))->getModel() == ItemModelType::painting &&
 								(dynamic_cast<ObjectTile *> (gameData->getAtlas()->getTileAt(loc)))->getBearBuff() &&
 								!player->getBearBuff()) {
-								std::cout << "SETTING BEAR BUFF " << std::endl;
+								 // std::cout << "SETTING BEAR BUFF " << std::endl;
 								player->setBearBuff(true);
 								if (player->isChef()) {
 									gameData->boostChefAnger();
@@ -280,7 +280,7 @@ void ServerGame::receiveFromClients()
 
 						if (player->isChef())
 						{
-							std::cout << "CAUGHT ANIMAL" << std::endl;
+							 // std::cout << "CAUGHT ANIMAL" << std::endl;
 							Direction dir = player->getFacingDirection();
 							Location jailLoc;
 							JailTile * jailTile = gameData->getAdjacentJailTile(loc, dir, jailLoc);
@@ -290,7 +290,7 @@ void ServerGame::receiveFromClients()
 							{
 								int animal = player->getCaughtAnimalId();
 								//update jail with animal
-								std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
+								 // std::cout << "PLACE ANIMAL IN JAIL" << std::endl;
 								jailTile->placeAnimalInJail(animal);
 								player->setCaughtAnimalId(-1);
 								player->setCaughtAnimalType(ModelType::DEFAULT);
@@ -306,10 +306,10 @@ void ServerGame::receiveFromClients()
 							}
 							else if (!player->hasCaughtAnimal())
 							{
-								std::cout << "SWINGING" << std::endl;
+								 // std::cout << "SWINGING" << std::endl;
 								if (!player->isInteracting())
 								{
-									std::cout << "CAN SWING" << std::endl;
+									 // std::cout << "CAN SWING" << std::endl;
 									player->setInteracting(true);
 									player->setAction(Action::SWING_NET);
 									player->setActionStartTime();
@@ -397,7 +397,7 @@ void ServerGame::receiveFromClients()
 								if (chefWin)
 								{
 									gameData->setWT(WinType::CHEF_WIN);
-									std::cout << "CHEF WIN" << std::endl;
+									 // std::cout << "CHEF WIN" << std::endl;
 								}
 							}
 						}
@@ -415,7 +415,7 @@ void ServerGame::receiveFromClients()
 								// Pr
 								if (objectTile && objectTile->getItem() == ItemModelType::cake)
 								{
-									std::cout << "table has cake!" << std::endl;
+									 // std::cout << "table has cake!" << std::endl;
 									player->setInventory(objectTile->getItem());
 									objectTile->setItem(ItemModelType::EMPTY);
 									player->modifySpeedMultiplier(CAKE_SLOWDOWN_MULTIPLIER);
@@ -515,7 +515,7 @@ void ServerGame::receiveFromClients()
 										}
 
 										animalWin = true;
-										std::cout << "ANIMAL WIN" << std::endl;
+										 // std::cout << "ANIMAL WIN" << std::endl;
 									}
 
 								}
@@ -534,14 +534,14 @@ void ServerGame::receiveFromClients()
 									player->setUnlockJailStartTime();
 
 									//update jail progres
-									std::cout << "UNLOCKING JAIL" << std::endl;
+									 // std::cout << "UNLOCKING JAIL" << std::endl;
 
 									jailTile->unlockJail();
 
 									//check if jail progress == 5
 									if (jailTile->getProgress() >= HITS_TO_OPEN_JAIL)
 									{
-										std::cout << "ANIMAL IS RELEASED" << std::endl;
+										 // std::cout << "ANIMAL IS RELEASED" << std::endl;
 										//update animal 
 										int animal = jailTile->getCapturedAnimal();
 										gameData->getPlayer(animal)->setCaughtStatus(false);
@@ -559,9 +559,9 @@ void ServerGame::receiveFromClients()
 							}
 							else if (gameData->getAtlas()->hasBox(loc))
 							{
-								std::cout << "HAS BOX" << std::endl;
+								 // std::cout << "HAS BOX" << std::endl;
 								if (!player->isInteracting()) {
-									std::cout << "starting to interact!" << std::endl;
+									 // std::cout << "starting to interact!" << std::endl;
 
 									if (player->getInstantSearch())
 									{
@@ -594,7 +594,7 @@ void ServerGame::receiveFromClients()
 						player->setInteracting(true);
 						player->setPoweringUp(true);
 						player->setActionStartTime();
-						std::cout << "starting to use powerup!" << std::endl;
+						 // std::cout << "starting to use powerup!" << std::endl;
 					}
 				}
 				break;
@@ -620,7 +620,7 @@ void ServerGame::receiveFromClients()
 							if (player->getAction() == Action::OPEN_BOX)
 							{
 								if (seconds > TIME_TO_OPEN_BOX) {
-									std::cout << "UPDATED BOX" << std::endl;
+									 // std::cout << "UPDATED BOX" << std::endl;
 									gameData->getAtlas()->updateBoxLayout(loc);
 									player->setInteracting(false);
 									player->setAction(Action::NONE);
@@ -633,7 +633,7 @@ void ServerGame::receiveFromClients()
 									GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 									if (!gateTile->isOpen())
 									{
-										std::cout << "RELEASED SPACE" << std::endl;
+										 // std::cout << "RELEASED SPACE" << std::endl;
 										player->setInteracting(false);
 										player->setAction(Action::NONE);
 
@@ -645,14 +645,14 @@ void ServerGame::receiveFromClients()
 							}
 
 							if (!player->isChef()) {
-								std::cout << "RELEASED SPACE" << std::endl;
+								 // std::cout << "RELEASED SPACE" << std::endl;
 								player->setInteracting(false);
 								player->setAction(Action::NONE);
 //
 						//if (player->getInteracting() && player->getOpeningBox()) {
 						//	double seconds = player->getInteractingTime(0);
 						//	if (seconds > gameData->getBoxTime()) {
-						//		std::cout << "UNLOCKED BOX" << std::endl;
+						//		 // std::cout << "UNLOCKED BOX" << std::endl;
 						//		gameData->getAtlas()->updateBoxLayout(loc);
 						//		player->setInteracting(false);
 						//		player->setOpeningBox(false);
@@ -662,7 +662,7 @@ void ServerGame::receiveFromClients()
 
 						/*if (player->isInteracting() &&
 							!player->isChef()) {
-							std::cout << "RELEASED SPACE" << std::endl;
+							 // std::cout << "RELEASED SPACE" << std::endl;
 							player->setInteracting(false);
 // HEAD
 						}*/
@@ -674,7 +674,7 @@ void ServerGame::receiveFromClients()
 						//	GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 						//	if (!gateTile->isOpen())
 						//	{
-						//		std::cout << "RELEASED SPACE" << std::endl;
+						//		 // std::cout << "RELEASED SPACE" << std::endl;
 						//		player->setOpeningGate(false);
 
 						//		//update progress of gate 
@@ -693,7 +693,7 @@ void ServerGame::receiveFromClients()
 						//	GateTile * gateTile = (GateTile *)(gameData->getAtlas()->getTileAt(loc));
 						//	if (!gateTile->isOpen())
 						//	{
-						//		std::cout << "RELEASED SPACE" << std::endl;
+						//		 // std::cout << "RELEASED SPACE" << std::endl;
 						//		player->setOpeningGate(false);
 
 						//		//update progress of gate 
@@ -720,7 +720,7 @@ void ServerGame::receiveFromClients()
 							break;
 						}
 
-						std::cout << "facing:" << static_cast<int>(player->getFacingDirection()) << std::endl;
+						 // std::cout << "facing:" << static_cast<int>(player->getFacingDirection()) << std::endl;
 						Location loc = player->getLocation();
 
 						// PLayer cannot drop item if there is an item already on the current tile
@@ -783,9 +783,9 @@ void ServerGame::receiveFromClients()
 			}
 			case RESET_EVENT:
 			{
-				std::cout << "RESET_EVENT" << std::endl;
+				 // std::cout << "RESET_EVENT" << std::endl;
 				if (chefWin || animalWin) { 
-					std::cout << "CALLING RESET" << std::endl;
+					 // std::cout << "CALLING RESET" << std::endl;
 					chefWin = false;
 					animalWin = false;
 					gameData->setWT(WinType::NONE);
@@ -798,7 +798,7 @@ void ServerGame::receiveFromClients()
 			}
 
 			default:
-				printf("error in packet types\n");
+				// printf("error in packet types\n");
 				break;
 			}
 
@@ -956,7 +956,7 @@ void ServerGame::receiveFromClients()
 						if (player->getAction() == Action::SWING_NET)
 						{
 							if (seconds > SWING_NET_DELAY) {
-								std::cout << "CAN SWING AGAIN" << std::endl;
+								 // std::cout << "CAN SWING AGAIN" << std::endl;
 								player->setInteracting(false);
 								player->setAction(Action::NONE);
 								sendActionPackets();
@@ -979,7 +979,7 @@ void ServerGame::receiveFromClients()
 					{
 						// HEAD
 						if (seconds > TIME_TO_OPEN_BOX) {
-							std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
+							 // std::cout << "UPDATED BOX UNLOCKED KEY" << std::endl;
 							gameData->getAtlas()->updateBoxLayout(loc);
 							player->setInteracting(false);
 							player->setAction(Action::NONE);
@@ -1022,7 +1022,7 @@ void ServerGame::receiveFromClients()
 
 								if (gateTile->getCurrentConstructTime() + seconds >= TIME_TO_CONSTRUCT_GATE)
 								{
-									std::cout << "GATE CONSTRUCTED" << std::endl;
+									 // std::cout << "GATE CONSTRUCTED" << std::endl;
 									gateTile->constructGate(seconds);
 									player->setInteracting(false);
 									player->setAction(Action::NONE);
@@ -1034,7 +1034,7 @@ void ServerGame::receiveFromClients()
 
 					//Handling power ups
 					if (player->getPoweringUp() && seconds > ABILITY_CHARGE_TIME) {
-						std::cout << "POWERING UP" << std::endl;
+						 // std::cout << "POWERING UP" << std::endl;
 						player->setInteracting(false);
 						player->setPoweringUp(false);
 
@@ -1043,7 +1043,7 @@ void ServerGame::receiveFromClients()
 						bool powerUp = true;
 						if (it == ItemModelType::apple)
 						{
-							std::cout << "POWER: limit chef vision" << std::endl;
+							 // std::cout << "POWER: limit chef vision" << std::endl;
 							//call limit chef vision
 							player->setBlindChef(true);
 							gameData->setBlindChef(true);
@@ -1052,7 +1052,7 @@ void ServerGame::receiveFromClients()
 						}
 						else if (it == ItemModelType::orange)
 						{
-							std::cout << "POWER: limit chef speed" << std::endl;
+							 // std::cout << "POWER: limit chef speed" << std::endl;
 							//call limit chef speed 
 							player->setSlowChef(true);
 							gameData->setSlowChef(true);
@@ -1061,7 +1061,7 @@ void ServerGame::receiveFromClients()
 						}
 						else if (it == ItemModelType::bananaGreen)
 						{
-							std::cout << "POWER: ghost" << std::endl;
+							 // std::cout << "POWER: ghost" << std::endl;
 							player->setGhost(true);
 							//call ghost because green means go 
 							player->setSpeedStartTime();
@@ -1069,7 +1069,7 @@ void ServerGame::receiveFromClients()
 						}
 						else if (it == ItemModelType::bananaPerfect)
 						{
-							std::cout << "POWER: flash" << std::endl;
+							 // std::cout << "POWER: flash" << std::endl;
 
 							//call flash because yellow banana
 							float x = player->getLocation().getX();
@@ -1132,7 +1132,7 @@ void ServerGame::receiveFromClients()
 						}
 						else if (it == ItemModelType::bananaVeryRipe)
 						{
-							std::cout << "POWER: search" << std::endl;
+							 // std::cout << "POWER: search" << std::endl;
 							player->setInstantSearch(true);
 							//maybe like a trap item - makes chef slip or creates a barrier for a set duration
 							player->setSearchStartTime();
@@ -1372,7 +1372,7 @@ void ServerGame::updateHeight(int id)
 		return; 
 	}
 
-	//std::cout << "THERES A RAMP" << std::endl;
+	// // std::cout << "THERES A RAMP" << std::endl;
 
 	float x = loc.getX();
 	float y;
@@ -1542,7 +1542,7 @@ void ServerGame::updateCollision(int id)
 
 void ServerGame::resetGame() 
 {
-	std::cout << "CALLING RESET GAME" << std::endl;
+	 // std::cout << "CALLING RESET GAME" << std::endl;
 	delete gameData;
 	gameData = new GameData(SERVER_GAMEDATA);
 
@@ -1556,6 +1556,6 @@ void ServerGame::resetGame()
 		gameData->addNewPlayer(id, loc, ClientType::SERVER_SIDE);
 		count++;
 	}
-	std::cout << "GAME RESET" << std::endl;
+	 // std::cout << "GAME RESET" << std::endl;
 
 }

@@ -17,7 +17,7 @@ ServerNetwork::ServerNetwork(void)
     // Initialize Winsock
     iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
     if (iResult != 0) {
-        printf("WSAStartup failed with error: %d\n", iResult);
+        // printf("WSAStartup failed with error: %d\n", iResult);
         exit(1);
     }
  
@@ -32,7 +32,7 @@ ServerNetwork::ServerNetwork(void)
     iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
  
     if ( iResult != 0 ) {
-        printf("getaddrinfo failed with error: %d\n", iResult);
+        // printf("getaddrinfo failed with error: %d\n", iResult);
         WSACleanup();
         exit(1);
     }
@@ -41,7 +41,7 @@ ServerNetwork::ServerNetwork(void)
     ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
  
     if (ListenSocket == INVALID_SOCKET) {
-        printf("socket failed with error: %ld\n", WSAGetLastError());
+        // printf("socket failed with error: %ld\n", WSAGetLastError());
         freeaddrinfo(result);
         WSACleanup();
         exit(1);
@@ -52,7 +52,7 @@ ServerNetwork::ServerNetwork(void)
     iResult = ioctlsocket(ListenSocket, FIONBIO, &iMode);
  
     if (iResult == SOCKET_ERROR) {
-        printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
+        // printf("ioctlsocket failed with error: %d\n", WSAGetLastError());
         closesocket(ListenSocket);
         WSACleanup();
         exit(1);
@@ -62,7 +62,7 @@ ServerNetwork::ServerNetwork(void)
     iResult = bind( ListenSocket, result->ai_addr, (int)result->ai_addrlen);
  
     if (iResult == SOCKET_ERROR) {
-        printf("bind failed with error: %d\n", WSAGetLastError());
+        // printf("bind failed with error: %d\n", WSAGetLastError());
         freeaddrinfo(result);
         closesocket(ListenSocket);
         WSACleanup();
@@ -76,7 +76,7 @@ ServerNetwork::ServerNetwork(void)
     iResult = listen(ListenSocket, SOMAXCONN);
  
     if (iResult == SOCKET_ERROR) {
-        printf("listen failed with error: %d\n", WSAGetLastError());
+        // printf("listen failed with error: %d\n", WSAGetLastError());
         closesocket(ListenSocket);
         WSACleanup();
         exit(1);
@@ -103,7 +103,7 @@ bool ServerNetwork::acceptNewClient(unsigned int & id)
 		// Do not allow more than MAX_CLIENTS users to connect to the server
 		if (sessions.size() >= MAX_CLIENTS)
 		{
-			std::cout << "There are " << MAX_CLIENTS << " clients connected already!" << std::endl;
+			 // std::cout << "There are " << MAX_CLIENTS << " clients connected already!" << std::endl;
 			auto iResult = shutdown(ClientSocket, SD_SEND);
 			if (iResult == SOCKET_ERROR)
 				closesocket(ClientSocket);
