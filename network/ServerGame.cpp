@@ -263,11 +263,11 @@ void ServerGame::receiveFromClients()
 
 						//easter egg
 						if (gameData->getAtlas()->getTileAt(loc)->getTileType() == TileType::OBJECT) {
-							 // std::cout << "bb: " << player->getBearBuff() << std::endl;
+							std::cout << "bb: " << player->getBearBuff() << std::endl;
 							if (dynamic_cast<ObjectTile *> (gameData->getAtlas()->getTileAt(loc))->getModel() == ItemModelType::painting &&
 								(dynamic_cast<ObjectTile *> (gameData->getAtlas()->getTileAt(loc)))->getBearBuff() &&
 								!player->getBearBuff()) {
-								 // std::cout << "SETTING BEAR BUFF " << std::endl;
+								std::cout << "SETTING BEAR BUFF " << std::endl;
 								player->setBearBuff(true);
 								if (player->isChef()) {
 									gameData->boostChefAnger();

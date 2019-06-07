@@ -306,6 +306,7 @@ bool Player::getBearBuff()
 
 void Player::setBearBuff(bool aBearBuff) {
 	bearBuff = aBearBuff;
+	dirtyVariablesMap["bearBuff"] = true;
 }
 
 
@@ -459,8 +460,7 @@ void Player::decodeDashCooldown(std::string value)
 void Player::decodeBearBuff(std::string value)
 {
 	bearBuff = std::stoi(value);
-	dirtyVariablesMap["bearBuff"] = true;
-	 // std::cout << "BEAR BUFF ACTIVATED WOOOOOOOOO" << std::endl;
+	std::cout << "BEAR BUFF ACTIVATED WOOOOOOOOO" << std::endl;
 }
 
 void Player::addDecodeFunctions()
@@ -623,6 +623,7 @@ std::string Player::encodeDashCooldown() {
 }
 std::string Player::encodeBearBuff() {
 	std::stringstream encodedData;
+	std::cout << "ENCODING BEAR BUFF" << std::endl;
 	encodedData << "bearBuff: " << (int)bearBuff << std::endl;
 
 	return encodedData.str();

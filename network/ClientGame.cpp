@@ -369,6 +369,10 @@ void ClientGame::update()
 				}
 			}
 
+			if (player->getBearBuff()) {
+				std::cout << "I HAVE BEAR BUFF" << std::endl;
+			}
+
 		}
 
 		// sounds that originate from other players
