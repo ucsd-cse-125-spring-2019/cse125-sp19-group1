@@ -870,14 +870,14 @@ void ServerGame::receiveFromClients()
 					continue;
 				}
 
-				if (player->getBlindChef() && player->getVisionTime() > MAX_CHEF_TIME)
+				if (player->getReverseChef() && player->getReverseTime() > MAX_REVERSE_CHEF_TIME)
 				{
-					player->setBlindChef(false);
-					gameData->setBlindChef(false);
+					player->setReverseChef(false);
+					gameData->setReverseChef(false);
 					player->setPowerUp(PowerUp::NONE);
 				}
 
-				if (player->getSlowChef() && player->getSlowTime() > MAX_CHEF_TIME)
+				if (player->getSlowChef() && player->getSlowTime() > MAX_SLOW_CHEF_TIME)
 				{
 					player->setSlowChef(false);
 					gameData->setSlowChef(false);
@@ -996,10 +996,10 @@ void ServerGame::receiveFromClients()
 						if (it == ItemModelType::apple)
 						{
 							//call limit chef vision
-							player->setBlindChef(true);
-							gameData->setBlindChef(true);
-							player->setVisionStartTime();
-							player->setPowerUp(PowerUp::CHEF_BLIND);
+							player->setReverseChef(true);
+							gameData->setReverseChef(true);
+							player->setReverseStartTime();
+							player->setPowerUp(PowerUp::CHEF_REVERSE);
 						}
 						else if (it == ItemModelType::orange)
 						{
@@ -1257,6 +1257,13 @@ void ServerGame::updateMovement(int dir, int id)
 	if (gameData->getPlayer(id)->isCaught() ||
 		gameData->getPlayer(id)->getHidden()) {
 		return;
+	}
+
+	if (gameData->getReverseChef() && gameData->getPlayer(id)->isChef()) {
+		if (dir % 2 == 1) 
+			dir++;
+		else 
+			dir--;
 	}
 
 	switch (dir)

@@ -203,9 +203,9 @@ void Player::setSearchStartTime()
 {
 	searchStartTime = std::chrono::system_clock::now();
 }
-void Player::setVisionStartTime()
+void Player::setReverseStartTime()
 {
-	visionStartTime = std::chrono::system_clock::now();
+	reverseStartTime = std::chrono::system_clock::now();
 }
 void Player::setSlowStartTime()
 {
@@ -281,10 +281,10 @@ double Player::getSearchTime()
 	return elapsed_seconds.count();
 }
 
-double Player::getVisionTime()
+double Player::getReverseTime()
 {
 	auto now = std::chrono::system_clock::now();
-	std::chrono::duration<double> elapsed_seconds = now - visionStartTime;
+	std::chrono::duration<double> elapsed_seconds = now - reverseStartTime;
 	return elapsed_seconds.count();
 }
 

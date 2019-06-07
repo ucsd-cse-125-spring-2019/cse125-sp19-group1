@@ -536,7 +536,7 @@ struct PlayerState {
 	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
 	int movingSpeed = 0;			// -1 = slow, 0 = normal, 1 = fast
 	int flashedRecently;		//counts down to fire a burst of flash particles
-	bool blinded = false; //will activate if player is blinded: should only activate on chef
+	bool reversed = false; //will activate if player is reversed: should only activate on chef
 	bool instantSearch = false; //will activate if player has instant search. 
 	bool restrictRotation = false;
 	bool isBear = false; //will activate if player has bear powerup
@@ -1933,7 +1933,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		}
 		break;
 	}
-	state.blinded = false;
+	state.reversed = false;
 	state.instantSearch = false;
 	state.isBear = false;
 	state.movingSpeed = 0;
@@ -1947,7 +1947,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case PowerUp::FLASH:
 		state.flashedRecently = 6;
 		break;
-	case PowerUp::CHEF_BLIND:
+	case PowerUp::CHEF_REVERSE:
 
 		state.movingSpeed = 0;
 		break;
@@ -1958,14 +1958,14 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		state.flashedRecently = 0;
 		break;
 	}
-	if (sharedClient->getGameData()->getBlindChef()) {
+	if (sharedClient->getGameData()->getReverseChef()) {
 		std::cerr << "ChefBlind gotten" << std::endl;
 	}
 	if (sharedClient->getGameData()->getSlowChef()) {
 		std::cerr << "ChefSlow gotten" << std::endl;
 	}
-	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->blindChef) {
-		state.blinded = true;
+	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->reverseChef) {
+		state.reversed = true;
 	}
 	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->slowChef) {
 		state.movingSpeed = -1;
@@ -2338,7 +2338,7 @@ void DisplayCallback(GLFWwindow* window)
 		flashSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position, state.flashedRecently > 0);
 		blindSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position + glm::vec3(0,25.0f,0), state.blinded);
+			state.position + glm::vec3(0,25.0f,0), state.reversed);
 		searchSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), state.instantSearch);
 	}

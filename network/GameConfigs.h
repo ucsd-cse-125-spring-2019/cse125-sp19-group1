@@ -66,7 +66,9 @@
 // COOLDOWN = time to wait before you can do this action again
 #define UNLOCK_JAIL_COOLDOWN 0.5
 #define PLAYER_DASH_COOLDOWN 5
-#define MAX_CHEF_TIME 2.5
+#define MAX_SLOW_CHEF_TIME 2.5
+#define MAX_REVERSE_CHEF_TIME 1.5
+
 
 
 #endif
