@@ -41,6 +41,7 @@ enum class ItemModelType {
 	window,
 	table,
 	net,
+	warrenBear,
 };
 
 #endif
