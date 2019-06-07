@@ -202,10 +202,10 @@ static const struct ExtraObjects {
 	{23, 12, ItemModelType::painting, TEXTURES_PATH "paintingvoelker1.png"},
 	{TO_TILE_COORDS(47.619, 227.9), ItemModelType::painting, TEXTURES_PATH "paintingvoelker2.png"},
 
-	// Trash bags
+	/*// Trash bags
 	{TO_TILE_COORDS(7.79725, 249.298), ItemModelType::garbageBag, nullptr},
 	{TO_TILE_COORDS(225.56, 310.885), ItemModelType::garbageBag, nullptr},
-	{TO_TILE_COORDS(471.777, 152.69), ItemModelType::garbageBag, nullptr},
+	{TO_TILE_COORDS(471.777, 152.69), ItemModelType::garbageBag, nullptr},*/
 };
 
 #define TO_TILE_CENTER(x, offset) (TO_TILE_COORD(x) + 0.5f + offset) * TILE_SIZE_SERVER
@@ -218,7 +218,13 @@ static const struct CustomPositionedObjects {
 	{TO_TILE_CENTER(208.88, 0.f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::plate},
 	{TO_TILE_CENTER(208.88, -0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::fork},
 	{TO_TILE_CENTER(208.88, 0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::knife},
+	
 	{80, 0, -100, ItemModelType::warrenBear},
+	
+	// Trash bags
+	{TO_TILE_CENTER(-10, 0), 0, TO_TILE_CENTER(249.298, 0), ItemModelType::garbageBag},
+	//{TO_TILE_CENTER(225.56, 0), 0, TO_TILE_CENTER(310.885, 0), ItemModelType::garbageBag},
+	{TO_TILE_CENTER(491.777, 0), 0, TO_TILE_CENTER(152.69, 0), ItemModelType::garbageBag},
 };
 
 static const glm::mat4 identityMat(1.f);
