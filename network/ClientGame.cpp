@@ -11,9 +11,11 @@
 #define SOUNDS_EXIT_DOOR	(SOUNDS_PATH "door_yay_combo.mp3")
 #define SOUNDS_DOOR_UNLOCK	(SOUNDS_PATH "frontexit_unlock_short.mp3")
 #define SOUNDS_FOUND_ITEM	(SOUNDS_PATH "found_item_short.mp3")
-#define SOUNDS_NET			(SOUNDS_PATH "NetSwoosh.mp3")	// FIXME placeholder for swoosh
+#define SOUNDS_NET			(SOUNDS_PATH "NetSwoosh.mp3")
 #define SOUNDS_RACCOON_UP	(SOUNDS_PATH "RaccoonDownUp.mp3")
 #define SOUNDS_RACCOON_DOWN	(SOUNDS_PATH "RaccoonUpDown.mp3")
+#define SOUNDS_CAT			(SOUNDS_PATH "catMeow.mp3")
+#define SOUNDS_DOG			(SOUNDS_PATH "dogWhine.mp3")
 #define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
 #define SOUNDS_TOILET		(SOUNDS_PATH "bathroom_toilet.mp3")
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
@@ -23,6 +25,8 @@
 #define SOUNDS_JAIL_UNLOCK	(SOUNDS_PATH "jail_rattle.mp3")
 #define SOUNDS_KEYDROP		(SOUNDS_PATH "keydrop.mp3")
 #define SOUNDS_CHEF			(SOUNDS_PATH "chef_win.mp3")
+#define SOUNDS_SPLAT		(SOUNDS_PATH "splat.mp3")
+#define SOUNDS_JAIL_ESCAPE	(SOUNDS_PATH "latching_opening.mp3")
 
 // Paths for background music loops
 #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
@@ -43,6 +47,8 @@ static Sound * sound_found_item;
 static Sound * sound_net;
 static Sound * sound_raccoon_up;
 static Sound * sound_raccoon_down;
+static Sound * sound_cat;
+static Sound * sound_dog;
 static Sound * sound_search_item;
 static Sound * sound_toilet;
 static Sound * sound_vent_screw;
@@ -52,6 +58,8 @@ static Sound * sound_yay;
 static Sound * sound_jail_unlock;
 static Sound * sound_keydrop;
 static Sound * sound_chef;
+static Sound * sound_splat;
+static Sound * sound_jail_escape;
 
 // sounds specific to other players (3D)
 static Sound * sound_other_found_item;
@@ -66,6 +74,7 @@ static Sound * background_music;
 
 // VERY HACKY FIX....
 std::map<int, bool> playerDoingStuff; // true if currently doing something
+std::map<int, bool> playerIsCaught;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
@@ -105,6 +114,8 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_net, SOUNDS_NET);
 		soundSystem->createSoundEffect(&sound_raccoon_up, SOUNDS_RACCOON_UP);
 		soundSystem->createSoundEffect(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
+		soundSystem->createSoundEffect(&sound_cat, SOUNDS_CAT);
+		soundSystem->createSoundEffect(&sound_dog, SOUNDS_DOG);
 		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
@@ -114,6 +125,8 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
 		soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
 		soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
+		soundSystem->createSoundEffect(&sound_splat, SOUNDS_SPLAT);
+		soundSystem->createSoundEffect(&sound_jail_escape, SOUNDS_JAIL_ESCAPE);
 
 		soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
 		soundSystem->createOtherPlayersSounds(&sound_other_jail_unlock, SOUNDS_JAIL_UNLOCK);
@@ -149,6 +162,8 @@ ClientGame::~ClientGame()
 	soundSystem->releaseSound(sound_net);
 	soundSystem->releaseSound(sound_raccoon_down);
 	soundSystem->releaseSound(sound_raccoon_up);
+	soundSystem->releaseSound(sound_cat);
+	soundSystem->releaseSound(sound_dog);
 	soundSystem->releaseSound(sound_search_item);
 	soundSystem->releaseSound(sound_toilet);
 	soundSystem->releaseSound(sound_vent_screw);
@@ -157,6 +172,8 @@ ClientGame::~ClientGame()
 	soundSystem->releaseSound(sound_jail_unlock);
 	soundSystem->releaseSound(sound_keydrop);
 	soundSystem->releaseSound(sound_chef);
+	soundSystem->releaseSound(sound_splat);
+	soundSystem->releaseSound(sound_jail_escape);
 
 	soundSystem->releaseSound(sound_other_found_item);
 	soundSystem->releaseSound(sound_other_jail_unlock);
@@ -256,6 +273,10 @@ void ClientGame::update()
 		if (miniIt == playerDoingStuff.end()) {
 			playerDoingStuff.insert(std::pair<int, bool>(pNum, false));
 		}
+		miniIt = playerIsCaught.find(pNum);
+		if (miniIt == playerIsCaught.end()) {
+			playerIsCaught.insert(std::pair<int, bool>(pNum, false));
+		}
 
 		// sounds that originate from THIS player
 		if (player->isChef()) 
@@ -265,15 +286,13 @@ void ClientGame::update()
 				playerDoingStuff[pNum] = true;
 
 				if (player->getCaughtAnimalType() == ModelType::RACOON) {
-					soundSystem->playSoundEffect(sound_raccoon_up);
+					soundSystem->playSoundEffect(sound_raccoon_up, true);
 				}
 				else if (player->getCaughtAnimalType() == ModelType::CAT) {
-					// TODO
-					// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
+					soundSystem->playSoundEffect(sound_cat, true);
 				}
 				else if (player->getCaughtAnimalType() == ModelType::DOG) {
-					// TODO
-					// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
+					soundSystem->playSoundEffect(sound_dog, true);
 				}
 			}
 			else if (player->getAction() == Action::NONE) {
@@ -289,8 +308,12 @@ void ClientGame::update()
 		else {
 			if (player->getAction() == Action::NONE) {
 				soundSystem->pauseSoundEffect();
-				// soundSystem->pauseSoundQueue();
 				playerDoingStuff[pNum] = false;
+
+				if (player->isCaught() == false && playerIsCaught.at(pNum)) {
+					soundSystem->playSoundEffect(sound_jail_escape, true);
+					playerIsCaught[pNum] = false;
+				}
 			}
 			else if (player->getAction() == Action::OPEN_BOX && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_search_item);
@@ -372,6 +395,10 @@ void ClientGame::update()
 			if (miniIt2 == playerDoingStuff.end()) {
 				playerDoingStuff.insert(std::pair<int, bool>(curPlayerNum, false));
 			}
+			miniIt2 = playerIsCaught.find(curPlayerNum);
+			if (miniIt2 == playerIsCaught.end()) {
+				playerIsCaught.insert(std::pair<int, bool>(curPlayerNum, false));
+			}
 
 			locX = curPlayerLoc.getX();
 			locY = curPlayerLoc.getY();
@@ -383,28 +410,31 @@ void ClientGame::update()
 					playerDoingStuff.at(curPlayerNum) = false;
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
 
-					if (curPlayer->getCaughtAnimalType() == ModelType::RACOON) {
-						soundSystem->playSoundEffect(sound_raccoon_up);
-					}
-					else if (curPlayer->getCaughtAnimalType() == ModelType::CAT) {
-						// TODO
-						// soundSystem->playSoundEffect(INSERT CAT SOUND EFFECT);
-					}
-					else if (curPlayer->getCaughtAnimalType() == ModelType::DOG) {
-						// TODO
-						// soundSystem->playSoundEffect(INSERT DOG SOUND EFFECT);
-					}
-
 				}
 				else if (curPlayer->getAction() == Action::SWING_NET && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playOtherPlayersSounds(sound_other_net, curPlayerNum, locX, locY, locZ);
 					playerDoingStuff.at(curPlayerNum) = true;
+
+					if (curPlayer->getCaughtAnimalType() == ModelType::RACOON) {
+						soundSystem->playSoundEffect(sound_raccoon_up, true);
+					}
+					else if (curPlayer->getCaughtAnimalType() == ModelType::CAT) {
+						soundSystem->playSoundEffect(sound_cat, true);
+					}
+					else if (curPlayer->getCaughtAnimalType() == ModelType::DOG) {
+						soundSystem->playSoundEffect(sound_dog, true);
+					}
 				}
 			}
 			else {
 				if (curPlayer->getAction() == Action::NONE) {
 					playerDoingStuff.at(curPlayerNum) = false;
 					soundSystem->pauseOtherPlayersSounds(curPlayerNum);
+
+					if (curPlayer->isCaught() == false && playerIsCaught.at(curPlayerNum)) {
+						soundSystem->playSoundEffect(sound_jail_escape, true);
+						playerIsCaught[curPlayerNum] = false;
+					}
 				}
 				else if (curPlayer->getAction() == Action::OPEN_BOX && playerDoingStuff.at(curPlayerNum) == false) {
 					soundSystem->playOtherPlayersSounds(sound_other_search_item, curPlayerNum, locX, locY, locZ);
