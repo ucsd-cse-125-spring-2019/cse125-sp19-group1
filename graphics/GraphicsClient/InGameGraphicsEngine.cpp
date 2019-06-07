@@ -1297,8 +1297,12 @@ void InGameGraphicsEngine::MovePlayers()
 			}
 
 			// Animate state.angle towards state.targetAngle
-			state.angle += (state.targetAngle - state.angle) * 0.2f;
-			if (abs(state.targetAngle - state.angle) < 0.01) {
+			float targetAngle = state.targetAngle;
+			if (state.id == myID && state.geometryIdx == static_cast<unsigned>(ModelType::CHEF) && sharedClient->getGameData()->getReverseChef()) {
+				targetAngle = fmodf(targetAngle + glm::pi<float>(), glm::two_pi<float>());
+			}
+			state.angle += (targetAngle - state.angle) * 0.2f;
+			if (abs(fmodf(state.targetAngle - state.angle, glm::two_pi<float>())) < 0.01) {
 				// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
 				state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
 			}
@@ -1556,6 +1560,10 @@ void updateUIElements(GameData * gameData) {
 		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, false);
 		uiCanvas->setVisible(UICanvas::ANGRY_METER_2, true);
 	}
+	else {
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, true);
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_2, false);
+	}
 	//check if animals are caught
 	//activates when animal is first in net.
 	for (auto it = players.begin(); it != players.end(); ++it) {
@@ -1597,7 +1605,13 @@ void updateUIElements(GameData * gameData) {
 	//check if current user is holding item
 	Player * currPlayer = players[currState->id];
 	//items held by chef are the icons for animals
+
+	if (currPlayer->getDashCooldown() > 0) {
+		uiCanvas->setVisible(UICanvas::PROMPT_BOOST, false);
+	}
 	if (currPlayer->isChef()) {
+		uiCanvas->setBoostVisible(false);
+		uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, false);
 		if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
 			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::CAT) {
 			uiCanvas->setItemChef(UICanvas::CAT_ITEM);
@@ -1615,11 +1629,16 @@ void updateUIElements(GameData * gameData) {
 			uiCanvas->removeItems();
 		}
 
-		if (currPlayer->isChef()) {
+		if (currPlayer->isChef() && players.find(currPlayer->getCaughtAnimalId()) == players.end()) {
 			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
 		}
 	}
 	else {
+		uiCanvas->setBoostVisible(true);
+
 		//disable prompts unless item is held
 		uiCanvas->setVisible(UICanvas::PROMPT_GREEN_BANANA, false);
 		uiCanvas->setVisible(UICanvas::PROMPT_YELLOW_BANANA, false);
@@ -1704,6 +1723,13 @@ void updateUIElements(GameData * gameData) {
 		}
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, false);
+		}
+
+		if (gameData->getJailTile(currPlayer->getLocation()) != nullptr && !currPlayer->isChef()) {
+			uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, false);
 		}
 
 		//cake prompt check
