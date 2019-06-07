@@ -611,18 +611,21 @@ JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir, Location &
 
 Tile * GameData::getAdjacentTileNotThroughWalls(Location loc, Location & tileLoc) {
 	std::vector<Direction> dirs;
+	dirs.push_back(Direction::WEST);
+
 	dirs.push_back(Direction::NORTH);
 	dirs.push_back(Direction::EAST);
 	dirs.push_back(Direction::SOUTH);
-	dirs.push_back(Direction::WEST);
-
+	//dirs.push_back(Direction::WEST);
+	Tile * currTile = getTile(loc);
 
 	for (int i = 0; i < dirs.size(); i++) {
-		int index = rand() % dirs.size();
-		Direction dir = dirs[index];
-		dirs.erase(dirs.begin() + index);
-		Tile * tile = getAdjacentTile(loc, dir, tileLoc);
-		std::bitset<4> wall(tile->getWall());
+		//int index = rand() % dirs.size();
+		//Direction dir = dirs[index];
+		Direction dir = dirs[i];
+		//dirs.erase(dirs.begin() + index);
+ 		Tile * tile = getAdjacentTile(loc, dir, tileLoc);
+		std::bitset<4> wall(currTile->getWall());
 		// 3 EAST
 		// 2 SOUTH
 		// 1 NORTH
@@ -635,22 +638,34 @@ Tile * GameData::getAdjacentTileNotThroughWalls(Location loc, Location & tileLoc
 			if (wall[1])
 				break;
 			else
+			{
+				tileLoc.setZ(tileLoc.getZ() + TILE_SIZE/2);
 				return tile;
+			}
 		case Direction::SOUTH:
 			if (wall[2])
 				break;
 			else
+			{
+				tileLoc.setZ(tileLoc.getZ() - TILE_SIZE / 2);
 				return tile;
+			}
 		case Direction::EAST:
-			if (wall[0])
-				break;
-			else 
-				return tile;
-		case Direction::WEST:
 			if (wall[3])
 				break;
 			else
+			{
+				tileLoc.setX(tileLoc.getX() - TILE_SIZE / 2);
 				return tile;
+			}
+		case Direction::WEST:
+			if (wall[0])
+				break;
+			else
+			{
+				tileLoc.setX(tileLoc.getX() + TILE_SIZE / 2);
+				return tile;
+			}
 		}
 	}
 	return nullptr;
