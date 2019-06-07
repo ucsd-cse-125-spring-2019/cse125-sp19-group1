@@ -346,8 +346,13 @@ int main(int argc, char *argv[]) {
 
 						for (auto &m : modelTypes) {
 							if (colorCode == m.colorCode) {
-								envObjects[mapOffset] = static_cast<uint8_t>(m.modelType);
-								found = true;
+								if (m.modelType == ItemModelType::painting) {
+									printf("Suppressed painting at (%d, %d)\n", mapX, mapY);
+								}
+								else {
+									envObjects[mapOffset] = static_cast<uint8_t>(m.modelType);
+									found = true;
+								}
 								break;
 							}
 						}
@@ -365,6 +370,11 @@ int main(int argc, char *argv[]) {
 		}
 		mapY++;
 	}
+
+	int injectX = floorf(189.535995f / 20);
+	int injectZ = floorf(167.119995f / 20);
+	envObjects[injectZ * mapWidth + injectX] = static_cast<uint8_t>(ItemModelType::painting);
+	printf("Injected painting at %d, %d\n", injectX, injectZ);
 
 	MY_MKDIR(folderName.c_str());
 
