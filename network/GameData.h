@@ -56,7 +56,7 @@ public:
 	void decodeChefAnger(std::string value);
 	void decodeChefVision(std::string value);
 	void decodeWinType(std::string value);
-	void decodeBlindChef(std::string value);
+	void decodeReverseChef(std::string value);
 	void decodeSlowChef(std::string value);
 	void decodeAllPlayersLoaded(std::string value);
 
@@ -79,14 +79,14 @@ public:
 	double chefVision = 40;
 	double chefRampVision = 0;
 
-	bool blindChef = false;
+	bool reverseChef = false;
 	bool slowChef = false;
 	
 	void setChefRampVision(double crv) { chefRampVision = crv; }
 	double getChefRampVision() { return chefRampVision; }
 
-	bool getBlindChef() { return blindChef; }
-	void setBlindChef(bool aBlindChef) { blindChef = aBlindChef; }
+	bool getReverseChef() { return reverseChef; }
+	void setReverseChef(bool aReverseChef) { reverseChef = aReverseChef; }
 
 	bool getSlowChef() { return slowChef; }
 	void setSlowChef(bool aSlowChef) { slowChef = aSlowChef; }

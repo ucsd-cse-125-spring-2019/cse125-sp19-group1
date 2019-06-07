@@ -26,7 +26,7 @@ enum class Direction {
 
 enum class Action { NONE, OPEN_BOX, CONSTRUCT_GATE, UNLOCK_JAIL, SWING_NET, KEY_DROP, DESTROY_POWERUP };
 
-enum class PowerUp {NONE, FLASH, GHOST, INSTA_SEARCH, CHEF_BLIND, CHEF_SLOW};
+enum class PowerUp {NONE, FLASH, GHOST, INSTA_SEARCH, CHEF_REVERSE, CHEF_SLOW};
 
 class Player
 {
@@ -85,7 +85,7 @@ public:
 	void setDashCooldownStartTime();
 	void setSpeedStartTime();
 	void setSearchStartTime();
-	void setVisionStartTime();
+	void setReverseStartTime();
 	void setSlowStartTime();
 
 	void updateDashCooldownTime();
@@ -94,7 +94,7 @@ public:
 	double getDashTime();
 	double getSpeedTime();
 	double getSearchTime();
-	double getVisionTime();
+	double getReverseTime();
 	double getSlowTime();
 	
 	bool getPoweringUp() { return poweringUp; }
@@ -115,9 +115,9 @@ public:
 	void setDashing(bool dash) { dashing = dash; }
 	bool isDashing() { return dashing; }
 
-	bool blindChef = false;
-	bool getBlindChef() { return blindChef; }
-	void setBlindChef(bool blind) { blindChef = blind; }
+	bool reverseChef = false;
+	bool getReverseChef() { return reverseChef; }
+	void setReverseChef(bool blind) { reverseChef = blind; }
 
 	bool bearBuff = false;
 	bool getBearBuff();
@@ -215,7 +215,7 @@ protected:
 
 	std::chrono::time_point<std::chrono::system_clock> speedStartTime;
 	std::chrono::time_point<std::chrono::system_clock> searchStartTime;
-	std::chrono::time_point<std::chrono::system_clock> visionStartTime;
+	std::chrono::time_point<std::chrono::system_clock> reverseStartTime;
 	std::chrono::time_point<std::chrono::system_clock> slowStartTime;
 	std::chrono::time_point<std::chrono::system_clock> dashStartTime;
 	std::chrono::time_point<std::chrono::system_clock> dashCooldownStartTime;
