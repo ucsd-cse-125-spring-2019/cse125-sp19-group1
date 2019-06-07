@@ -33,11 +33,11 @@ PlayAgainGraphicsEngine *playAgainEngine = nullptr;
 static AbstractGraphicsEngine * currentEngine = nullptr;
 static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 
-static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
 
 //#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
+static ServerGame* server = nullptr;
 static ClientGame * clients[4] = { nullptr };
 
 void toggleClient() {
@@ -123,9 +123,9 @@ void Init(GLFWwindow *window)
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 
+#ifdef DEBUG_CLIENTS
 	server = new ServerGame();
 
-#ifdef DEBUG_CLIENTS
 	for (auto &client : clients) {
 		client = new ClientGame();
 	}
@@ -182,12 +182,6 @@ void Init(GLFWwindow *window)
 	inGameEngine->StartLoading();
 }
 
-void serverLoop(void * args) {
-	while (true) {
-		server->update();
-	}
-}
-
 // Treat this as a destructor function. Delete dynamically allocated memory here.
 void CleanUp() {
 	currentEngine = nullptr;
@@ -232,7 +226,11 @@ void CleanUp() {
 		delete cutscene;
 	}
 	startingCutscenes.clear();
+
+#ifdef DEBUG_CLIENTS
 	delete server;
+#endif
+
 	delete sharedClient;
 }
 
@@ -478,7 +476,9 @@ int main(void)
 			glfwPollEvents();
 		}
 		
+#ifdef DEBUG_CLIENTS
 		server->update();
+#endif
 
 		// Only update client from tester.cpp while game is loading
 		if (sharedClient->gameData->getGameState() == GameState::LOADING) {
