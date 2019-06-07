@@ -1,6 +1,9 @@
 #include "Player.h"
 
-Player::Player() : playerID(-1) { std::cout << "player default constructor called\n"; addDecodeFunctions(); }
+Player::Player() : playerID(-1) {  
+	// std::cout << "player default constructor called\n";
+	addDecodeFunctions(); 
+}
 
 Player::Player(int anID, int aPlayerNum, Location aLoc) : playerID(anID), playerNum(aPlayerNum), location(aLoc), inventory(ItemModelType::EMPTY),
 	modelType(ModelType::RACOON), visionRadius(VISION_RADIUS), speedMultiplier(DEFAULT_SPEED_MULTIPLIER), selectedAnimal(true), doneLoading(false),
@@ -316,27 +319,27 @@ void Player::updateChefMultiplier(int anger)
 	}
 	else if (anger < 24) 
 	{
-		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.05;
 		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
-		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.05;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.1;
 		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
-		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.10;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.15;
 		//catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
-		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.15;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.2;
 		//catchRadius = 18;
 	}
 	else 
 	{
-		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.2;
+		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.25;
 		//catchRadius = 20;
 	}
 
@@ -364,8 +367,8 @@ std::string Player::encodePlayerData(bool newPlayerInit)
 				encodedData << (this->*encodingFunctions.at(key))();
 				dirtyVariablesMap[key] = false;
 			}
-			else
-				std::cout << "Missing encoding function for key " << key << std::endl;
+			//else
+				 // std::cout << "Missing encoding function for key " << key << std::endl;
 		}
 	}
 
@@ -377,8 +380,8 @@ void Player::decodePlayerData(std::string key, std::string value)
 	// Safety check in case decoding function for the key doesn't exist
 	if (decodingFunctions.count(key) > 0)
 		(this->*decodingFunctions[key])(value); // Format for calling the functions from the map
-	else
-		std::cout << "No decoding function for key: " << key << std::endl;
+	//else
+		 // std::cout << "No decoding function for key: " << key << std::endl;
 }
 
 void Player::decodePlayerNum(std::string value)
@@ -457,7 +460,7 @@ void Player::decodeBearBuff(std::string value)
 {
 	bearBuff = std::stoi(value);
 	dirtyVariablesMap["bearBuff"] = true;
-	std::cout << "BEAR BUFF ACTIVATED WOOOOOOOOO" << std::endl;
+	 // std::cout << "BEAR BUFF ACTIVATED WOOOOOOOOO" << std::endl;
 }
 
 void Player::addDecodeFunctions()
