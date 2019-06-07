@@ -1727,6 +1727,7 @@ void updateUIElements(GameData * gameData) {
 
 		if (gameData->getJailTile(currPlayer->getLocation()) != nullptr && !currPlayer->isChef()) {
 			uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, true);
+			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, false);
 		}
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, false);
