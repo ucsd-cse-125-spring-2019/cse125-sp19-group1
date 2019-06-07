@@ -131,7 +131,7 @@
 //#define DEBUG_GATE_ANIMATION
 
 // Set to 0 to disable gate animation
-#define ENABLE_GATE_ANIMATION 0
+#define ENABLE_GATE_ANIMATION 1
 
 #ifdef DEBUG_CARRY
 unsigned fake_carried_idx = 1;
@@ -283,6 +283,8 @@ static const struct PlayerModelSettings {
 #define WINDOW_FILENAMES MDL_SAME_TEX("window")
 #define WINDOW_SCALE glm::vec3(1.f)
 #endif
+
+bool WINDOW_SCALED_UP = true;
 
 static const struct ItemModelSettings {
 	const char *modelPath;       // filesystem path to a model geometry file
@@ -933,6 +935,8 @@ void updateBoxVisibility()
 		return;
 	}
 
+	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
+
 	unsigned y = 0;
 	for (auto &row : envObjs) {
 		unsigned x = 0;
@@ -944,21 +948,40 @@ void updateBoxVisibility()
 			if (tile && tileLayout[y][x]->getTileType() == TileType::GATE) {
 				GateTile *gate = (GateTile *)tileLayout[y][x];
 
-				static unsigned char gateHistory[4] = { 0 };
-				static double gateTimes[4] = {0.0};
-				int num = gate->getGateNum();
-				gateHistory[num] = (gateHistory[num] << 1) | (gateTimes[num] != gate->getCurrentConstructTime());
-				gateTimes[num] = gate->getCurrentConstructTime();
+				bool foundPlayer = false;
+
+				for (auto pair : allPlayers) {
+					if (pair.second->getAction() == Action::CONSTRUCT_GATE) {
+						auto loc = pair.second->getLocation();
+						int playerX = loc.getX() / TILE_SIZE_SERVER;
+						int playerZ = loc.getZ() / TILE_SIZE_SERVER;
+						if (playerX == x && playerZ == y) {
+							foundPlayer = true;
+							break;
+						}
+					}
+				}
 
 #ifdef DEBUG_GATE_ANIMATION
-				gateHistory[num] = 1;
+				foundPlayer = true;
 #endif
+
+				Transform *transformNode = envObjs[y][x];
+				if (foundPlayer && gate->getModel() == ItemModelType::window && WINDOW_SCALED_UP) {
+					// compensate for weird animation transform
+					transformNode->undoScale();
+					WINDOW_SCALED_UP = false;
+				}
+				else if (!foundPlayer &&gate->getModel() == ItemModelType::window && !WINDOW_SCALED_UP) {
+					// use regular transform
+					transformNode->applyScale(WINDOW_SCALE);
+  					WINDOW_SCALED_UP = true;
+				}
 
 				glm::vec3 position((x + 0.5f) * TILE_SIZE_SERVER, 0.f, (y + 0.5f) * TILE_SIZE_SERVER);
 				if (glm::distance(position, ingame_light_center) < ingame_light_radius + ITEM_MDL_CLIP_RADIUS) {
 					auto index = static_cast<unsigned>(gate->getModel());
-					//cout << "Calling update(" << (gateHistory[num] != 0) << ") on model " << index << " (" << itemModels[index].settings->name << ")\n";
-					itemModels[index].object->Update(gateHistory[num] != 0);
+					itemModels[index].object->Update(foundPlayer);
 				}
 			}
 

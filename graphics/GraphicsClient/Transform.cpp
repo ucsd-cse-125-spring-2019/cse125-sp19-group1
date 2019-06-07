@@ -42,3 +42,13 @@ void Transform::incrementRefCount()
 {
 	++refCount;
 }
+
+void Transform::applyScale(glm::vec3 scale) {
+	offset = glm::scale(offset, scale);
+}
+
+void Transform::undoScale() {
+	offset[0] = glm::normalize(glm::vec4(offset[0][0], offset[0][1], offset[0][2], offset[0][3]));
+	offset[1] = glm::normalize(glm::vec4(offset[1][0], offset[1][1], offset[1][2], offset[1][3]));
+	offset[2] = glm::normalize(glm::vec4(offset[2][0], offset[2][1], offset[2][2], offset[2][3]));
+}
