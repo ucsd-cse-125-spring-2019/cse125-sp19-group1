@@ -1,6 +1,6 @@
 #include "animloader.h"
 
-#define TOTAL_DUR_MULTIPLIER 0.6f
+#define TOTAL_DUR_MULTIPLIER 0.5f // use 0.5 for demo computers
 
 bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlayer, float animMultiplier, int animIndex) {
 	// create the scene from which assimp will gather information about the file

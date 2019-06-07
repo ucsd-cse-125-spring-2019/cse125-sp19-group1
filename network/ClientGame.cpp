@@ -16,7 +16,7 @@
 #define SOUNDS_RACCOON_UP	(SOUNDS_PATH "RaccoonDownUp.mp3")
 #define SOUNDS_RACCOON_DOWN	(SOUNDS_PATH "RaccoonUpDown.mp3")
 #define SOUNDS_CAT			(SOUNDS_PATH "catMeow.mp3")
-#define SOUNDS_DOG			(SOUNDS_PATH "dogWhine.mp3")
+#define SOUNDS_DOG			(SOUNDS_PATH "dogWhine.wav")
 #define SOUNDS_SEARCH_ITEM	(SOUNDS_PATH "search_item.mp3")
 #define SOUNDS_TOILET		(SOUNDS_PATH "bathroom_toilet.mp3")
 #define SOUNDS_VENT_SCREW	(SOUNDS_PATH "ventexit_screw.mp3")
@@ -126,6 +126,8 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_net, SOUNDS_NET);
 		soundSystem->createSoundEffect(&sound_raccoon_up, SOUNDS_RACCOON_UP);
 		soundSystem->createSoundEffect(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
+		soundSystem->createSoundEffect(&sound_cat, SOUNDS_CAT);
+		soundSystem->createSoundEffect(&sound_dog, SOUNDS_DOG);
 		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
@@ -135,6 +137,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
 		soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
 		soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
+		soundSystem->createSoundEffect(&sound_jail_escape, SOUNDS_JAIL_ESCAPE);
 
 		soundSystem->createOtherPlayersSounds(&sound_splat, SOUNDS_SPLAT);
 		soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
