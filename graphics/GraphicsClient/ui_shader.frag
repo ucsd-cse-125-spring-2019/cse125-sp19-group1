@@ -28,7 +28,7 @@ void main()
 		color = vec4(0.7176,0.3725,0.3725,1);
 	}
 
-	if(boostVisible == 1 && uv.x * 3 > (0.8) && uv.x * 3 < (0.916 - max(0, (ratioBoost)) * .116) && 
+	if(boostVisible == 1 && uv.x * 3 > (0.8) && uv.x * 3 < (0.911 - max(0, (ratioBoost)) * .111) && 
 		uv.y * 3 < 2.7638 && uv.y * 3 > 2.7388) {
 		color = vec4(0.14, 0.8, 0.7, 1);	
 	}

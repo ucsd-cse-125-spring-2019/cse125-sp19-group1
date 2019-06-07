@@ -28,10 +28,8 @@ SoundSystem::SoundSystem()
 	threeDeeChannel[0] = 0;
 	threeDeeChannel[1] = 0;
 	threeDeeChannel[2] = 0;
-	// threeDeeChannelTaken = 0;
-	// threeDeeChannelPlayedBefore[0] = false;
-	// threeDeeChannelPlayedBefore[1] = false;
-	// threeDeeChannelPlayedBefore[2] = false;
+	threeDeeChannel[3] = 0;
+	threeDeeSeparate = 0;
 
 	if (driverCount == 0) {
 		std::cerr << "SoundSystem ERROR: driverCount = 0, possibly because no audio devices are plugged in\n";
@@ -351,7 +349,7 @@ void SoundSystem::playBackgroundMusic(Sound * pSound, bool bLoop)
 	}
 }
 
-void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerNum, float x, float y, float z, bool bLoop)
+void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerNum, float x, float y, float z, bool playUntilEnd, bool bLoop)
 {
 	FMOD_RESULT result;
 	// FMOD::Channel * curPlayerChannel;
@@ -376,24 +374,45 @@ void SoundSystem::playOtherPlayersSounds(Sound * pSound, int playerNum, float x,
 	// std::cerr << "playOtherPlayerSounds curPlayerChannel=" << curPlayerChannel << "\n";
 
 	// result = system->playSound(pSound, 0, true, &curPlayerChannel);
-	result = system->playSound(pSound, 0, true, &threeDeeChannel[playerNum - 1]);
+	if (playUntilEnd) {
+		result = system->playSound(pSound, 0, true, &threeDeeSeparate);
 
-	if (result != FMOD_OK) {
-		std::cerr << "playOtherPlayersSounds 1 ERROR: cannot play sounds - " << FMOD_ErrorString(result) << "\n";
+		if (result != FMOD_OK) {
+			std::cerr << "playOtherPlayersSounds 1 ERROR: cannot play sounds - " << FMOD_ErrorString(result) << "\n";
+		}
+		// result = curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
+		result = threeDeeSeparate->set3DAttributes(&loc, NULL, NULL);
+
+		if (result != FMOD_OK) {
+			std::cerr << "playOtherPlayersSounds 1 ERROR: cannot set 3d - " << FMOD_ErrorString(result) << "\n";
+		}
+		// result = curPlayerChannel->setPaused(false);
+		result = threeDeeSeparate->setPaused(false);
+
+		if (result != FMOD_OK) {
+			std::cerr << "playOtherPlayersSounds 1 ERROR: cannot set paused to false - " << FMOD_ErrorString(result) << "\n";
+		}
+
 	}
-	// result = curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
-	result = threeDeeChannel[playerNum - 1]->set3DAttributes(&loc, NULL, NULL);
+	else {
+		result = system->playSound(pSound, 0, true, &threeDeeChannel[playerNum - 1]);
 
-	if (result != FMOD_OK) {
-		std::cerr << "playOtherPlayersSounds 1 ERROR: cannot set 3d - " << FMOD_ErrorString(result) << "\n";
+		if (result != FMOD_OK) {
+			std::cerr << "playOtherPlayersSounds 1 ERROR: cannot play sounds - " << FMOD_ErrorString(result) << "\n";
+		}
+		// result = curPlayerChannel->set3DAttributes(&loc, NULL, NULL);
+		result = threeDeeChannel[playerNum - 1]->set3DAttributes(&loc, NULL, NULL);
+
+		if (result != FMOD_OK) {
+			std::cerr << "playOtherPlayersSounds 1 ERROR: cannot set 3d - " << FMOD_ErrorString(result) << "\n";
+		}
+		// result = curPlayerChannel->setPaused(false);
+		result = threeDeeChannel[playerNum - 1]->setPaused(false);
+
+		if (result != FMOD_OK) {
+			std::cerr << "playOtherPlayersSounds 1 ERROR: cannot set paused to false - " << FMOD_ErrorString(result) << "\n";
+		}
 	}
-	// result = curPlayerChannel->setPaused(false);
-	result = threeDeeChannel[playerNum - 1]->setPaused(false);
-
-	if (result != FMOD_OK) {
-		std::cerr << "playOtherPlayersSounds 1 ERROR: cannot set paused to false - " << FMOD_ErrorString(result) << "\n";
-	}
-
 }
 
 // if there are sound effects being played, don't play this

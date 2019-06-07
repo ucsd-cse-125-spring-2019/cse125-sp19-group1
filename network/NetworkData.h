@@ -51,12 +51,12 @@ struct Packet {
 
 	void serialize(char * data) {
 		memcpy(data, this, sizeof(Packet));
-		//std::cout << data << std::endl;
+		// // std::cout << data << std::endl;
 	}
 
 	void deserialize(char * data) {
 		memcpy(this, data, sizeof(Packet));
-		//std::cout << data << std::endl;
+		// // std::cout << data << std::endl;
 
 	}
 };

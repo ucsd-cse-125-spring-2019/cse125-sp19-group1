@@ -72,8 +72,8 @@ class UICanvas {
 public:
 	enum UIType {
 		UI_BASE = 0,
-		RACCOON_HAPPY = 1,
-		CAT_HAPPY = 2,
+		ANGRY_METER_1 = 1,
+		ANGRY_METER_2 = 2,
 		DOG_HAPPY = 3,
 		RACCOON_JAIL = 4,
 		CAT_JAIL = 5,
@@ -126,8 +126,8 @@ public:
 		PROMPT_KEY = 52,
 		PROMPT_GET_CAKE = 53,
 		PROMPT_DROP_ITEM = 54,
-		ANGRY_METER_1 = 55,
-		ANGRY_METER_2 = 56,
+		RACCOON_HAPPY = 55,
+		CAT_HAPPY = 56,
 		SPEED_BOOST = 57,
 		PROMPT_BUILD_EXIT = 58,
 
