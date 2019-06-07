@@ -137,6 +137,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
 		soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
 		soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
+		soundSystem->createSoundEffect(&sound_jail_escape, SOUNDS_JAIL_ESCAPE);
 
 		soundSystem->createOtherPlayersSounds(&sound_splat, SOUNDS_SPLAT);
 		soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
@@ -365,6 +366,9 @@ void ClientGame::update()
 					soundSystem->playSoundEffect(sound_jail_escape, true);
 					playerIsCaught[pNum] = false;
 				}
+				else if (player->isCaught()) {
+					playerIsCaught[pNum] = true;
+				}
 			}
 			else if (player->getAction() == Action::OPEN_BOX && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_search_item);
@@ -493,6 +497,9 @@ void ClientGame::update()
 					if (curPlayer->isCaught() == false && playerIsCaught.at(curPlayerNum)) {
 						soundSystem->playSoundEffect(sound_jail_escape, true);
 						playerIsCaught[curPlayerNum] = false;
+					}
+					else if (curPlayer->isCaught()) {
+						playerIsCaught[curPlayerNum] = true;
 					}
 				}
 				else if (curPlayer->getAction() == Action::OPEN_BOX && playerDoingStuff.at(curPlayerNum) == false) {

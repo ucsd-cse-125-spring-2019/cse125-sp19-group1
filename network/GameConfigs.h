@@ -3,7 +3,7 @@
 #define GAME_CONFIGS_H
 
 //logs
-#define PRINT_DEBUG_STATEMENTS
+//#define PRINT_DEBUG_STATEMENTS
 
 #ifdef PRINT_DEBUG_STATEMENTS
 #endif
