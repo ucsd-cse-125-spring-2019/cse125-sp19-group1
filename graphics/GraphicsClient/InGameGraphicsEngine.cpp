@@ -422,15 +422,15 @@ static FBXObject * sandModel = nullptr;
 static Skybox *skybox = nullptr;
 
 static UICanvas * uiCanvas = nullptr;
-static GLuint objShaderProgram;
-static GLuint uiShaderProgram;
-static GLuint particleShaderProgram;
+static GLuint objShaderProgram = 0;
+static GLuint uiShaderProgram = 0;
+static GLuint particleShaderProgram = 0;
 
-static GLuint uiTexture;
+static GLuint uiTexture = 0;
 
-static Geometry * tileGeometry;
-static Geometry * wallGeometry;
-static Geometry * netGeometry;
+static Geometry * tileGeometry = nullptr;
+static Geometry * wallGeometry = nullptr;
+static Geometry * netGeometry = nullptr;
 static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
@@ -449,13 +449,13 @@ static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;*/
 
-ParticleSpawner * dustSpawner[MAX_PLAYERS];
-ParticleSpawner * flashSpawner[MAX_PLAYERS];
-ParticleSpawner * speedSpawner[MAX_PLAYERS];
-ParticleSpawner * slowSpawner[MAX_PLAYERS];
-//ParticleSpawner * buildSpawner;
-ParticleSpawner * blindSpawner[MAX_PLAYERS];
-ParticleSpawner * searchSpawner[MAX_PLAYERS];
+static ParticleSpawner * dustSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * flashSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * speedSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * slowSpawner[MAX_PLAYERS] = { nullptr };
+//static ParticleSpawner * buildSpawner;
+static ParticleSpawner * blindSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * searchSpawner[MAX_PLAYERS] = { nullptr };
 
 
 extern ClientGame * sharedClient;
@@ -2116,10 +2116,10 @@ static void DrawMinimap()
 					}
 					continue;
 				}
-				else if (networkPlayer->isCaught()) {
+				/*else if (networkPlayer->isCaught()) {
 					// Animals can't see caught animals
 					continue;
-				}
+				}*/
 			}
 		}
 
