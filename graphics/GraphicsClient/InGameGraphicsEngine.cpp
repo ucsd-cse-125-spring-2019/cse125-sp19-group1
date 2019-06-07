@@ -105,7 +105,7 @@
 
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
-//#define ENV_OBJS_DEMO
+// #define ENV_OBJS_DEMO
 
 #define TILE_HEIGHT_ADJUST -2.f
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
@@ -184,6 +184,46 @@ struct MapPing {
 	}
 };
 unordered_map<int, MapPing> allPings;
+
+#define TABLE_HEIGHT 9.25f
+#define TO_TILE_COORD(x) (int)(x / TILE_SIZE_SERVER)
+#define TO_TILE_COORDS(x, y) TO_TILE_COORD(x), TO_TILE_COORD(y)
+static const struct ExtraObjects {
+	int x;
+	int z;
+	ItemModelType type;
+	const char *texture;
+} extraObjects[] = {
+	// Paintings
+	{13, 1, ItemModelType::painting, TEXTURES_PATH "painting.png"},
+	{0, 4, ItemModelType::painting, TEXTURES_PATH "paintingathena.png"},
+	{19, 6, ItemModelType::painting, TEXTURES_PATH "paintingedward.png"},
+	{2, 12, ItemModelType::painting, TEXTURES_PATH "paintingoliver.png"},
+	{23, 12, ItemModelType::painting, TEXTURES_PATH "paintingvoelker1.png"},
+	{TO_TILE_COORDS(47.619, 227.9), ItemModelType::painting, TEXTURES_PATH "paintingvoelker2.png"},
+
+	// Trash bags
+	{TO_TILE_COORDS(7.79725, 249.298), ItemModelType::garbageBag, nullptr},
+	{TO_TILE_COORDS(225.56, 310.885), ItemModelType::garbageBag, nullptr},
+	{TO_TILE_COORDS(471.777, 152.69), ItemModelType::garbageBag, nullptr},
+	
+	/*// Table setting
+	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::plate, nullptr},
+	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::fork, nullptr},
+	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::knife, nullptr},*/
+};
+
+#define TO_TILE_CENTER(x, offset) (TO_TILE_COORD(x) + 0.5f + offset) * TILE_SIZE_SERVER
+static const struct CustomPositionedObjects {
+	float x;
+	float y;
+	float z;
+	ItemModelType type;
+} customPositionedObjects[] = {
+	{TO_TILE_CENTER(208.88, 0.f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::plate},
+	{TO_TILE_CENTER(208.88, -0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::fork},
+	{TO_TILE_CENTER(208.88, 0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::knife},
+};
 
 static const glm::mat4 identityMat(1.f);
 static glm::mat4 orthoP;
@@ -306,7 +346,7 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,              glm::vec3(0.6f),    glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
 	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              glm::vec3(1.f),     glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              glm::vec3(1.f),     glm::vec3(0.05f, 0.0f, 0.f),   glm::vec3(0.f, GLM_PI, 0.f),      true },
 	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,              glm::vec3(0.3f),    glm::vec3(0.f),                glm::vec3(0.f),                   false },
 	{ MDL_AND_TEX("key", "key1"),                          "key #1",               ItemModelType::key1,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
@@ -315,9 +355,9 @@ static const struct ItemModelSettings {
 	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),          "bathroom key drop",    ItemModelType::keyDropBathroom,   glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),         "front exit key drop",  ItemModelType::keyDropFrontExit,  glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,       glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             glm::vec3(1.f),     glm::vec3(-0.05f, 0.0f, 0.f),  glm::vec3(0.f, GLM_PI, 0.f),      true },
 	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("painting"),                            "wall painting",        ItemModelType::painting,          glm::vec3(1.8f),    glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
+	{ MDL_AND_TEX("painting", "paintingbear"),             "bear painting",        ItemModelType::painting,          glm::vec3(1.8f),    glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
 	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
 	{ MDL_SAME_TEX("plate"),                               "plate",                ItemModelType::plate,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
 	{ MDL_SAME_TEX("plunger"),                             "plunger",              ItemModelType::plunger,           glm::vec3(0.7f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
@@ -412,6 +452,12 @@ struct AnimatedItem {
 	ItemModelType type = ItemModelType::EMPTY;
 };
 
+struct EnvObject {
+	Transform *transform = nullptr;
+	ItemModelType type = ItemModelType::EMPTY;
+	GLuint textureOverride = 0;
+};
+
 static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 
 static FBXObject * tileModel = nullptr;
@@ -423,19 +469,19 @@ static FBXObject * sandModel = nullptr;
 static Skybox *skybox = nullptr;
 
 static UICanvas * uiCanvas = nullptr;
-static GLuint objShaderProgram;
-static GLuint uiShaderProgram;
-static GLuint particleShaderProgram;
+static GLuint objShaderProgram = 0;
+static GLuint uiShaderProgram = 0;
+static GLuint particleShaderProgram = 0;
 
-static GLuint uiTexture;
+static GLuint uiTexture = 0;
 
-static Geometry * tileGeometry;
-static Geometry * wallGeometry;
-static Geometry * netGeometry;
+static Geometry * tileGeometry = nullptr;
+static Geometry * wallGeometry = nullptr;
+static Geometry * netGeometry = nullptr;
 static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
-static vector<vector<Transform *>> envObjs;
+static vector<vector<EnvObject>> envObjs;
 static vector<vector<AnimatedItem>> itemTransforms;
 
 /*static Sound * sound_door;
@@ -450,14 +496,14 @@ static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;*/
 
-ParticleSpawner * dustSpawner[MAX_PLAYERS];
-ParticleSpawner * flashSpawner[MAX_PLAYERS];
-ParticleSpawner * speedSpawner[MAX_PLAYERS];
-ParticleSpawner * slowSpawner[MAX_PLAYERS];
-//ParticleSpawner * buildSpawner;
-ParticleSpawner * blindSpawner[MAX_PLAYERS];
-ParticleSpawner * searchSpawner[MAX_PLAYERS];
-ParticleSpawner * bearSpawner[MAX_PLAYERS];
+static ParticleSpawner * dustSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * flashSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * speedSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * slowSpawner[MAX_PLAYERS] = { nullptr };
+//static ParticleSpawner * buildSpawner;
+static ParticleSpawner * blindSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * searchSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * bearSpawner[MAX_PLAYERS] = { nullptr };
 
 
 extern ClientGame * sharedClient;
@@ -700,15 +746,28 @@ void resetEnvObjs()
 				break;
 			}
 
+			row[x].textureOverride = 0;
 			if (objIdx == 0) {
-				row[x] = nullptr;
-				continue;
+				bool found = false;
+				for (const auto &extra : extraObjects) {
+					if (x == extra.x && z == extra.z) {
+						row[x].textureOverride = extra.texture ? loadTexture(extra.texture) : 0;
+						objIdx = static_cast<uint8_t>(extra.type);
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					row[x].transform = nullptr;
+					continue;
+				}
 			}
 #endif
 
 			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
 			if (modelType == ItemModelType::EMPTY || !itemModels[objIdx].settings) {
-				row[x] = nullptr;
+				row[x].transform = nullptr;
 				continue;
 			}
 
@@ -749,9 +808,10 @@ void resetEnvObjs()
 			modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
 			modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
 
-			row[x] = new Transform(modelRotate);
-			row[x]->addChild(itemModels[objIdx].geometry);
-			envObjsTransform->addChild(row[x]);
+			row[x].type = modelType;
+			row[x].transform = new Transform(modelRotate);
+			row[x].transform->addChild(itemModels[objIdx].geometry);
+			envObjsTransform->addChild(row[x].transform);
 		}
 	}
 }
@@ -818,7 +878,7 @@ void resetItems()
 
 			if (tile->getTileType() == TileType::OBJECT) {
 				if (((ObjectTile *)tile)->getModel() == ItemModelType::table) {
-					tileTranslate.y += 9.25f;
+					tileTranslate.y += TABLE_HEIGHT;
 				}
 			}
 
@@ -939,7 +999,9 @@ void updateBoxVisibility()
 	unsigned y = 0;
 	for (auto &row : envObjs) {
 		unsigned x = 0;
-		for (auto tile : row) {
+		for (auto &envObj : row) {
+			auto tile = envObj.transform;
+
 			if (tile && tileLayout[y][x]->getTileType() == TileType::BOX) {
 				tile->hidden = !((BoxTile *)tileLayout[y][x])->hasBox();
 			}
@@ -1745,7 +1807,8 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		// hide the un-animated box
 		int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
 		int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
-		auto transform = envObjs[z][x];
+		const auto &envObj = envObjs[z][x];
+		auto transform = envObj.transform;
 		transform->hidden = true;
 
 		// show the animated box
@@ -1907,7 +1970,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		if (state.animatingInventory) {
 			int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
 			int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
-			glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
+			glm::vec3 targetPosition = glm::vec3(envObjs[z][x].transform->getOffset()[3]);
 			targetPosition.y += 6.f;
 			auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
 
@@ -2123,10 +2186,10 @@ static void DrawMinimap()
 					}
 					continue;
 				}
-				else if (networkPlayer->isCaught()) {
+				/*else if (networkPlayer->isCaught()) {
 					// Animals can't see caught animals
 					continue;
-				}
+				}*/
 			}
 		}
 
@@ -2174,12 +2237,32 @@ void DisplayCallback(GLFWwindow* window)
 		floorTransform->draw(V, P, glm::mat4(1.0));
 	}
 
-	if (envObjsTransform) {
+	/*if (envObjsTransform) {
 		envObjsTransform->draw(V, P, glm::mat4(1.0));
+	}*/
+	for (int z = 0; z < envObjs.size(); z++) {
+		for (int x = 0; x < envObjs[z].size(); x++) {
+			const auto &envObj = envObjs[z][x];
+			if (envObj.transform && !envObj.transform->hidden) {
+				if (envObj.textureOverride) {
+					itemModels[static_cast<unsigned>(envObj.type)].object->Draw(objShaderProgram, &V, &P, envObj.transform->getOffset(), envObj.textureOverride);
+				}
+				else {
+					envObj.transform->draw(V, P, identityMat);
+				}
+			}
+		}
 	}
 
 	if (allItemsTransform) {
 		allItemsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	for (const auto &customObj : customPositionedObjects) {
+		const auto &model = itemModels[static_cast<unsigned>(customObj.type)];
+		const auto translate = glm::translate(identityMat, glm::vec3(customObj.x, customObj.y, customObj.z));
+		glm::mat4 modelMat = glm::scale(glm::rotate(translate, model.settings->rotation.y, glm::vec3(0.f, 1.f, 0.f)), model.settings->scale);
+		model.geometry->draw(V, P, modelMat);
 	}
 
 	for (const auto &state : players) {

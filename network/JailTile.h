@@ -18,7 +18,10 @@ public:
 	int getProgress() { return progress; }
 	bool isJailEmpty() { return (capturedAnimal == -1); };
 
-	void placeAnimalInJail(int iter) { capturedAnimal = iter; };
+	void placeAnimalInJail(int iter) {
+		capturedAnimal = iter;
+		setDirty();
+	};
 	void unlockJail() { progress += 1; };
 	void resetJail() 
 	{ 
