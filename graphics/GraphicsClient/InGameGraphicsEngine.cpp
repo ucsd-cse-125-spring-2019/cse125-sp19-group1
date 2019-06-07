@@ -185,6 +185,19 @@ struct MapPing {
 };
 unordered_map<int, MapPing> allPings;
 
+static const struct ExtraPainting {
+	int x;
+	int z;
+	const char *texture;
+} extraPaintings[] = {
+	{13, 1, TEXTURES_PATH "painting.png"},
+	{0, 4, TEXTURES_PATH "paintingathena.png"},
+	{19, 6, TEXTURES_PATH "paintingedward.png"},
+	{2, 12, TEXTURES_PATH "paintingoliver.png"},
+	{23, 12, TEXTURES_PATH "paintingvoelker1.png"},
+	{(int)(47.619 / TILE_SIZE_SERVER), (int)(227.9 / TILE_SIZE_SERVER), TEXTURES_PATH "paintingvoelker2.png"},
+};
+
 static const glm::mat4 identityMat(1.f);
 static glm::mat4 orthoP;
 
@@ -317,7 +330,7 @@ static const struct ItemModelSettings {
 	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,       glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
-	{ MDL_SAME_TEX("painting"),                            "wall painting",        ItemModelType::painting,          glm::vec3(1.8f),    glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
+	{ MDL_AND_TEX("painting", "paintingbear"),             "bear painting",        ItemModelType::painting,          glm::vec3(1.8f),    glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
 	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
 	{ MDL_SAME_TEX("plate"),                               "plate",                ItemModelType::plate,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.1f, 2.f) },
 	{ MDL_SAME_TEX("plunger"),                             "plunger",              ItemModelType::plunger,           glm::vec3(0.7f),    glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
@@ -412,6 +425,12 @@ struct AnimatedItem {
 	ItemModelType type = ItemModelType::EMPTY;
 };
 
+struct EnvObject {
+	Transform *transform = nullptr;
+	ItemModelType type = ItemModelType::EMPTY;
+	GLuint textureOverride = 0;
+};
+
 static PlayerModel playerModels[NUM_PLAYER_MODEL_TYPES] = { nullptr };
 
 static FBXObject * tileModel = nullptr;
@@ -435,7 +454,7 @@ static Geometry * netGeometry = nullptr;
 static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
-static vector<vector<Transform *>> envObjs;
+static vector<vector<EnvObject>> envObjs;
 static vector<vector<AnimatedItem>> itemTransforms;
 
 /*static Sound * sound_door;
@@ -700,15 +719,28 @@ void resetEnvObjs()
 				break;
 			}
 
+			row[x].textureOverride = 0;
 			if (objIdx == 0) {
-				row[x] = nullptr;
-				continue;
+				bool found = false;
+				for (const auto &extra : extraPaintings) {
+					if (x == extra.x && z == extra.z) {
+						row[x].textureOverride = loadTexture(extra.texture);
+						objIdx = static_cast<uint8_t>(ItemModelType::painting);
+						found = true;
+						break;
+					}
+				}
+
+				if (!found) {
+					row[x].transform = nullptr;
+					continue;
+				}
 			}
 #endif
 
 			ItemModelType modelType = static_cast<ItemModelType>(objIdx);
 			if (modelType == ItemModelType::EMPTY || !itemModels[objIdx].settings) {
-				row[x] = nullptr;
+				row[x].transform = nullptr;
 				continue;
 			}
 
@@ -749,9 +781,10 @@ void resetEnvObjs()
 			modelRotate = glm::rotate(modelRotate, modelAngles.x, glm::vec3(1.f, 0.f, 0.f));
 			modelRotate = glm::rotate(modelRotate, modelAngles.z, glm::vec3(0.f, 0.f, 1.f));
 
-			row[x] = new Transform(modelRotate);
-			row[x]->addChild(itemModels[objIdx].geometry);
-			envObjsTransform->addChild(row[x]);
+			row[x].type = modelType;
+			row[x].transform = new Transform(modelRotate);
+			row[x].transform->addChild(itemModels[objIdx].geometry);
+			envObjsTransform->addChild(row[x].transform);
 		}
 	}
 }
@@ -939,7 +972,9 @@ void updateBoxVisibility()
 	unsigned y = 0;
 	for (auto &row : envObjs) {
 		unsigned x = 0;
-		for (auto tile : row) {
+		for (auto &envObj : row) {
+			auto tile = envObj.transform;
+
 			if (tile && tileLayout[y][x]->getTileType() == TileType::BOX) {
 				tile->hidden = !((BoxTile *)tileLayout[y][x])->hasBox();
 			}
@@ -1745,7 +1780,8 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		// hide the un-animated box
 		int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
 		int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
-		auto transform = envObjs[z][x];
+		const auto &envObj = envObjs[z][x];
+		auto transform = envObj.transform;
 		transform->hidden = true;
 
 		// show the animated box
@@ -1907,7 +1943,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		if (state.animatingInventory) {
 			int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
 			int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
-			glm::vec3 targetPosition = glm::vec3(envObjs[z][x]->getOffset()[3]);
+			glm::vec3 targetPosition = glm::vec3(envObjs[z][x].transform->getOffset()[3]);
 			targetPosition.y += 6.f;
 			auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
 
@@ -2174,8 +2210,21 @@ void DisplayCallback(GLFWwindow* window)
 		floorTransform->draw(V, P, glm::mat4(1.0));
 	}
 
-	if (envObjsTransform) {
+	/*if (envObjsTransform) {
 		envObjsTransform->draw(V, P, glm::mat4(1.0));
+	}*/
+	for (int z = 0; z < envObjs.size(); z++) {
+		for (int x = 0; x < envObjs[z].size(); x++) {
+			const auto &envObj = envObjs[z][x];
+			if (envObj.transform && !envObj.transform->hidden) {
+				if (envObj.textureOverride) {
+					itemModels[static_cast<unsigned>(envObj.type)].object->Draw(objShaderProgram, &V, &P, envObj.transform->getOffset(), envObj.textureOverride);
+				}
+				else {
+					envObj.transform->draw(V, P, identityMat);
+				}
+			}
+		}
 	}
 
 	if (allItemsTransform) {
