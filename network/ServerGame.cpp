@@ -1247,8 +1247,11 @@ void ServerGame::updateMovement2(Direction dir, int id)
 	if (gameData->getPlayer(id)->isChef())
 	{
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
-		gameData->getPlayer(id)->setLocation(loc.getX() + (xSPEED*multiplier), loc.getY(), 
-												loc.getZ() + (zSPEED*multiplier));
+		/*gameData->getPlayer(id)->setLocation(loc.getX() + (xSPEED*multiplier), loc.getY(), 
+												loc.getZ() + (zSPEED*multiplier));*/
+		destLoc = Location(loc.getX() + (xSPEED*multiplier), loc.getY(),
+			loc.getZ() + (zSPEED*multiplier));
+
 
 		Location loc = gameData->getPlayer(id)->getLocation();
 		Tile * tile = gameData->getTile(loc);
@@ -1285,18 +1288,18 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		}
 		else
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * dashMultiplier, loc.getY(),
+			/*gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * dashMultiplier, loc.getY(),
 													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * dashMultiplier);
-			
-			//destLoc = Location(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier(), loc.getY(), 
-			//										loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier());
+			*/
+			destLoc = Location(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * dashMultiplier, loc.getY(),
+													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * dashMultiplier);
 		}
 	}
 
-	//if (gameData->getAtlas()->canReachDestination(loc, destLoc))
-	//	gameData->getPlayer(id)->setLocation(destLoc);
+	if (gameData->getAtlas()->canMoveToDestination(loc, destLoc))
+		gameData->getPlayer(id)->setLocation(destLoc);
 	updatePlayerCollision(id, dir);
-	updateCollision(id);
+	//updateCollision(id);
 	updateHeight(id);
 }
 void ServerGame::updateMovement(int dir, int id)
