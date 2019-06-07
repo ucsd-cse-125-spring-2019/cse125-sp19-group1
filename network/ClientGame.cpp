@@ -127,9 +127,9 @@ ClientGame::ClientGame(void)
 			soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
 			soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
 			soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
-			soundSystem->createSoundEffect(&sound_splat, SOUNDS_SPLAT);
 			soundSystem->createSoundEffect(&sound_jail_escape, SOUNDS_JAIL_ESCAPE);
 
+			soundSystem->createOtherPlayersSounds(&sound_splat, SOUNDS_SPLAT);
 			soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
 			soundSystem->createOtherPlayersSounds(&sound_other_jail_unlock, SOUNDS_JAIL_UNLOCK);
 			soundSystem->createOtherPlayersSounds(&sound_other_search_item, SOUNDS_SEARCH_ITEM);
