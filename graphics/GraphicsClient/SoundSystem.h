@@ -11,6 +11,9 @@ typedef FMOD::Sound Sound;
 
 #define DISTANCE_FACTOR 3.0
 
+// all the background loops will be here since we want to switch them here?
+
+
 /*
  * 
  * Channel 0: sound effects specific to yourself
@@ -29,6 +32,9 @@ private:
 	bool hasAudioDriver;
 	bool continueQueue;
 
+	Sound * backgroundSounds[7]; // FIXME: INCREDIBLY HARD-CODED
+	int curLoop;
+
 public:
 	SoundSystem();
 	~SoundSystem();
@@ -40,7 +46,12 @@ public:
 
 	void createSoundEffect(Sound ** pSound, const char* pFile);
 	void createOtherPlayersSounds(Sound ** pSound, const char* pFile);
-	void createBackgroundMusic(Sound ** pSound, const char* pFile);
+
+	void createBackgroundMusic(const char* pFile);
+	void startBackgroundMusic();
+	void nextBackgroundLoop(bool bLoop = false);
+	void skipToLoop(int toLoop, bool isEndLoop = false);
+
 	void playBackgroundMusic(Sound * pSound, bool bLoop = true);
 	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool playUntilEnd = false, bool bLoop = false);
 	void playSoundEffect(Sound * pSound, bool playUntilEnd = false, bool bLoop = false);

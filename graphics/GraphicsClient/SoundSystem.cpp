@@ -31,6 +31,8 @@ SoundSystem::SoundSystem()
 	threeDeeChannel[3] = 0;
 	threeDeeSeparate = 0;
 
+	curLoop = 0;
+
 	if (driverCount == 0) {
 		std::cerr << "SoundSystem ERROR: driverCount = 0, possibly because no audio devices are plugged in\n";
 		hasAudioDriver = false;
@@ -63,7 +65,7 @@ SoundSystem::SoundSystem()
 	}
 
 	// 5.0 is kind of like for distance -- very arbitrary and needs playing with
-	result = system->set3DSettings(1.0, 3.0, 1.0);
+	result = system->set3DSettings(1.0, DISTANCE_FACTOR, 1.0);
 }
 
 
@@ -149,7 +151,7 @@ void SoundSystem::createOtherPlayersSounds(Sound ** pSound, const char* pFile)
 	}
 }
 
-void SoundSystem::createBackgroundMusic(Sound ** pSound, const char* pFile)
+void SoundSystem::createBackgroundMusic(const char* pFile)
 {
 	FMOD_RESULT result;
 	struct stat buffer;
@@ -159,16 +161,74 @@ void SoundSystem::createBackgroundMusic(Sound ** pSound, const char* pFile)
 		fprintf(stderr, "createBackgroundMusic ERROR: FILE DOES NOT EXIST\n");
 	}
 
-	fprintf(stderr, "createBackgroundMusic: before system->createSound pSound=%d\n", pSound);
 	// using FMOD_CREATESAMPLE since background music is larger file
-	result = system->createSound(pFile, FMOD_CREATESAMPLE, 0, pSound);
+	// result = system->createSound(pFile, FMOD_CREATESAMPLE, 0, pSound);
+	result = system->createSound(pFile, FMOD_CREATESAMPLE, 0, &backgroundSounds[curLoop]);
+	curLoop++;
+
 	if (result != FMOD_OK) {
 		std::cerr << "createBackground Music ERROR: could not create sound - " << FMOD_ErrorString(result) << "\n";
 	}
 	else {
 		fprintf(stderr, "createSound: Able to create sound %s\n", pFile);
-		fprintf(stderr, "createSound: pSound=%d\n", pSound);
 	}
+}
+
+void SoundSystem::startBackgroundMusic()
+{
+	FMOD_RESULT result;
+
+	curLoop = 0;
+	backgroundSounds[curLoop]->setMode(FMOD_LOOP_NORMAL);
+	backgroundSounds[curLoop]->setLoopCount(-1);
+
+	result = system->playSound(backgroundSounds[curLoop], 0, false, &not3DChannel[1]);
+	if (result != FMOD_OK) {
+		std::cerr << "startBackgroundMusic ERROR: cannot play music - " << FMOD_ErrorString(result) << "\n";
+	}
+}
+
+void SoundSystem::nextBackgroundLoop(bool bLoop)
+{
+	FMOD_RESULT result;
+	unsigned int sLength;
+	unsigned int cPosition;
+
+	result = backgroundSounds[curLoop]->getLength(&sLength, FMOD_TIMEUNIT_MS);
+	if (result != FMOD_OK) {
+		std::cerr << "nextBackgroundLoop ERROR: cannot get length - " << FMOD_ErrorString(result) << "\n";
+	}
+	result = not3DChannel[1]->getPosition(&cPosition, FMOD_TIMEUNIT_MS);
+	if (result != FMOD_OK) {
+		std::cerr << "nextBackgroundLoop ERROR: cannot get position - " << FMOD_ErrorString(result) << "\n";
+	}
+
+	while (cPosition < sLength) {
+		result = not3DChannel[1]->getPosition(&cPosition, FMOD_TIMEUNIT_MS);
+		if (result != FMOD_OK) {
+			std::cerr << "nextBackgroundLoop ERROR: cannot get position - " << FMOD_ErrorString(result) << "\n";
+		}
+	}
+	
+	result = not3DChannel[1]->stop();
+	if (result != FMOD_OK) {
+		std::cerr << "nextBackgroundLoop ERROR: stop - " << FMOD_ErrorString(result) << "\n";
+	}
+	
+	curLoop++;
+
+	result = system->playSound(backgroundSounds[curLoop], 0, false, &not3DChannel[1]);
+	if (result != FMOD_OK) {
+		std::cerr << "nextBackgroundLoop ERROR: playSound - " << FMOD_ErrorString(result) << "\n";
+	}
+	
+}
+
+// toLoop: the song number to skip to in the sequence
+// isEndLoop: if it's the end of the game, don't need to wait for the loop to end
+void SoundSystem::skipToLoop(int toLoop, bool isEndLoop)
+{
+
 }
 
 // this method will play a sound effect, regardless of other sounds

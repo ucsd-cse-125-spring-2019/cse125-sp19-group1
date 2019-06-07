@@ -39,6 +39,7 @@
 #define LOOP_B				(SOUNDS_PATH "LoopB.wav")
 #define TRANSITION_C		(SOUNDS_PATH "TransitionC.wav")
 #define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.wav")
+
 static SoundSystem * soundSystem = nullptr;
 
 
@@ -72,6 +73,7 @@ static Sound * sound_other_toilet;
 static Sound * sound_other_vent_screw;
 static Sound * sound_other_door_unlock;
 
+/*
 static Sound * lobby_loop;
 static Sound * instructions_one;
 static Sound * instructions_two;
@@ -79,6 +81,7 @@ static Sound * game_loop_one;
 static Sound * game_loop_two;
 static Sound * game_transition_one;
 static Sound * game_loop_three;
+*/
 
 // VERY HACKY FIX....
 std::map<int, bool> playerDoingStuff; // true if currently doing something
@@ -141,6 +144,7 @@ ClientGame::ClientGame(void)
 		soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
 		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
 
+		/*
 		soundSystem->createBackgroundMusic(&lobby_loop, LOBBY_LOOP); //loop that plays during the lobby, play instructions_A after the loop ends 
 		soundSystem->createBackgroundMusic(&instructions_one, INSTRUCTIONS_A); //One-time song, stop after plays once, don't start InstructionsB until slide 3 comes in
 		soundSystem->createBackgroundMusic(&instructions_two, INSTRUCTIONS_B); //One-time song, play immediately once slide 3 comes in, transition to Loop A
@@ -149,9 +153,19 @@ ClientGame::ClientGame(void)
 		soundSystem->createBackgroundMusic(&game_transition_one, TRANSITION_C); // One-time, transitions after song ends to Ending_LOOP
 		soundSystem->createBackgroundMusic(&game_loop_three, ENDING_LOOP); //Loop until game ends
 		//When the game ends, immediately cease music and start playing lobby loop.
+		*/
 
+		soundSystem->createBackgroundMusic(LOBBY_LOOP);
+		soundSystem->createBackgroundMusic(INSTRUCTIONS_A);
+		soundSystem->createBackgroundMusic(INSTRUCTIONS_B);
+		soundSystem->createBackgroundMusic(LOOP_A);
+		soundSystem->createBackgroundMusic(LOOP_B);
+		soundSystem->createBackgroundMusic(TRANSITION_C);
+		soundSystem->createBackgroundMusic(ENDING_LOOP);
 
-		soundSystem->playBackgroundMusic(lobby_loop, true); // FIXME: uncomment
+		soundSystem->startBackgroundMusic();
+
+		// soundSystem->playBackgroundMusic(lobby_loop, true); // FIXME: uncomment
 	}
 
 	// send init packet
