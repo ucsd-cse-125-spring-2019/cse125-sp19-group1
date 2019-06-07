@@ -299,6 +299,10 @@ void ClientGame::update()
 				soundSystem->pauseSoundEffect();
 				playerDoingStuff[pNum] = false;
 			}
+			else if (player->getAction() == Action::DESTROY_POWERUP && playerDoingStuff.at(pNum) == false) {
+				soundSystem->playSoundEffect(sound_splat, true);
+				playerDoingStuff[pNum] = true;
+			}
 
 			if (wt == WinType::CHEF_WIN && playerDoingStuff.at(pNum) == false) {
 				soundSystem->playSoundEffect(sound_chef);
@@ -424,6 +428,10 @@ void ClientGame::update()
 					else if (curPlayer->getCaughtAnimalType() == ModelType::DOG) {
 						soundSystem->playSoundEffect(sound_dog, true);
 					}
+				}
+				else if (curPlayer->getAction() == Action::DESTROY_POWERUP && playerDoingStuff.at(curPlayerNum) == false) {
+					soundSystem->playOtherPlayersSounds(sound_splat, curPlayerNum, locX, locY, locZ, true);
+					playerDoingStuff[curPlayerNum] = true;
 				}
 			}
 			else {
