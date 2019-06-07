@@ -201,6 +201,8 @@ static const struct ExtraObjects {
 	{2, 12, ItemModelType::painting, TEXTURES_PATH "paintingoliver.png"},
 	{23, 12, ItemModelType::painting, TEXTURES_PATH "paintingvoelker1.png"},
 	{TO_TILE_COORDS(47.619, 227.9), ItemModelType::painting, TEXTURES_PATH "paintingvoelker2.png"},
+	{TO_TILE_COORDS(365.061, 115.715), ItemModelType::painting, TEXTURES_PATH "paintingHung.png"},
+	{470.262, 111.56, ItemModelType::painting, TEXTURES_PATH "paintingSterling.png"},
 
 	/*// Trash bags
 	{TO_TILE_COORDS(7.79725, 249.298), ItemModelType::garbageBag, nullptr},
