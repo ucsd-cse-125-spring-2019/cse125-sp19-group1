@@ -107,7 +107,6 @@ ClientGame::ClientGame(void)
 	gameData = new GameData();
 	network = new ClientNetwork();
 
-<<<<<<< Updated upstream
 	if (!soundSystem) {
 		soundSystem = new SoundSystem();
 		if (!(soundSystem->shouldIgnoreSound())) {
