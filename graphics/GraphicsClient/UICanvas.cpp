@@ -121,6 +121,10 @@ UICanvas::UICanvas(GLuint shaderProgram) {
 	visibleItems[SPEED_BOOST] = true;
 	uiItems[PROMPT_BUILD_EXIT] = new UIObject(PROMPT_BUILD_EXIT_TEX);
 	visibleItems[PROMPT_BUILD_EXIT] = false;
+	uiItems[PROMPT_BOOST] = new UIObject(PROMPT_DASH_TEX);
+	visibleItems[PROMPT_BOOST] = true;
+	uiItems[PROMPT_CHANGE_VIEW] = new UIObject(PROMPT_CHANGE_VIEW_TEX);
+	visibleItems[PROMPT_CHANGE_VIEW] = false;
 	boostVisible = true;
 }
 
@@ -178,6 +182,7 @@ void UICanvas::setVisible(UIType item, bool visible) {
 void UICanvas::setBoostVisible(bool visible) {
 	if (!visible) {
 		setVisible(UICanvas::SPEED_BOOST, false);
+		setVisible(UICanvas::PROMPT_BOOST, false);
 		boostVisible = 0;
 	}
 	else {

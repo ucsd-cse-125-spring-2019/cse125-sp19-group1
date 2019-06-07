@@ -1,7 +1,7 @@
 
 #include "UIObject.h"
 
-#define NUM_ITEMS 59
+#define NUM_ITEMS 61
 #define CANVAS_PATH    "../Canvas/"
 
 #define CANVAS_MDL_PATH		(CANVAS_PATH "canvas.fbx")
@@ -64,6 +64,8 @@
 #define ANGRY_METER_2_TEX (CANVAS_PATH "angry2.png")
 #define SPEED_METER_TEX (CANVAS_PATH "speedBoost.png")
 #define PROMPT_BUILD_EXIT_TEX (CANVAS_PATH "promptBuildExit.png")
+#define PROMPT_CHANGE_VIEW_TEX (CANVAS_PATH "promptChangeView.png")
+#define PROMPT_DASH_TEX (CANVAS_PATH "promptDash.png")
 
 
 #ifndef UICANVAS_H
@@ -130,6 +132,8 @@ public:
 		CAT_HAPPY = 56,
 		SPEED_BOOST = 57,
 		PROMPT_BUILD_EXIT = 58,
+		PROMPT_BOOST = 59,
+		PROMPT_CHANGE_VIEW = 60
 
 	};
 	void draw(glm::mat4 * V, glm::mat4 * P, glm::mat4 model);

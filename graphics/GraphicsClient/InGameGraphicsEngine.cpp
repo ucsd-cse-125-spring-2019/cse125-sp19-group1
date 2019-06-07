@@ -1605,7 +1605,13 @@ void updateUIElements(GameData * gameData) {
 	//check if current user is holding item
 	Player * currPlayer = players[currState->id];
 	//items held by chef are the icons for animals
+
+	if (currPlayer->getDashCooldown() > 0) {
+		uiCanvas->setVisible(UICanvas::PROMPT_BOOST, false);
+	}
 	if (currPlayer->isChef()) {
+		uiCanvas->setBoostVisible(false);
+		uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, false);
 		if (players.find(currPlayer->getCaughtAnimalId()) != players.end()
 			&& players[currPlayer->getCaughtAnimalId()]->getModelType() == ModelType::CAT) {
 			uiCanvas->setItemChef(UICanvas::CAT_ITEM);
@@ -1623,11 +1629,16 @@ void updateUIElements(GameData * gameData) {
 			uiCanvas->removeItems();
 		}
 
-		if (currPlayer->isChef()) {
+		if (currPlayer->isChef() && players.find(currPlayer->getCaughtAnimalId()) == players.end()) {
 			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_SWING_NET, false);
 		}
 	}
 	else {
+		uiCanvas->setBoostVisible(true);
+
 		//disable prompts unless item is held
 		uiCanvas->setVisible(UICanvas::PROMPT_GREEN_BANANA, false);
 		uiCanvas->setVisible(UICanvas::PROMPT_YELLOW_BANANA, false);
@@ -1712,6 +1723,13 @@ void updateUIElements(GameData * gameData) {
 		}
 		else {
 			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, false);
+		}
+
+		if (gameData->getJailTile(currPlayer->getLocation()) != nullptr && !currPlayer->isChef()) {
+			uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, true);
+		}
+		else {
+			uiCanvas->setVisible(UICanvas::PROMPT_CHANGE_VIEW, false);
 		}
 
 		//cake prompt check
