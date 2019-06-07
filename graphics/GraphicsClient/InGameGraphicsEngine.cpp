@@ -1409,6 +1409,37 @@ static bool isBeingCarriedByChef(int id)
 	return false;
 }
 
+static void toggleJailCam()
+{
+	auto gameData = sharedClient->getGameData();
+	if (gameData) {
+		const auto &allPlayers = gameData->getAllPlayers();
+		bool cameraClientSeen = false;
+		int firstId = -1;
+		int nextId = -1;
+
+		for (auto pair : allPlayers) {
+			if (pair.first == cameraClientId) {
+				cameraClientSeen = true;
+			}
+			else if (!pair.second->isChef()) {
+				if (firstId == -1)
+					firstId = pair.first;
+
+				if (cameraClientSeen && nextId == -1)
+					nextId = pair.first;
+			}
+		}
+
+		if (nextId != -1) {
+			cameraClientId = nextId;
+		}
+		else if (firstId != -1) {
+			cameraClientId = firstId;
+		}
+	}
+}
+
 static bool iAmJailed()
 {
 #ifdef DEBUG_CAUGHT
@@ -1726,6 +1757,15 @@ void InGameGraphicsEngine::IdleCallback()
 		const auto gameData = sharedClient->getGameData();
 		if (gameData) {
 			updateBoxVisibility();
+
+			// Prevent a jailed animal from watching the a chef
+			if (iAmJailed()) {
+				// Why does this need fixing?
+				auto networkPlayerFollowing = gameData->getPlayer(cameraClientId);
+				if (!networkPlayerFollowing || networkPlayerFollowing->isChef()) {
+					toggleJailCam();
+				}
+			}
 
 #ifdef DUMMY_ID
 			bool playersChanged = (players.size() != gameData->players.size() + 1);
@@ -2186,7 +2226,7 @@ static void DrawMinimap()
 					allPings.emplace(state.id, MapPing(state.position, glm::vec3(MINIMAP_ANIMAL_PING_COLOR)));
 				}
 				// The chef sees only those in jail and not being carried
-				if (!networkPlayer->isCaught() || networkPlayerMe->getCaughtAnimalId() == state.id) {
+				if (!networkPlayer->isCaught() || (networkPlayerMe->hasCaughtAnimal() && networkPlayerMe->getCaughtAnimalId() == state.id)) {
 					continue;
 				}
 
@@ -2881,33 +2921,7 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_SPACE) {
 			if (iAmJailed()) {
-				auto gameData = sharedClient->getGameData();
-				if (gameData) {
-					const auto &allPlayers = gameData->getAllPlayers();
-					bool cameraClientSeen = false;
-					int firstId = -1;
-					int nextId = -1;
-
-					for (auto pair : allPlayers) {
-						if (pair.first == cameraClientId) {
-							cameraClientSeen = true;
-						}
-						else if (!pair.second->isChef()) {
-							if (firstId == -1)
-								firstId = pair.first;
-
-							if (cameraClientSeen && nextId == -1)
-								nextId = pair.first;
-						}
-					}
-
-					if (nextId != -1) {
-						cameraClientId = nextId;
-					}
-					else if (firstId != -1) {
-						cameraClientId = firstId;
-					}
-				}
+				toggleJailCam();
 			}
 			else {
 				// interact key press
