@@ -34,5 +34,7 @@ public:
 	void setOffset(glm::mat4);
 	bool decrementRefCount();
 	void incrementRefCount();
+	void applyScale(glm::vec3 scale);
+	void undoScale();
 };
 #endif

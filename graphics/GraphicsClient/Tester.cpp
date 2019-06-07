@@ -36,7 +36,7 @@ static AbstractGraphicsEngine * previousEngine = nullptr;  // for crossfading
 static ServerGame * server = nullptr;
 ClientGame * sharedClient = nullptr;
 
-//#define DEBUG_CLIENTS
+#define DEBUG_CLIENTS
 #ifdef DEBUG_CLIENTS
 static ClientGame * clients[4] = { nullptr };
 
@@ -481,20 +481,27 @@ int main(void)
 		server->update();
 
 		// Only update client from tester.cpp while game is loading
-		if(sharedClient->gameData->getGameState() == GameState::LOADING)
+		if (sharedClient->gameData->getGameState() == GameState::LOADING) {
 			sharedClient->update();
 
-		// Send done loading event only if client is on loading screen, game state = loading, and in game engine is fully loaded
-		if (inGameEngine->fullyLoaded && sharedClient->gameData->getGameState() == GameState::LOADING && currentEngine == (AbstractGraphicsEngine*)loadingEngine)
-		{
+			// Send done loading event only if client is on loading screen, game state = loading, and in game engine is fully loaded
+			if (inGameEngine->fullyLoaded && currentEngine == (AbstractGraphicsEngine*)loadingEngine)
+			{
+				// Limit to no more often that once per second
+				static double lastSent = -1000.0;
+				double now = glfwGetTime();
+				if (now > lastSent + 1.0) {
+					lastSent = now;
 
 #ifdef DEBUG_CLIENTS
-			sharedClient->sendPackets(SET_DONE_LOADING_EVENT);
-
+					sharedClient->sendPackets(SET_DONE_LOADING_EVENT);
 #else
-			sharedClient->sendPackets(DONE_LOADING_EVENT);
+					sharedClient->sendPackets(DONE_LOADING_EVENT);
 #endif
+				}
+			}
 		}
+
 		auto finish = high_resolution_clock::now();
 
 		// Limit to no more than 60fps

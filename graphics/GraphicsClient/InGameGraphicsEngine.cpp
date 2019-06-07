@@ -76,7 +76,7 @@
 #define BUILD_PARTICLE_TEX (PARTICLES_PATH "build.png")
 #define BLIND_PARTICLE_TEX (PARTICLES_PATH "blind.png")
 #define SEARCH_PARTICLE_TEX (PARTICLES_PATH "search.png")
-#define BEAR_PARTICLE_TEX (PARTICLES_PATH "bear.png")
+#define BEAR_PARTICLE_TEX (PARTICLES_PATH "bearFull.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -132,7 +132,7 @@
 //#define DEBUG_GATE_ANIMATION
 
 // Set to 0 to disable gate animation
-#define ENABLE_GATE_ANIMATION 0
+#define ENABLE_GATE_ANIMATION 1
 
 #ifdef DEBUG_CARRY
 unsigned fake_carried_idx = 1;
@@ -197,7 +197,7 @@ static const struct ExtraObjects {
 	// Paintings
 	{13, 1, ItemModelType::painting, TEXTURES_PATH "painting.png"},
 	{0, 4, ItemModelType::painting, TEXTURES_PATH "paintingathena.png"},
-	{19, 6, ItemModelType::painting, TEXTURES_PATH "paintingedward.png"},
+	{19, 7, ItemModelType::painting, TEXTURES_PATH "paintingedward.png"},
 	{2, 12, ItemModelType::painting, TEXTURES_PATH "paintingoliver.png"},
 	{23, 12, ItemModelType::painting, TEXTURES_PATH "paintingvoelker1.png"},
 	{TO_TILE_COORDS(47.619, 227.9), ItemModelType::painting, TEXTURES_PATH "paintingvoelker2.png"},
@@ -206,11 +206,6 @@ static const struct ExtraObjects {
 	{TO_TILE_COORDS(7.79725, 249.298), ItemModelType::garbageBag, nullptr},
 	{TO_TILE_COORDS(225.56, 310.885), ItemModelType::garbageBag, nullptr},
 	{TO_TILE_COORDS(471.777, 152.69), ItemModelType::garbageBag, nullptr},
-	
-	/*// Table setting
-	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::plate, nullptr},
-	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::fork, nullptr},
-	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::knife, nullptr},*/
 };
 
 #define TO_TILE_CENTER(x, offset) (TO_TILE_COORD(x) + 0.5f + offset) * TILE_SIZE_SERVER
@@ -324,6 +319,8 @@ static const struct PlayerModelSettings {
 #define WINDOW_FILENAMES MDL_SAME_TEX("window")
 #define WINDOW_SCALE glm::vec3(1.f)
 #endif
+
+bool WINDOW_SCALED_UP = true;
 
 static const struct ItemModelSettings {
 	const char *modelPath;       // filesystem path to a model geometry file
@@ -539,7 +536,7 @@ struct PlayerState {
 	glm::vec3 buildPosition = glm::vec3(0.0f);    // where to spawn build effects
 	int movingSpeed = 0;			// -1 = slow, 0 = normal, 1 = fast
 	int flashedRecently;		//counts down to fire a burst of flash particles
-	bool blinded = false; //will activate if player is blinded: should only activate on chef
+	bool reversed = false; //will activate if player is reversed: should only activate on chef
 	bool instantSearch = false; //will activate if player has instant search. 
 	bool restrictRotation = false;
 	bool isBear = false; //will activate if player has bear powerup
@@ -996,6 +993,8 @@ void updateBoxVisibility()
 		return;
 	}
 
+	auto &allPlayers = sharedClient->getGameData()->getAllPlayers();
+
 	unsigned y = 0;
 	for (auto &row : envObjs) {
 		unsigned x = 0;
@@ -1009,21 +1008,40 @@ void updateBoxVisibility()
 			if (tile && tileLayout[y][x]->getTileType() == TileType::GATE) {
 				GateTile *gate = (GateTile *)tileLayout[y][x];
 
-				static unsigned char gateHistory[4] = { 0 };
-				static double gateTimes[4] = {0.0};
-				int num = gate->getGateNum();
-				gateHistory[num] = (gateHistory[num] << 1) | (gateTimes[num] != gate->getCurrentConstructTime());
-				gateTimes[num] = gate->getCurrentConstructTime();
+				bool foundPlayer = false;
+
+				for (auto pair : allPlayers) {
+					if (pair.second->getAction() == Action::CONSTRUCT_GATE) {
+						auto loc = pair.second->getLocation();
+						int playerX = loc.getX() / TILE_SIZE_SERVER;
+						int playerZ = loc.getZ() / TILE_SIZE_SERVER;
+						if (playerX == x && playerZ == y) {
+							foundPlayer = true;
+							break;
+						}
+					}
+				}
 
 #ifdef DEBUG_GATE_ANIMATION
-				gateHistory[num] = 1;
+				foundPlayer = true;
 #endif
+
+				Transform *transformNode = envObjs[y][x].transform;
+				if (foundPlayer && gate->getModel() == ItemModelType::window && WINDOW_SCALED_UP) {
+					// compensate for weird animation transform
+					transformNode->undoScale();
+					WINDOW_SCALED_UP = false;
+				}
+				else if (!foundPlayer &&gate->getModel() == ItemModelType::window && !WINDOW_SCALED_UP) {
+					// use regular transform
+					transformNode->applyScale(WINDOW_SCALE);
+  					WINDOW_SCALED_UP = true;
+				}
 
 				glm::vec3 position((x + 0.5f) * TILE_SIZE_SERVER, 0.f, (y + 0.5f) * TILE_SIZE_SERVER);
 				if (glm::distance(position, ingame_light_center) < ingame_light_radius + ITEM_MDL_CLIP_RADIUS) {
 					auto index = static_cast<unsigned>(gate->getModel());
-					//cout << "Calling update(" << (gateHistory[num] != 0) << ") on model " << index << " (" << itemModels[index].settings->name << ")\n";
-					itemModels[index].object->Update(gateHistory[num] != 0);
+					itemModels[index].object->Update(foundPlayer);
 				}
 			}
 
@@ -1391,6 +1409,37 @@ static bool isBeingCarriedByChef(int id)
 	return false;
 }
 
+static void toggleJailCam()
+{
+	auto gameData = sharedClient->getGameData();
+	if (gameData) {
+		const auto &allPlayers = gameData->getAllPlayers();
+		bool cameraClientSeen = false;
+		int firstId = -1;
+		int nextId = -1;
+
+		for (auto pair : allPlayers) {
+			if (pair.first == cameraClientId) {
+				cameraClientSeen = true;
+			}
+			else if (!pair.second->isChef()) {
+				if (firstId == -1)
+					firstId = pair.first;
+
+				if (cameraClientSeen && nextId == -1)
+					nextId = pair.first;
+			}
+		}
+
+		if (nextId != -1) {
+			cameraClientId = nextId;
+		}
+		else if (firstId != -1) {
+			cameraClientId = firstId;
+		}
+	}
+}
+
 static bool iAmJailed()
 {
 #ifdef DEBUG_CAUGHT
@@ -1709,6 +1758,15 @@ void InGameGraphicsEngine::IdleCallback()
 		if (gameData) {
 			updateBoxVisibility();
 
+			// Prevent a jailed animal from watching the a chef
+			if (iAmJailed()) {
+				// Why does this need fixing?
+				auto networkPlayerFollowing = gameData->getPlayer(cameraClientId);
+				if (!networkPlayerFollowing || networkPlayerFollowing->isChef()) {
+					toggleJailCam();
+				}
+			}
+
 #ifdef DUMMY_ID
 			bool playersChanged = (players.size() != gameData->players.size() + 1);
 #else
@@ -1875,7 +1933,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		}
 		break;
 	}
-	state.blinded = false;
+	state.reversed = false;
 	state.instantSearch = false;
 	state.isBear = false;
 	state.movingSpeed = 0;
@@ -1889,7 +1947,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case PowerUp::FLASH:
 		state.flashedRecently = 6;
 		break;
-	case PowerUp::CHEF_BLIND:
+	case PowerUp::CHEF_REVERSE:
 
 		state.movingSpeed = 0;
 		break;
@@ -1900,14 +1958,14 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 		state.flashedRecently = 0;
 		break;
 	}
-	if (sharedClient->getGameData()->getBlindChef()) {
+	if (sharedClient->getGameData()->getReverseChef()) {
 		std::cerr << "ChefBlind gotten" << std::endl;
 	}
 	if (sharedClient->getGameData()->getSlowChef()) {
 		std::cerr << "ChefSlow gotten" << std::endl;
 	}
-	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->blindChef) {
-		state.blinded = true;
+	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->reverseChef) {
+		state.reversed = true;
 	}
 	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->slowChef) {
 		state.movingSpeed = -1;
@@ -2168,7 +2226,7 @@ static void DrawMinimap()
 					allPings.emplace(state.id, MapPing(state.position, glm::vec3(MINIMAP_ANIMAL_PING_COLOR)));
 				}
 				// The chef sees only those in jail and not being carried
-				if (!networkPlayer->isCaught() || networkPlayerMe->getCaughtAnimalId() == state.id) {
+				if (!networkPlayer->isCaught() || (networkPlayerMe->hasCaughtAnimal() && networkPlayerMe->getCaughtAnimalId() == state.id)) {
 					continue;
 				}
 
@@ -2269,7 +2327,7 @@ void DisplayCallback(GLFWwindow* window)
 		dustSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && !state.isBear));
 		bearSpawner[state.number - 1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && state.isBear));
+			state.position - glm::vec3(0, 1.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && state.isBear));
 		speedSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1 && !state.instantSearch && !state.isBear));
 		slowSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
@@ -2280,7 +2338,7 @@ void DisplayCallback(GLFWwindow* window)
 		flashSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position, state.flashedRecently > 0);
 		blindSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position + glm::vec3(0,25.0f,0), state.blinded);
+			state.position + glm::vec3(0,25.0f,0), state.reversed);
 		searchSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), state.instantSearch);
 	}
@@ -2761,7 +2819,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 			//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 			blindSpawner[i] = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
 			searchSpawner[i] = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
-			bearSpawner[i] = new ParticleSpawner(BEAR_PARTICLE_TEX, glm::vec3(0, 1.0f, 0), 1.0, 125, 3.3f);
+			bearSpawner[i] = new ParticleSpawner(BEAR_PARTICLE_TEX, glm::vec3(0, 1.0f, 0), 1.75f, 255, 5.0f);
 		}
 
 		auto setupEnd = high_resolution_clock::now();
@@ -2863,33 +2921,7 @@ void InGameGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode
 
 		if (key == GLFW_KEY_SPACE) {
 			if (iAmJailed()) {
-				auto gameData = sharedClient->getGameData();
-				if (gameData) {
-					const auto &allPlayers = gameData->getAllPlayers();
-					bool cameraClientSeen = false;
-					int firstId = -1;
-					int nextId = -1;
-
-					for (auto pair : allPlayers) {
-						if (pair.first == cameraClientId) {
-							cameraClientSeen = true;
-						}
-						else if (!pair.second->isChef()) {
-							if (firstId == -1)
-								firstId = pair.first;
-
-							if (cameraClientSeen && nextId == -1)
-								nextId = pair.first;
-						}
-					}
-
-					if (nextId != -1) {
-						cameraClientId = nextId;
-					}
-					else if (firstId != -1) {
-						cameraClientId = firstId;
-					}
-				}
+				toggleJailCam();
 			}
 			else {
 				// interact key press

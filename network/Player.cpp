@@ -160,10 +160,6 @@ bool Player::isCaught() const {
 	return caughtStatus;
 }
 
-int Player::getCatchRadius() const
-{
-	return catchRadius;
-}
 
 bool Player::inRange(Location & myLoc, Location & theirLoc) 
 {
@@ -207,9 +203,9 @@ void Player::setSearchStartTime()
 {
 	searchStartTime = std::chrono::system_clock::now();
 }
-void Player::setVisionStartTime()
+void Player::setReverseStartTime()
 {
-	visionStartTime = std::chrono::system_clock::now();
+	reverseStartTime = std::chrono::system_clock::now();
 }
 void Player::setSlowStartTime()
 {
@@ -285,10 +281,10 @@ double Player::getSearchTime()
 	return elapsed_seconds.count();
 }
 
-double Player::getVisionTime()
+double Player::getReverseTime()
 {
 	auto now = std::chrono::system_clock::now();
-	std::chrono::duration<double> elapsed_seconds = now - visionStartTime;
+	std::chrono::duration<double> elapsed_seconds = now - reverseStartTime;
 	return elapsed_seconds.count();
 }
 
@@ -316,32 +312,26 @@ void Player::updateChefMultiplier(int anger)
 	if (anger < 12) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER;
-		catchRadius = 12;
 	}
 	else if (anger < 24) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.05;
-		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.1;
-		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.15;
-		//catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.2;
-		//catchRadius = 18;
 	}
 	else 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.25;
-		//catchRadius = 20;
 	}
 
 	if (getSlowChef())

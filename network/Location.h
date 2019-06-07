@@ -32,11 +32,6 @@ public:
 
 	double distanceTo(const Location & loc) const
 	{
-		
-		double xdiff = pow(x - loc.x, 2);
-		double ydiff = pow(y - loc.y, 2);
-		double zdiff = pow(z - loc.z, 2);
-
 		return sqrt(pow(x - loc.x, 2) 
 			      + pow(y - loc.y, 2)
 			      + pow(z - loc.z, 2));
