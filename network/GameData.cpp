@@ -587,19 +587,19 @@ JailTile * GameData::getAdjacentJailTile(Location loc, Direction dir, Location &
 				return nullptr;
 			break;
 		case Direction::NORTHEAST:
-			if (wall[2] && wall[0])
+			if (wall[2] || wall[0])
 				return nullptr;
 			break;
 		case Direction::NORTHWEST:
-			if (wall[2] && wall[3])
+			if (wall[2] || wall[3])
 				return nullptr;
 			break;
 		case Direction::SOUTHEAST:
-			if (wall[1] && wall[0])
+			if (wall[1] || wall[0])
 				return nullptr;
 			break;
 		case Direction::SOUTHWEST:
-			if (wall[1] && wall[3])
+			if (wall[1] || wall[3])
 				return nullptr;
 			break;
 		}
@@ -642,12 +642,12 @@ Tile * GameData::getAdjacentTileNotThroughWalls(Location loc, Location & tileLoc
 			else
 				return tile;
 		case Direction::EAST:
-			if (wall[3])
+			if (wall[0])
 				break;
 			else 
 				return tile;
 		case Direction::WEST:
-			if (wall[0])
+			if (wall[3])
 				break;
 			else
 				return tile;
