@@ -76,7 +76,7 @@
 #define BUILD_PARTICLE_TEX (PARTICLES_PATH "build.png")
 #define BLIND_PARTICLE_TEX (PARTICLES_PATH "blind.png")
 #define SEARCH_PARTICLE_TEX (PARTICLES_PATH "search.png")
-#define BEAR_PARTICLE_TEX (PARTICLES_PATH "bear.png")
+#define BEAR_PARTICLE_TEX (PARTICLES_PATH "bearFull.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
