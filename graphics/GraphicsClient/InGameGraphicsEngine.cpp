@@ -2351,9 +2351,9 @@ void DisplayCallback(GLFWwindow* window)
 		bearSpawner[state.number - 1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 1.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && state.isBear));
 		speedSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1 && !state.instantSearch && !state.isBear));
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1 && !state.instantSearch));
 		slowSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1 && !state.instantSearch && !state.isBear));
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1 && !state.instantSearch));
 		//buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			//state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
 			//glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
