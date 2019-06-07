@@ -1560,6 +1560,10 @@ void updateUIElements(GameData * gameData) {
 		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, false);
 		uiCanvas->setVisible(UICanvas::ANGRY_METER_2, true);
 	}
+	else {
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_1, true);
+		uiCanvas->setVisible(UICanvas::ANGRY_METER_2, false);
+	}
 	//check if animals are caught
 	//activates when animal is first in net.
 	for (auto it = players.begin(); it != players.end(); ++it) {
