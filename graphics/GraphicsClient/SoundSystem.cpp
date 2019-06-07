@@ -29,6 +29,7 @@ SoundSystem::SoundSystem()
 	threeDeeChannel[1] = 0;
 	threeDeeChannel[2] = 0;
 	threeDeeChannel[3] = 0;
+	threeDeeSeparate = 0;
 
 	if (driverCount == 0) {
 		std::cerr << "SoundSystem ERROR: driverCount = 0, possibly because no audio devices are plugged in\n";
