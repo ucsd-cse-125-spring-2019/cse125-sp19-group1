@@ -74,7 +74,6 @@ public:
 	void removeWalls(int row, int col);
 
 	bool canMoveToDestination(Location currentLoc, Location & destinationLoc);
-	bool canReachTarget(Location currentLoc, Location & targetLoc);
 	bool hasWallInBetween(Location currentLoc, Location & destinationLoc);
 	std::vector<std::vector<Tile *>> getServerTileLayout() { return tileLayout; }
 

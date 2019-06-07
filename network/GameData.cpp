@@ -56,7 +56,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 	encodedData << "tileLayout: " << atlas->encodeTileLayoutData(newPlayerInit);
 	encodedData << "chefAnger: " << getChefAnger() << std::endl;
 	encodedData << "chefVision:" << getChefVision() << std::endl;
-	encodedData << "blindChef:" << getBlindChef() << std::endl;
+	encodedData << "reverseChef:" << getReverseChef() << std::endl;
 	encodedData << "slowChef:" << getSlowChef() << std::endl;
 	encodedData << "winType: " << (int) getWT() << std::endl;
 	encodedData << "gameState: " << static_cast<int>(gameState) << std::endl;
@@ -195,7 +195,7 @@ void GameData::addDecodeFunctions()
 	decodingFunctions["tileLayout"] = &GameData::decodeTileLayout;
 	decodingFunctions["disconnectedClients"] = &GameData::decodeDisconnectedClients;
 	decodingFunctions["gameState"] = &GameData::decodeGameState;
-	decodingFunctions["blindChef"] = &GameData::decodeBlindChef;
+	decodingFunctions["reverseChef"] = &GameData::decodeReverseChef;
 	decodingFunctions["slowChef"] = &GameData::decodeSlowChef;
  	decodingFunctions["chefAnger"] = &GameData::decodeChefAnger;
 	decodingFunctions["chefVision"] = &GameData::decodeChefVision;
@@ -214,9 +214,9 @@ void GameData::decodeSlowChef(std::string value)
 	slowChef = std::stoi(value);
 }
 
-void GameData::decodeBlindChef(std::string value)
+void GameData::decodeReverseChef(std::string value)
 {
-	blindChef = std::stoi(value);
+	reverseChef = std::stoi(value);
 }
 
 void GameData::decodeChefAnger(std::string value) 
@@ -393,10 +393,10 @@ void GameData::decodeGameData(const char * data)
 }
 
 double GameData::getChefVision() {
-	if (getBlindChef())
+	/*if (getBlindChef())
 	{
 		return (chefVision + getChefRampVision()) * LIMIT_CHEF_VISION_MULT;
-	}
+	}*/
 	return chefVision + getChefRampVision();
 }
 
