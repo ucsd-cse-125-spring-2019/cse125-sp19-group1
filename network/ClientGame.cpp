@@ -5,6 +5,7 @@
 
 // Comment this out to print all messages to stdout, even messages larger than 128 chars
 #define CENSOR_LARGE_MSG 1024
+//#define PRINT_DEBUG_STATEMENTS
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
@@ -217,7 +218,7 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
-
+#ifdef PRINT_DEBUG_STATEMENTS
 #ifdef CENSOR_LARGE_MSG
 	const auto len = strlen(network_data);
 	if (len > CENSOR_LARGE_MSG)
@@ -225,7 +226,7 @@ void ClientGame::update()
 	else
 #endif
 		std::cout << "data received on client:\n" << network_data << std::endl;
-		
+#endif
 	if (myID == NOT_INITIALIZED)
 	{
 		// initialize myID with the value sent from server
