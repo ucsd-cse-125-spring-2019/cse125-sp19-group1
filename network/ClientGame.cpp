@@ -126,6 +126,8 @@ ClientGame::ClientGame(void)
 		soundSystem->createSoundEffect(&sound_net, SOUNDS_NET);
 		soundSystem->createSoundEffect(&sound_raccoon_up, SOUNDS_RACCOON_UP);
 		soundSystem->createSoundEffect(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
+		soundSystem->createSoundEffect(&sound_cat, SOUNDS_CAT);
+		soundSystem->createSoundEffect(&sound_dog, SOUNDS_DOG);
 		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
 		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
 		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);

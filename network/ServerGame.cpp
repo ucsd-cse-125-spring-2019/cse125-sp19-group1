@@ -1233,8 +1233,10 @@ void ServerGame::updateMovement2(Direction dir, int id)
 			dashMultiplier = PLAYER_DASH_MULTIPLIER;
 		if (gameData->getPlayer(id)->getGhost())
 		{
-			gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier, loc.getY(),
-													loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier);
+			//gameData->getPlayer(id)->setLocation(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier, loc.getY(),
+			//										loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier);
+			destLoc = Location(loc.getX() + xSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier, loc.getY(),
+				loc.getZ() + zSPEED * gameData->getPlayer(id)->getSpeedMultiplier() * GHOST_MULTIPLIER * dashMultiplier);
 		}
 		else
 		{

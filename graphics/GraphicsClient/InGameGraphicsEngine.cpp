@@ -218,6 +218,7 @@ static const struct CustomPositionedObjects {
 	{TO_TILE_CENTER(208.88, 0.f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::plate},
 	{TO_TILE_CENTER(208.88, -0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::fork},
 	{TO_TILE_CENTER(208.88, 0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::knife},
+	{80, 0, -100, ItemModelType::warrenBear},
 };
 
 static const glm::mat4 identityMat(1.f);
@@ -370,6 +371,7 @@ static const struct ItemModelSettings {
 	{ WINDOW_FILENAMES,                                    "window",               ItemModelType::window,            WINDOW_SCALE,       glm::vec3(0.f, 0.65f, -0.4f),  glm::vec3(0.f),                   true },
 	{ MDL_SAME_TEX("table"),                               "table",                ItemModelType::table,             glm::vec3(1.5f),    glm::vec3(0.f),                glm::vec3(0.f),                   true },
     { MDL_SAME_TEX("net"),                                 "net",                  ItemModelType::net,               glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 0.f) },
+	{ MODELS_PATH "ucsd-bear-sp10.obj", nullptr,           "warren bear",          ItemModelType::warrenBear,        glm::vec3(4.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false },
 };
 
 struct ItemModel {
@@ -2343,13 +2345,6 @@ void DisplayCallback(GLFWwindow* window)
 		allItemsTransform->draw(V, P, glm::mat4(1.0));
 	}
 
-	for (const auto &customObj : customPositionedObjects) {
-		const auto &model = itemModels[static_cast<unsigned>(customObj.type)];
-		const auto translate = glm::translate(identityMat, glm::vec3(customObj.x, customObj.y, customObj.z));
-		glm::mat4 modelMat = glm::scale(glm::rotate(translate, model.settings->rotation.y, glm::vec3(0.f, 1.f, 0.f)), model.settings->scale);
-		model.geometry->draw(V, P, modelMat);
-	}
-
 	for (const auto &state : players) {
 		dustSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && !state.isBear));
@@ -2411,6 +2406,25 @@ void DisplayCallback(GLFWwindow* window)
 	for (int z = floorArray.size(); z <= floorArray.size() + SAND_MARGIN_Z; z++) {
 		for (int x = -SAND_MARGIN_X; x < mapWidth + SAND_MARGIN_X; x++) {
 			DrawSandTile(x, z);
+		}
+	}
+
+	for (const auto &customObj : customPositionedObjects) {
+		if (customObj.type == ItemModelType::warrenBear) {
+			fog->setFogDistance(1000);
+			fog->draw(objShaderProgram, P * V * glm::vec4(ingame_light_center, 1.0f));
+			light->toggleNormalShading();
+			light->draw(objShaderProgram, &cam_pos, cam_look_at);
+		}
+
+		const auto &model = itemModels[static_cast<unsigned>(customObj.type)];
+		const auto translate = glm::translate(identityMat, glm::vec3(customObj.x, customObj.y, customObj.z));
+		glm::mat4 modelMat = glm::scale(glm::rotate(translate, model.settings->rotation.y, glm::vec3(0.f, 1.f, 0.f)), model.settings->scale);
+		model.geometry->draw(V, P, modelMat);
+
+		if (customObj.type == ItemModelType::warrenBear) {
+			light->toggleNormalShading();
+			light->draw(objShaderProgram, &cam_pos, cam_look_at);
 		}
 	}
 
