@@ -1026,7 +1026,7 @@ void updateBoxVisibility()
 				foundPlayer = true;
 #endif
 
-				Transform *transformNode = envObjs[y][x];
+				Transform *transformNode = envObjs[y][x].transform;
 				if (foundPlayer && gate->getModel() == ItemModelType::window && WINDOW_SCALED_UP) {
 					// compensate for weird animation transform
 					transformNode->undoScale();
