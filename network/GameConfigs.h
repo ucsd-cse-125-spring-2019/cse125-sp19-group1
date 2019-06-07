@@ -4,6 +4,7 @@
 
 //logs
 //#define PRINT_DEBUG_STATEMENTS
+//#define USE_DEBUG_KEYS
 
 #ifdef PRINT_DEBUG_STATEMENTS
 #endif

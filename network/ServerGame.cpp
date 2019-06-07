@@ -89,6 +89,7 @@ void ServerGame::receiveFromClients()
 			}
 
 			switch (packet.packet_type) {
+#ifdef USE_DEBUG_KEYS
 			case OPEN_ALL_BOXES_EVENT:
 				gameData->getAtlas()->openAllBoxes();
 				break;
@@ -105,6 +106,7 @@ void ServerGame::receiveFromClients()
 			case UNLOCK_ALL_GATES_EVENT:
 				gameData->getAtlas()->unlockAllGates();
 				break;
+#endif
 			case INIT_CONNECTION:
 				newPlayerInit = true;
 #ifdef PRINT_DEBUG_STATEMENTS
@@ -119,6 +121,7 @@ void ServerGame::receiveFromClients()
 				printf("server received action event packet from client\n");
 #endif
 				break;
+#ifdef USE_DEBUG_KEYS
 			case REMOVE_WALLS_EVENT:
 #ifdef PRINT_DEBUG_STATEMENTS
 				printf("server received remove walls event packet from client\n");
@@ -133,6 +136,7 @@ void ServerGame::receiveFromClients()
 					}
 				}
 				break;
+#endif
 			case PLAYER_DASH_EVENT:
 #ifdef PRINT_DEBUG_STATEMENTS
 				printf("server received PlayerDash event packet from client\n");
@@ -207,6 +211,7 @@ void ServerGame::receiveFromClients()
 #endif
 				gameData->getPlayer(playerID)->toggleAnimalSelection();
 				break;
+#ifdef USE_DEBUG_KEYS
 			case SELECT0_EVENT:
 			{
 #ifdef PRINT_DEBUG_STATEMENTS
@@ -245,6 +250,7 @@ void ServerGame::receiveFromClients()
 #endif
 				gameData->getPlayer(iter->first)->setModelType(ModelType::DOG);
 				break;
+#endif
 			case FORWARD_EVENT:
 				if (gameStarted && !(chefWin || animalWin)) 
 				{
