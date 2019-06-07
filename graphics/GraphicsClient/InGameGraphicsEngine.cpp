@@ -76,6 +76,7 @@
 #define BUILD_PARTICLE_TEX (PARTICLES_PATH "build.png")
 #define BLIND_PARTICLE_TEX (PARTICLES_PATH "blind.png")
 #define SEARCH_PARTICLE_TEX (PARTICLES_PATH "search.png")
+#define BEAR_PARTICLE_TEX (PARTICLES_PATH "bear.png")
 
 #define OBJ_VERT_SHADER_PATH "./obj_shader.vert"
 #define OBJ_FRAG_SHADER_PATH "./obj_shader.frag"
@@ -422,15 +423,15 @@ static FBXObject * sandModel = nullptr;
 static Skybox *skybox = nullptr;
 
 static UICanvas * uiCanvas = nullptr;
-static GLuint objShaderProgram;
-static GLuint uiShaderProgram;
-static GLuint particleShaderProgram;
+static GLuint objShaderProgram = 0;
+static GLuint uiShaderProgram = 0;
+static GLuint particleShaderProgram = 0;
 
-static GLuint uiTexture;
+static GLuint uiTexture = 0;
 
-static Geometry * tileGeometry;
-static Geometry * wallGeometry;
-static Geometry * netGeometry;
+static Geometry * tileGeometry = nullptr;
+static Geometry * wallGeometry = nullptr;
+static Geometry * netGeometry = nullptr;
 static vector<vector<Transform *>> floorArray;
 static vector<vector<Transform *>> northWalls;
 static vector<vector<Transform *>> westWalls;
@@ -449,13 +450,14 @@ static Sound * sound_vent_screw;
 static Sound * sound_window;
 static Sound * sound_yay;*/
 
-ParticleSpawner * dustSpawner[MAX_PLAYERS];
-ParticleSpawner * flashSpawner[MAX_PLAYERS];
-ParticleSpawner * speedSpawner[MAX_PLAYERS];
-ParticleSpawner * slowSpawner[MAX_PLAYERS];
-//ParticleSpawner * buildSpawner;
-ParticleSpawner * blindSpawner[MAX_PLAYERS];
-ParticleSpawner * searchSpawner[MAX_PLAYERS];
+static ParticleSpawner * dustSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * flashSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * speedSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * slowSpawner[MAX_PLAYERS] = { nullptr };
+//static ParticleSpawner * buildSpawner;
+static ParticleSpawner * blindSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * searchSpawner[MAX_PLAYERS] = { nullptr };
+static ParticleSpawner * bearSpawner[MAX_PLAYERS] = { nullptr };
 
 
 extern ClientGame * sharedClient;
@@ -494,6 +496,7 @@ struct PlayerState {
 	bool blinded = false; //will activate if player is blinded: should only activate on chef
 	bool instantSearch = false; //will activate if player has instant search. 
 	bool restrictRotation = false;
+	bool isBear = false; //will activate if player has bear powerup
 
 	ItemModelType previousInventory;
 	glm::mat4 inventoryTransform;
@@ -1581,9 +1584,9 @@ void updateUIElements(GameData * gameData) {
 		}
 
 		//set goals
+		Location tempLoc;
 
 		//set prompts
-		Location tempLoc;
 		if (gameData->getAdjacentJailTile(currPlayer->getLocation(),currPlayer->getFacingDirection(),tempLoc) != nullptr &&
 			gameData->getAdjacentJailTile(currPlayer->getLocation(), currPlayer->getFacingDirection(), tempLoc)->getCapturedAnimal() != -1 && !currPlayer->isChef()) {
 			uiCanvas->setVisible(UICanvas::PROMPT_JAIL_RESCUE, true);
@@ -1811,6 +1814,7 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	}
 	state.blinded = false;
 	state.instantSearch = false;
+	state.isBear = false;
 	state.movingSpeed = 0;
 	//set states to show auras for powerups
 	switch (powerupActive) {
@@ -1844,6 +1848,9 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	}
 	if (networkPlayer->getModelType() == ModelType::CHEF && sharedClient->getGameData()->slowChef) {
 		state.movingSpeed = -1;
+	}
+	if (networkPlayer->getBearBuff()) {
+		state.isBear = true;
 	}
 	if (notHidden) {
 		playerGeometry->draw(V, P, state.transform);
@@ -2116,10 +2123,10 @@ static void DrawMinimap()
 					}
 					continue;
 				}
-				else if (networkPlayer->isCaught()) {
+				/*else if (networkPlayer->isCaught()) {
 					// Animals can't see caught animals
 					continue;
-				}
+				}*/
 			}
 		}
 
@@ -2177,11 +2184,13 @@ void DisplayCallback(GLFWwindow* window)
 
 	for (const auto &state : players) {
 		dustSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch));
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && !state.isBear));
+		bearSpawner[state.number - 1]->draw(particleShaderProgram, &V, &P, cam_pos,
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && state.isBear));
 		speedSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1 && !state.instantSearch));
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1 && !state.instantSearch && !state.isBear));
 		slowSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1 && !state.instantSearch));
+			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == -1 && !state.instantSearch && !state.isBear));
 		//buildSpawner->draw(particleShaderProgram, &V, &P, cam_pos,
 			//state.buildPosition + ((float)(rand() % 1000 - 1000) / 100.0f) *
 			//glm::vec3(1.0f, 0, 0.5f) + glm::vec3(3.5f, 1, 3), state.building);
@@ -2469,6 +2478,7 @@ InGameGraphicsEngine::~InGameGraphicsEngine()
 	delete slowSpawner;
 	delete blindSpawner;
 	delete flashSpawner;
+	delete bearSpawner;
 }
 
 void InGameGraphicsEngine::StartLoading()  // may launch a thread and return immediately
@@ -2668,6 +2678,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 			//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 			blindSpawner[i] = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
 			searchSpawner[i] = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
+			bearSpawner[i] = new ParticleSpawner(BEAR_PARTICLE_TEX, glm::vec3(0, 1.0f, 0), 1.0, 125, 3.3f);
 		}
 
 		auto setupEnd = high_resolution_clock::now();

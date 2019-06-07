@@ -42,7 +42,7 @@ public:
 	void createOtherPlayersSounds(Sound ** pSound, const char* pFile);
 	void createBackgroundMusic(Sound ** pSound, const char* pFile);
 	void playBackgroundMusic(Sound * pSound, bool bLoop = true);
-	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool bLoop = false);
+	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool playUntilEnd = false, bool bLoop = false);
 	void playSoundEffect(Sound * pSound, bool playUntilEnd = false, bool bLoop = false);
 	void pauseBackgroundMusic();
 	void pauseOtherPlayersSounds(int playerID);
