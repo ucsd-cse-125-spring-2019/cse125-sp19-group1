@@ -2287,7 +2287,7 @@ void DisplayCallback(GLFWwindow* window)
 		dustSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && !state.isBear));
 		bearSpawner[state.number - 1]->draw(particleShaderProgram, &V, &P, cam_pos,
-			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && state.isBear));
+			state.position - glm::vec3(0, 1.0f, 0), (state.moving && state.movingSpeed == 0 && !state.instantSearch && state.isBear));
 		speedSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
 			state.position - glm::vec3(0, 3.0f, 0), (state.moving && state.movingSpeed == 1 && !state.instantSearch && !state.isBear));
 		slowSpawner[state.number-1]->draw(particleShaderProgram, &V, &P, cam_pos,
@@ -2779,7 +2779,7 @@ void InGameGraphicsEngine::MainLoopBegin()
 			//buildSpawner = new ParticleSpawner(BUILD_PARTICLE_TEX, glm::vec3(0, 10.0f, 2.0f), 0.7f);
 			blindSpawner[i] = new ParticleSpawner(BLIND_PARTICLE_TEX, glm::vec3(0, 0.0f, 0), 0.5f, 255);
 			searchSpawner[i] = new ParticleSpawner(SEARCH_PARTICLE_TEX, glm::vec3(0, -4.0f, 0), 2.0f);
-			bearSpawner[i] = new ParticleSpawner(BEAR_PARTICLE_TEX, glm::vec3(0, 1.0f, 0), 1.0, 125, 3.3f);
+			bearSpawner[i] = new ParticleSpawner(BEAR_PARTICLE_TEX, glm::vec3(0, 1.0f, 0), 1.75f, 255, 5.0f);
 		}
 
 		auto setupEnd = high_resolution_clock::now();

@@ -160,10 +160,6 @@ bool Player::isCaught() const {
 	return caughtStatus;
 }
 
-int Player::getCatchRadius() const
-{
-	return catchRadius;
-}
 
 bool Player::inRange(Location & myLoc, Location & theirLoc) 
 {
@@ -316,32 +312,26 @@ void Player::updateChefMultiplier(int anger)
 	if (anger < 12) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER;
-		catchRadius = 12;
 	}
 	else if (anger < 24) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.05;
-		//catchRadius = 12;
 	}
 	else if (anger < 36) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.1;
-		//catchRadius = 1;
 	}
 	else if (anger < 48) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.15;
-		//catchRadius = 16;
 	}
 	else if (anger < 59) 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.2;
-		//catchRadius = 18;
 	}
 	else 
 	{
 		chefSpeedMultiplier = DEFAULT_CHEF_SPEED_MULTIPLIER + 0.25;
-		//catchRadius = 20;
 	}
 
 	if (getSlowChef())

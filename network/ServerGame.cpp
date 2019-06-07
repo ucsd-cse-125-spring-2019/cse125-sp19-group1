@@ -349,7 +349,7 @@ void ServerGame::receiveFromClients()
 										Location tLoc = iter2->second->getLocation();
 
 										//if (player->inRange(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
-										if (loc.distanceTo(tLoc) < player->getCatchRadius() && gameData->getAtlas()->hasWallInBetween(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
+										if (loc.distanceTo(tLoc) < CHEF_CATCH_RADIUS && gameData->getAtlas()->hasWallInBetween(loc, tLoc) && !iter2->second->isCaught() && !player->hasCaughtAnimal())
 										{
 
 											if (!(gameData->getAtlas()->tileHasItem(loc)))
@@ -1195,10 +1195,14 @@ void ServerGame::updateMovement2(Direction dir, int id)
 		double multiplier = gameData->getPlayer(id)->getChefSpeedMultiplier();
 		/*gameData->getPlayer(id)->setLocation(loc.getX() + (xSPEED*multiplier), loc.getY(), 
 												loc.getZ() + (zSPEED*multiplier));*/
+		if (gameData->getSlowChef()) {
+			multiplier *= LIMIT_CHEF_SLOW_MULT;
+		}
 		destLoc = Location(loc.getX() + (xSPEED*multiplier), loc.getY(),
 			loc.getZ() + (zSPEED*multiplier));
 
-
+		
+		
 		Location loc = gameData->getPlayer(id)->getLocation();
 		Tile * tile = gameData->getTile(loc);
 		int row = 0;
@@ -1502,6 +1506,4 @@ void ServerGame::resetGame()
 		gameData->addNewPlayer(id, loc, ClientType::SERVER_SIDE);
 		count++;
 	}
-	 // std::cout << "GAME RESET" << std::endl;
-
 }
