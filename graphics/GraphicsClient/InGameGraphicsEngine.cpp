@@ -1297,8 +1297,12 @@ void InGameGraphicsEngine::MovePlayers()
 			}
 
 			// Animate state.angle towards state.targetAngle
-			state.angle += (state.targetAngle - state.angle) * 0.2f;
-			if (abs(state.targetAngle - state.angle) < 0.01) {
+			float targetAngle = state.targetAngle;
+			if (state.id == myID && state.geometryIdx == static_cast<unsigned>(ModelType::CHEF) && sharedClient->getGameData()->getReverseChef()) {
+				targetAngle = fmodf(targetAngle + glm::pi<float>(), glm::two_pi<float>());
+			}
+			state.angle += (targetAngle - state.angle) * 0.2f;
+			if (abs(fmodf(state.targetAngle - state.angle, glm::two_pi<float>())) < 0.01) {
 				// state.angle has gotten close enough to state.targetAngle, so make them both between 0 and 2pi
 				state.angle = state.targetAngle = fmod(state.targetAngle, glm::two_pi<float>());
 			}
