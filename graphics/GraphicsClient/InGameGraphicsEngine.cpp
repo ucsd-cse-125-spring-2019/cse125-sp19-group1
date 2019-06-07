@@ -197,7 +197,7 @@ static const struct ExtraObjects {
 	// Paintings
 	{13, 1, ItemModelType::painting, TEXTURES_PATH "painting.png"},
 	{0, 4, ItemModelType::painting, TEXTURES_PATH "paintingathena.png"},
-	{19, 6, ItemModelType::painting, TEXTURES_PATH "paintingedward.png"},
+	{19, 7, ItemModelType::painting, TEXTURES_PATH "paintingedward.png"},
 	{2, 12, ItemModelType::painting, TEXTURES_PATH "paintingoliver.png"},
 	{23, 12, ItemModelType::painting, TEXTURES_PATH "paintingvoelker1.png"},
 	{TO_TILE_COORDS(47.619, 227.9), ItemModelType::painting, TEXTURES_PATH "paintingvoelker2.png"},
@@ -206,11 +206,6 @@ static const struct ExtraObjects {
 	{TO_TILE_COORDS(7.79725, 249.298), ItemModelType::garbageBag, nullptr},
 	{TO_TILE_COORDS(225.56, 310.885), ItemModelType::garbageBag, nullptr},
 	{TO_TILE_COORDS(471.777, 152.69), ItemModelType::garbageBag, nullptr},
-	
-	/*// Table setting
-	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::plate, nullptr},
-	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::fork, nullptr},
-	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::knife, nullptr},*/
 };
 
 #define TO_TILE_CENTER(x, offset) (TO_TILE_COORD(x) + 0.5f + offset) * TILE_SIZE_SERVER
