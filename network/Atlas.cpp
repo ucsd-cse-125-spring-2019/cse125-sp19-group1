@@ -894,36 +894,71 @@ bool Atlas::hasWallInBetween(Location currentLoc, Location & destinationLoc)
 	int rowDiff = destRow - currRow;
 	int colDiff = destCol - currCol;
 
-	if (rowDiff != 0 && colDiff != 0)
+	if (rowDiff != 0 && colDiff != 0) // diagonal cases
 	{
 		Tile * currtile = tileLayout[currRow][currCol];
-		bool xDir = true;
-		bool zDir = true;
+		Tile * destTile = tileLayout[destRow][destCol];
+		bool currXDir = true;
+		bool currZDir = true;
+		bool destXDir = true;
+		bool destZDir = true;
 		std::bitset<4> currWall(currtile->getWall());
+		std::bitset<4> destWall(destTile->getWall());
 		if (rowDiff < 0) // Check up wall
 		{
 			if (currWall[2])
-				zDir = false;
+				currZDir = false;
 		}
 		else if (rowDiff > 0) // check down wall
 		{
 			if (currWall[1])
-				zDir = false;
+				currZDir = false;
 		}
 
 		if (colDiff < 0) // check left wall
 		{
 			if (currWall[3])
-				xDir = false;
+				currXDir = false;
 
 		}
 		else if (colDiff > 0) // check right wall
 		{
 			if (currWall[0])
-				xDir = false;
+				currXDir = false;
 		}
-		if (xDir || zDir) // the corner has only 1 of 2 walls so target can be reached
-			return true;
+
+		if (currXDir || currZDir) // the corner has only 1 of 2 walls so destination tile has to be checked for walls can be reached
+		{
+
+			if (rowDiff < 0) // Check down wall
+			{
+				if (destWall[1])
+					destZDir = false;
+			}
+			else if (rowDiff > 0) // check up wall
+			{
+				if (destWall[2])
+					destZDir = false;
+			}
+
+			if (colDiff < 0) // check right wall
+			{
+				if (destWall[0])
+					destXDir = false;
+
+			}
+			else if (colDiff > 0) // check left wall
+			{
+				if (destWall[3])
+					destXDir = false;
+			}
+
+
+			if (currXDir && destZDir || currZDir && destXDir)
+				return true;
+			else
+				return false;
+		}
 		else
 			return false;
 	}
@@ -957,13 +992,15 @@ bool Atlas::hasWallInBetween(Location currentLoc, Location & destinationLoc)
 		{
 			if (wall[3])
 				return false;
-			
+
 		}
 		else if (colDiff > 0) // check right wall
 		{
 			if (wall[0])
 				return false;
 		}
+		
+		return true;
 	}
 	else // within same tile = no walls to check
 	{
