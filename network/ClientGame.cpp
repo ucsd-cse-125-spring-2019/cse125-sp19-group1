@@ -30,15 +30,15 @@
 #define SOUNDS_JAIL_ESCAPE	(SOUNDS_PATH "latching_opening.mp3")
 
 // Paths for background music loops
-#define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
-#define SONG_LOOP			(SOUNDS_PATH "Song_Loop.mp3") //placeholder
+// #define BKG_MUSIC			(SOUNDS_PATH "Safety_Net.mp3") // FIXME placeholder for background music
+// #define SONG_LOOP			(SOUNDS_PATH "Song_Loop.mp3") //placeholder
 #define LOBBY_LOOP			(SOUNDS_PATH "LobbyLoop.wav")
-#define INSTRUCTIONS_A	    (SOUNDS_PATH "Instructions1.wav")
-#define INSTRUCTIONS_B      (SOUNDS_PATH "Instructions2.wav")
+// #define INSTRUCTIONS_A	    (SOUNDS_PATH "Instructions1.wav")
+// #define INSTRUCTIONS_B      (SOUNDS_PATH "Instructions2.wav")
 #define LOOP_A				(SOUNDS_PATH "LoopA.wav")
-#define LOOP_B				(SOUNDS_PATH "LoopB.wav")
-#define TRANSITION_C		(SOUNDS_PATH "TransitionC.wav")
-#define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.wav")
+// #define LOOP_B				(SOUNDS_PATH "LoopB.wav")
+// #define TRANSITION_C		(SOUNDS_PATH "TransitionC.wav")
+// #define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.wav")
 
 static SoundSystem * soundSystem = nullptr;
 
@@ -83,9 +83,10 @@ static Sound * game_transition_one;
 static Sound * game_loop_three;
 */
 
-// VERY HACKY FIX....
+// VERY HACKY FIXES....
 std::map<int, bool> playerDoingStuff; // true if currently doing something
 std::map<int, bool> playerIsCaught;
+GameState prevState;
 
 void loadMapArray(std::vector<std::vector<uint8_t>> &array, const char *filepath) {
 	std::ifstream inf(filepath);
@@ -155,15 +156,16 @@ ClientGame::ClientGame(void)
 		//When the game ends, immediately cease music and start playing lobby loop.
 		*/
 
-		soundSystem->createBackgroundMusic(LOBBY_LOOP);
-		soundSystem->createBackgroundMusic(INSTRUCTIONS_A);
-		soundSystem->createBackgroundMusic(INSTRUCTIONS_B);
-		soundSystem->createBackgroundMusic(LOOP_A);
-		soundSystem->createBackgroundMusic(LOOP_B);
-		soundSystem->createBackgroundMusic(TRANSITION_C);
-		soundSystem->createBackgroundMusic(ENDING_LOOP);
+		soundSystem->createBackgroundMusic(0, LOBBY_LOOP);
+		// soundSystem->createBackgroundMusic(INSTRUCTIONS_A);
+		// soundSystem->createBackgroundMusic(INSTRUCTIONS_B);
+		soundSystem->createBackgroundMusic(1, LOOP_A);
+		// soundSystem->createBackgroundMusic(LOOP_B);
+		// soundSystem->createBackgroundMusic(TRANSITION_C);
+		//soundSystem->createBackgroundMusic(ENDING_LOOP);
 
 		soundSystem->startBackgroundMusic();
+		prevState = GameState::IN_LOBBY;
 
 		// soundSystem->playBackgroundMusic(lobby_loop, true); // FIXME: uncomment
 	}
@@ -185,40 +187,45 @@ ClientGame::~ClientGame()
 	delete network;
 
 	if (soundSystem) {
-		soundSystem->releaseSound(sound_exit_door);
-		soundSystem->releaseSound(sound_door_unlock);
-		soundSystem->releaseSound(sound_found_item);
-		soundSystem->releaseSound(sound_net);
-		soundSystem->releaseSound(sound_raccoon_down);
-		soundSystem->releaseSound(sound_raccoon_up);
-		soundSystem->releaseSound(sound_cat);
-		soundSystem->releaseSound(sound_dog);
-		soundSystem->releaseSound(sound_search_item);
-		soundSystem->releaseSound(sound_toilet);
-		soundSystem->releaseSound(sound_vent_screw);
-		soundSystem->releaseSound(sound_exit_window);
-		soundSystem->releaseSound(sound_yay);
-		soundSystem->releaseSound(sound_jail_unlock);
-		soundSystem->releaseSound(sound_keydrop);
-		soundSystem->releaseSound(sound_chef);
-		soundSystem->releaseSound(sound_splat);
-		soundSystem->releaseSound(sound_jail_escape);
 
-		soundSystem->releaseSound(sound_other_found_item);
-		soundSystem->releaseSound(sound_other_jail_unlock);
-		soundSystem->releaseSound(sound_other_search_item);
-		soundSystem->releaseSound(sound_other_net);
-		soundSystem->releaseSound(sound_other_toilet);
-		soundSystem->releaseSound(sound_other_vent_screw);
-		soundSystem->releaseSound(sound_other_door_unlock);
-	
-		soundSystem->releaseSound(lobby_loop);
-		soundSystem->releaseSound(instructions_one);
-		soundSystem->releaseSound(instructions_two);
-		soundSystem->releaseSound(game_loop_one);
-		soundSystem->releaseSound(game_loop_two);
-		soundSystem->releaseSound(game_transition_one);
-		soundSystem->releaseSound(game_loop_three);
+		if (!soundSystem->shouldIgnoreSound()) {
+			soundSystem->releaseSound(sound_exit_door);
+			soundSystem->releaseSound(sound_door_unlock);
+			soundSystem->releaseSound(sound_found_item);
+			soundSystem->releaseSound(sound_net);
+			soundSystem->releaseSound(sound_raccoon_down);
+			soundSystem->releaseSound(sound_raccoon_up);
+			soundSystem->releaseSound(sound_cat);
+			soundSystem->releaseSound(sound_dog);
+			soundSystem->releaseSound(sound_search_item);
+			soundSystem->releaseSound(sound_toilet);
+			soundSystem->releaseSound(sound_vent_screw);
+			soundSystem->releaseSound(sound_exit_window);
+			soundSystem->releaseSound(sound_yay);
+			soundSystem->releaseSound(sound_jail_unlock);
+			soundSystem->releaseSound(sound_keydrop);
+			soundSystem->releaseSound(sound_chef);
+			soundSystem->releaseSound(sound_splat);
+			soundSystem->releaseSound(sound_jail_escape);
+
+			soundSystem->releaseSound(sound_other_found_item);
+			soundSystem->releaseSound(sound_other_jail_unlock);
+			soundSystem->releaseSound(sound_other_search_item);
+			soundSystem->releaseSound(sound_other_net);
+			soundSystem->releaseSound(sound_other_toilet);
+			soundSystem->releaseSound(sound_other_vent_screw);
+			soundSystem->releaseSound(sound_other_door_unlock);
+
+			/*
+			soundSystem->releaseSound(lobby_loop);
+			soundSystem->releaseSound(instructions_one);
+			soundSystem->releaseSound(instructions_two);
+			soundSystem->releaseSound(game_loop_one);
+			soundSystem->releaseSound(game_loop_two);
+			soundSystem->releaseSound(game_transition_one);
+			soundSystem->releaseSound(game_loop_three);
+			*/
+		}
 
 		delete soundSystem;
 
@@ -514,6 +521,27 @@ void ClientGame::update()
 			}
 
 		}
+
+		// background music checks
+		GameState currentState = gameData->getGameState();
+		if (prevState == GameState::IN_LOBBY && currentState == GameState::LOADING) {
+			// soundSystem->nextBackgroundLoop();
+			prevState = GameState::LOADING;
+		}
+		else if (prevState == GameState::LOADING && currentState == GameState::IN_GAME) {
+			soundSystem->nextBackgroundLoop(1);
+			prevState = GameState::IN_GAME;
+
+		}
+		else if (prevState == GameState::IN_GAME && currentState == GameState::WIN_CUTSCENE) {
+			soundSystem->nextBackgroundLoop(0);
+			prevState = GameState::WIN_CUTSCENE;
+		}
+		else if (currentState == GameState::IN_LOBBY) {
+			prevState = GameState::IN_LOBBY;
+		}
+
+
 
 		soundSystem->update();
 	}

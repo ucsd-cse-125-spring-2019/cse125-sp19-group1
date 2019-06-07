@@ -32,8 +32,23 @@ private:
 	bool hasAudioDriver;
 	bool continueQueue;
 
-	Sound * backgroundSounds[7]; // FIXME: INCREDIBLY HARD-CODED
-	int curLoop;
+	Sound * backgroundSounds[2]; // FIXME: INCREDIBLY HARD-CODED
+	/* 0: lobby loop
+	 *		loop that plays during the lobby, play instructions_A after the loop ends 
+	 * 1: instructions A
+	 *		One-time song, stop after plays once, don't start InstructionsB until slide 3 comes in
+	 * 2: instructions B
+	 *		One-time song, play immediately once slide 3 comes in, transition to Loop A
+	 * 3: loop a
+	 *		Loop, transitions after song ends to loop B (in-game)
+	 * 4: loop b
+	 *		Loop, transitions after song ends to Transition C (in-game)
+	 * 5: transition c
+	 *		One-time, transitions after song ends to Ending_LOOP
+	 * 6: ending loop
+	 *		Loop until game ends
+	 *		When the game ends, immediately cease music and start playing lobby loop.
+	 */
 
 public:
 	SoundSystem();
@@ -47,10 +62,9 @@ public:
 	void createSoundEffect(Sound ** pSound, const char* pFile);
 	void createOtherPlayersSounds(Sound ** pSound, const char* pFile);
 
-	void createBackgroundMusic(const char* pFile);
+	void createBackgroundMusic(int spot, const char* pFile);
 	void startBackgroundMusic();
-	void nextBackgroundLoop(bool bLoop = false);
-	void skipToLoop(int toLoop, bool isEndLoop = false);
+	void nextBackgroundLoop(int toPlay, bool bLoop = true);
 
 	void playBackgroundMusic(Sound * pSound, bool bLoop = true);
 	void playOtherPlayersSounds(Sound * pSound, int playerID, float x, float y, float z, bool playUntilEnd = false, bool bLoop = false);
