@@ -68,7 +68,7 @@ std::string GameData::encodeGameData(bool newPlayerInit)
 		encodedData << " " << p.first;
 	}
 	encodedData << std::endl;
-	//std::cout << encodedData.str() << std::endl;
+	// // std::cout << encodedData.str() << std::endl;
 	return encodedData.str();
 }
 
@@ -377,8 +377,8 @@ void GameData::decodeGameData(const char * data)
 			{
 				if (decodingFunctions.count(key) > 0)
 					(this->*decodingFunctions[key])(value); // Format for calling the functions from the map
-				else
-					std::cout << "No decoding function for key: " << key << std::endl;
+				//else
+					 // std::cout << "No decoding function for key: " << key << std::endl;
 			}
 			else
 			{

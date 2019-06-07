@@ -112,7 +112,7 @@ Atlas::Atlas()
 			{
 				int y = height / 2 * TILE_HEIGHT;
 				playerSpawnLocations.push_back(Location(TILE_SIZE/2 + TILE_SIZE * col, y, TILE_SIZE/2 + TILE_SIZE * row));
-				std::cout << "player spawn: " << row << ", " << col << std::endl;
+				 // std::cout << "player spawn: " << row << ", " << col << std::endl;
 			}
 
 			if (boxNum != "0")
@@ -152,7 +152,7 @@ Atlas::Atlas()
 				break;
 			case TileType::JAIL:
 				tileRow.push_back(new JailTile(wall, height));
-				std::cout << "row " << row << " col " << col << std::endl;
+				 // std::cout << "row " << row << " col " << col << std::endl;
 				jailLocations.push_back(std::pair<int, int>(row, col));
 				break;
 			case TileType::GATE:
@@ -226,9 +226,9 @@ Atlas::Atlas()
 	for (int r = 0; r < tileLayout.size(); r++) {
 		for (int c = 0; c < tileLayout[r].size(); c++) {
 
-			std::cout << tileLayout[r][c]->getWall() << " ";
+			 // std::cout << tileLayout[r][c]->getWall() << " ";
 		}
-		std::cout << std::endl;
+		 // std::cout << std::endl;
 	}
 	srand(time(NULL));
 	// Remove extra boxes locations to use until box count matches item count
@@ -260,15 +260,15 @@ Atlas::Atlas()
 
 	itemsMap.emplace(ItemModelType::cake, Item(ItemModelType::cake, tableLoc.first, tableLoc.second)); // adds cake to table location
 	tileLayout[tableLoc.first][tableLoc.second]->setItem(ItemModelType::cake);
-	std::cout << "keys" << std::endl;
+	 // std::cout << "keys" << std::endl;
 	// Debug print key layout
 	for (auto v : keyLocations)
 	{
 		for (auto x : v)
 		{
-			std::cout << x << " ";
+			 // std::cout << x << " ";
 		}
-		std::cout << std::endl;
+		 // std::cout << std::endl;
 	}
 	std::cout << "end atlas constructor\n";
 }
@@ -304,12 +304,12 @@ void Atlas::detectWallCollision(Location & loc) {
 	//check collision
 	std::bitset<4> wall(tileLayout[row][col]->getWall());
 
-	std::cout << "mapCoord:(" << row << ", " << col << "): " << tileLayout[row][col]->getWall() << std::endl;
+	 // std::cout << "mapCoord:(" << row << ", " << col << "): " << tileLayout[row][col]->getWall() << std::endl;
 	//check left wall
 	if (wall[3]) {
 		int left_bound = col * TILE_SIZE + WALL_SIZE;
 		if (loc.getX() - PLAYER_RADIUS < left_bound) {
-			printf("collided with left wall\n");
+			// printf("collided with left wall\n");
 			loc.setX(left_bound + PLAYER_RADIUS);
 		}
 	}
@@ -317,7 +317,7 @@ void Atlas::detectWallCollision(Location & loc) {
 	if (wall[2]) {
 		int up_bound = row * TILE_SIZE + WALL_SIZE;
 		if (loc.getZ() - PLAYER_RADIUS < up_bound) {
-			printf("collided with up wall\n");
+			// printf("collided with up wall\n");
 			loc.setZ(up_bound + PLAYER_RADIUS);
 		}
 	}
@@ -325,7 +325,7 @@ void Atlas::detectWallCollision(Location & loc) {
 	if (wall[1]) {
 		int down_bound = row * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
 		if (loc.getZ() + PLAYER_RADIUS > down_bound) {
-			printf("collided with down wall\n");
+			// printf("collided with down wall\n");
 			loc.setZ(down_bound - PLAYER_RADIUS);
 		}
 	}
@@ -333,7 +333,7 @@ void Atlas::detectWallCollision(Location & loc) {
 	if (wall[0]) {
 		int right_bound = col * TILE_SIZE + (TILE_SIZE - WALL_SIZE);
 		if (loc.getX() + PLAYER_RADIUS > right_bound) {
-			printf("collided with right wall\n");
+			// printf("collided with right wall\n");
 			loc.setX(right_bound - PLAYER_RADIUS);
 		}
 	}
@@ -363,7 +363,7 @@ void Atlas::detectObjectCollision(Location & loc) {
 		{
 			int up_bound = row * TILE_SIZE;
 			if (loc.getZ() - PLAYER_RADIUS <= up_bound) {
-				printf("collided with up obj\n");
+				// printf("collided with up obj\n");
 				loc.setZ(up_bound + PLAYER_RADIUS);
 			}
 		}
@@ -377,7 +377,7 @@ void Atlas::detectObjectCollision(Location & loc) {
 		{
 			int down_bound = row * TILE_SIZE + TILE_SIZE-1;// need -1 so that it does not go into the next tile
 			if (loc.getZ() + PLAYER_RADIUS >= down_bound) {
-				printf("collided with down obj\n");
+				// printf("collided with down obj\n");
 				loc.setZ(down_bound - PLAYER_RADIUS);
 			}
 		}
@@ -390,7 +390,7 @@ void Atlas::detectObjectCollision(Location & loc) {
 		{
 			int left_bound = col * TILE_SIZE;
 			if (loc.getX() - PLAYER_RADIUS <= left_bound) {
-				printf("collided with left obj\n");
+				// printf("collided with left obj\n");
 				loc.setX(left_bound + PLAYER_RADIUS);
 			}
 		}
@@ -405,7 +405,7 @@ void Atlas::detectObjectCollision(Location & loc) {
 		{
 			int right_bound = col * TILE_SIZE + TILE_SIZE-1; // need -1 so that it does not go into the next tile
 			if (loc.getX() + PLAYER_RADIUS >= right_bound) {
-				printf("collided with right obj\n");
+				// printf("collided with right obj\n");
 				loc.setX(right_bound - PLAYER_RADIUS);
 			}
 		}
@@ -1215,7 +1215,7 @@ void Atlas::updateDroppedItem(ItemModelType anItem, Location loc)
 		if (temp.hasBeenMoved())
 		{
 			temp.setDropTime();
-			//std::cout << "dropTime:" << clock() << std::endl;
+			// // std::cout << "dropTime:" << clock() << std::endl;
 		}
 	}
 }
@@ -1226,7 +1226,7 @@ bool Atlas::checkDroppedItems()
 	{
 		if (iter->second.hasBeenMoved())
 		{
-			//std::cout << "elapsedTime:" << iter->second.getDropDuration() << std::endl;
+			// // std::cout << "elapsedTime:" << iter->second.getDropDuration() << std::endl;
 			if (iter->second.getDropDuration() > ITEM_DROP_DURATION)
 			{
 				int spawnRow, spawnCol;

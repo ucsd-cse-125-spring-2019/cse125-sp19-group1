@@ -5,6 +5,7 @@
 
 // Comment this out to print all messages to stdout, even messages larger than 128 chars
 #define CENSOR_LARGE_MSG 1024
+//#define PRINT_DEBUG_STATEMENTS
 
 // Paths for sounds
 #define SOUNDS_PATH			"../../sounds/"
@@ -38,7 +39,7 @@
 #define LOOP_B				(SOUNDS_PATH "LoopB.wav")
 #define TRANSITION_C		(SOUNDS_PATH "TransitionC.wav")
 #define ENDING_LOOP			(SOUNDS_PATH "EndingLoop.mp3")
-static SoundSystem * soundSystem;
+static SoundSystem * soundSystem = nullptr;
 
 // sounds specific to player (NOT 3D)
 static Sound * sound_exit_door;
@@ -106,38 +107,41 @@ ClientGame::ClientGame(void)
 	gameData = new GameData();
 	network = new ClientNetwork();
 
-	soundSystem = new SoundSystem();
-	if (!(soundSystem->shouldIgnoreSound())) {
-		soundSystem->createSoundEffect(&sound_exit_door, SOUNDS_EXIT_DOOR);
-		soundSystem->createSoundEffect(&sound_door_unlock, SOUNDS_DOOR_UNLOCK);
-		soundSystem->createSoundEffect(&sound_found_item, SOUNDS_FOUND_ITEM);
-		soundSystem->createSoundEffect(&sound_net, SOUNDS_NET);
-		soundSystem->createSoundEffect(&sound_raccoon_up, SOUNDS_RACCOON_UP);
-		soundSystem->createSoundEffect(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
-		soundSystem->createSoundEffect(&sound_cat, SOUNDS_CAT);
-		soundSystem->createSoundEffect(&sound_dog, SOUNDS_DOG);
-		soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
-		soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
-		soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
-		soundSystem->createSoundEffect(&sound_exit_vent, SOUNDS_EXIT_VENT);
-		soundSystem->createSoundEffect(&sound_exit_window, SOUNDS_EXIT_WINDOW);
-		soundSystem->createSoundEffect(&sound_yay, SOUNDS_YAY);
-		soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
-		soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
-		soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
-		soundSystem->createSoundEffect(&sound_splat, SOUNDS_SPLAT);
-		soundSystem->createSoundEffect(&sound_jail_escape, SOUNDS_JAIL_ESCAPE);
+<<<<<<< Updated upstream
+	if (!soundSystem) {
+		soundSystem = new SoundSystem();
+		if (!(soundSystem->shouldIgnoreSound())) {
+			soundSystem->createSoundEffect(&sound_exit_door, SOUNDS_EXIT_DOOR);
+			soundSystem->createSoundEffect(&sound_door_unlock, SOUNDS_DOOR_UNLOCK);
+			soundSystem->createSoundEffect(&sound_found_item, SOUNDS_FOUND_ITEM);
+			soundSystem->createSoundEffect(&sound_net, SOUNDS_NET);
+			soundSystem->createSoundEffect(&sound_raccoon_up, SOUNDS_RACCOON_UP);
+			soundSystem->createSoundEffect(&sound_raccoon_down, SOUNDS_RACCOON_DOWN);
+			soundSystem->createSoundEffect(&sound_cat, SOUNDS_CAT);
+			soundSystem->createSoundEffect(&sound_dog, SOUNDS_DOG);
+			soundSystem->createSoundEffect(&sound_search_item, SOUNDS_SEARCH_ITEM);
+			soundSystem->createSoundEffect(&sound_toilet, SOUNDS_TOILET);
+			soundSystem->createSoundEffect(&sound_vent_screw, SOUNDS_VENT_SCREW);
+			soundSystem->createSoundEffect(&sound_exit_vent, SOUNDS_EXIT_VENT);
+			soundSystem->createSoundEffect(&sound_exit_window, SOUNDS_EXIT_WINDOW);
+			soundSystem->createSoundEffect(&sound_yay, SOUNDS_YAY);
+			soundSystem->createSoundEffect(&sound_jail_unlock, SOUNDS_JAIL_UNLOCK);
+			soundSystem->createSoundEffect(&sound_keydrop, SOUNDS_KEYDROP);
+			soundSystem->createSoundEffect(&sound_chef, SOUNDS_CHEF);
+			soundSystem->createSoundEffect(&sound_splat, SOUNDS_SPLAT);
+			soundSystem->createSoundEffect(&sound_jail_escape, SOUNDS_JAIL_ESCAPE);
 
-		soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
-		soundSystem->createOtherPlayersSounds(&sound_other_jail_unlock, SOUNDS_JAIL_UNLOCK);
-		soundSystem->createOtherPlayersSounds(&sound_other_search_item, SOUNDS_SEARCH_ITEM);
-		soundSystem->createOtherPlayersSounds(&sound_other_net, SOUNDS_NET);
-		soundSystem->createOtherPlayersSounds(&sound_other_toilet, SOUNDS_TOILET);
-		soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
-		soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
+			soundSystem->createOtherPlayersSounds(&sound_other_found_item, SOUNDS_FOUND_ITEM);
+			soundSystem->createOtherPlayersSounds(&sound_other_jail_unlock, SOUNDS_JAIL_UNLOCK);
+			soundSystem->createOtherPlayersSounds(&sound_other_search_item, SOUNDS_SEARCH_ITEM);
+			soundSystem->createOtherPlayersSounds(&sound_other_net, SOUNDS_NET);
+			soundSystem->createOtherPlayersSounds(&sound_other_toilet, SOUNDS_TOILET);
+			soundSystem->createOtherPlayersSounds(&sound_other_vent_screw, SOUNDS_VENT_SCREW);
+			soundSystem->createOtherPlayersSounds(&sound_other_door_unlock, SOUNDS_DOOR_UNLOCK);
 
-		soundSystem->createBackgroundMusic(&background_music, TRANSITION_C);
-		soundSystem->playBackgroundMusic(background_music, true); // FIXME: uncomment
+			soundSystem->createBackgroundMusic(&background_music, TRANSITION_C);
+			soundSystem->playBackgroundMusic(background_music, true); // FIXME: uncomment
+		}
 	}
 
 	// send init packet
@@ -156,36 +160,40 @@ ClientGame::~ClientGame()
 	delete gameData;
 	delete network;
 
-	soundSystem->releaseSound(sound_exit_door);
-	soundSystem->releaseSound(sound_door_unlock);
-	soundSystem->releaseSound(sound_found_item);
-	soundSystem->releaseSound(sound_net);
-	soundSystem->releaseSound(sound_raccoon_down);
-	soundSystem->releaseSound(sound_raccoon_up);
-	soundSystem->releaseSound(sound_cat);
-	soundSystem->releaseSound(sound_dog);
-	soundSystem->releaseSound(sound_search_item);
-	soundSystem->releaseSound(sound_toilet);
-	soundSystem->releaseSound(sound_vent_screw);
-	soundSystem->releaseSound(sound_exit_window);
-	soundSystem->releaseSound(sound_yay);
-	soundSystem->releaseSound(sound_jail_unlock);
-	soundSystem->releaseSound(sound_keydrop);
-	soundSystem->releaseSound(sound_chef);
-	soundSystem->releaseSound(sound_splat);
-	soundSystem->releaseSound(sound_jail_escape);
+	if (soundSystem) {
+		soundSystem->releaseSound(sound_exit_door);
+		soundSystem->releaseSound(sound_door_unlock);
+		soundSystem->releaseSound(sound_found_item);
+		soundSystem->releaseSound(sound_net);
+		soundSystem->releaseSound(sound_raccoon_down);
+		soundSystem->releaseSound(sound_raccoon_up);
+		soundSystem->releaseSound(sound_cat);
+		soundSystem->releaseSound(sound_dog);
+		soundSystem->releaseSound(sound_search_item);
+		soundSystem->releaseSound(sound_toilet);
+		soundSystem->releaseSound(sound_vent_screw);
+		soundSystem->releaseSound(sound_exit_window);
+		soundSystem->releaseSound(sound_yay);
+		soundSystem->releaseSound(sound_jail_unlock);
+		soundSystem->releaseSound(sound_keydrop);
+		soundSystem->releaseSound(sound_chef);
+		soundSystem->releaseSound(sound_splat);
+		soundSystem->releaseSound(sound_jail_escape);
 
-	soundSystem->releaseSound(sound_other_found_item);
-	soundSystem->releaseSound(sound_other_jail_unlock);
-	soundSystem->releaseSound(sound_other_search_item);
-	soundSystem->releaseSound(sound_other_net);
-	soundSystem->releaseSound(sound_other_toilet);
-	soundSystem->releaseSound(sound_other_vent_screw);
-	soundSystem->releaseSound(sound_other_door_unlock);
+		soundSystem->releaseSound(sound_other_found_item);
+		soundSystem->releaseSound(sound_other_jail_unlock);
+		soundSystem->releaseSound(sound_other_search_item);
+		soundSystem->releaseSound(sound_other_net);
+		soundSystem->releaseSound(sound_other_toilet);
+		soundSystem->releaseSound(sound_other_vent_screw);
+		soundSystem->releaseSound(sound_other_door_unlock);
 	
-	soundSystem->releaseSound(background_music);
+		soundSystem->releaseSound(background_music);
 
-	delete soundSystem;
+		delete soundSystem;
+
+		soundSystem = nullptr;
+	}
 }
 
 //Sending packet information
@@ -234,7 +242,7 @@ void ClientGame::update()
 		//no data recieved
 		return;
 	}
-
+#ifdef PRINT_DEBUG_STATEMENTS
 #ifdef CENSOR_LARGE_MSG
 	const auto len = strlen(network_data);
 	if (len > CENSOR_LARGE_MSG)
@@ -242,7 +250,7 @@ void ClientGame::update()
 	else
 #endif
 		std::cout << "data received on client:\n" << network_data << std::endl;
-		
+#endif
 	if (myID == NOT_INITIALIZED)
 	{
 		// initialize myID with the value sent from server
