@@ -105,7 +105,7 @@
 
 // Uncomment to render a repeating pattern of all environment objects
 // This is good for debugging scale/positioning/rendering
-//#define ENV_OBJS_DEMO
+// #define ENV_OBJS_DEMO
 
 #define TILE_HEIGHT_ADJUST -2.f
 #define TILE_SCALE 10.f          /* overall scale of the entire floor. (TILE_SCALE * TILE_STRIDE) should match server tile size, which is currently 20 */
@@ -185,17 +185,44 @@ struct MapPing {
 };
 unordered_map<int, MapPing> allPings;
 
-static const struct ExtraPainting {
+#define TABLE_HEIGHT 9.25f
+#define TO_TILE_COORD(x) (int)(x / TILE_SIZE_SERVER)
+#define TO_TILE_COORDS(x, y) TO_TILE_COORD(x), TO_TILE_COORD(y)
+static const struct ExtraObjects {
 	int x;
 	int z;
+	ItemModelType type;
 	const char *texture;
-} extraPaintings[] = {
-	{13, 1, TEXTURES_PATH "painting.png"},
-	{0, 4, TEXTURES_PATH "paintingathena.png"},
-	{19, 6, TEXTURES_PATH "paintingedward.png"},
-	{2, 12, TEXTURES_PATH "paintingoliver.png"},
-	{23, 12, TEXTURES_PATH "paintingvoelker1.png"},
-	{(int)(47.619 / TILE_SIZE_SERVER), (int)(227.9 / TILE_SIZE_SERVER), TEXTURES_PATH "paintingvoelker2.png"},
+} extraObjects[] = {
+	// Paintings
+	{13, 1, ItemModelType::painting, TEXTURES_PATH "painting.png"},
+	{0, 4, ItemModelType::painting, TEXTURES_PATH "paintingathena.png"},
+	{19, 6, ItemModelType::painting, TEXTURES_PATH "paintingedward.png"},
+	{2, 12, ItemModelType::painting, TEXTURES_PATH "paintingoliver.png"},
+	{23, 12, ItemModelType::painting, TEXTURES_PATH "paintingvoelker1.png"},
+	{TO_TILE_COORDS(47.619, 227.9), ItemModelType::painting, TEXTURES_PATH "paintingvoelker2.png"},
+
+	// Trash bags
+	{TO_TILE_COORDS(7.79725, 249.298), ItemModelType::garbageBag, nullptr},
+	{TO_TILE_COORDS(225.56, 310.885), ItemModelType::garbageBag, nullptr},
+	{TO_TILE_COORDS(471.777, 152.69), ItemModelType::garbageBag, nullptr},
+	
+	/*// Table setting
+	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::plate, nullptr},
+	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::fork, nullptr},
+	{TO_TILE_COORDS(193.88, 111.23), ItemModelType::knife, nullptr},*/
+};
+
+#define TO_TILE_CENTER(x, offset) (TO_TILE_COORD(x) + 0.5f + offset) * TILE_SIZE_SERVER
+static const struct CustomPositionedObjects {
+	float x;
+	float y;
+	float z;
+	ItemModelType type;
+} customPositionedObjects[] = {
+	{TO_TILE_CENTER(208.88, 0.f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::plate},
+	{TO_TILE_CENTER(208.88, -0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::fork},
+	{TO_TILE_CENTER(208.88, 0.25f), TILE_HEIGHT + TABLE_HEIGHT, TO_TILE_CENTER(111.23, 0.f), ItemModelType::knife},
 };
 
 static const glm::mat4 identityMat(1.f);
@@ -319,7 +346,7 @@ static const struct ItemModelSettings {
 	{ MDL_SAME_TEX("cake"),                                "cake",                 ItemModelType::cake,              glm::vec3(0.6f),    glm::vec3(0.f),                glm::vec3(0.f, GLM_H_PI, 0.f),    false,      glm::vec3(0.f, 1.f, 2.75f) },
 	{ MDL_SAME_TEX("cookingpot"),                          "cooking pot",          ItemModelType::cookingPot,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ DOOR_FILENAMES,                                      "door",                 ItemModelType::door,              glm::vec3(1.f),     glm::vec3(0.f, 0.0f, -0.45f),  glm::vec3(0.f),                   true },
-	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("fork"),                                "fork",                 ItemModelType::fork,              glm::vec3(1.f),     glm::vec3(0.05f, 0.0f, 0.f),   glm::vec3(0.f, GLM_PI, 0.f),      true },
 	{ MDL_SAME_TEX("garbagebag"),                          "garbage bag",          ItemModelType::garbageBag,        glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true,       glm::vec3(0.f, 1.f, 2.5f) },
 	{ MDL_SAME_TEX("jail"),                                "jail",                 ItemModelType::jail,              glm::vec3(0.3f),    glm::vec3(0.f),                glm::vec3(0.f),                   false },
 	{ MDL_AND_TEX("key", "key1"),                          "key #1",               ItemModelType::key1,              glm::vec3(0.5f),    glm::vec3(0.f),                glm::vec3(GLM_H_PI, 0.f, 0.f),    false,      glm::vec3(1.f, -0.5f, 0.5f),   glm::vec3(-GLM_H_PI, 0.f, 0.f) },
@@ -328,7 +355,7 @@ static const struct ItemModelSettings {
 	{ MDL_AND_TEX("keydrop", "keydrop_bathroom"),          "bathroom key drop",    ItemModelType::keyDropBathroom,   glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_AND_TEX("keydrop", "keydrop_frontexit"),         "front exit key drop",  ItemModelType::keyDropFrontExit,  glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
 	{ MDL_AND_TEX("keydrop", "keydrop_vent"),              "vent key drop",        ItemModelType::keyDropVent,       glm::vec3(2.5f),    glm::vec3(0.f, 0.0f, -0.375f), glm::vec3(0.f, -GLM_H_PI, 0.f),   true },
-	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   true },
+	{ MDL_SAME_TEX("knife"),                               "knife",                ItemModelType::knife,             glm::vec3(1.f),     glm::vec3(-0.05f, 0.0f, 0.f),  glm::vec3(0.f, GLM_PI, 0.f),      true },
 	{ MDL_SAME_TEX("orange"),                              "orange fruit",         ItemModelType::orange,            glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
 	{ MDL_AND_TEX("painting", "paintingbear"),             "bear painting",        ItemModelType::painting,          glm::vec3(1.8f),    glm::vec3(0.f, 0.5f, -0.4f),   glm::vec3(0.f),                   true,       glm::vec3(0.f, 0.f, 2.f) },
 	{ MDL_SAME_TEX("pear"),                                "pear",                 ItemModelType::pear,              glm::vec3(1.f),     glm::vec3(0.f),                glm::vec3(0.f),                   false,      glm::vec3(0.f, 0.f, 1.f) },
@@ -722,10 +749,10 @@ void resetEnvObjs()
 			row[x].textureOverride = 0;
 			if (objIdx == 0) {
 				bool found = false;
-				for (const auto &extra : extraPaintings) {
+				for (const auto &extra : extraObjects) {
 					if (x == extra.x && z == extra.z) {
-						row[x].textureOverride = loadTexture(extra.texture);
-						objIdx = static_cast<uint8_t>(ItemModelType::painting);
+						row[x].textureOverride = extra.texture ? loadTexture(extra.texture) : 0;
+						objIdx = static_cast<uint8_t>(extra.type);
 						found = true;
 						break;
 					}
@@ -851,7 +878,7 @@ void resetItems()
 
 			if (tile->getTileType() == TileType::OBJECT) {
 				if (((ObjectTile *)tile)->getModel() == ItemModelType::table) {
-					tileTranslate.y += 9.25f;
+					tileTranslate.y += TABLE_HEIGHT;
 				}
 			}
 
@@ -2229,6 +2256,13 @@ void DisplayCallback(GLFWwindow* window)
 
 	if (allItemsTransform) {
 		allItemsTransform->draw(V, P, glm::mat4(1.0));
+	}
+
+	for (const auto &customObj : customPositionedObjects) {
+		const auto &model = itemModels[static_cast<unsigned>(customObj.type)];
+		const auto translate = glm::translate(identityMat, glm::vec3(customObj.x, customObj.y, customObj.z));
+		glm::mat4 modelMat = glm::scale(glm::rotate(translate, model.settings->rotation.y, glm::vec3(0.f, 1.f, 0.f)), model.settings->scale);
+		model.geometry->draw(V, P, modelMat);
 	}
 
 	for (const auto &state : players) {
