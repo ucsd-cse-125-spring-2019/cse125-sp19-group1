@@ -1384,8 +1384,10 @@ static glm::vec3 LookAtForWT(WinType wt) {
 		break;
 	}
 	default:
-		return cam_look_at;
+		break;
 	}
+
+	return cam_look_at;
 }
 
 static glm::vec3 limitLookAt(glm::vec3 lookAt) {
