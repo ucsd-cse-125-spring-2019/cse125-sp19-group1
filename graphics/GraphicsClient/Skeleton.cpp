@@ -15,18 +15,17 @@ void Skeleton::AddNode(string name, Bone * newNode) {
 	bones.insert(std::pair<string, Bone *>(name, newNode));
 }
 
-Bone * Skeleton::GetBone(string name) {
-	if (bones.find(name) != bones.end())
-		return bones[name];
-	return NULL;
+Bone * Skeleton::GetBone(const string &name) const {
+	const auto it = bones.find(name);
+	return (it != bones.end()) ? it->second : nullptr;
 }
 
-std::map<string, Bone *> * Skeleton::GetBones() {
-	return &bones;
+std::unordered_map<string, Bone *> * Skeleton::GetBones() const {
+	return (std::unordered_map<string, Bone *> *)&bones;
 }
 
-std::vector<Vertex *> * Skeleton::GetVertices() {
-	return &vertices;
+std::vector<Vertex *> * Skeleton::GetVertices() const {
+	return (std::vector<Vertex *> *)&vertices;
 }
 
 void Skeleton::PrintBoneStructure() {

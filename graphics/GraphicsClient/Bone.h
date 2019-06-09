@@ -6,14 +6,14 @@
 
 class Bone {
 public:
-	Bone(string newName, glm::mat4 nodeMat, Bone * newParent);
+	Bone(const string &newName, glm::mat4 nodeMat, Bone * newParent);
 	~Bone();
 	void AddChild(Bone * child);
-	string GetName();
+	const string &GetName() const;
 	void Print(string spaces);
-	glm::mat4 * GetOffset();
-	glm::mat4 GetTransform();
-	void SetOffset(glm::mat4 newOffset);
+	const glm::mat4 &GetOffset() const;
+	const glm::mat4 &GetTransform() const;
+	void SetOffset(const glm::mat4 &newOffset);
 	void SetTransform(glm::mat4 * newTransform);
 	void SetChannel(AnimationChannel * newChannel);
 	void CopyParentChannel();
@@ -22,11 +22,11 @@ public:
 	void PrintMatrix(glm::mat4 * matrix);
 	void SetIsBone(bool input);
 
-	bool CheckIsBone();
+	bool CheckIsBone() const;
 	void SetChannelMatrices(float * values, int numValues);
 	void SetID(unsigned int newID);
-	int GetID();
-	AnimationChannel * GetChannel();
+	int GetID() const;
+	AnimationChannel * GetChannel() const;
 
 private:
 	Bone * parent;

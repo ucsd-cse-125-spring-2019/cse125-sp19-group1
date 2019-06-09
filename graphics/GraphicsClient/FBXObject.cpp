@@ -59,7 +59,7 @@ void FBXObject::Parse(const char *filepath, float animMultiplier, int animIndex)
 			for (int j = 0; j < currWeights->size() && j < 4; j++) {
 				const std::pair<string, float> currWeight = (*currWeights)[j];
 				if (currWeight.first.size() != 0) {
-					Bone * currBone = skel->GetBone(currWeight.first);
+					const Bone * currBone = skel->GetBone(currWeight.first);
 					if (currBone != NULL) {
 						if (currBone->GetID() == -1) std::cout << "ID OF -1 ON NECESSARY BONE: " << currBone->GetName() << std::endl;
 						else {
@@ -260,8 +260,8 @@ void FBXObject::Draw(GLuint shaderProgram, const glm::mat4 * V, const glm::mat4 
 	if (shouldAnimate && (skel != NULL || animPlayer != NULL)) {
 		glUniform1i(uIsAnimated, 1);
 		std::vector<glm::mat4> boneTransforms;
-		std::map<string, Bone *> * skelBones = skel->GetBones();
-		for (std::map<string, Bone *>::iterator it = skelBones->begin(); it != skelBones->end(); it++) {
+		auto skelBones = skel->GetBones();
+		for (auto it = skelBones->begin(); it != skelBones->end(); it++) {
 			if (it->second->CheckIsBone()) {
 				boneTransforms.push_back(it->second->GetTransform());
 				string boneString = string("bones[");
@@ -417,27 +417,34 @@ void FBXObject::Animate() {
 
 void FBXObject::LoadMatrices(const char * path) {
 	int bufsize = 128;
-	Tokenizer * token = new Tokenizer();
-	token->Open(path);
+	Tokenizer token;
+	token.Open(path);
 	
-	if (token->FindToken("<library_animations>")) {
-		while (token->FindToken("<animation id=\"")) {
+	if (token.FindToken("<library_animations>")) {
+		const string prefix("id=\"");
+		const string suffix("-Matrix-animation-output-transform-array\" count=\"");
+
+		while (token.FindToken("<animation id=\"")) {
 			char * out = new char[bufsize];
-			token->GetToken(out);
-			string boneName = "";
+			token.GetToken(out);
+
 			// extracting the bone name
-			for (int index = 0; out[index] != '-' && index < bufsize; index++)
-				boneName = boneName + out[index];
+			string boneName = "";
+			char *dash = (char *)memchr(out, '-', bufsize);
+			if (dash && dash >= out) {
+				boneName = string(out, dash - out);
+			}
+
 			Bone * currBone = skel->GetBone(boneName);
 			if (currBone != NULL) {
-				string param = string("id=\"") + boneName + string("-Matrix-animation-output-transform-array\" count=\"");
-				if (token->FindToken(param.c_str())) {
-					int numValues = token->GetInt();
+				const string param = prefix + boneName + suffix;
+				if (token.FindToken(param.c_str())) {
+					int numValues = token.GetInt();
 					// skipping to the end of the line to start reading floats
-					if (token->FindToken("\">")) {
+					if (token.FindToken("\">")) {
 						float * values = new float[numValues];
 						for (int i = 0; i < numValues; i++)
-							values[i] = token->GetFloat();
+							values[i] = token.GetFloat();
 						currBone->SetChannelMatrices(values, numValues);
 					}
 					else
@@ -449,5 +456,5 @@ void FBXObject::LoadMatrices(const char * path) {
 	else
 		std::cout << "COULD NOT FIND LIBRARY ANIMATIONS" << std::endl;
 
-	token->Close();
+	token.Close();
 }

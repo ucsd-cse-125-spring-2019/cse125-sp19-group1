@@ -7,7 +7,7 @@ Vertex::Vertex(unsigned int newID, glm::vec3 * newPos, glm::vec3 * newNorm)
 	normal = glm::vec3(*newNorm);
 }
 
-void Vertex::AddWeight(string boneName, float boneWeight) {
+void Vertex::AddWeight(const string &boneName, float boneWeight) {
 	if (weights.size() < NUM_WEIGHTS)
 		weights.push_back(std::pair<string, float>(boneName, boneWeight));
 	else {
@@ -42,15 +42,15 @@ std::vector<std::pair<string, float>> * Vertex::GetWeights() {
 	return &weights;
 }
 
-glm::vec3 Vertex::GetPos() {
+const glm::vec3 &Vertex::GetPos() const {
 	return position;
 }
 
-glm::vec3 Vertex::GetNorm() {
+const glm::vec3 &Vertex::GetNorm() const {
 	return normal;
 }
 
-unsigned int Vertex::GetID() {
+unsigned int Vertex::GetID() const {
 	return id;
 }
 

@@ -1,6 +1,6 @@
 #include "Bone.h"
 
-Bone::Bone(string newName, glm::mat4 nodeMat, Bone * newParent) {
+Bone::Bone(const string &newName, glm::mat4 nodeMat, Bone * newParent) {
 	id = -1; // default ID; should be updated later (if all goes correctly)
 	name = string(newName);
 	transform = glm::mat4(1.0f);
@@ -19,19 +19,19 @@ void Bone::AddChild(Bone * child) {
 	children.push_back(child);
 }
 
-string Bone::GetName() {
+const string &Bone::GetName() const {
 	return name;
 }
 
-glm::mat4 * Bone::GetOffset() {
-	return &offset;
+const glm::mat4 & Bone::GetOffset() const {
+	return offset;
 }
 
-glm::mat4 Bone::GetTransform() {
+const glm::mat4 &Bone::GetTransform() const {
 	return transform;
 }
 
-void Bone::SetOffset(glm::mat4 newOffset) {
+void Bone::SetOffset(const glm::mat4 &newOffset) {
 	try {
 		offset = glm::mat4(newOffset);
 	}
@@ -99,7 +99,7 @@ void Bone::SetIsBone(bool input) {
 	isBone = input;
 }
 
-bool Bone::CheckIsBone() {
+bool Bone::CheckIsBone() const {
 	return isBone;
 }
 
@@ -121,10 +121,10 @@ void Bone::SetID(unsigned int newID) {
 	id = newID;
 }
 
-int Bone::GetID() {
+int Bone::GetID() const {
 	return id;
 }
 
-AnimationChannel * Bone::GetChannel() {
+AnimationChannel * Bone::GetChannel() const {
 	return channel;
 }

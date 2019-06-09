@@ -69,9 +69,9 @@ void traverseSkeleton(aiNode * currNode, Skeleton * skel)
 }
 
 void assignIDs(Skeleton * skel) {
-	std::map<string, Bone *> * bones = skel->GetBones();
+	auto bones = skel->GetBones();
 	unsigned int currID = 0;
-	for (map<string, Bone *>::iterator it = bones->begin(); it != bones->end(); it++) {
+	for (auto it = bones->begin(); it != bones->end(); it++) {
 		if (it->second->CheckIsBone()) {
 			it->second->SetID(currID);
 			currID++;
@@ -128,7 +128,7 @@ void populateSkelVertices(aiMesh * mesh, std::vector<glm::vec3> * vertices, std:
 // aiMatrix4x4 is row major, while glm is column major
 glm::mat4 aiMatTOglm(aiMatrix4x4 mat)
 {
-	glm::mat4 newMat = glm::mat4(1.0);
+	glm::mat4 newMat;
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
 			newMat[i][j] = mat[j][i];
@@ -143,11 +143,17 @@ void populateMesh(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<
 	std::vector<unsigned int> * indices, std::vector<glm::vec2> * uvs)
 {
 	// Fill vertices positions
+#ifndef ASSIMP_DOUBLE_PRECISION
+	// Yay, aiVector3D is laid out in memory exactly like a glm::vec3, so we can just insert them all at once
+	vertices->assign((glm::vec3 *)mesh->mVertices, (glm::vec3 *)mesh->mVertices + mesh->mNumVertices);
+#else
+	// Darn, gotta loop over element by element
 	vertices->reserve(mesh->mNumVertices);
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		aiVector3D pos = mesh->mVertices[i];
 		vertices->push_back(glm::vec3(pos.x, pos.y, pos.z));
 	}
+#endif
 
 	// Fill vertices texture coordinates
 	uvs->reserve(mesh->mNumVertices);
@@ -157,18 +163,22 @@ void populateMesh(aiMesh * mesh, std::vector<glm::vec3> * vertices, std::vector<
 	}
 
 	// Fill vertices normals
+#ifndef ASSIMP_DOUBLE_PRECISION
+	// Yay, aiVector3D is laid out in memory exactly like a glm::vec3, so we can just insert them all at once
+	normals->assign((glm::vec3 *)mesh->mNormals, (glm::vec3 *)mesh->mNormals + mesh->mNumVertices);
+#else
+	// Darn, gotta loop over element by element
 	normals->reserve(mesh->mNumVertices);
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 		aiVector3D n = mesh->mNormals[i];
 		normals->push_back(glm::vec3(n.x, n.y, n.z));
 	}
+#endif
 
 	// Fill face indices
 	indices->reserve(3 * mesh->mNumFaces);
 	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
 		// Assume the model has only triangles.
-		indices->push_back(mesh->mFaces[i].mIndices[0]);
-		indices->push_back(mesh->mFaces[i].mIndices[1]);
-		indices->push_back(mesh->mFaces[i].mIndices[2]);
+		indices->insert(indices->cend(), mesh->mFaces[i].mIndices, mesh->mFaces[i].mIndices + 3);
 	}
 }

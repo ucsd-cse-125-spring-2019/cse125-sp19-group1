@@ -56,8 +56,8 @@ void AnimationPlayer::SetBoneChannels() {
 			std::cout << "ANIMPLAYER: NO BONE MATCHES THIS CHANNEL" << std::endl;
 	}
 
-	std::map<string, Bone *> * bones = skeleton->GetBones();
-	for (std::map<string, Bone *>::iterator it = bones->begin(); it != bones->end(); it++) {
+	auto bones = skeleton->GetBones();
+	for (auto it = bones->begin(); it != bones->end(); it++) {
 		Bone * currBone = it->second;
 		if (currBone->GetName().find("joint") != string::npos && currBone->CheckIsBone() && currBone->GetChannel() == NULL) {
 			currBone->CopyParentChannel();
