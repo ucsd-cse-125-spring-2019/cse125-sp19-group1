@@ -22,7 +22,7 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	}
 
 	aiAnimation * anim;
-	if (animIndex != -1 && animIndex < scene->mNumAnimations)
+	if (animIndex != -1 && animIndex < (int)scene->mNumAnimations)
 		anim = scene->mAnimations[animIndex];
 	else if (scene->mNumAnimations > 1)
 		anim = scene->mAnimations[1];
@@ -43,7 +43,7 @@ bool loadAnimation(aiScene * scene, Skeleton * skel, AnimationPlayer ** animPlay
 	float modifiedDuration = convertChannels(anim, channels, animMultiplier);
 
 	if (animMultiplier != 1.0f)
-		newAnimation->setEndTime(anim->mDuration * TOTAL_DUR_MULTIPLIER);
+		newAnimation->setEndTime((float)anim->mDuration * TOTAL_DUR_MULTIPLIER);
 
 	*animPlayer = new AnimationPlayer(skel, newAnimation);
 	return true;
@@ -53,15 +53,15 @@ float convertChannels(aiAnimation * anim, std::vector<AnimationChannel *> * chan
 
 	//assumes there are no keyframes individually holding position/rotation/scaling info
 	float latestTime = 0.0f;
-	for (int i = 0; i < anim->mNumChannels; i++) {
+	for (unsigned i = 0; i < anim->mNumChannels; i++) {
 		aiNodeAnim * currChannel = anim->mChannels[i];
 		//have to map the channels while building them, mold all keyframes together.
 		AnimationChannel * newChannel = new AnimationChannel((char*)(currChannel->mNodeName.C_Str()), currChannel->mNumPositionKeys);
 		std::vector<Keyframe *> * keyframes = newChannel->getKeyframes();
 		channels->push_back(newChannel);
-		for (int j = 0; j < currChannel->mNumPositionKeys; j++) {
+		for (unsigned j = 0; j < currChannel->mNumPositionKeys; j++) {
 			aiVectorKey positionKey = currChannel->mPositionKeys[j];
-			float keyTime = positionKey.mTime * animMultiplier;
+			float keyTime = (float)(positionKey.mTime * animMultiplier);
 			if (keyTime > latestTime)
 				latestTime = keyTime;
 			glm::vec3 positionVec = glm::vec3();

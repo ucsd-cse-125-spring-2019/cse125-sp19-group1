@@ -141,7 +141,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 
 #define DOT_PERIOD (1.5)
 	double now = glfwGetTime();
-	float dotPhase = (fmod(now, DOT_PERIOD) / DOT_PERIOD) * 4.0;
+	float dotPhase = (float)(fmod(now, DOT_PERIOD) / DOT_PERIOD) * 4.0f;
 
 	switch((int)dotPhase) {
 	case 0:
@@ -204,7 +204,7 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	glm::vec3 pawDirection(cosf(movementAngle), sinf(movementAngle), 0.f);
 
 #define PAW_PERIOD 0.825
-	float pawPhase = fmod(now, PAW_PERIOD) / PAW_PERIOD;
+	float pawPhase = (float)(fmod(now, PAW_PERIOD) / PAW_PERIOD);
 
 #define PAW_DOWN_FRAC 0.5
 #define PAW_FADEOUT_FRAC 0.075
@@ -213,19 +213,19 @@ void LoadingGraphicsEngine::MainLoopCallback(GLFWwindow * window)
 	int pawPhaseIdx;
 	float pawSubphase;
 	if (pawPhase < PAW_DOWN_FRAC) {
-		pawSubphase = (pawPhase - 0.f) / PAW_DOWN_FRAC;
+		pawSubphase = (float)((pawPhase - 0.f) / PAW_DOWN_FRAC);
 		pawPhaseIdx = 0;
 	}
 	else if (pawPhase < PAW_DOWN_FRAC + PAW_FADEOUT_FRAC) {
-		pawSubphase = (pawPhase - PAW_DOWN_FRAC) / PAW_FADEOUT_FRAC;
+		pawSubphase = (float)((pawPhase - PAW_DOWN_FRAC) / PAW_FADEOUT_FRAC);
 		pawPhaseIdx = 1;
 	}
 	else if (pawPhase < PAW_DOWN_FRAC + PAW_FADEOUT_FRAC + PAW_UP_FRAC) {
-		pawSubphase = (pawPhase - (PAW_DOWN_FRAC + PAW_FADEOUT_FRAC)) / PAW_UP_FRAC;
+		pawSubphase = (float)((pawPhase - (PAW_DOWN_FRAC + PAW_FADEOUT_FRAC)) / PAW_UP_FRAC);
 		pawPhaseIdx = 2;
 	}
 	else {
-		pawSubphase = (pawPhase - (1.0 - PAW_FADEIN_FRAC)) / PAW_FADEIN_FRAC;
+		pawSubphase = (float)((pawPhase - (1.0 - PAW_FADEIN_FRAC)) / PAW_FADEIN_FRAC);
 		pawPhaseIdx = 3;
 	}
 

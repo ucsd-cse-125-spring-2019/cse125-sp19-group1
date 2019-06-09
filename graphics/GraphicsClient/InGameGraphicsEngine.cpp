@@ -901,7 +901,7 @@ void resetItems()
 
 #define ITEM_ROTATION_PERIOD 5.25
 			auto t = glfwGetTime();
-			float timeAngle = fmod(t, ITEM_ROTATION_PERIOD) * glm::two_pi<double>() / ITEM_ROTATION_PERIOD;
+			float timeAngle = (float)(fmod(t, ITEM_ROTATION_PERIOD) * glm::two_pi<double>() / ITEM_ROTATION_PERIOD);
 
 			auto modelAngles = settings.rotation;
 			auto modelRotate = glm::rotate(scale, modelAngles.y + timeAngle, glm::vec3(0.f, 1.f, 0.f));
@@ -1023,8 +1023,8 @@ void updateBoxVisibility()
 				for (auto pair : allPlayers) {
 					if (pair.second->getAction() == Action::CONSTRUCT_GATE) {
 						auto loc = pair.second->getLocation();
-						int playerX = loc.getX() / TILE_SIZE_SERVER;
-						int playerZ = loc.getZ() / TILE_SIZE_SERVER;
+						int playerX = (int)(loc.getX() / TILE_SIZE_SERVER);
+						int playerZ = (int)(loc.getZ() / TILE_SIZE_SERVER);
 						if (playerX == x && playerZ == y) {
 							foundPlayer = true;
 							break;
@@ -1857,7 +1857,7 @@ void InGameGraphicsEngine::IdleCallback()
 		updateUIElements(gameData);
 		Player *networkPlayer = gameData->getPlayer(sharedClient->getMyID());
 		if (networkPlayer) {
-			ingame_light_radius = networkPlayer->isChef() ? gameData->chefVision : networkPlayer->getVisionRadius();
+			ingame_light_radius = networkPlayer->isChef() ? (float)gameData->chefVision : networkPlayer->getVisionRadius();
 			fog->setFogDistance(ingame_light_radius);
 		}
 	//}
@@ -1902,8 +1902,8 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 	case Action::OPEN_BOX:
 	{
 		// hide the un-animated box
-		int x = floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
-		int z = floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
+		int x = (int)floorf(state.position.x / (TILE_SCALE * TILE_STRIDE));
+		int z = (int)floorf(state.position.z / (TILE_SCALE * TILE_STRIDE));
 		const auto &envObj = envObjs[z][x];
 		auto transform = envObj.transform;
 		transform->hidden = true;
@@ -2065,8 +2065,8 @@ static void UpdateAndDrawPlayer(PlayerState &state)
 
 		// If the animation wasn't cancelled, calculate projectile position
 		if (state.animatingInventory) {
-			int x = floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
-			int z = floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
+			int x = (int)floorf(state.carryStopLoc.getX() / (TILE_SCALE * TILE_STRIDE));
+			int z = (int)floorf(state.carryStopLoc.getZ() / (TILE_SCALE * TILE_STRIDE));
 			glm::vec3 targetPosition = glm::vec3(envObjs[z][x].transform->getOffset()[3]);
 			targetPosition.y += 6.f;
 			auto sourcePosition = glm::vec3(state.inventoryTransform[3]);
@@ -2113,7 +2113,7 @@ static void DrawPings(const glm::mat4 &viewMat)
 			continue;
 		}
 
-		float pingPhase = (now - ping.startTime) / MINIMAP_PING_DURATION;
+		float pingPhase = (float)((now - ping.startTime) / MINIMAP_PING_DURATION);
 
 		glUniform3f(uFillColor, ping.fillColor.r, ping.fillColor.g, ping.fillColor.b);
 		glUniform1f(uAlpha, (1.f - pingPhase) * (1.f - pingPhase));
@@ -2161,11 +2161,11 @@ static void DrawMinimap()
 	}
 
 	const auto &tileLayout = gameData->getTileLayout();
-	int tileHeight = tileLayout.size();
+	int tileHeight = (int)tileLayout.size();
 	int tileWidth = 0;
 	for (int z = 0; z < tileHeight; z++) {
-		if (tileWidth < tileLayout[z].size())
-			tileWidth = tileLayout[z].size();
+		if (tileWidth < (int)tileLayout[z].size())
+			tileWidth = (int)tileLayout[z].size();
 	}
 
 	const float mapWidth = tileWidth * TILE_SIZE_SERVER;
@@ -2395,9 +2395,9 @@ void DisplayCallback(GLFWwindow* window)
 	fog->draw(objShaderProgram, P * V * glm::vec4(ingame_light_center, 1.0f));
 
 	int mapWidth = 0;
-	for (unsigned z = 0; z < floorArray.size(); z++) {
-		if (mapWidth < floorArray[z].size())
-			mapWidth = floorArray[z].size();
+	for (unsigned z = 0; z < (int)floorArray.size(); z++) {
+		if (mapWidth < (int)floorArray[z].size())
+			mapWidth = (int)floorArray[z].size();
 	}
 
 	for (int z = -SAND_MARGIN_Z; z < 0; z++) {
@@ -2405,15 +2405,15 @@ void DisplayCallback(GLFWwindow* window)
 			DrawSandTile(x, z);
 		}
 	}
-	for (int z = 0; z < floorArray.size(); z++) {
+	for (int z = 0; z < (int)floorArray.size(); z++) {
 		for (int x = -SAND_MARGIN_X; x < 0; x++) {
 			DrawSandTile(x, z);
 		}
-		for (int x = floorArray[z].size(); x < mapWidth + SAND_MARGIN_X; x++) {
+		for (int x = (int)floorArray[z].size(); x < mapWidth + SAND_MARGIN_X; x++) {
 			DrawSandTile(x, z);
 		}
 	}
-	for (int z = floorArray.size(); z <= floorArray.size() + SAND_MARGIN_Z; z++) {
+	for (int z = (int)floorArray.size(); z <= (int)floorArray.size() + SAND_MARGIN_Z; z++) {
 		for (int x = -SAND_MARGIN_X; x < mapWidth + SAND_MARGIN_X; x++) {
 			DrawSandTile(x, z);
 		}
@@ -2441,7 +2441,7 @@ void DisplayCallback(GLFWwindow* window)
 	// Draw the starting prompt
 #define START_PROMPT_DURATION 10.0
 #define START_PROMPT_FADEOUT 1.0
-#define START_PROMPT_PERIOD 0.5
+#define START_PROMPT_PERIOD 0.5f
 	double now = glfwGetTime();
 	Player *networkPlayer = nullptr;
 	if (now >= mainLoopBeginTime && now < mainLoopBeginTime + START_PROMPT_DURATION
@@ -2451,11 +2451,11 @@ void DisplayCallback(GLFWwindow* window)
 		
 		FBXObject *message = networkPlayer->isChef() ? chefStartingPrompt : animalStartingPrompt;
 
-		float scale = 1.f - (sinf(now * (glm::two_pi<float>() / START_PROMPT_PERIOD)) + 1.f) * 0.01f;
+		float scale = 1.f - (sinf((float)now * (glm::two_pi<float>() / START_PROMPT_PERIOD)) + 1.f) * 0.01f;
 		auto mat = glm::scale(identityMat, glm::vec3(scale));
 
 		float msgAlpha = 1.f;
-		double alphaPhase = now - (mainLoopBeginTime + START_PROMPT_DURATION - START_PROMPT_FADEOUT) / START_PROMPT_FADEOUT;
+		float alphaPhase = (float)(now - (mainLoopBeginTime + START_PROMPT_DURATION - START_PROMPT_FADEOUT) / START_PROMPT_FADEOUT);
 		if (alphaPhase >= 0.f && alphaPhase <= 1.f) {
 			msgAlpha = 1.f - alphaPhase;
 		}
@@ -2624,7 +2624,7 @@ void LoadModels()
 	//wallModel->SetClipRadius(ITEM_MDL_CLIP_RADIUS);
 
 	cout << "\tloading " << "sand" << endl;
-	sandModel = new FBXObject(CANVAS_MDL_PATH, SAND_TEX_PATH, false, 1.0f, false, GL_LINEAR);
+	sandModel = new FBXObject(CANVAS_MDL_PATH, SAND_TEX_PATH, false, 1.0f, -1, false, GL_LINEAR);
 	//sandModel->SetClipRadius(200.f);
 
 	tileGeometry = new Geometry(tileModel, objShaderProgram);
@@ -2662,15 +2662,25 @@ InGameGraphicsEngine::InGameGraphicsEngine()
 }
 
 
+static void deleteSpawners(ParticleSpawner *array[MAX_PLAYERS]) {
+	for (size_t i = 0; i < MAX_PLAYERS; ++i) {
+		auto &spawner = array[i];
+		if (spawner) {
+			delete spawner;
+			spawner = nullptr;
+		}
+	}
+}
+
 InGameGraphicsEngine::~InGameGraphicsEngine()
 {
-	delete dustSpawner;
-	delete speedSpawner;
-	delete searchSpawner;
-	delete slowSpawner;
-	delete blindSpawner;
-	delete flashSpawner;
-	delete bearSpawner;
+	deleteSpawners(dustSpawner);
+	deleteSpawners(speedSpawner);
+	deleteSpawners(searchSpawner);
+	deleteSpawners(slowSpawner);
+	deleteSpawners(blindSpawner);
+	deleteSpawners(flashSpawner);
+	deleteSpawners(bearSpawner);
 }
 
 void InGameGraphicsEngine::StartLoading()  // may launch a thread and return immediately

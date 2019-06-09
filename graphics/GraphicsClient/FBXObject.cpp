@@ -407,7 +407,7 @@ void FBXObject::SetBuffers() {
 void FBXObject::Animate() {
 	if (!animPlayer || !skel) {
 		static const char *messages[] = {"(please disregard)", "null animPlayer", "null skel", "null animPlayer and null skel"};
-		cerr << "ERROR: FBXObject::Animate called with " << messages[!animPlayer + (!skel) << 1] << endl;
+		cerr << "ERROR: FBXObject::Animate called with " << messages[!animPlayer + ((!skel) << 1)] << endl;
 		return;
 	}
 

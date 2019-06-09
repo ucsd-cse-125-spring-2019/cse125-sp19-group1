@@ -18,7 +18,7 @@ public:
 	virtual void MainLoopCallback(GLFWwindow * window);
 
 protected:
-	void DrawSprite(LobbySprite &sprite, int designX, int designY, float alpha = 1.f);
+	void DrawSprite(LobbySprite &sprite, float designX, float designY, float alpha = 1.f);
 
 	bool startEnabled = false;
 

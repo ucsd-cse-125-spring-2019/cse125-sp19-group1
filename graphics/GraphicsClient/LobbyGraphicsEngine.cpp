@@ -156,7 +156,7 @@ void LobbyGraphicsEngine::KeyCallback(GLFWwindow* window, int key, int scancode,
 	}
 }
 
-void LobbyGraphicsEngine::DrawSprite(LobbySprite &sprite, int designX, int designY, float alpha)
+void LobbyGraphicsEngine::DrawSprite(LobbySprite &sprite, float designX, float designY, float alpha)
 {
 	glm::vec3 center = glm::vec3(0.f);
 	center.x = ((designX + sprite.designWidth / 2) / DESIGN_WIDTH) * 2.f - 1.f;
