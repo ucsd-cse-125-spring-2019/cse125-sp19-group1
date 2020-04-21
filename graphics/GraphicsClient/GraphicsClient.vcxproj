@@ -22,7 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{A9924152-8D03-4207-BE62-CE1F5A6ACBE9}</ProjectGuid>
     <RootNamespace>GraphicsClient</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -92,8 +92,8 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)packages\FMOD Studio API Windows\api\lowlevel\lib;$(SolutionDir)packages\FMOD Studio API Windows\api\studio\lib;$(SolutionDir)packages\assimp_native.4.0.1\build\native\lib\x64\v141\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp-vc140-mt.lib;fmodL64_vc.lib;fmodstudioL64_vc.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)packages\assimp_native.4.0.1\build\native\lib\x64\v141\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glu32.lib;assimp-vc140-mt.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
