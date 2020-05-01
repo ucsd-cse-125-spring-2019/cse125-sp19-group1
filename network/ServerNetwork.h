@@ -8,7 +8,7 @@ using namespace std;
 #pragma comment (lib, "Ws2_32.lib")
 
 #define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "6881" 
+#define DEFAULT_PORT "27015" 
 #define CONNECTION_RESET_ERROR 10054
 #define CONNECTION_ABORT_ERROR 10053
 #define MAX_CLIENTS 4
